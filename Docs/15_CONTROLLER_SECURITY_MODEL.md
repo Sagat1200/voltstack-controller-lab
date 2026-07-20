@@ -17914,3 +17914,3429 @@ Response Splitting Defenses
 Response Smuggling Foundations
 ```
 
+# CONTROLLER_SECURITY_MODEL_PART_04.md
+
+## Transport & Response Security
+
+**Entrega:** 8 de varias
+**Cobertura:** Secciones **641–740**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_04.md — Entrega 7`
+
+---
+
+# 641. HTTP Smuggling Defense Model
+
+HTTP smuggling aparece cuando dos componentes interpretan de forma diferente los límites de una petición o respuesta.
+
+Un flujo típico puede involucrar:
+
+```text
+Client
+  ↓
+CDN
+  ↓
+Reverse Proxy
+  ↓
+Load Balancer
+  ↓
+FrankenPHP
+  ↓
+VoltStack
+```
+
+Si cualquiera de estas capas interpreta de manera distinta:
+
+* `Content-Length`;
+* `Transfer-Encoding`;
+* cuerpos chunked;
+* headers duplicados;
+* whitespace;
+* conexiones persistentes;
+
+podrá producirse desincronización.
+
+---
+
+# 642. Smuggling trust boundary
+
+VoltStack no controla todas las capas de infraestructura, pero deberá:
+
+* rechazar representaciones ambiguas;
+* no generar respuestas ambiguas;
+* validar metadata de proxy;
+* usar adapters compatibles;
+* documentar configuraciones seguras;
+* auditar inconsistencias.
+
+---
+
+# 643. Request framing validation
+
+Antes de ejecutar Controllers, la capa HTTP deberá validar la coherencia del framing del request.
+
+---
+
+# 644. Content-Length and Transfer-Encoding
+
+Una petición que contenga ambos deberá:
+
+* ser rechazada;
+* o ser normalizada únicamente por una capa confiable con semántica inequívoca.
+
+El comportamiento por defecto deberá ser fail closed.
+
+---
+
+# 645. Duplicate Content-Length
+
+Múltiples headers `Content-Length` deberán aceptarse únicamente si la infraestructura los normaliza de manera segura y todos los valores son idénticos.
+
+VoltStack deberá preferir rechazo.
+
+---
+
+# 646. Conflicting body lengths
+
+Valores diferentes deberán provocar el cierre de la petición antes del routing.
+
+---
+
+# 647. Transfer-Encoding canonicalization
+
+El valor deberá parsearse como una lista estructurada.
+
+No mediante comparaciones parciales de strings.
+
+---
+
+# 648. Unsupported transfer codings
+
+Los codings no soportados deberán rechazarse.
+
+---
+
+# 649. Obfuscated transfer encodings
+
+Deberán detectarse variantes ambiguas con:
+
+* espacios inesperados;
+* casing;
+* delimitadores inválidos;
+* valores duplicados;
+* caracteres de control.
+
+---
+
+# 650. Chunked request validation
+
+Los cuerpos chunked deberán ser procesados por el servidor HTTP o adapter confiable.
+
+Los Controllers nunca deberán interpretar chunks manualmente.
+
+---
+
+# 651. Chunk extension policy
+
+Las extensiones de chunks deberán ignorarse o rechazarse según las capacidades del servidor.
+
+No deberán exponerse a la aplicación.
+
+---
+
+# 652. Trailer headers
+
+Los trailers deberán estar deshabilitados por defecto para la lógica de aplicación.
+
+---
+
+# 653. Request trailer trust
+
+Un trailer no deberá sobrescribir headers ya validados.
+
+---
+
+# 654. Header whitespace normalization
+
+Whitespace ambiguo deberá normalizarse antes de interpretar headers críticos.
+
+---
+
+# 655. Obsolete line folding
+
+La continuación de headers mediante line folding obsoleto deberá rechazarse.
+
+---
+
+# 656. Null-byte rejection
+
+Los null bytes deberán rechazarse en:
+
+* nombres;
+* valores;
+* path;
+* query;
+* host;
+* forwarded headers.
+
+---
+
+# 657. Connection reuse after parse error
+
+Ante errores de framing, la conexión deberá cerrarse cuando la infraestructura lo permita.
+
+---
+
+# 658. Response desynchronization
+
+VoltStack deberá garantizar que cada respuesta tenga:
+
+* framing inequívoco;
+* body compatible;
+* longitud consistente;
+* headers congelados;
+* cierre controlado del stream.
+
+---
+
+# 659. SmugglingSecurityGuard
+
+```php
+interface SmugglingSecurityGuardInterface
+{
+    public function validateRequest(
+        ServerRequestInterface $request,
+        RequestTransportMetadata $transport
+    ): SmugglingValidationResult;
+
+    public function validateResponse(
+        SecureHttpResponse $response
+    ): SmugglingValidationResult;
+}
+```
+
+---
+
+# 660. Validation outcomes
+
+```php
+enum SmugglingValidationStatus: string
+{
+    case Valid = 'valid';
+    case Ambiguous = 'ambiguous';
+    case Invalid = 'invalid';
+    case InfrastructureMismatch = 'infrastructure_mismatch';
+}
+```
+
+---
+
+# 661. Infrastructure mismatch
+
+VoltStack deberá poder detectar configuraciones incompatibles entre:
+
+* proxy;
+* servidor;
+* runtime;
+* adapter;
+* middleware.
+
+---
+
+# 662. Deployment health check
+
+El sistema podrá ejecutar pruebas de salud específicas para framing HTTP en entornos controlados.
+
+---
+
+# 663. Reverse Proxy Trust Model
+
+Los reverse proxies pueden aportar información necesaria sobre:
+
+* IP original;
+* scheme;
+* host;
+* port;
+* protocolo;
+* cadena de proxies.
+
+Esta información será no confiable hasta validar el emisor.
+
+---
+
+# 664. Direct peer identity
+
+La primera decisión deberá basarse en la IP o identidad de la conexión directa.
+
+---
+
+# 665. Trusted proxy definition
+
+```php
+final readonly class TrustedProxyDefinition
+{
+    public function __construct(
+        public string $id,
+        public NetworkMatcher $network,
+        public ProxyCapabilitySet $capabilities,
+        public int $priority,
+    ) {
+    }
+}
+```
+
+---
+
+# 666. Proxy capabilities
+
+```php
+enum ProxyCapability: string
+{
+    case ForwardClientIp = 'forward_client_ip';
+    case ForwardHost = 'forward_host';
+    case ForwardPort = 'forward_port';
+    case ForwardScheme = 'forward_scheme';
+    case ForwardProtocol = 'forward_protocol';
+    case ForwardTlsMetadata = 'forward_tls_metadata';
+}
+```
+
+---
+
+# 667. Trusted Proxy Registry
+
+```php
+interface TrustedProxyRegistryInterface
+{
+    public function register(
+        TrustedProxyDefinition $proxy
+    ): void;
+
+    public function resolve(
+        NetworkAddress $directPeer
+    ): ?TrustedProxyDefinition;
+
+    public function freeze(): void;
+}
+```
+
+---
+
+# 668. Registry freeze
+
+El registry deberá congelarse durante el bootstrap de producción.
+
+---
+
+# 669. Network matchers
+
+Podrán soportarse:
+
+* IP exacta;
+* CIDR;
+* Unix socket identity;
+* network interface;
+* cloud load balancer ranges administrados.
+
+---
+
+# 670. Broad trust ranges
+
+No deberán configurarse redes demasiado amplias sin una justificación explícita.
+
+---
+
+# 671. Trust all proxies
+
+Una opción equivalente a:
+
+```text
+0.0.0.0/0
+::/0
+```
+
+deberá prohibirse en producción por defecto.
+
+---
+
+# 672. Cloud proxy ranges
+
+Los rangos administrados por proveedores deberán:
+
+* actualizarse de forma controlada;
+* validarse;
+* versionarse;
+* tener fallback seguro.
+
+---
+
+# 673. Proxy identity beyond IP
+
+En infraestructuras avanzadas podrán utilizarse:
+
+* mTLS;
+* private network;
+* signed headers;
+* workload identity;
+* proxy protocol.
+
+---
+
+# 674. Forwarded Header
+
+VoltStack deberá soportar el header estándar:
+
+```text
+Forwarded
+```
+
+mediante un parser estructurado.
+
+---
+
+# 675. Forwarded element
+
+Un elemento podrá incluir:
+
+```text
+for=
+by=
+host=
+proto=
+```
+
+---
+
+# 676. ForwardedHeaderParser
+
+```php
+interface ForwardedHeaderParserInterface
+{
+    public function parse(
+        HeaderValue $value
+    ): ForwardedHeaderChain;
+}
+```
+
+---
+
+# 677. Parsing limits
+
+Se deberán limitar:
+
+* cantidad de elementos;
+* longitud total;
+* longitud por parámetro;
+* cantidad de parámetros;
+* nesting o quoting.
+
+---
+
+# 678. Quoted values
+
+Los valores quoted deberán procesarse según una gramática estricta.
+
+---
+
+# 679. Obfuscated identifiers
+
+Los identificadores obfuscados podrán conservarse para auditoría, pero no deberán convertirse en IPs.
+
+---
+
+# 680. IPv6 forwarded values
+
+Los literales IPv6 deberán parsearse correctamente, incluidos brackets y port cuando corresponda.
+
+---
+
+# 681. Unknown forwarded values
+
+El valor `unknown` no deberá utilizarse para tomar decisiones de seguridad.
+
+---
+
+# 682. Forwarded chain direction
+
+VoltStack deberá definir con claridad el orden en que interpreta la cadena.
+
+---
+
+# 683. Trust chain walking
+
+La resolución recomendada será:
+
+```text
+Direct peer
+    ↓ trusted?
+Read nearest forwarded hop
+    ↓ trusted?
+Continue
+    ↓
+First untrusted client address
+```
+
+---
+
+# 684. Stop at first untrusted hop
+
+No deberán utilizarse valores anteriores al primer hop no confiable.
+
+---
+
+# 685. X-Forwarded-* support
+
+Por compatibilidad podrán procesarse:
+
+* `X-Forwarded-For`;
+* `X-Forwarded-Host`;
+* `X-Forwarded-Proto`;
+* `X-Forwarded-Port`;
+* `X-Forwarded-Prefix`.
+
+---
+
+# 686. Header precedence
+
+No deberán combinarse automáticamente `Forwarded` y `X-Forwarded-*` si producen resultados distintos.
+
+---
+
+# 687. Forwarding strategy
+
+```php
+enum ForwardingHeaderStrategy: string
+{
+    case ForwardedOnly = 'forwarded_only';
+    case XForwardedOnly = 'x_forwarded_only';
+    case PreferForwarded = 'prefer_forwarded';
+    case RejectOnConflict = 'reject_on_conflict';
+}
+```
+
+---
+
+# 688. Recommended conflict strategy
+
+En perfiles estrictos se recomienda:
+
+```text
+RejectOnConflict
+```
+
+---
+
+# 689. X-Forwarded-For parsing
+
+Cada elemento deberá:
+
+* limpiarse;
+* parsearse;
+* validarse;
+* clasificarse como trusted o untrusted.
+
+---
+
+# 690. Client IP Resolution
+
+La IP del cliente no deberá resolverse tomando simplemente el primer valor del header.
+
+---
+
+# 691. ClientAddressResolver
+
+```php
+interface ClientAddressResolverInterface
+{
+    public function resolve(
+        NetworkAddress $directPeer,
+        ProxyHeaderContext $headers,
+        TrustedProxyRegistryInterface $registry
+    ): ResolvedClientAddress;
+}
+```
+
+---
+
+# 692. ResolvedClientAddress
+
+```php
+final readonly class ResolvedClientAddress
+{
+    public function __construct(
+        public NetworkAddress $address,
+        public array $trustedProxyChain,
+        public ClientAddressConfidence $confidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 693. ClientAddressConfidence
+
+```php
+enum ClientAddressConfidence: string
+{
+    case Direct = 'direct';
+    case TrustedProxyChain = 'trusted_proxy_chain';
+    case PartialChain = 'partial_chain';
+    case Unknown = 'unknown';
+}
+```
+
+---
+
+# 694. IP-based security limits
+
+La IP no deberá ser el único factor para:
+
+* autenticación;
+* tenant selection;
+* high-risk authorization;
+* identity resolution.
+
+---
+
+# 695. Rate limiting
+
+Sí podrá utilizarse como una señal dentro de rate limiting y detección de abuso.
+
+---
+
+# 696. IP privacy
+
+Las direcciones deberán almacenarse y registrarse conforme a la política de privacidad de la aplicación.
+
+---
+
+# 697. Scheme Resolution
+
+El scheme efectivo deberá resolverse desde:
+
+1. conexión directa;
+2. proxy confiable;
+3. configuración de infraestructura.
+
+---
+
+# 698. SchemeResolver
+
+```php
+interface EffectiveSchemeResolverInterface
+{
+    public function resolve(
+        DirectTransportContext $direct,
+        TrustedProxyContext $proxy
+    ): EffectiveScheme;
+}
+```
+
+---
+
+# 699. Allowed schemes
+
+Para HTTP web se permitirán:
+
+* `http`;
+* `https`.
+
+Cualquier otro valor deberá rechazarse.
+
+---
+
+# 700. Forwarded proto validation
+
+No deberán aceptarse valores como:
+
+```text
+https,http
+javascript
+https:
+```
+
+sin parsing y normalización estrictos.
+
+---
+
+# 701. Secure scheme confidence
+
+El sistema deberá conocer si HTTPS fue:
+
+* directo;
+* terminado en proxy confiable;
+* inferido;
+* desconocido.
+
+---
+
+# 702. EffectiveScheme
+
+```php
+final readonly class EffectiveScheme
+{
+    public function __construct(
+        public string $value,
+        public SchemeConfidence $confidence,
+        public bool $secure,
+    ) {
+    }
+}
+```
+
+---
+
+# 703. HSTS dependency
+
+HSTS solo deberá emitirse cuando el scheme efectivo seguro sea confiable.
+
+---
+
+# 704. Secure cookie dependency
+
+Las cookies `Secure` podrán emitirse detrás de TLS termination únicamente si la cadena de proxy ha sido validada.
+
+---
+
+# 705. Port Resolution
+
+El puerto efectivo deberá derivarse de forma coherente con el scheme y host.
+
+---
+
+# 706. Forwarded port validation
+
+El valor deberá:
+
+* ser numérico;
+* estar entre 1 y 65535;
+* provenir de proxy confiable;
+* ser coherente con el host cuando este incluya puerto.
+
+---
+
+# 707. Default ports
+
+Se normalizarán:
+
+```text
+http  → 80
+https → 443
+```
+
+---
+
+# 708. Port mismatch
+
+Una discrepancia entre:
+
+* `Forwarded host`;
+* `X-Forwarded-Port`;
+* conexión directa;
+
+deberá registrarse o rechazarse según política.
+
+---
+
+# 709. Host Header Security
+
+El header `Host` influye en:
+
+* routing;
+* URLs absolutas;
+* cookies;
+* redirects;
+* cache;
+* tenant resolution;
+* enlaces de recuperación;
+* callbacks.
+
+---
+
+# 710. Host poisoning
+
+Un `Host` no validado puede provocar:
+
+* password reset poisoning;
+* redirect poisoning;
+* cache poisoning;
+* tenant confusion;
+* generación de enlaces maliciosos.
+
+---
+
+# 711. ValidatedHost
+
+```php
+final readonly class ValidatedHost
+{
+    public function __construct(
+        public string $asciiHost,
+        public ?string $unicodeHost,
+        public ?int $port,
+        public HostTrustSource $source,
+    ) {
+    }
+}
+```
+
+---
+
+# 712. HostTrustSource
+
+```php
+enum HostTrustSource: string
+{
+    case DirectHeader = 'direct_header';
+    case TrustedForwardedHeader = 'trusted_forwarded_header';
+    case RouteBinding = 'route_binding';
+    case ApplicationConfiguration = 'application_configuration';
+}
+```
+
+---
+
+# 713. Host syntax validation
+
+El host deberá rechazar:
+
+* controles;
+* espacios;
+* slashes;
+* backslashes;
+* userinfo;
+* path;
+* query;
+* fragment;
+* puertos inválidos.
+
+---
+
+# 714. IDN normalization
+
+Los hosts internacionales deberán normalizarse a una forma ASCII canónica antes de comparar.
+
+---
+
+# 715. Trailing dot
+
+La política deberá decidir si normaliza:
+
+```text
+example.com.
+```
+
+a:
+
+```text
+example.com
+```
+
+de forma consistente.
+
+---
+
+# 716. Mixed-case host
+
+La comparación deberá ser case-insensitive.
+
+---
+
+# 717. Duplicate Host headers
+
+Múltiples headers `Host` deberán provocar rechazo.
+
+---
+
+# 718. HTTP/2 authority
+
+En HTTP/2 y HTTP/3 deberá validarse `:authority` de forma equivalente.
+
+---
+
+# 719. Host and authority conflict
+
+Si ambos están presentes y difieren, la petición deberá rechazarse.
+
+---
+
+# 720. Allowed Host Registry
+
+```php
+interface AllowedHostRegistryInterface
+{
+    public function match(
+        ValidatedHost $host,
+        RequestSecurityContext $context
+    ): ?AllowedHostDefinition;
+}
+```
+
+---
+
+# 721. AllowedHostDefinition
+
+```php
+final readonly class AllowedHostDefinition
+{
+    public function __construct(
+        public string $id,
+        public HostMatcher $matcher,
+        public HostPurpose $purpose,
+        public bool $canonical,
+        public ?string $tenantResolver,
+    ) {
+    }
+}
+```
+
+---
+
+# 722. Host purposes
+
+```php
+enum HostPurpose: string
+{
+    case PrimaryApplication = 'primary_application';
+    case Tenant = 'tenant';
+    case Api = 'api';
+    case Assets = 'assets';
+    case Admin = 'admin';
+    case Callback = 'callback';
+}
+```
+
+---
+
+# 723. Default host policy
+
+Toda petición con host no reconocido deberá rechazarse antes del routing de aplicación.
+
+---
+
+# 724. Wildcard hosts
+
+Los wildcard deberán utilizar matchers estructurados.
+
+---
+
+# 725. Subdomain tenant matching
+
+Un host como:
+
+```text
+tenant.example.com
+```
+
+deberá resolver el tenant mediante una regla registrada y no mediante extracción arbitraria.
+
+---
+
+# 726. Registrable domain validation
+
+El sistema deberá evitar tratar como subdominio válido un host fuera del dominio registrable esperado.
+
+---
+
+# 727. Reserved subdomains
+
+Se podrán reservar:
+
+* `www`;
+* `api`;
+* `admin`;
+* `assets`;
+* `auth`;
+* `support`.
+
+---
+
+# 728. Tenant host collision
+
+No podrán coexistir tenants con hosts canónicamente equivalentes.
+
+---
+
+# 729. Custom tenant domains
+
+Los dominios personalizados deberán pasar por:
+
+* verificación de propiedad;
+* validación DNS;
+* emisión TLS;
+* registro;
+* activación atómica.
+
+---
+
+# 730. Canonical Host Enforcement
+
+Una aplicación podrá definir un host canónico para evitar variantes ambiguas.
+
+---
+
+# 731. Canonical host redirect
+
+La redirección deberá:
+
+* validar host origen;
+* preservar path seguro;
+* preservar query según política;
+* forzar HTTPS;
+* evitar loops.
+
+---
+
+# 732. Unsafe method canonicalization
+
+Las peticiones mutables no deberán redirigirse automáticamente a otro host sin evaluar preservación del método y del body.
+
+---
+
+# 733. Canonical host for APIs
+
+Las APIs podrán rechazar en lugar de redirigir.
+
+---
+
+# 734. Absolute URL Poisoning Prevention
+
+Toda URL absoluta generada deberá usar:
+
+* host validado;
+* scheme confiable;
+* port resuelto;
+* route segura.
+
+---
+
+# 735. Password reset URLs
+
+Nunca deberán derivarse de un host no validado.
+
+---
+
+# 736. Email link generation
+
+Los enlaces enviados por email deberán preferir un origen configurado o una identidad de tenant validada.
+
+---
+
+# 737. Signed URL host binding
+
+Las firmas deberán incluir el host cuando el enlace sea host-specific.
+
+---
+
+# 738. Proxy Chain Audit
+
+VoltStack deberá producir una representación auditable de la cadena de transporte sin exponerla al cliente.
+
+---
+
+# 739. ProxyChainAuditRecord
+
+```php
+final readonly class ProxyChainAuditRecord
+{
+    public function __construct(
+        public NetworkAddress $directPeer,
+        public array $trustedHops,
+        public ?NetworkAddress $resolvedClient,
+        public EffectiveScheme $scheme,
+        public ValidatedHost $host,
+        public ?int $port,
+        public array $conflicts,
+    ) {
+    }
+}
+```
+
+---
+
+# 740. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+HTTP Smuggling Defense Model
+Request and Response Framing Validation
+Duplicate Length Protection
+Transfer-Encoding Validation
+Reverse Proxy Trust Model
+Trusted Proxy Registry
+Forwarded Header Parsing
+X-Forwarded Header Compatibility
+Client IP Resolution
+Scheme and Port Resolution
+Host Header Security
+Allowed Host Registry
+Multi-Tenant Host Validation
+Canonical Host Enforcement
+Absolute URL Poisoning Prevention
+Proxy Chain Auditing
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_04.md
+
+## Transport & Response Security
+
+**Entrega:** 9 de varias
+**Cobertura:** Secciones **741–840**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_04.md — Entrega 8`
+
+---
+
+# 741. Cache-Control Security Model
+
+El sistema de cache HTTP deberá diseñarse bajo el principio de que **una respuesta incorrectamente cacheada constituye una fuga de información**.
+
+El objetivo no es únicamente mejorar el rendimiento, sino garantizar:
+
+* confidencialidad;
+* integridad;
+* aislamiento entre usuarios;
+* aislamiento entre tenants;
+* consistencia;
+* invalidez controlada;
+* comportamiento determinista.
+
+---
+
+# 742. Cache trust boundaries
+
+VoltStack deberá considerar los siguientes niveles de cache:
+
+```text
+Controller
+        │
+Application Cache
+        │
+Runtime Cache
+        │
+Reverse Proxy Cache
+        │
+CDN
+        │
+Browser Cache
+```
+
+Cada uno tendrá un nivel de confianza diferente.
+
+---
+
+# 743. Cache ownership
+
+Los Controllers no deberán construir manualmente encabezados `Cache-Control`.
+
+La decisión pertenecerá al motor de seguridad de respuestas.
+
+---
+
+# 744. CachePolicy
+
+```php
+final readonly class CachePolicy
+{
+    public function __construct(
+        public CacheVisibility $visibility,
+        public CacheStorageMode $storage,
+        public CacheRevalidationPolicy $revalidation,
+        public CacheLifetime $lifetime,
+    ) {
+    }
+}
+```
+
+---
+
+# 745. CacheVisibility
+
+```php
+enum CacheVisibility: string
+{
+    case Public = 'public';
+    case Private = 'private';
+    case Restricted = 'restricted';
+}
+```
+
+---
+
+# 746. CacheStorageMode
+
+```php
+enum CacheStorageMode: string
+{
+    case NoStore = 'no-store';
+    case Store = 'store';
+    case Conditional = 'conditional';
+}
+```
+
+---
+
+# 747. Default policy
+
+Toda respuesta autenticada utilizará por defecto:
+
+```text
+private
+no-store
+```
+
+salvo que exista una política explícita diferente.
+
+---
+
+# 748. Public responses
+
+Una respuesta pública deberá cumplir:
+
+* ausencia de datos personalizados;
+* ausencia de secretos;
+* ausencia de sesión;
+* ausencia de tokens;
+* independencia del usuario.
+
+---
+
+# 749. Private responses
+
+Una respuesta privada podrá almacenarse únicamente por el navegador del usuario.
+
+---
+
+# 750. Restricted responses
+
+Las respuestas clasificadas como **Restricted** no deberán almacenarse en ningún nivel.
+
+---
+
+# 751. Cache-Control Builder
+
+```php
+interface CacheControlBuilderInterface
+{
+    public function build(
+        CachePolicy $policy,
+        ResponseSecurityContext $context
+    ): HeaderValue;
+}
+```
+
+---
+
+# 752. Header normalization
+
+Los encabezados de cache deberán serializarse siempre en el mismo orden.
+
+---
+
+# 753. Immutable resources
+
+Los recursos versionados podrán declararse como:
+
+```text
+immutable
+```
+
+cuando el fingerprint garantice unicidad.
+
+---
+
+# 754. Fingerprinted assets
+
+Los assets generados por el pipeline podrán utilizar:
+
+```text
+app.f31a9f2.js
+```
+
+como identificador inmutable.
+
+---
+
+# 755. Runtime responses
+
+Las respuestas generadas dinámicamente no deberán declararse `immutable`.
+
+---
+
+# 756. Sensitive endpoints
+
+Los siguientes endpoints deberán utilizar `no-store`:
+
+* login;
+* logout;
+* MFA;
+* password reset;
+* billing;
+* administración;
+* perfiles;
+* datos personales.
+
+---
+
+# 757. Authentication responses
+
+Nunca deberán almacenarse respuestas que contengan:
+
+* cookies nuevas;
+* tokens;
+* credenciales;
+* cambios de autenticación.
+
+---
+
+# 758. Redirect cache policy
+
+Las redirecciones permanentes deberán revisarse cuidadosamente antes de permitir cache compartido.
+
+---
+
+# 759. Download cache policy
+
+Las descargas protegidas deberán especificar una política explícita.
+
+---
+
+# 760. Streaming cache policy
+
+Los streams:
+
+* SSE;
+* NDJSON;
+* streams binarios;
+
+normalmente no deberán almacenarse.
+
+---
+
+# 761. CDN Security Model
+
+Los CDN representan un cache compartido.
+
+Por tanto, deberán considerarse no confiables para información privada.
+
+---
+
+# 762. Shared cache eligibility
+
+Una respuesta solo podrá almacenarse en cache compartido cuando sea completamente independiente del usuario.
+
+---
+
+# 763. Personalized responses
+
+Las respuestas personalizadas nunca deberán publicarse mediante:
+
+```text
+Cache-Control: public
+```
+
+---
+
+# 764. Tenant-aware caching
+
+En aplicaciones multi-tenant, el tenant formará parte del contexto de cache.
+
+---
+
+# 765. Cache partitioning
+
+La clave lógica incluirá:
+
+* tenant;
+* locale;
+* representación;
+* perfil;
+* versión.
+
+---
+
+# 766. Authorization-aware cache
+
+Las respuestas cuyo contenido dependa de permisos deberán excluirse del cache compartido.
+
+---
+
+# 767. Capability-aware cache
+
+Si el contenido cambia según capacidades del usuario, dichas capacidades deberán formar parte del contexto de variación o la respuesta deberá marcarse como privada.
+
+---
+
+# 768. Vary Security Model
+
+El encabezado `Vary` controla la selección de representaciones.
+
+---
+
+# 769. VaryBuilder
+
+```php
+interface VaryBuilderInterface
+{
+    public function build(
+        ResponseVariationPolicy $policy
+    ): HeaderValue;
+}
+```
+
+---
+
+# 770. Supported Vary headers
+
+Se admitirán únicamente encabezados explícitamente aprobados, por ejemplo:
+
+* Accept
+* Accept-Encoding
+* Accept-Language
+* Origin
+
+---
+
+# 771. Unsafe Vary
+
+No deberá variarse por encabezados arbitrarios proporcionados por el usuario.
+
+---
+
+# 772. Vary normalization
+
+Los nombres incluidos en `Vary` deberán:
+
+* normalizarse;
+* eliminar duplicados;
+* ordenarse canónicamente.
+
+---
+
+# 773. Excessive variation
+
+Una cantidad excesiva de dimensiones de variación puede degradar significativamente la eficiencia del cache.
+
+---
+
+# 774. Cache key integrity
+
+La clave utilizada para cache deberá construirse mediante componentes estructurados.
+
+---
+
+# 775. CacheKeyContext
+
+```php
+final readonly class CacheKeyContext
+{
+    public function __construct(
+        public string $route,
+        public string $representation,
+        public string $tenant,
+        public string $locale,
+        public string $profile,
+    ) {
+    }
+}
+```
+
+---
+
+# 776. Cache poisoning
+
+Una representación no deberá sobrescribir otra representación incompatible.
+
+---
+
+# 777. Variant confusion
+
+Dos respuestas distintas no deberán producir la misma clave de cache.
+
+---
+
+# 778. Cache metadata
+
+Cada entrada deberá almacenar:
+
+* fecha;
+* política;
+* ETag;
+* Last-Modified;
+* clasificación;
+* tenant;
+* versión.
+
+---
+
+# 779. Cache invalidation
+
+Toda invalidación deberá ser explícita y auditable.
+
+---
+
+# 780. Invalidation events
+
+Eventos típicos:
+
+* publicación;
+* actualización;
+* eliminación;
+* cambio de permisos;
+* cambio de tenant;
+* despliegue.
+
+---
+
+# 781. ETag Security Model
+
+ETag permite validar representaciones sin retransmitir el contenido completo.
+
+---
+
+# 782. ETag ownership
+
+El cálculo de ETag no pertenecerá al Controller.
+
+---
+
+# 783. ETagStrategy
+
+```php
+enum ETagStrategy: string
+{
+    case Strong = 'strong';
+    case Weak = 'weak';
+}
+```
+
+---
+
+# 784. Strong validators
+
+Los ETag fuertes representan exactamente los bytes transmitidos.
+
+---
+
+# 785. Weak validators
+
+Los ETag débiles representan equivalencia semántica.
+
+---
+
+# 786. ETagBuilder
+
+```php
+interface ETagBuilderInterface
+{
+    public function build(
+        ResponseRepresentation $representation,
+        ETagStrategy $strategy
+    ): EntityTag;
+}
+```
+
+---
+
+# 787. Stable generation
+
+El algoritmo de generación deberá ser determinista.
+
+---
+
+# 788. Secret leakage
+
+El ETag no deberá revelar:
+
+* IDs internos;
+* rutas;
+* hashes reversibles;
+* timestamps sensibles.
+
+---
+
+# 789. EntityTag
+
+```php
+final readonly class EntityTag
+{
+    public function __construct(
+        public string $value,
+        public bool $weak,
+    ) {
+    }
+}
+```
+
+---
+
+# 790. Representation scope
+
+Cada representación tendrá su propio ETag.
+
+---
+
+# 791. Compression variants
+
+Una representación comprimida podrá requerir un validator distinto.
+
+---
+
+# 792. Content negotiation
+
+Los distintos formatos:
+
+* HTML;
+* JSON;
+* XML;
+
+no compartirán el mismo validator.
+
+---
+
+# 793. Tenant isolation
+
+Dos tenants nunca deberán compartir un ETag cuando el contenido sea diferente.
+
+---
+
+# 794. Personalized responses
+
+Las respuestas personalizadas podrán omitir ETag cuando el beneficio sea mínimo o exista riesgo de reutilización indebida.
+
+---
+
+# 795. If-None-Match
+
+El parser deberá soportar correctamente:
+
+```text
+If-None-Match
+```
+
+---
+
+# 796. EntityTag comparison
+
+La comparación distinguirá correctamente:
+
+* fuerte;
+* débil.
+
+---
+
+# 797. Wildcard entity tag
+
+El valor:
+
+```text
+*
+```
+
+deberá interpretarse conforme a la semántica del estándar.
+
+---
+
+# 798. Conditional request validator
+
+```php
+interface ConditionalRequestValidatorInterface
+{
+    public function validate(
+        ServerRequestInterface $request,
+        ResponseRepresentation $representation
+    ): ConditionalRequestResult;
+}
+```
+
+---
+
+# 799. Last-Modified Security
+
+El encabezado deberá representar el instante real de modificación de la representación.
+
+---
+
+# 800. Trusted timestamps
+
+Las fechas deberán derivarse de una fuente confiable y consistente.
+
+---
+
+# 801. LastModifiedBuilder
+
+```php
+interface LastModifiedBuilderInterface
+{
+    public function build(
+        ResponseRepresentation $representation
+    ): DateTimeImmutable;
+}
+```
+
+---
+
+# 802. Future timestamps
+
+No deberán emitirse fechas futuras salvo casos excepcionalmente documentados.
+
+---
+
+# 803. Clock consistency
+
+Todos los nodos del cluster deberán mantener sincronización horaria adecuada.
+
+---
+
+# 804. If-Modified-Since
+
+Las fechas recibidas deberán validarse estrictamente.
+
+---
+
+# 805. If-Unmodified-Since
+
+Podrá utilizarse para proteger operaciones concurrentes.
+
+---
+
+# 806. Date parsing
+
+Las fechas inválidas deberán rechazarse silenciosamente según el estándar, sin provocar errores internos.
+
+---
+
+# 807. Conditional evaluation order
+
+La evaluación seguirá un orden determinista entre:
+
+* If-Match;
+* If-None-Match;
+* If-Modified-Since;
+* If-Unmodified-Since;
+* If-Range.
+
+---
+
+# 808. Precondition failure
+
+Cuando una precondición falle, la respuesta deberá indicar el estado correspondiente sin revelar información adicional.
+
+---
+
+# 809. Not Modified responses
+
+Una respuesta equivalente a:
+
+```text
+304 Not Modified
+```
+
+no deberá incluir un cuerpo de contenido.
+
+---
+
+# 810. 304 metadata
+
+Los encabezados emitidos deberán ser coherentes con la representación validada.
+
+---
+
+# 811. Validator consistency
+
+No deberán emitirse simultáneamente validadores incompatibles.
+
+---
+
+# 812. Weak validator usage
+
+Los validadores débiles no deberán emplearse para operaciones que requieran igualdad byte a byte.
+
+---
+
+# 813. Cache validator registry
+
+```php
+interface CacheValidatorRegistryInterface
+{
+    public function register(
+        RepresentationValidator $validator
+    ): void;
+}
+```
+
+---
+
+# 814. Validator lifecycle
+
+Los validadores deberán invalidarse cuando cambie la representación.
+
+---
+
+# 815. Deployment awareness
+
+Un despliegue podrá invalidar representaciones si cambia su semántica.
+
+---
+
+# 816. Multi-node consistency
+
+Todos los nodos deberán calcular el mismo validator para la misma representación.
+
+---
+
+# 817. Conditional GET
+
+Las peticiones GET condicionales deberán evitar trabajo innecesario cuando la representación permanezca válida.
+
+---
+
+# 818. Conditional HEAD
+
+HEAD seguirá las mismas reglas de validación que GET.
+
+---
+
+# 819. Cache audit
+
+El framework registrará:
+
+* hits;
+* misses;
+* revalidaciones;
+* invalidaciones;
+* respuestas 304;
+* conflictos.
+
+---
+
+# 820. Cache metrics
+
+Métricas recomendadas:
+
+* ratio de aciertos;
+* tamaño;
+* variantes;
+* TTL medio;
+* invalidaciones;
+* colisiones.
+
+---
+
+# 821. Stale content policy
+
+Las respuestas obsoletas deberán controlarse mediante políticas explícitas.
+
+---
+
+# 822. Stale revalidation
+
+Cuando la política lo permita, el cache podrá revalidar antes de servir una representación.
+
+---
+
+# 823. Stale-if-error
+
+Podrá configurarse para mejorar disponibilidad, siempre que la sensibilidad de la respuesta lo permita.
+
+---
+
+# 824. Stale-while-revalidate
+
+Los recursos públicos podrán aprovechar esta estrategia bajo límites definidos.
+
+---
+
+# 825. Sensitive stale data
+
+Nunca deberán servirse respuestas obsoletas que contengan datos sensibles o personalizados.
+
+---
+
+# 826. Cache poisoning defense
+
+Toda representación deberá comprobar:
+
+* contexto;
+* tenant;
+* usuario cuando aplique;
+* política;
+* variante.
+
+---
+
+# 827. Header confusion
+
+Los encabezados utilizados para construir la clave no deberán aceptar variantes ambiguas.
+
+---
+
+# 828. Response classification
+
+La clasificación de seguridad formará parte del modelo de cache.
+
+---
+
+# 829. Runtime cache isolation
+
+Los caches internos del runtime deberán respetar el mismo aislamiento que los caches HTTP.
+
+---
+
+# 830. Cache security events
+
+Eventos relevantes:
+
+* CachePoisoningDetected;
+* InvalidValidator;
+* CachePolicyViolation;
+* VariantMismatch;
+* SharedCacheRejected.
+
+---
+
+# 831. Testing strategy
+
+Las pruebas deberán cubrir:
+
+* Vary;
+* ETag;
+* Last-Modified;
+* 304;
+* cache compartido;
+* multi-tenant;
+* compresión.
+
+---
+
+# 832. Security audit
+
+Las decisiones de cache deberán ser completamente auditables.
+
+---
+
+# 833. Deployment verification
+
+Durante el despliegue podrán ejecutarse verificaciones de coherencia de validadores y políticas.
+
+---
+
+# 834. Backward compatibility
+
+Los cambios en estrategias de cache deberán poder versionarse para evitar comportamientos inconsistentes.
+
+---
+
+# 835. Performance considerations
+
+La seguridad del cache no deberá depender de optimizaciones específicas del servidor HTTP.
+
+---
+
+# 836. Documentation requirements
+
+Toda política personalizada de cache deberá documentarse indicando:
+
+* finalidad;
+* riesgos;
+* alcance;
+* responsables.
+
+---
+
+# 837. ADR-111
+
+**Separación entre clasificación de seguridad y política de cache.**
+
+---
+
+# 838. ADR-112
+
+**Los Controllers nunca construirán manualmente encabezados Cache-Control, ETag o Last-Modified.**
+
+---
+
+# 839. ADR-113
+
+**Toda representación cacheable deberá poseer una política de variación determinista.**
+
+---
+
+# 840. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Complete Cache-Control Security Model
+Shared Cache Protection
+Tenant-Aware Caching
+Authorization-Aware Caching
+Cache Key Integrity
+Vary Security
+ETag Architecture
+Strong and Weak Validators
+Last-Modified Validation
+Conditional Requests
+304 Security
+Stale Content Policies
+Cache Poisoning Defenses
+Validator Lifecycle
+Cache Auditing and Metrics
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_04.md
+
+## Transport & Response Security
+
+**Entrega:** 10 de 10
+**Cobertura:** Secciones **841–950**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_04.md — Entrega 9`
+**Estado:** Cierre de `CONTROLLER_SECURITY_MODEL_PART_04`
+
+---
+
+# 841. Response Integrity Security Model
+
+La integridad de una respuesta garantiza que:
+
+* el contenido emitido corresponde a la representación autorizada;
+* no fue alterado por middleware no autorizado;
+* sus headers describen correctamente el body;
+* la respuesta pertenece al request y contexto esperados;
+* los intermediarios no modificaron silenciosamente datos protegidos;
+* el cliente puede verificar autenticidad cuando el protocolo lo requiera.
+
+La integridad deberá evaluarse en varias capas:
+
+```text
+Controller Result
+      ↓
+Normalized Representation
+      ↓
+Security Transformation
+      ↓
+Final Response
+      ↓
+Transport Encoding
+      ↓
+Network
+      ↓
+Client Verification
+```
+
+---
+
+# 842. Integrity dimensions
+
+VoltStack distinguirá entre:
+
+* integridad lógica;
+* integridad de representación;
+* integridad de transporte;
+* autenticidad;
+* frescura;
+* vinculación contextual.
+
+---
+
+# 843. Logical integrity
+
+La integridad lógica asegura que el contenido corresponde al resultado autorizado del Controller.
+
+---
+
+# 844. Representation integrity
+
+La integridad de representación asegura que los bytes serializados coinciden con:
+
+* content type;
+* encoding;
+* locale;
+* variante negociada;
+* perfil de seguridad.
+
+---
+
+# 845. Transport integrity
+
+La integridad de transporte depende principalmente de:
+
+* TLS;
+* HTTP framing;
+* proxy confiable;
+* ausencia de response splitting;
+* delimitación correcta del body.
+
+---
+
+# 846. Authenticity
+
+La autenticidad permite verificar que la respuesta fue producida por una entidad autorizada.
+
+---
+
+# 847. Freshness
+
+La frescura evita aceptar respuestas:
+
+* expiradas;
+* reproducidas;
+* pertenecientes a otro request;
+* generadas para otro usuario o tenant.
+
+---
+
+# 848. ResponseIntegrityPolicy
+
+```php
+final readonly class ResponseIntegrityPolicy
+{
+    public function __construct(
+        public IntegrityMode $mode,
+        public DigestPolicy $digest,
+        public SignaturePolicy $signature,
+        public FreshnessPolicy $freshness,
+        public ContextBindingPolicy $contextBinding,
+    ) {
+    }
+}
+```
+
+---
+
+# 849. IntegrityMode
+
+```php
+enum IntegrityMode: string
+{
+    case Disabled = 'disabled';
+    case DigestOnly = 'digest_only';
+    case Signed = 'signed';
+    case SignedAndEncryptedTransport = 'signed_and_encrypted_transport';
+}
+```
+
+---
+
+# 850. Default integrity mode
+
+Las respuestas web convencionales utilizarán normalmente:
+
+```text
+TLS
++
+HTTP framing validation
++
+internal representation integrity
+```
+
+Las firmas criptográficas externas deberán reservarse para escenarios que realmente las necesiten.
+
+---
+
+# 851. High-integrity scenarios
+
+Podrán requerir firmas de respuesta:
+
+* webhooks;
+* APIs interorganizacionales;
+* documentos regulatorios;
+* comprobantes;
+* paquetes de configuración;
+* manifests;
+* respuestas offline;
+* sincronización entre nodos;
+* artefactos descargables.
+
+---
+
+# 852. ResponseIntegrityEngine
+
+```php
+interface ResponseIntegrityEngineInterface
+{
+    public function protect(
+        SecureHttpResponse $response,
+        ResponseIntegrityPolicy $policy,
+        ResponseSecurityContext $context
+    ): IntegrityProtectedResponse;
+}
+```
+
+---
+
+# 853. Integrity processing order
+
+La protección deberá aplicarse después de completar la representación final.
+
+```text
+Serialize
+   ↓
+Transform
+   ↓
+Compress when applicable
+   ↓
+Calculate digest
+   ↓
+Build signature input
+   ↓
+Sign
+   ↓
+Freeze
+   ↓
+Emit
+```
+
+El orden exacto podrá variar según si la firma protege la representación o el mensaje transportado.
+
+---
+
+# 854. Representation versus transfer integrity
+
+VoltStack deberá diferenciar:
+
+* digest de contenido sin compresión;
+* digest de bytes transferidos;
+* firma de campos semánticos;
+* firma de headers y body final.
+
+---
+
+# 855. Digest Security Model
+
+Un digest permite detectar modificaciones accidentales o maliciosas del contenido.
+
+No demuestra por sí solo quién produjo la respuesta.
+
+---
+
+# 856. DigestAlgorithm
+
+```php
+enum DigestAlgorithm: string
+{
+    case Sha256 = 'sha-256';
+    case Sha384 = 'sha-384';
+    case Sha512 = 'sha-512';
+}
+```
+
+---
+
+# 857. Deprecated digest algorithms
+
+No deberán utilizarse para integridad de seguridad:
+
+* MD5;
+* SHA-1;
+* algoritmos propietarios débiles.
+
+---
+
+# 858. DigestPolicy
+
+```php
+final readonly class DigestPolicy
+{
+    public function __construct(
+        public bool $enabled,
+        public DigestAlgorithm $algorithm,
+        public DigestScope $scope,
+        public bool $requiredForClient,
+    ) {
+    }
+}
+```
+
+---
+
+# 859. DigestScope
+
+```php
+enum DigestScope: string
+{
+    case Representation = 'representation';
+    case TransferredContent = 'transferred_content';
+    case DownloadArtifact = 'download_artifact';
+}
+```
+
+---
+
+# 860. Digest builder
+
+```php
+interface ResponseDigestBuilderInterface
+{
+    public function build(
+        ReadableContentInterface $content,
+        DigestAlgorithm $algorithm
+    ): ContentDigest;
+}
+```
+
+---
+
+# 861. Streaming digest
+
+Para streams, el digest deberá calcularse incrementalmente.
+
+---
+
+# 862. Digest and unknown streams
+
+Cuando no sea posible conocer el digest antes de emitir headers, podrán utilizarse:
+
+* trailers confiables;
+* digest externo del artefacto;
+* firma del manifest;
+* verificación posterior.
+
+Los trailers permanecerán deshabilitados salvo soporte seguro de toda la cadena.
+
+---
+
+# 863. Download digest
+
+Las descargas sensibles podrán publicar un digest separado mediante metadata segura.
+
+---
+
+# 864. Digest mismatch
+
+Una discrepancia deberá producir:
+
+* rechazo del artefacto;
+* evento de seguridad;
+* invalidación de cache;
+* posible aislamiento del nodo;
+* investigación de infraestructura.
+
+---
+
+# 865. Digest confidentiality
+
+Un digest no deberá utilizarse como sustituto de autorización.
+
+---
+
+# 866. Low-entropy content risk
+
+Los hashes de contenido predecible pueden permitir inferencias.
+
+No deberán exponerse innecesariamente para recursos privados.
+
+---
+
+# 867. HTTP Message Signatures
+
+VoltStack podrá soportar firmas estructuradas de mensajes HTTP mediante un módulo especializado.
+
+---
+
+# 868. SignaturePolicy
+
+```php
+final readonly class SignaturePolicy
+{
+    public function __construct(
+        public bool $enabled,
+        public SignatureAlgorithm $algorithm,
+        public SignatureComponentSet $components,
+        public KeyReference $key,
+        public int $lifetimeSeconds,
+    ) {
+    }
+}
+```
+
+---
+
+# 869. SignatureAlgorithm
+
+```php
+enum SignatureAlgorithm: string
+{
+    case Ed25519 = 'ed25519';
+    case EcdsaP256Sha256 = 'ecdsa-p256-sha256';
+    case RsaPssSha512 = 'rsa-pss-sha512';
+    case HmacSha256 = 'hmac-sha256';
+}
+```
+
+---
+
+# 870. Algorithm selection
+
+Se preferirán firmas asimétricas cuando múltiples consumidores deban verificar sin conocer la clave privada.
+
+---
+
+# 871. HMAC usage
+
+HMAC podrá utilizarse en relaciones cerradas entre sistemas confiables.
+
+No deberá compartirse una clave global entre múltiples tenants o integraciones independientes.
+
+---
+
+# 872. Signed components
+
+Una firma podrá cubrir:
+
+* status;
+* method original;
+* authority;
+* path;
+* content type;
+* content digest;
+* date;
+* request ID;
+* tenant;
+* nonce;
+* expiración.
+
+---
+
+# 873. SignatureComponentSet
+
+```php
+final readonly class SignatureComponentSet
+{
+    public function __construct(
+        public array $derivedComponents,
+        public array $headers,
+        public bool $includeContentDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 874. Mandatory signed components
+
+Toda respuesta firmada deberá incluir como mínimo:
+
+* identificador de clave;
+* fecha de creación;
+* expiración;
+* content digest cuando exista body;
+* contexto suficiente para impedir sustitución.
+
+---
+
+# 875. Request-response binding
+
+Una respuesta firmada podrá vincularse al request mediante:
+
+* request ID;
+* challenge;
+* nonce;
+* method;
+* route;
+* client identifier.
+
+---
+
+# 876. Cross-request substitution
+
+Sin binding, una respuesta válida podría reutilizarse en otro contexto.
+
+---
+
+# 877. Tenant binding
+
+En sistemas multi-tenant, la identidad del tenant deberá formar parte del material firmado cuando sea relevante.
+
+---
+
+# 878. User binding
+
+Las respuestas personalizadas de alto valor podrán firmarse para un usuario o sesión concreta.
+
+---
+
+# 879. SignatureInputBuilder
+
+```php
+interface SignatureInputBuilderInterface
+{
+    public function build(
+        SecureHttpResponse $response,
+        SignaturePolicy $policy,
+        ResponseSecurityContext $context
+    ): CanonicalSignatureInput;
+}
+```
+
+---
+
+# 880. Canonicalization
+
+La canonicalización deberá ser:
+
+* determinista;
+* versionada;
+* independiente de orden accidental;
+* resistente a whitespace ambiguo;
+* compatible entre lenguajes.
+
+---
+
+# 881. Signature header ownership
+
+Solo el motor de integridad podrá emitir headers de firma.
+
+---
+
+# 882. Signature key identifiers
+
+El identificador de clave no deberá exponer:
+
+* rutas internas;
+* nombres de archivos;
+* secretos;
+* detalles de HSM;
+* nombres de usuarios.
+
+---
+
+# 883. Key lifecycle
+
+Las claves deberán tener:
+
+* fecha de activación;
+* fecha de expiración;
+* estado;
+* propósito;
+* algoritmo;
+* propietario;
+* versión.
+
+---
+
+# 884. Key rotation
+
+La rotación deberá permitir una ventana de verificación de respuestas previamente emitidas.
+
+---
+
+# 885. Key revocation
+
+Una clave comprometida deberá poder revocarse inmediatamente.
+
+---
+
+# 886. Verification key publication
+
+Las claves públicas podrán distribuirse mediante:
+
+* endpoint controlado;
+* JWKS;
+* manifest firmado;
+* configuración out-of-band.
+
+---
+
+# 887. Key isolation
+
+Las claves de respuesta deberán separarse de:
+
+* claves de sesión;
+* claves CSRF;
+* claves de cifrado de cookies;
+* claves de firma de URLs;
+* claves de autenticación.
+
+---
+
+# 888. Hardware-backed keys
+
+Perfiles de alta seguridad podrán utilizar:
+
+* HSM;
+* KMS;
+* secure enclave;
+* servicio de firma remoto.
+
+---
+
+# 889. Signing failures
+
+Si una respuesta requiere firma y el servicio de firma falla, la respuesta no deberá emitirse sin protección.
+
+---
+
+# 890. Signature downgrade
+
+No deberá degradarse silenciosamente de `Signed` a `DigestOnly`.
+
+---
+
+# 891. Signature verification telemetry
+
+Los consumidores integrados podrán reportar:
+
+* firma válida;
+* expiración;
+* clave desconocida;
+* digest incorrecto;
+* contexto incorrecto;
+* replay.
+
+---
+
+# 892. Replay Protection
+
+Una firma válida no siempre impide replay.
+
+---
+
+# 893. FreshnessPolicy
+
+```php
+final readonly class FreshnessPolicy
+{
+    public function __construct(
+        public int $maxAgeSeconds,
+        public bool $requireNonce,
+        public bool $singleUse,
+        public ClockSkewPolicy $clockSkew,
+    ) {
+    }
+}
+```
+
+---
+
+# 894. Created and expires
+
+Las respuestas firmadas deberán incluir una ventana temporal explícita.
+
+---
+
+# 895. Clock skew
+
+La tolerancia de reloj deberá ser limitada y configurable.
+
+---
+
+# 896. Nonce registry
+
+```php
+interface ResponseNonceRegistryInterface
+{
+    public function issue(
+        ResponseSecurityContext $context
+    ): ResponseNonce;
+
+    public function consume(
+        ResponseNonce $nonce
+    ): NonceConsumptionResult;
+}
+```
+
+---
+
+# 897. Single-use responses
+
+Podrán utilizarse para:
+
+* confirmaciones financieras;
+* enlaces de descarga;
+* entrega de secretos;
+* autorizaciones temporales.
+
+---
+
+# 898. Replay storage
+
+El registro de nonces deberá:
+
+* ser distribuido cuando aplique;
+* expirar;
+* ser atómico;
+* resistir carreras;
+* aislar tenants.
+
+---
+
+# 899. Context Binding Policy
+
+```php
+final readonly class ContextBindingPolicy
+{
+    public function __construct(
+        public bool $bindRequestId,
+        public bool $bindTenant,
+        public bool $bindUser,
+        public bool $bindRoute,
+        public bool $bindOrigin,
+    ) {
+    }
+}
+```
+
+---
+
+# 900. Response Provenance
+
+Toda respuesta deberá poder asociarse internamente a su origen de ejecución.
+
+---
+
+# 901. ResponseProvenance
+
+```php
+final readonly class ResponseProvenance
+{
+    public function __construct(
+        public string $applicationId,
+        public string $releaseId,
+        public string $nodeId,
+        public string $requestId,
+        public string $routeId,
+        public ?string $controllerId,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 902. Provenance exposure
+
+No toda metadata de procedencia deberá enviarse al cliente.
+
+---
+
+# 903. Public provenance
+
+Podrán exponerse únicamente identificadores no sensibles y necesarios para soporte.
+
+---
+
+# 904. Internal provenance
+
+El detalle completo permanecerá en:
+
+* tracing;
+* audit logs;
+* security events;
+* incident records.
+
+---
+
+# 905. Release binding
+
+Las respuestas firmadas de alto valor podrán vincularse al release que las produjo.
+
+---
+
+# 906. Node anomaly detection
+
+Si respuestas equivalentes difieren entre nodos, deberá investigarse:
+
+* configuración divergente;
+* despliegue parcial;
+* cache inconsistente;
+* compromiso;
+* errores de serialización.
+
+---
+
+# 907. Transport Audit System
+
+VoltStack deberá mantener un sistema de auditoría específico para seguridad de transporte y respuesta.
+
+---
+
+# 908. TransportAuditRecord
+
+```php
+final readonly class TransportAuditRecord
+{
+    public function __construct(
+        public string $requestId,
+        public string $routeId,
+        public string $responseProfile,
+        public int $status,
+        public ResponseSensitivity $sensitivity,
+        public array $securityHeaders,
+        public string $cacheDecision,
+        public string $integrityDecision,
+        public string $transportState,
+        public array $violations,
+    ) {
+    }
+}
+```
+
+---
+
+# 909. Audit objectives
+
+El sistema deberá permitir responder:
+
+* qué política se aplicó;
+* por qué se aplicó;
+* qué componente la decidió;
+* si existieron overrides;
+* si hubo conflictos;
+* qué headers fueron emitidos;
+* si la respuesta se completó.
+
+---
+
+# 910. Audit data minimization
+
+Los registros no deberán incluir automáticamente:
+
+* bodies;
+* tokens;
+* cookies completas;
+* headers de autorización;
+* datos personales.
+
+---
+
+# 911. Header audit representation
+
+Los headers sensibles deberán representarse mediante:
+
+* presencia;
+* clasificación;
+* hash seguro cuando sea necesario;
+* valor redactado.
+
+---
+
+# 912. Audit immutability
+
+Los registros de seguridad deberán protegerse contra modificación no autorizada.
+
+---
+
+# 913. Audit retention
+
+La retención dependerá de:
+
+* clasificación;
+* regulación;
+* capacidad de almacenamiento;
+* necesidades forenses;
+* privacidad.
+
+---
+
+# 914. Audit correlation
+
+Los registros deberán correlacionarse con:
+
+* request tracing;
+* authentication;
+* authorization;
+* tenant;
+* deployment;
+* proxy chain;
+* incident ID.
+
+---
+
+# 915. Security Telemetry
+
+La telemetría deberá detectar desviaciones antes de convertirse en incidentes.
+
+---
+
+# 916. Transport metrics
+
+Métricas recomendadas:
+
+* respuestas por perfil;
+* fallos de header validation;
+* redirects rechazados;
+* cookies rechazadas;
+* fallos CSRF;
+* CORS denegados;
+* framing inválido;
+* errores de streaming;
+* cache policy violations;
+* firmas fallidas.
+
+---
+
+# 917. Security metric labels
+
+Las labels deberán evitar cardinalidad excesiva.
+
+---
+
+# 918. Safe metric dimensions
+
+Podrán utilizarse:
+
+* route group;
+* response profile;
+* status family;
+* tenant tier;
+* violation type;
+* deployment region.
+
+---
+
+# 919. Unsafe metric dimensions
+
+Deberán evitarse:
+
+* URL completa;
+* user ID sin anonimizar;
+* token;
+* query string arbitraria;
+* filename libre;
+* stack trace.
+
+---
+
+# 920. SecurityEventBus
+
+```php
+interface SecurityEventBusInterface
+{
+    public function publish(
+        SecurityEvent $event
+    ): void;
+}
+```
+
+---
+
+# 921. Transport security events
+
+El framework deberá incluir eventos como:
+
+* `InvalidResponseHeaderDetected`;
+* `UnsafeRedirectBlocked`;
+* `CorsPolicyViolation`;
+* `CsrfValidationFailed`;
+* `CookiePolicyViolation`;
+* `StreamAborted`;
+* `SmugglingAttemptDetected`;
+* `HostValidationFailed`;
+* `CacheIsolationViolation`;
+* `ResponseSignatureFailed`;
+* `IntegrityMismatchDetected`.
+
+---
+
+# 922. Security event severity
+
+```php
+enum SecurityEventSeverity: string
+{
+    case Informational = 'informational';
+    case Low = 'low';
+    case Medium = 'medium';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 923. Severity resolution
+
+La severidad deberá considerar:
+
+* sensibilidad;
+* repetición;
+* endpoint;
+* autenticación;
+* tenant;
+* impacto;
+* evidencia de explotación.
+
+---
+
+# 924. Alert thresholds
+
+No todo evento deberá producir una alerta inmediata.
+
+El sistema deberá soportar:
+
+* agregación;
+* ventanas temporales;
+* rate thresholds;
+* anomaly detection;
+* suppression controlada.
+
+---
+
+# 925. Threat Intelligence Hooks
+
+VoltStack podrá exponer hooks para enriquecer eventos con inteligencia externa.
+
+---
+
+# 926. ThreatIntelligenceProvider
+
+```php
+interface ThreatIntelligenceProviderInterface
+{
+    public function assess(
+        ThreatObservation $observation
+    ): ThreatAssessment;
+}
+```
+
+---
+
+# 927. Threat observations
+
+Podrán incluir:
+
+* IP;
+* ASN;
+* user agent;
+* firma de payload;
+* patrón de headers;
+* origen;
+* frecuencia;
+* proxy anomalies.
+
+---
+
+# 928. Threat intelligence trust
+
+La inteligencia externa será una señal, no una verdad absoluta.
+
+---
+
+# 929. Automated response
+
+Las respuestas automáticas podrán incluir:
+
+* rate limit;
+* challenge;
+* bloqueo temporal;
+* aislamiento de sesión;
+* cierre de stream;
+* revocación de token.
+
+No deberán realizar acciones destructivas irreversibles sin política explícita.
+
+---
+
+# 930. Incident Reporting
+
+Los incidentes de transporte deberán generar un expediente estructurado.
+
+---
+
+# 931. TransportSecurityIncident
+
+```php
+final readonly class TransportSecurityIncident
+{
+    public function __construct(
+        public string $incidentId,
+        public SecurityEventSeverity $severity,
+        public string $category,
+        public DateTimeImmutable $detectedAt,
+        public array $affectedRequests,
+        public array $affectedTenants,
+        public array $evidenceReferences,
+        public IncidentStatus $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 932. IncidentStatus
+
+```php
+enum IncidentStatus: string
+{
+    case Detected = 'detected';
+    case Investigating = 'investigating';
+    case Contained = 'contained';
+    case Remediated = 'remediated';
+    case Closed = 'closed';
+}
+```
+
+---
+
+# 933. Incident containment
+
+Las acciones de contención podrán incluir:
+
+* deshabilitar rutas;
+* revocar claves;
+* desactivar cache;
+* cerrar sesiones;
+* bloquear origins;
+* retirar un nodo;
+* forzar un perfil estricto.
+
+---
+
+# 934. Emergency security profile
+
+VoltStack deberá soportar activar un perfil de emergencia sin modificar cada Controller.
+
+---
+
+# 935. EmergencyTransportProfile
+
+```php
+final readonly class EmergencyTransportProfile
+{
+    public function __construct(
+        public bool $disableSharedCache,
+        public bool $disableExternalRedirects,
+        public bool $disableCompression,
+        public bool $forceNoStore,
+        public bool $requireStrictHeaders,
+        public bool $terminateLongLivedStreams,
+    ) {
+    }
+}
+```
+
+---
+
+# 936. Runtime Observability
+
+El sistema deberá proporcionar observabilidad sin debilitar la seguridad.
+
+---
+
+# 937. Response trace span
+
+Cada respuesta podrá generar spans para:
+
+* normalization;
+* security classification;
+* header resolution;
+* cache decision;
+* serialization;
+* compression;
+* signature;
+* emission.
+
+---
+
+# 938. Sensitive trace attributes
+
+Los valores sensibles deberán redactarse antes de enviarse a sistemas de tracing.
+
+---
+
+# 939. Debug mode restrictions
+
+El modo debug nunca deberá:
+
+* omitir headers de seguridad;
+* exponer cookies;
+* mostrar claves;
+* desactivar validación de host;
+* permitir framing ambiguo.
+
+---
+
+# 940. Production Hardening Profile
+
+VoltStack deberá proporcionar un perfil endurecido para producción.
+
+```php
+enum TransportHardeningProfile: string
+{
+    case Development = 'development';
+    case StandardProduction = 'standard_production';
+    case StrictProduction = 'strict_production';
+    case Regulated = 'regulated';
+}
+```
+
+---
+
+# 941. Standard production profile
+
+Deberá habilitar como mínimo:
+
+* HTTPS confiable;
+* secure cookies;
+* host allowlist;
+* trusted proxy validation;
+* response header guard;
+* CSP baseline;
+* no-sniff;
+* cache classification;
+* CSRF para sesiones;
+* CORS deny-by-default;
+* debug output suppression.
+
+---
+
+# 942. Strict production profile
+
+Añadirá:
+
+* conflicto de forwarded headers como error;
+* external redirects por capability;
+* compression restringida;
+* cross-origin policies estrictas;
+* auditoría extendida;
+* fail closed en inconsistencias;
+* validación de integridad reforzada.
+
+---
+
+# 943. Regulated profile
+
+Podrá añadir:
+
+* firmas de respuesta;
+* retención de auditoría;
+* HSM/KMS;
+* segregación de claves;
+* evidence logging;
+* control de cambios;
+* revisión de políticas;
+* trazabilidad de despliegue.
+
+---
+
+# 944. Compliance Mapping
+
+VoltStack podrá incluir mapas de cumplimiento hacia controles externos.
+
+Estos mapas serán ayudas de ingeniería, no certificaciones automáticas.
+
+---
+
+# 945. OWASP ASVS mapping
+
+El modelo deberá mapear, entre otros:
+
+* validación HTTP;
+* gestión de sesiones;
+* control de acceso;
+* seguridad de archivos;
+* protección de datos;
+* comunicaciones;
+* configuración;
+* logging.
+
+---
+
+# 946. NIST mapping
+
+Podrán documentarse relaciones con funciones como:
+
+* Identify;
+* Protect;
+* Detect;
+* Respond;
+* Recover.
+
+---
+
+# 947. PCI-oriented profile
+
+Aplicaciones que procesen datos de pago deberán reforzar:
+
+* no-store;
+* TLS;
+* logging protegido;
+* segregación;
+* sesiones;
+* claves;
+* integridad;
+* incident response.
+
+---
+
+# 948. Production Hardening Checklist
+
+Antes de producción deberá verificarse:
+
+```text
+[ ] HTTPS obligatorio
+[ ] HSTS configurado
+[ ] Proxies confiables registrados
+[ ] Forwarded headers validados
+[ ] Hosts permitidos definidos
+[ ] URLs absolutas no dependen de Host arbitrario
+[ ] Cookies Secure, HttpOnly y SameSite
+[ ] CSRF activo para autenticación por cookies
+[ ] CORS deny-by-default
+[ ] CSP activa
+[ ] Permissions Policy mínima
+[ ] COOP, COEP y CORP evaluados
+[ ] Cache privado y público correctamente clasificado
+[ ] Respuestas sensibles con no-store
+[ ] Redirects externos restringidos
+[ ] Descargas con rutas y nombres validados
+[ ] Streams con límites y cancelación
+[ ] SSE con reautorización
+[ ] Range requests limitados
+[ ] Compresión evaluada para secretos
+[ ] Content-Length y Transfer-Encoding controlados
+[ ] Errores y warnings fuera del body
+[ ] Auditoría y métricas activas
+[ ] Claves rotables y segregadas
+[ ] Perfil de emergencia disponible
+[ ] Pruebas de seguridad automatizadas
+```
+
+---
+
+# 949. Security ADRs
+
+## ADR-114 — Response integrity is a transport concern
+
+La integridad final deberá resolverse después de serializar y transformar la representación.
+
+## ADR-115 — Digests do not replace authentication
+
+Un digest solo demuestra igualdad, no identidad.
+
+## ADR-116 — Signed responses require contextual binding
+
+Toda firma de alto valor deberá vincularse a su contexto.
+
+## ADR-117 — Key purposes must remain isolated
+
+Las claves de respuesta no se reutilizarán para sesiones, cookies o URLs.
+
+## ADR-118 — Signature downgrade is forbidden
+
+Una respuesta que requiera firma no podrá emitirse sin ella.
+
+## ADR-119 — Audit logs must minimize sensitive data
+
+La observabilidad nunca justificará registrar secretos.
+
+## ADR-120 — Transport policies are centrally resolved
+
+Los Controllers no deberán reconstruir políticas de transporte.
+
+## ADR-121 — Emergency controls operate above Controllers
+
+El framework deberá poder endurecer respuestas globalmente.
+
+## ADR-122 — Compliance mappings are not certifications
+
+Las matrices de controles serán herramientas documentales.
+
+## ADR-123 — Debug mode cannot weaken critical transport controls
+
+El entorno de desarrollo podrá aumentar visibilidad, no reducir garantías esenciales.
+
+## ADR-124 — Security telemetry must be bounded
+
+Métricas y eventos deberán controlar cardinalidad y volumen.
+
+## ADR-125 — Threat intelligence is advisory
+
+Las señales externas no sustituirán validación local.
+
+## ADR-126 — Integrity violations fail closed
+
+Una discrepancia crítica deberá impedir la entrega.
+
+## ADR-127 — Long-lived connections remain continuously authorized
+
+La autorización inicial no será suficiente para streams prolongados.
+
+## ADR-128 — Response provenance is internal by default
+
+Solo se expondrá metadata mínima y deliberada.
+
+## ADR-129 — Production hardening is profile-driven
+
+Los controles deberán activarse mediante perfiles consistentes y verificables.
+
+## ADR-130 — Transport security is verified before emission
+
+Ninguna respuesta será emitida antes de completar la validación final aplicable.
+
+---
+
+# 950. Conclusión de CONTROLLER_SECURITY_MODEL_PART_04
+
+`CONTROLLER_SECURITY_MODEL_PART_04.md` define el modelo completo de seguridad de transporte y respuestas de VoltStack.
+
+La arquitectura resultante establece el flujo:
+
+```text
+Controller Result
+        ↓
+Result Normalization
+        ↓
+Response Classification
+        ↓
+Security Policy Resolution
+        ↓
+Content-Type and Negotiation
+        ↓
+HTML, CSP and Trusted Types
+        ↓
+Cross-Origin Security
+        ↓
+CORS and CSRF
+        ↓
+Cookie Protection
+        ↓
+Redirect and File Security
+        ↓
+Streaming and SSE Controls
+        ↓
+Compression and Framing
+        ↓
+Proxy, Host and Scheme Validation
+        ↓
+Cache and Conditional Requests
+        ↓
+Integrity and Signature Protection
+        ↓
+Audit and Observability
+        ↓
+Final Response Freeze
+        ↓
+Secure Transport Emission
+```
+
+Los principios definitivos de esta parte son:
+
+```text
+1. Toda respuesta se considera insegura hasta ser clasificada.
+2. Los Controllers expresan intención, no construyen transporte crítico.
+3. Los headers sensibles tienen propietarios únicos.
+4. Toda metadata externa se trata como no confiable.
+5. Las respuestas privadas nunca deben entrar en caches compartidos.
+6. El host, scheme, port e IP efectiva requieren resolución confiable.
+7. Los streams mantienen autorización durante toda su vida.
+8. La integridad se calcula sobre la representación correcta.
+9. Las firmas requieren contexto, frescura y rotación de claves.
+10. La observabilidad nunca debe filtrar secretos.
+11. Las inconsistencias críticas fallan de forma cerrada.
+12. La seguridad final se valida antes de emitir el primer byte.
+```
+
+## Estado final
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_04
+Transport & Response Security
+
+Secciones: 1–950
+Entregas: 10
+Estado: COMPLETADO
+```
