@@ -1,0 +1,50 @@
+{
+    "name": "voltstack/controller-lab",
+    "description": "The Controller Lab Package for VoltStack Framework",
+    "license": "MIT",
+    "keywords": [
+        "voltstack",
+        "controller",
+        "php"
+    ],
+    "authors": [
+        {
+            "name": "Francisco J. Morales",
+            "email": "francisco.morales@voltstack.net"
+        }
+    ],
+    "homepage": "https://voltstack.net",
+    "require": {
+        "php": "^8.3",
+        "voltstack/framework": "@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.1"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../voltstack-framework",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "VoltStack\\ControllerLab\\": "src",
+            "VoltStack\\ControllerLab\\Pages\\": "app/Pages/",
+            "VoltStack\\ControllerLab\\Controllers\\": "app/Controllers/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VoltStack\\ControllerLab\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0-dev"
+        }
+    }
+}
