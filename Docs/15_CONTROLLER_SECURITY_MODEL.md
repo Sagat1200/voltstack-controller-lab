@@ -21340,3 +21340,2526 @@ Secciones: 1–950
 Entregas: 10
 Estado: COMPLETADO
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 1 de varias
+**Cobertura:** Secciones **1–100**
+**Estado:** En desarrollo
+**Continuación conceptual de:** `CONTROLLER_SECURITY_MODEL_PART_04.md`
+
+---
+
+# 1. Introducción
+
+`CONTROLLER_SECURITY_MODEL_PART_05.md` define la arquitectura de seguridad para:
+
+* identidad;
+* autenticación;
+* credenciales;
+* sesiones;
+* dispositivos;
+* autenticación multifactor;
+* recuperación de cuentas;
+* federación;
+* tokens;
+* identidades de servicio;
+* impersonación;
+* auditoría de acceso.
+
+El objetivo es que los Controllers de VoltStack nunca tengan que implementar directamente lógica criptográfica, validación de credenciales o administración de sesiones.
+
+---
+
+# 2. Principio fundamental
+
+Un Controller no autentica usuarios.
+
+Un Controller declara el nivel de identidad y autenticación requerido para ejecutar una acción.
+
+```text
+Request
+   ↓
+Identity Resolution
+   ↓
+Authentication
+   ↓
+Session Validation
+   ↓
+Risk Evaluation
+   ↓
+Authorization
+   ↓
+Controller
+```
+
+---
+
+# 3. Separación de responsabilidades
+
+VoltStack distinguirá claramente:
+
+* identificación;
+* autenticación;
+* autorización;
+* gestión de sesión;
+* elevación de privilegios;
+* federación de identidad;
+* auditoría.
+
+---
+
+# 4. Identification
+
+La identificación responde:
+
+> ¿Qué identidad afirma representar el actor?
+
+Ejemplos:
+
+* usuario;
+* dispositivo;
+* servicio;
+* aplicación;
+* proceso;
+* tenant;
+* API client.
+
+---
+
+# 5. Authentication
+
+La autenticación responde:
+
+> ¿Qué evidencia existe de que el actor controla esa identidad?
+
+---
+
+# 6. Authorization
+
+La autorización responde:
+
+> ¿Qué acciones puede realizar la identidad autenticada?
+
+Autenticación y autorización deberán permanecer desacopladas.
+
+---
+
+# 7. Identity Security Pipeline
+
+```text
+Incoming Request
+      ↓
+Credential Extraction
+      ↓
+Credential Classification
+      ↓
+Identity Lookup
+      ↓
+Credential Verification
+      ↓
+Authentication Policy Evaluation
+      ↓
+Risk Analysis
+      ↓
+Authentication Result
+      ↓
+Session or Token Binding
+      ↓
+Authorization Context
+      ↓
+Controller Dispatch
+```
+
+---
+
+# 8. Security goals
+
+El sistema deberá garantizar:
+
+* autenticidad razonable;
+* resistencia a robo de credenciales;
+* resistencia a replay;
+* protección de sesiones;
+* aislamiento multi-tenant;
+* trazabilidad;
+* revocación;
+* mínima exposición de identidad;
+* extensibilidad controlada.
+
+---
+
+# 9. Threat model
+
+El modelo considerará ataques como:
+
+* credential stuffing;
+* password spraying;
+* brute force;
+* phishing;
+* session fixation;
+* session hijacking;
+* token theft;
+* token replay;
+* MFA fatigue;
+* recovery abuse;
+* account enumeration;
+* identity confusion;
+* tenant confusion;
+* OAuth mix-up;
+* redirect URI manipulation;
+* forged service identities.
+
+---
+
+# 10. Protected assets
+
+Los activos protegidos incluyen:
+
+* contraseñas;
+* hashes;
+* session IDs;
+* refresh tokens;
+* access tokens;
+* recovery codes;
+* MFA secrets;
+* device credentials;
+* signing keys;
+* authentication state;
+* identity mappings;
+* audit trails.
+
+---
+
+# 11. Trust boundaries
+
+```text
+Browser
+   ↓
+Edge / Proxy
+   ↓
+HTTP Runtime
+   ↓
+Authentication System
+   ↓
+Identity Provider
+   ↓
+Session Store
+   ↓
+Application
+   ↓
+Protected Resources
+```
+
+---
+
+# 12. Identity types
+
+```php
+enum IdentityType: string
+{
+    case HumanUser = 'human_user';
+    case ServiceAccount = 'service_account';
+    case Application = 'application';
+    case Device = 'device';
+    case Anonymous = 'anonymous';
+    case SystemProcess = 'system_process';
+}
+```
+
+---
+
+# 13. IdentityIdentifier
+
+```php
+final readonly class IdentityIdentifier
+{
+    public function __construct(
+        public IdentityType $type,
+        public string $provider,
+        public string $subject,
+    ) {
+    }
+}
+```
+
+---
+
+# 14. Stable subject identifiers
+
+El identificador interno deberá ser:
+
+* estable;
+* opaco;
+* no reciclable;
+* independiente del email;
+* independiente del username;
+* único dentro del provider.
+
+---
+
+# 15. Mutable identity attributes
+
+No deberán utilizarse como clave primaria de identidad:
+
+* email;
+* teléfono;
+* username;
+* display name;
+* nombre legal.
+
+---
+
+# 16. Identity provider
+
+```php
+interface IdentityProviderInterface
+{
+    public function resolve(
+        IdentityLookup $lookup
+    ): ?IdentityRecord;
+}
+```
+
+---
+
+# 17. IdentityRecord
+
+```php
+final readonly class IdentityRecord
+{
+    public function __construct(
+        public IdentityIdentifier $identifier,
+        public IdentityStatus $status,
+        public array $attributes,
+        public array $authenticationMethods,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 18. IdentityStatus
+
+```php
+enum IdentityStatus: string
+{
+    case Active = 'active';
+    case Pending = 'pending';
+    case Suspended = 'suspended';
+    case Locked = 'locked';
+    case Disabled = 'disabled';
+    case Deleted = 'deleted';
+}
+```
+
+---
+
+# 19. Status validation
+
+Solo identidades `Active` podrán autenticarse normalmente.
+
+---
+
+# 20. Pending identities
+
+Las cuentas pendientes podrán acceder únicamente a flujos limitados como:
+
+* verificación de email;
+* activación;
+* aceptación de invitación;
+* configuración inicial.
+
+---
+
+# 21. Suspended identities
+
+Una cuenta suspendida deberá:
+
+* rechazar nuevas autenticaciones;
+* invalidar sesiones según política;
+* impedir refresh;
+* generar evento de seguridad.
+
+---
+
+# 22. Locked identities
+
+El bloqueo podrá ser:
+
+* temporal;
+* administrativo;
+* por riesgo;
+* por intentos fallidos;
+* por incidente.
+
+---
+
+# 23. Disabled identities
+
+Una identidad deshabilitada deberá considerarse no autenticable.
+
+---
+
+# 24. Deleted identities
+
+Los identificadores eliminados no deberán reutilizarse automáticamente.
+
+---
+
+# 25. Identity context
+
+```php
+final readonly class IdentityContext
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public AuthenticationState $authentication,
+        public ?string $tenantId,
+        public ActorContext $actor,
+    ) {
+    }
+}
+```
+
+---
+
+# 26. Actor versus subject
+
+VoltStack distinguirá:
+
+* actor: quien ejecuta la acción;
+* subject: identidad sobre la que actúa.
+
+Esto será esencial para:
+
+* impersonación;
+* administración;
+* automatización;
+* delegación.
+
+---
+
+# 27. ActorContext
+
+```php
+final readonly class ActorContext
+{
+    public function __construct(
+        public IdentityIdentifier $actor,
+        public IdentityIdentifier $subject,
+        public bool $impersonating,
+        public ?string $delegationId,
+    ) {
+    }
+}
+```
+
+---
+
+# 28. Authentication methods
+
+VoltStack podrá soportar:
+
+* password;
+* passkey;
+* WebAuthn;
+* TOTP;
+* email link;
+* SMS OTP;
+* recovery code;
+* OAuth;
+* OpenID Connect;
+* client certificate;
+* API key;
+* signed request;
+* workload identity.
+
+---
+
+# 29. AuthenticationMethod
+
+```php
+enum AuthenticationMethod: string
+{
+    case Password = 'password';
+    case Passkey = 'passkey';
+    case WebAuthn = 'webauthn';
+    case Totp = 'totp';
+    case EmailOtp = 'email_otp';
+    case SmsOtp = 'sms_otp';
+    case MagicLink = 'magic_link';
+    case RecoveryCode = 'recovery_code';
+    case OAuth = 'oauth';
+    case OpenIdConnect = 'openid_connect';
+    case ApiKey = 'api_key';
+    case ClientCertificate = 'client_certificate';
+    case SignedRequest = 'signed_request';
+}
+```
+
+---
+
+# 30. Authentication factor categories
+
+```php
+enum AuthenticationFactorCategory: string
+{
+    case Knowledge = 'knowledge';
+    case Possession = 'possession';
+    case Inherence = 'inherence';
+    case Device = 'device';
+    case Federation = 'federation';
+}
+```
+
+---
+
+# 31. Factor strength
+
+No todos los métodos poseen el mismo nivel de confianza.
+
+---
+
+# 32. Authentication strength
+
+```php
+enum AuthenticationStrength: int
+{
+    case Anonymous = 0;
+    case Low = 10;
+    case Standard = 20;
+    case Strong = 30;
+    case PhishingResistant = 40;
+    case HardwareBound = 50;
+}
+```
+
+---
+
+# 33. Authentication Assurance Level
+
+```php
+enum AuthenticationAssuranceLevel: string
+{
+    case Aal0 = 'aal0';
+    case Aal1 = 'aal1';
+    case Aal2 = 'aal2';
+    case Aal3 = 'aal3';
+}
+```
+
+---
+
+# 34. Assurance calculation
+
+El assurance level deberá derivarse de:
+
+* método;
+* cantidad de factores;
+* independencia de factores;
+* dispositivo;
+* autenticador;
+* riesgo;
+* antigüedad de autenticación.
+
+---
+
+# 35. AuthenticationState
+
+```php
+final readonly class AuthenticationState
+{
+    public function __construct(
+        public bool $authenticated,
+        public AuthenticationAssuranceLevel $assurance,
+        public AuthenticationStrength $strength,
+        public array $methods,
+        public DateTimeImmutable $authenticatedAt,
+        public ?DateTimeImmutable $elevatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 36. Anonymous identity
+
+Las peticiones sin autenticación deberán usar una identidad anónima explícita.
+
+---
+
+# 37. Anonymous context
+
+```php
+IdentityIdentifier(
+    type: IdentityType::Anonymous,
+    provider: 'voltstack',
+    subject: 'anonymous',
+);
+```
+
+---
+
+# 38. No nullable identity context
+
+El sistema deberá evitar representar el anonimato mediante `null` disperso en toda la aplicación.
+
+---
+
+# 39. Authentication policy
+
+```php
+interface AuthenticationPolicyInterface
+{
+    public function evaluate(
+        AuthenticationAttempt $attempt,
+        AuthenticationSecurityContext $context
+    ): AuthenticationPolicyDecision;
+}
+```
+
+---
+
+# 40. AuthenticationAttempt
+
+```php
+final readonly class AuthenticationAttempt
+{
+    public function __construct(
+        public AuthenticationMethod $method,
+        public CredentialEnvelope $credentials,
+        public RequestFingerprint $request,
+        public ?IdentityLookup $claimedIdentity,
+    ) {
+    }
+}
+```
+
+---
+
+# 41. CredentialEnvelope
+
+```php
+final readonly class CredentialEnvelope
+{
+    public function __construct(
+        public CredentialType $type,
+        private SensitiveValue $value,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 42. SensitiveValue
+
+Las credenciales deberán almacenarse temporalmente en un tipo sensible.
+
+```php
+final class SensitiveValue
+{
+    public function reveal(
+        SensitiveValueAccessToken $token
+    ): string;
+}
+```
+
+---
+
+# 43. Credential redaction
+
+Las credenciales nunca deberán aparecer en:
+
+* logs;
+* excepciones;
+* traces;
+* dumps;
+* profiler;
+* telemetry;
+* serialization.
+
+---
+
+# 44. Credential lifetime
+
+Las credenciales en memoria deberán mantenerse únicamente durante la verificación.
+
+---
+
+# 45. Credential zeroization
+
+Cuando el runtime lo permita, los buffers sensibles deberán limpiarse después del uso.
+
+---
+
+# 46. Credential extraction
+
+La extracción deberá depender del método:
+
+* body;
+* header;
+* cookie;
+* TLS metadata;
+* authorization header;
+* WebAuthn payload.
+
+---
+
+# 47. CredentialExtractor
+
+```php
+interface CredentialExtractorInterface
+{
+    public function supports(
+        ServerRequestInterface $request
+    ): bool;
+
+    public function extract(
+        ServerRequestInterface $request
+    ): CredentialEnvelope;
+}
+```
+
+---
+
+# 48. Multiple credentials
+
+Una petición con múltiples esquemas incompatibles deberá rechazarse o resolverse mediante política explícita.
+
+---
+
+# 49. Credential precedence
+
+No deberá existir precedencia implícita entre:
+
+* session cookie;
+* bearer token;
+* API key;
+* client certificate.
+
+---
+
+# 50. Authentication scheme selection
+
+```php
+interface AuthenticationSchemeResolverInterface
+{
+    public function resolve(
+        ServerRequestInterface $request,
+        RouteAuthenticationMetadata $metadata
+    ): AuthenticationScheme;
+}
+```
+
+---
+
+# 51. AuthenticationScheme
+
+```php
+final readonly class AuthenticationScheme
+{
+    public function __construct(
+        public string $name,
+        public AuthenticationMethod $method,
+        public CredentialExtractorInterface $extractor,
+        public CredentialVerifierInterface $verifier,
+    ) {
+    }
+}
+```
+
+---
+
+# 52. Route authentication metadata
+
+```php
+#[RequiresAuthentication(
+    assurance: AuthenticationAssuranceLevel::Aal2,
+    methods: [
+        AuthenticationMethod::Passkey,
+        AuthenticationMethod::Password,
+    ]
+)]
+public function billing(): Response
+{
+}
+```
+
+---
+
+# 53. Controller requirements
+
+Los Controllers podrán declarar:
+
+* autenticación requerida;
+* assurance mínimo;
+* métodos aceptados;
+* frescura;
+* step-up;
+* dispositivo confiable.
+
+---
+
+# 54. Authentication freshness
+
+Algunas operaciones deberán exigir autenticación reciente.
+
+---
+
+# 55. FreshAuthenticationRequirement
+
+```php
+final readonly class FreshAuthenticationRequirement
+{
+    public function __construct(
+        public int $maxAgeSeconds,
+        public AuthenticationAssuranceLevel $minimumAssurance,
+    ) {
+    }
+}
+```
+
+---
+
+# 56. Sensitive operations
+
+Podrán requerir autenticación reciente:
+
+* cambio de contraseña;
+* cambio de email;
+* gestión de MFA;
+* pagos;
+* retiro de fondos;
+* exportación de datos;
+* impersonación;
+* eliminación de cuenta.
+
+---
+
+# 57. Step-up authentication
+
+Una sesión válida podrá necesitar elevar temporalmente su assurance.
+
+---
+
+# 58. StepUpAuthenticationService
+
+```php
+interface StepUpAuthenticationServiceInterface
+{
+    public function begin(
+        IdentityContext $identity,
+        StepUpRequirement $requirement
+    ): StepUpChallenge;
+
+    public function verify(
+        StepUpResponse $response
+    ): StepUpResult;
+}
+```
+
+---
+
+# 59. Step-up scope
+
+La elevación podrá estar vinculada a:
+
+* sesión;
+* operación;
+* recurso;
+* tenant;
+* ventana temporal.
+
+---
+
+# 60. Global elevation risk
+
+Una elevación no deberá aumentar indefinidamente todos los privilegios de la sesión.
+
+---
+
+# 61. Authentication challenge
+
+```php
+final readonly class AuthenticationChallenge
+{
+    public function __construct(
+        public string $challengeId,
+        public AuthenticationMethod $method,
+        public DateTimeImmutable $expiresAt,
+        public string $purpose,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 62. Challenge properties
+
+Todo challenge deberá ser:
+
+* impredecible;
+* temporal;
+* vinculado al flujo;
+* limitado a una identidad;
+* de un solo uso cuando aplique.
+
+---
+
+# 63. Challenge registry
+
+```php
+interface AuthenticationChallengeRegistryInterface
+{
+    public function issue(
+        AuthenticationChallenge $challenge
+    ): void;
+
+    public function consume(
+        string $challengeId
+    ): ChallengeConsumptionResult;
+}
+```
+
+---
+
+# 64. Challenge replay
+
+Los challenges consumidos deberán rechazarse.
+
+---
+
+# 65. Challenge expiration
+
+Los challenges expirados deberán eliminarse o invalidarse.
+
+---
+
+# 66. Authentication result
+
+```php
+final readonly class AuthenticationResult
+{
+    public function __construct(
+        public AuthenticationResultStatus $status,
+        public ?IdentityContext $identity,
+        public ?AuthenticationFailure $failure,
+        public array $securityEvents,
+    ) {
+    }
+}
+```
+
+---
+
+# 67. AuthenticationResultStatus
+
+```php
+enum AuthenticationResultStatus: string
+{
+    case Succeeded = 'succeeded';
+    case Failed = 'failed';
+    case ChallengeRequired = 'challenge_required';
+    case StepUpRequired = 'step_up_required';
+    case Locked = 'locked';
+    case Suspended = 'suspended';
+}
+```
+
+---
+
+# 68. Generic authentication failures
+
+La respuesta externa no deberá revelar si falló:
+
+* username;
+* password;
+* tenant;
+* MFA;
+* estado de cuenta.
+
+---
+
+# 69. Internal failure classification
+
+Internamente sí deberán diferenciarse las causas para:
+
+* auditoría;
+* seguridad;
+* soporte;
+* métricas;
+* respuesta automática.
+
+---
+
+# 70. AuthenticationFailure
+
+```php
+enum AuthenticationFailure: string
+{
+    case IdentityNotFound = 'identity_not_found';
+    case CredentialMismatch = 'credential_mismatch';
+    case AccountLocked = 'account_locked';
+    case AccountSuspended = 'account_suspended';
+    case FactorRequired = 'factor_required';
+    case ChallengeExpired = 'challenge_expired';
+    case ReplayDetected = 'replay_detected';
+    case RiskRejected = 'risk_rejected';
+    case ProviderUnavailable = 'provider_unavailable';
+}
+```
+
+---
+
+# 71. Account enumeration prevention
+
+El sistema deberá evitar diferencias observables en:
+
+* mensaje;
+* status;
+* tiempo;
+* redirects;
+* respuesta;
+* rate limit.
+
+---
+
+# 72. Timing normalization
+
+Los intentos con identidad inexistente deberán ejecutar una operación de verificación simulada cuando sea razonable.
+
+---
+
+# 73. Dummy password hash
+
+El framework podrá mantener un hash dummy para reducir diferencias de timing.
+
+---
+
+# 74. Authentication rate limiting
+
+Los límites deberán considerar:
+
+* IP;
+* identidad reclamada;
+* dispositivo;
+* tenant;
+* ASN;
+* patrón global.
+
+---
+
+# 75. AuthRateLimitKey
+
+```php
+final readonly class AuthRateLimitKey
+{
+    public function __construct(
+        public ?string $identityHash,
+        public ?string $ipPrefix,
+        public ?string $deviceId,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 76. IP-only rate limiting risk
+
+Limitar únicamente por IP puede afectar redes compartidas y ser evadido mediante botnets.
+
+---
+
+# 77. Identity-only rate limiting risk
+
+Limitar únicamente por identidad puede permitir bloquear cuentas mediante ataques externos.
+
+---
+
+# 78. Composite throttling
+
+VoltStack deberá combinar múltiples señales.
+
+---
+
+# 79. Password spraying detection
+
+Se deberá detectar el patrón:
+
+```text
+Una contraseña
+    ↓
+Muchas identidades
+```
+
+---
+
+# 80. Credential stuffing detection
+
+Se deberá detectar:
+
+```text
+Muchas credenciales conocidas
+    ↓
+Muchas identidades
+```
+
+---
+
+# 81. Brute-force detection
+
+Se deberá detectar:
+
+```text
+Muchas contraseñas
+    ↓
+Una identidad
+```
+
+---
+
+# 82. AuthenticationRiskEngine
+
+```php
+interface AuthenticationRiskEngineInterface
+{
+    public function assess(
+        AuthenticationAttempt $attempt,
+        AuthenticationSecurityContext $context
+    ): AuthenticationRiskAssessment;
+}
+```
+
+---
+
+# 83. Risk signals
+
+El motor podrá considerar:
+
+* IP reputation;
+* geolocation inconsistency;
+* device novelty;
+* impossible travel;
+* request velocity;
+* breached credential signal;
+* user agent anomalies;
+* proxy or Tor usage;
+* authentication method;
+* previous incidents.
+
+---
+
+# 84. Risk score
+
+```php
+final readonly class AuthenticationRiskAssessment
+{
+    public function __construct(
+        public int $score,
+        public AuthenticationRiskLevel $level,
+        public array $signals,
+        public AuthenticationRiskAction $action,
+    ) {
+    }
+}
+```
+
+---
+
+# 85. AuthenticationRiskLevel
+
+```php
+enum AuthenticationRiskLevel: string
+{
+    case Low = 'low';
+    case Medium = 'medium';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 86. AuthenticationRiskAction
+
+```php
+enum AuthenticationRiskAction: string
+{
+    case Allow = 'allow';
+    case Challenge = 'challenge';
+    case RequireMfa = 'require_mfa';
+    case RequirePhishingResistantFactor = 'require_phishing_resistant_factor';
+    case Deny = 'deny';
+    case LockTemporarily = 'lock_temporarily';
+}
+```
+
+---
+
+# 87. Risk engine limitations
+
+El motor de riesgo deberá ser una señal complementaria.
+
+No deberá reemplazar verificaciones criptográficas.
+
+---
+
+# 88. Explainable risk decisions
+
+Las decisiones deberán conservar razones internas auditables.
+
+---
+
+# 89. User-facing risk messages
+
+Los mensajes externos deberán evitar revelar reglas de detección.
+
+---
+
+# 90. Device identity
+
+VoltStack podrá asociar sesiones a dispositivos conocidos.
+
+---
+
+# 91. DeviceIdentifier
+
+```php
+final readonly class DeviceIdentifier
+{
+    public function __construct(
+        public string $id,
+        public DeviceTrustLevel $trust,
+        public DateTimeImmutable $firstSeenAt,
+        public DateTimeImmutable $lastSeenAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 92. DeviceTrustLevel
+
+```php
+enum DeviceTrustLevel: string
+{
+    case Unknown = 'unknown';
+    case Recognized = 'recognized';
+    case Trusted = 'trusted';
+    case Managed = 'managed';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 93. Device fingerprinting
+
+El fingerprinting pasivo deberá utilizarse con precaución debido a:
+
+* privacidad;
+* falsos positivos;
+* volatilidad;
+* evasión;
+* regulación.
+
+---
+
+# 94. Device cookie
+
+Una cookie de dispositivo deberá:
+
+* estar firmada;
+* ser opaca;
+* no contener datos sensibles;
+* poder revocarse;
+* tener scope limitado.
+
+---
+
+# 95. Trusted device
+
+Un dispositivo confiable no deberá eliminar completamente la necesidad de autenticación.
+
+---
+
+# 96. Managed devices
+
+Los dispositivos administrados podrán aportar señales como:
+
+* certificado;
+* posture;
+* enrollment;
+* workload identity;
+* attestation.
+
+---
+
+# 97. Compromised device
+
+Una señal de compromiso podrá provocar:
+
+* revocación de sesiones;
+* MFA obligatorio;
+* bloqueo temporal;
+* alerta;
+* denial.
+
+---
+
+# 98. Authentication events
+
+Eventos iniciales del sistema:
+
+* `AuthenticationAttempted`;
+* `AuthenticationSucceeded`;
+* `AuthenticationFailed`;
+* `AuthenticationChallenged`;
+* `StepUpRequired`;
+* `IdentityLocked`;
+* `RiskAuthenticationRejected`;
+* `DeviceRecognized`;
+* `DeviceCompromised`.
+
+---
+
+# 99. Principios arquitectónicos de esta entrega
+
+```text
+1. Identificación, autenticación y autorización son procesos distintos.
+2. Los Controllers declaran requisitos de autenticación.
+3. Las credenciales se encapsulan como valores sensibles.
+4. Las respuestas de error evitan enumeración de cuentas.
+5. El nivel de autenticación se representa explícitamente.
+6. La autenticación reciente puede exigirse por operación.
+7. El riesgo complementa, pero no sustituye, la criptografía.
+8. Los challenges son temporales, vinculados y consumibles.
+9. La identidad anónima se representa explícitamente.
+10. Actor y subject permanecen separados.
+```
+
+---
+
+# 100. Resultado de esta entrega
+
+Esta primera entrega establece:
+
+```text
+Identity Trust Model
+Identity Types
+Identity Providers
+Identity Status Lifecycle
+Actor and Subject Separation
+Authentication Methods
+Authentication Strength
+Authentication Assurance Levels
+Credential Envelopes
+Sensitive Credential Handling
+Authentication Scheme Resolution
+Route Authentication Metadata
+Fresh Authentication
+Step-Up Authentication
+Authentication Challenges
+Generic Failure Responses
+Account Enumeration Defenses
+Rate Limiting Foundations
+Credential Stuffing Detection
+Risk-Based Authentication
+Device Identity Foundations
+Authentication Security Events
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 2 de varias
+**Cobertura:** Secciones **101–200**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 1`
+
+---
+
+# 101. Password Security Architecture
+
+VoltStack tratará las contraseñas como credenciales de alto riesgo.
+
+El sistema deberá diseñarse para reducir:
+
+* robo de credenciales;
+* reutilización;
+* cracking offline;
+* password spraying;
+* credential stuffing;
+* filtraciones accidentales;
+* abuso de recuperación;
+* downgrade criptográfico.
+
+---
+
+# 102. Password subsystem boundaries
+
+El subsistema de contraseñas deberá permanecer separado de:
+
+* Controllers;
+* formularios;
+* modelos ORM;
+* logs;
+* serializadores;
+* sesiones;
+* autorización.
+
+---
+
+# 103. PasswordCredential
+
+```php
+final class PasswordCredential
+{
+    public function __construct(
+        private SensitiveValue $value,
+    ) {
+    }
+
+    public function reveal(
+        SensitiveValueAccessToken $token
+    ): string {
+        return $this->value->reveal($token);
+    }
+}
+```
+
+---
+
+# 104. Password value restrictions
+
+Una contraseña no deberá:
+
+* convertirse automáticamente a string;
+* serializarse;
+* exportarse;
+* incluirse en excepciones;
+* persistirse en texto plano;
+* almacenarse en request attributes duraderos.
+
+---
+
+# 105. Password lifecycle
+
+```text
+Input
+  ↓
+Sensitive Capture
+  ↓
+Policy Validation
+  ↓
+Breach Evaluation
+  ↓
+Hashing
+  ↓
+Persistence
+  ↓
+Zeroization
+```
+
+---
+
+# 106. PasswordPolicyEngine
+
+```php
+interface PasswordPolicyEngineInterface
+{
+    public function evaluate(
+        PasswordCredential $password,
+        PasswordPolicyContext $context
+    ): PasswordPolicyDecision;
+}
+```
+
+---
+
+# 107. PasswordPolicyContext
+
+```php
+final readonly class PasswordPolicyContext
+{
+    public function __construct(
+        public PasswordOperation $operation,
+        public ?IdentityIdentifier $identity,
+        public ?string $tenantId,
+        public array $identityAttributes,
+        public AuthenticationRiskAssessment $risk,
+    ) {
+    }
+}
+```
+
+---
+
+# 108. PasswordOperation
+
+```php
+enum PasswordOperation: string
+{
+    case Registration = 'registration';
+    case Change = 'change';
+    case Reset = 'reset';
+    case AdministrativeSet = 'administrative_set';
+    case Migration = 'migration';
+}
+```
+
+---
+
+# 109. Policy composition
+
+La política deberá poder componerse mediante reglas como:
+
+* longitud mínima;
+* longitud máxima;
+* resistencia estimada;
+* breached password;
+* similitud con identidad;
+* historial;
+* contexto del tenant;
+* tipo de operación.
+
+---
+
+# 110. Length-first policy
+
+VoltStack deberá priorizar longitud y resistencia real sobre reglas arbitrarias de composición.
+
+---
+
+# 111. Minimum password length
+
+El mínimo deberá ser configurable por perfil.
+
+Ejemplo:
+
+```php
+final readonly class PasswordLengthPolicy
+{
+    public function __construct(
+        public int $minimum,
+        public int $maximum,
+    ) {
+    }
+}
+```
+
+---
+
+# 112. Maximum password length
+
+Deberá existir un máximo razonable para evitar:
+
+* agotamiento de memoria;
+* ataques de CPU;
+* cuerpos excesivos;
+* abuso de parsers.
+
+El límite no deberá ser tan bajo que impida passphrases.
+
+---
+
+# 113. Unicode passwords
+
+VoltStack deberá definir una política explícita para Unicode.
+
+---
+
+# 114. Unicode normalization
+
+La normalización puede cambiar la semántica de una contraseña.
+
+Por defecto, el framework no deberá aplicar transformaciones invisibles sin una decisión documentada.
+
+---
+
+# 115. Whitespace preservation
+
+No deberán eliminarse automáticamente:
+
+* espacios iniciales;
+* espacios finales;
+* múltiples espacios internos.
+
+---
+
+# 116. Password composition rules
+
+No deberán exigirse obligatoriamente combinaciones como:
+
+* una mayúscula;
+* una minúscula;
+* un número;
+* un símbolo;
+
+salvo requerimiento regulatorio explícito.
+
+---
+
+# 117. Password strength estimation
+
+El framework podrá integrar un estimador de resistencia basado en:
+
+* longitud;
+* patrones;
+* secuencias;
+* palabras comunes;
+* datos personales;
+* repeticiones.
+
+---
+
+# 118. PasswordStrengthEstimator
+
+```php
+interface PasswordStrengthEstimatorInterface
+{
+    public function estimate(
+        PasswordCredential $password,
+        PasswordStrengthContext $context
+    ): PasswordStrengthAssessment;
+}
+```
+
+---
+
+# 119. PasswordStrengthAssessment
+
+```php
+final readonly class PasswordStrengthAssessment
+{
+    public function __construct(
+        public int $score,
+        public PasswordStrengthLevel $level,
+        public array $reasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 120. PasswordStrengthLevel
+
+```php
+enum PasswordStrengthLevel: string
+{
+    case VeryWeak = 'very_weak';
+    case Weak = 'weak';
+    case Acceptable = 'acceptable';
+    case Strong = 'strong';
+    case VeryStrong = 'very_strong';
+}
+```
+
+---
+
+# 121. Identity similarity checks
+
+Las contraseñas podrán compararse contra:
+
+* username;
+* email local part;
+* display name;
+* tenant name;
+* nombre de la aplicación.
+
+---
+
+# 122. Sensitive comparison data
+
+Los atributos de identidad utilizados para estas comparaciones deberán permanecer protegidos y no registrarse junto a la contraseña.
+
+---
+
+# 123. Password hashing architecture
+
+El hash deberá calcularse exclusivamente mediante un servicio dedicado.
+
+---
+
+# 124. PasswordHasher
+
+```php
+interface PasswordHasherInterface
+{
+    public function hash(
+        PasswordCredential $password,
+        PasswordHashingProfile $profile
+    ): PasswordHash;
+
+    public function verify(
+        PasswordCredential $password,
+        PasswordHash $hash
+    ): PasswordVerificationResult;
+
+    public function needsRehash(
+        PasswordHash $hash,
+        PasswordHashingProfile $target
+    ): bool;
+}
+```
+
+---
+
+# 125. PasswordHash
+
+```php
+final readonly class PasswordHash
+{
+    public function __construct(
+        public string $encoded,
+        public string $algorithm,
+        public array $parameters,
+        public string $profileId,
+        public int $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 126. Preferred algorithm
+
+VoltStack deberá preferir `Argon2id` cuando esté disponible de forma segura.
+
+---
+
+# 127. PasswordHashingProfile
+
+```php
+final readonly class PasswordHashingProfile
+{
+    public function __construct(
+        public string $id,
+        public PasswordHashAlgorithm $algorithm,
+        public int $memoryCost,
+        public int $timeCost,
+        public int $threads,
+        public int $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 128. PasswordHashAlgorithm
+
+```php
+enum PasswordHashAlgorithm: string
+{
+    case Argon2id = 'argon2id';
+    case Bcrypt = 'bcrypt';
+    case Pbkdf2Sha256 = 'pbkdf2-sha256';
+}
+```
+
+---
+
+# 129. Algorithm fallback
+
+Los algoritmos alternativos deberán existir solo para:
+
+* compatibilidad;
+* migraciones;
+* entornos limitados;
+* cumplimiento específico.
+
+---
+
+# 130. Argon2id profile selection
+
+Los parámetros deberán calibrarse según:
+
+* hardware;
+* concurrencia;
+* memoria disponible;
+* latencia objetivo;
+* entorno;
+* riesgo.
+
+---
+
+# 131. Runtime calibration
+
+VoltStack podrá incluir un comando de calibración.
+
+```text
+volt security:password-calibrate
+```
+
+---
+
+# 132. Calibration goal
+
+La calibración deberá buscar un costo suficientemente alto sin provocar:
+
+* denegación de servicio;
+* latencia excesiva;
+* saturación de workers;
+* incompatibilidad con el runtime.
+
+---
+
+# 133. Profile versioning
+
+Los perfiles deberán versionarse para permitir evolución gradual.
+
+---
+
+# 134. Per-environment profiles
+
+Podrán existir perfiles distintos para:
+
+* desarrollo;
+* pruebas;
+* producción;
+* producción estricta.
+
+Los perfiles de desarrollo nunca deberán migrarse accidentalmente a producción.
+
+---
+
+# 135. Salt management
+
+Cada hash deberá utilizar un salt único generado por el algoritmo.
+
+---
+
+# 136. Manual salts
+
+Los Controllers y la aplicación no deberán proporcionar salts manualmente.
+
+---
+
+# 137. Pepper architecture
+
+VoltStack podrá soportar un pepper adicional almacenado fuera de la base de datos.
+
+---
+
+# 138. PasswordPepperProvider
+
+```php
+interface PasswordPepperProviderInterface
+{
+    public function active(): PasswordPepper;
+
+    public function byVersion(int $version): ?PasswordPepper;
+}
+```
+
+---
+
+# 139. PasswordPepper
+
+```php
+final class PasswordPepper
+{
+    public function __construct(
+        public readonly int $version,
+        private SensitiveValue $value,
+    ) {
+    }
+}
+```
+
+---
+
+# 140. Pepper storage
+
+El pepper deberá almacenarse en:
+
+* secret manager;
+* KMS;
+* HSM;
+* variable segura de runtime;
+* mecanismo equivalente.
+
+No en la misma base de datos que los hashes.
+
+---
+
+# 141. Pepper rotation
+
+La rotación deberá permitir verificar hashes creados con versiones anteriores.
+
+---
+
+# 142. Pepper compromise
+
+Ante compromiso deberá evaluarse:
+
+* rotación;
+* invalidación de sesiones;
+* rehash progresivo;
+* reset forzado;
+* análisis de exposición.
+
+---
+
+# 143. Pepper usage modes
+
+El pepper podrá aplicarse:
+
+* antes del hashing;
+* como derivación separada;
+* mediante HMAC sobre el resultado.
+
+La estrategia deberá ser única y versionada.
+
+---
+
+# 144. Password verification
+
+La verificación deberá usar funciones resistentes a timing attacks.
+
+---
+
+# 145. PasswordVerificationResult
+
+```php
+final readonly class PasswordVerificationResult
+{
+    public function __construct(
+        public bool $valid,
+        public bool $needsRehash,
+        public ?string $matchedProfileId,
+        public ?int $matchedPepperVersion,
+    ) {
+    }
+}
+```
+
+---
+
+# 146. Verification flow
+
+```text
+Credential
+   ↓
+Resolve Stored Hash
+   ↓
+Resolve Algorithm
+   ↓
+Resolve Pepper Version
+   ↓
+Verify
+   ↓
+Evaluate Rehash
+   ↓
+Return Generic Result
+```
+
+---
+
+# 147. Rehash on authentication
+
+Después de una autenticación válida, el sistema podrá actualizar el hash si:
+
+* cambió el algoritmo;
+* aumentó el costo;
+* cambió el pepper;
+* cambió la versión del perfil.
+
+---
+
+# 148. Atomic rehash
+
+El rehash deberá actualizarse atómicamente y evitar sobrescribir cambios concurrentes.
+
+---
+
+# 149. Rehash failure
+
+Un fallo al rehash no deberá convertir una autenticación válida en una autenticación inválida, salvo política estricta.
+
+Deberá registrarse para reintento.
+
+---
+
+# 150. Legacy hash migration
+
+VoltStack podrá reconocer hashes heredados mediante adapters limitados.
+
+---
+
+# 151. LegacyHashVerifier
+
+```php
+interface LegacyHashVerifierInterface
+{
+    public function supports(
+        PasswordHash $hash
+    ): bool;
+
+    public function verify(
+        PasswordCredential $password,
+        PasswordHash $hash
+    ): bool;
+}
+```
+
+---
+
+# 152. Legacy migration policy
+
+Todo hash heredado validado deberá migrarse al perfil actual tan pronto como sea posible.
+
+---
+
+# 153. Plaintext migration prohibition
+
+Nunca deberá almacenarse temporalmente una contraseña en texto plano para migración futura.
+
+---
+
+# 154. Breached Password Detection
+
+VoltStack deberá poder rechazar contraseñas conocidas por filtraciones.
+
+---
+
+# 155. BreachedPasswordChecker
+
+```php
+interface BreachedPasswordCheckerInterface
+{
+    public function check(
+        PasswordCredential $password,
+        BreachCheckPolicy $policy
+    ): BreachedPasswordResult;
+}
+```
+
+---
+
+# 156. BreachCheckPolicy
+
+```php
+final readonly class BreachCheckPolicy
+{
+    public function __construct(
+        public bool $enabled,
+        public BreachCheckMode $mode,
+        public int $minimumOccurrences,
+        public bool $failClosed,
+    ) {
+    }
+}
+```
+
+---
+
+# 157. BreachCheckMode
+
+```php
+enum BreachCheckMode: string
+{
+    case LocalDataset = 'local_dataset';
+    case PrivacyPreservingRemote = 'privacy_preserving_remote';
+    case Hybrid = 'hybrid';
+}
+```
+
+---
+
+# 158. Password disclosure prohibition
+
+La contraseña completa nunca deberá enviarse a un proveedor externo.
+
+---
+
+# 159. Privacy-preserving lookup
+
+Las consultas remotas deberán usar un mecanismo que reduzca la exposición, como prefijos de hash o un protocolo equivalente.
+
+---
+
+# 160. Breach provider failure
+
+La política deberá decidir entre:
+
+* permitir;
+* rechazar;
+* degradar a dataset local;
+* solicitar cambio posterior.
+
+---
+
+# 161. Breached password result
+
+```php
+final readonly class BreachedPasswordResult
+{
+    public function __construct(
+        public bool $breached,
+        public ?int $estimatedOccurrences,
+        public BreachResultConfidence $confidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 162. Existing breached passwords
+
+Cuando una contraseña existente aparezca en una nueva filtración, VoltStack podrá:
+
+* marcar la cuenta;
+* requerir step-up;
+* pedir cambio;
+* revocar sesiones de riesgo;
+* notificar al usuario.
+
+---
+
+# 163. Password history
+
+El sistema podrá impedir reutilización reciente.
+
+---
+
+# 164. PasswordHistoryEntry
+
+```php
+final readonly class PasswordHistoryEntry
+{
+    public function __construct(
+        public PasswordHash $hash,
+        public DateTimeImmutable $retiredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 165. History comparison
+
+La nueva contraseña deberá verificarse contra hashes históricos usando sus perfiles originales.
+
+---
+
+# 166. History length
+
+La cantidad de hashes retenidos deberá ser configurable y proporcional al riesgo.
+
+---
+
+# 167. History retention risk
+
+Retener demasiados hashes incrementa el material disponible ante una filtración.
+
+---
+
+# 168. Periodic password expiration
+
+VoltStack no deberá forzar cambios periódicos sin evidencia de compromiso, salvo requisito regulatorio.
+
+---
+
+# 169. Password compromise event
+
+Un cambio deberá exigirse cuando exista:
+
+* evidencia de filtración;
+* compromiso del proveedor;
+* exposición administrativa;
+* ataque confirmado;
+* incidente de sesión.
+
+---
+
+# 170. Password change workflow
+
+```text
+Authenticated User
+      ↓
+Fresh Authentication
+      ↓
+Current Password or Strong Factor
+      ↓
+New Password Policy
+      ↓
+Breach Check
+      ↓
+History Check
+      ↓
+Hash
+      ↓
+Atomic Update
+      ↓
+Session Rotation
+      ↓
+Notification
+```
+
+---
+
+# 171. PasswordChangeService
+
+```php
+interface PasswordChangeServiceInterface
+{
+    public function change(
+        IdentityContext $identity,
+        PasswordChangeCommand $command
+    ): PasswordChangeResult;
+}
+```
+
+---
+
+# 172. PasswordChangeCommand
+
+```php
+final readonly class PasswordChangeCommand
+{
+    public function __construct(
+        public PasswordCredential $newPassword,
+        public AuthenticationEvidence $evidence,
+        public bool $revokeOtherSessions,
+    ) {
+    }
+}
+```
+
+---
+
+# 173. Current password verification
+
+La contraseña actual podrá requerirse, salvo que exista una autenticación fuerte y reciente equivalente.
+
+---
+
+# 174. Session handling after change
+
+Después del cambio deberá:
+
+* rotarse la sesión actual;
+* revocarse refresh tokens según política;
+* revocarse otras sesiones cuando corresponda;
+* invalidarse remember-me.
+
+---
+
+# 175. Password change notification
+
+Se deberá notificar por un canal independiente cuando sea posible.
+
+---
+
+# 176. Notification content
+
+La notificación no deberá incluir:
+
+* contraseña;
+* reset token;
+* hash;
+* datos sensibles innecesarios.
+
+---
+
+# 177. Administrative password setting
+
+Los administradores no deberán conocer ni definir contraseñas permanentes de usuarios.
+
+---
+
+# 178. Temporary administrative credentials
+
+Cuando sea indispensable, deberán ser:
+
+* temporales;
+* de un solo uso;
+* forzar cambio;
+* auditadas;
+* entregadas por canal seguro.
+
+---
+
+# 179. Password Reset Security
+
+La recuperación de contraseña es un flujo de autenticación y deberá tratarse como tal.
+
+---
+
+# 180. Reset flow
+
+```text
+Reset Request
+   ↓
+Generic Response
+   ↓
+Identity Resolution
+   ↓
+Risk Evaluation
+   ↓
+Token Issuance
+   ↓
+Out-of-Band Delivery
+   ↓
+Token Verification
+   ↓
+New Password Policy
+   ↓
+Credential Update
+   ↓
+Session Revocation
+```
+
+---
+
+# 181. PasswordResetService
+
+```php
+interface PasswordResetServiceInterface
+{
+    public function request(
+        PasswordResetRequest $request
+    ): PasswordResetRequestResult;
+
+    public function complete(
+        PasswordResetCompletion $completion
+    ): PasswordResetResult;
+}
+```
+
+---
+
+# 182. Generic reset response
+
+La respuesta al solicitar un reset deberá ser equivalente exista o no la cuenta.
+
+---
+
+# 183. ResetToken
+
+```php
+final readonly class PasswordResetToken
+{
+    public function __construct(
+        public string $id,
+        public SensitiveValue $secret,
+        public DateTimeImmutable $expiresAt,
+        public string $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 184. Reset token storage
+
+El secreto completo no deberá almacenarse.
+
+Se persistirá una representación derivada verificable.
+
+---
+
+# 185. Reset token properties
+
+El token deberá ser:
+
+* aleatorio;
+* de alta entropía;
+* de un solo uso;
+* temporal;
+* vinculado a identidad;
+* vinculado a propósito;
+* revocable.
+
+---
+
+# 186. Reset token binding
+
+Podrá vincularse adicionalmente a:
+
+* tenant;
+* canal;
+* request;
+* dispositivo;
+* riesgo;
+* versión de credenciales.
+
+---
+
+# 187. Credential version binding
+
+Si la contraseña cambia después de emitir el token, los tokens anteriores deberán invalidarse.
+
+---
+
+# 188. Reset token URL
+
+La URL deberá generarse usando:
+
+* host validado;
+* HTTPS;
+* ruta registrada;
+* parámetros codificados;
+* origen canónico.
+
+---
+
+# 189. Referrer leakage protection
+
+La página de reset deberá aplicar una política de referrer restrictiva.
+
+---
+
+# 190. Third-party content restriction
+
+Las páginas de recuperación no deberán cargar recursos de terceros innecesarios que puedan observar el token.
+
+---
+
+# 191. Reset completion
+
+Antes de aceptar la nueva contraseña deberán validarse:
+
+* token;
+* expiración;
+* consumo;
+* identidad;
+* estado;
+* política;
+* riesgo.
+
+---
+
+# 192. Reset token consumption
+
+El consumo deberá ser atómico para evitar uso concurrente.
+
+---
+
+# 193. Post-reset actions
+
+Después del reset deberán considerarse:
+
+* revocar todas las sesiones;
+* revocar refresh tokens;
+* eliminar trusted devices;
+* invalidar recovery links;
+* notificar al usuario;
+* registrar evento de seguridad.
+
+---
+
+# 194. Email Verification
+
+La verificación de email no equivale necesariamente a autenticación completa.
+
+---
+
+# 195. EmailVerificationToken
+
+```php
+final readonly class EmailVerificationToken
+{
+    public function __construct(
+        public string $identityId,
+        public string $emailVersion,
+        public SensitiveValue $secret,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 196. Email version binding
+
+Si cambia el email antes de verificarse, el token anterior deberá quedar inválido.
+
+---
+
+# 197. Magic Links
+
+Un magic link actúa como credencial temporal.
+
+---
+
+# 198. MagicLinkPolicy
+
+```php
+final readonly class MagicLinkPolicy
+{
+    public function __construct(
+        public int $lifetimeSeconds,
+        public bool $singleUse,
+        public AuthenticationAssuranceLevel $resultingAssurance,
+        public bool $bindDevice,
+        public bool $requireConfirmation,
+    ) {
+    }
+}
+```
+
+---
+
+# 199. Magic link security
+
+Los magic links deberán:
+
+* expirar rápidamente;
+* ser de un solo uso;
+* evitar exposición en logs;
+* usar HTTPS;
+* vincularse a propósito;
+* limitar el assurance resultante;
+* requerir confirmación cuando el riesgo lo justifique.
+
+---
+
+# 200. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Password Security Architecture
+Password Policy Engine
+Length and Strength Rules
+Unicode and Whitespace Policy
+Argon2id Hashing Profiles
+Hash Calibration
+Salt and Pepper Management
+Password Verification
+Automatic Rehashing
+Legacy Hash Migration
+Breached Password Detection
+Password History
+Password Change Workflow
+Administrative Credential Restrictions
+Password Reset Security
+Reset Token Binding
+Email Verification Foundations
+Magic Link Security Foundations
+```
+
