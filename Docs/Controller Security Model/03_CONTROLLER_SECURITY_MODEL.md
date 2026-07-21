@@ -1,6 +1,5 @@
-# CONTROLLER_SECURITY_MODEL_PART_03.md
+# Controller Security Model - Part 03: Compilation & Artifact Security
 
-## Compilation & Artifact Security
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -19,7 +18,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 La compilación del subsistema Controllers transforma definiciones dinámicas en artefactos optimizados para producción.
 
@@ -68,7 +67,7 @@ Una alteración en esta cadena podría provocar ejecución arbitraria, bypass de
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Garantizar que todo artefacto usado por Controllers:
 
@@ -85,7 +84,7 @@ Garantizar que todo artefacto usado por Controllers:
 
 ---
 
-# 3. Principios fundamentales
+## 3. Principios fundamentales
 
 El modelo seguirá:
 
@@ -107,7 +106,7 @@ El modelo seguirá:
 
 ---
 
-# 4. Artefactos como código ejecutable
+## 4. Artefactos como código ejecutable
 
 Todo artefacto PHP generado se tratará como código ejecutable.
 
@@ -122,7 +121,7 @@ Por ello requerirá controles equivalentes a:
 
 ---
 
-# 5. Trust boundary principal
+## 5. Trust boundary principal
 
 ```text
 Source Code
@@ -148,7 +147,7 @@ Cada transición deberá validarse.
 
 ---
 
-# 6. Activos protegidos
+## 6. Activos protegidos
 
 Los principales activos serán:
 
@@ -172,7 +171,7 @@ Los principales activos serán:
 
 ---
 
-# 7. Actores
+## 7. Actores
 
 ```text
 Application developer
@@ -192,7 +191,7 @@ Compromised build agent
 
 ---
 
-# 8. Categorías de amenazas
+## 8. Categorías de amenazas
 
 Amenazas principales:
 
@@ -218,7 +217,7 @@ Amenazas principales:
 
 ---
 
-# 9. Security invariant principal
+## 9. Security invariant principal
 
 ```text
 No artifact shall execute unless:
@@ -232,7 +231,7 @@ No artifact shall execute unless:
 
 ---
 
-# 10. Compilation Trust Model
+## 10. Compilation Trust Model
 
 Los componentes se clasificarán por confianza:
 
@@ -247,7 +246,7 @@ Trusted runtime loader
 
 ---
 
-# 11. Source-derived input
+## 11. Source-derived input
 
 Se considerarán potencialmente no confiables:
 
@@ -264,7 +263,7 @@ Aunque provengan del código de la aplicación, deberán validarse.
 
 ---
 
-# 12. Core compiler trust
+## 12. Core compiler trust
 
 Los compiladores core se considerarán confiables, pero estarán sujetos a:
 
@@ -278,7 +277,7 @@ Los compiladores core se considerarán confiables, pero estarán sujetos a:
 
 ---
 
-# 13. Package compiler trust
+## 13. Package compiler trust
 
 Un package compiler será semi-confiable.
 
@@ -294,7 +293,7 @@ No deberá poder:
 
 ---
 
-# 14. Privileged build components
+## 14. Privileged build components
 
 Serán privilegiados:
 
@@ -307,7 +306,7 @@ Serán privilegiados:
 
 ---
 
-# 15. Separación build-runtime
+## 15. Separación build-runtime
 
 El runtime de producción no deberá compilar controladores salvo modo explícito de desarrollo.
 
@@ -322,7 +321,7 @@ Runtime environment
 
 ---
 
-# 16. No runtime generation
+## 16. No runtime generation
 
 En producción:
 
@@ -336,7 +335,7 @@ Si un artefacto falta, el runtime deberá fallar cerrado o usar un fallback din�
 
 ---
 
-# 17. Secure Compiler Pipeline
+## 17. Secure Compiler Pipeline
 
 Pipeline recomendado:
 
@@ -374,7 +373,7 @@ Activate Atomically
 
 ---
 
-# 18. Compiler input boundary
+## 18. Compiler input boundary
 
 Cada compilador deberá declarar qué entradas acepta.
 
@@ -394,7 +393,7 @@ interface SecureControllerCompilerInterface
 
 ---
 
-# 19. SecureCompilationContext
+## 19. SecureCompilationContext
 
 ```php
 final readonly class SecureCompilationContext
@@ -413,7 +412,7 @@ final readonly class SecureCompilationContext
 
 ---
 
-# 20. Compiler capabilities
+## 20. Compiler capabilities
 
 ```php
 enum CompilerCapability: string
@@ -430,7 +429,7 @@ enum CompilerCapability: string
 
 ---
 
-# 21. Forbidden compiler capabilities
+## 21. Forbidden compiler capabilities
 
 Package compilers no deberán recibir:
 
@@ -443,7 +442,7 @@ Package compilers no deberán recibir:
 
 ---
 
-# 22. Compiler registry
+## 22. Compiler registry
 
 ```php
 interface ControllerCompilerRegistryInterface
@@ -461,7 +460,7 @@ interface ControllerCompilerRegistryInterface
 
 ---
 
-# 23. Registry freeze
+## 23. Registry freeze
 
 El registry deberá congelarse antes de compilar.
 
@@ -469,7 +468,7 @@ No podrán añadirse compiladores durante la generación de un build.
 
 ---
 
-# 24. CompilerDescriptor
+## 24. CompilerDescriptor
 
 ```php
 final readonly class CompilerDescriptor
@@ -488,7 +487,7 @@ final readonly class CompilerDescriptor
 
 ---
 
-# 25. CompilerTrustLevel
+## 25. CompilerTrustLevel
 
 ```php
 enum CompilerTrustLevel: string
@@ -503,7 +502,7 @@ enum CompilerTrustLevel: string
 
 ---
 
-# 26. Untrusted compilers
+## 26. Untrusted compilers
 
 No deberán ejecutarse dentro del pipeline productivo.
 
@@ -516,7 +515,7 @@ Podrán requerir:
 
 ---
 
-# 27. Compiler identity
+## 27. Compiler identity
 
 Cada artifact deberá registrar:
 
@@ -529,7 +528,7 @@ Cada artifact deberá registrar:
 
 ---
 
-# 28. Determinismo
+## 28. Determinismo
 
 Siempre que sea posible, el mismo input deberá producir el mismo artifact.
 
@@ -543,7 +542,7 @@ Esto facilita:
 
 ---
 
-# 29. Non-deterministic data
+## 29. Non-deterministic data
 
 No deberá incluirse sin necesidad:
 
@@ -557,7 +556,7 @@ Estos valores podrán residir en metadata separada.
 
 ---
 
-# 30. Source normalization
+## 30. Source normalization
 
 Antes de compilar deberán normalizarse:
 
@@ -572,7 +571,7 @@ Antes de compilar deberán normalizarse:
 
 ---
 
-# 31. Path canonicalization
+## 31. Path canonicalization
 
 Todo path de source deberá convertirse a una representación canónica antes de:
 
@@ -583,7 +582,7 @@ Todo path de source deberá convertirse a una representación canónica antes de
 
 ---
 
-# 32. Source root policy
+## 32. Source root policy
 
 El compiler solo podrá leer fuentes dentro de roots permitidos.
 
@@ -601,7 +600,7 @@ final readonly class CompilationSourcePolicy
 
 ---
 
-# 33. Symlink policy
+## 33. Symlink policy
 
 Los symlinks deberán:
 
@@ -612,7 +611,7 @@ Los symlinks deberán:
 
 ---
 
-# 34. TOCTOU en sources
+## 34. TOCTOU en sources
 
 Entre validación y lectura, un source podría cambiar.
 
@@ -626,7 +625,7 @@ Mitigaciones:
 
 ---
 
-# 35. Source fingerprint
+## 35. Source fingerprint
 
 Cada unidad deberá registrar:
 
@@ -640,7 +639,7 @@ Dependency fingerprints
 
 ---
 
-# 36. ControllerCompilationUnit
+## 36. ControllerCompilationUnit
 
 ```php
 final readonly class ControllerCompilationUnit
@@ -658,7 +657,7 @@ final readonly class ControllerCompilationUnit
 
 ---
 
-# 37. Input validation
+## 37. Input validation
 
 El compiler deberá rechazar:
 
@@ -674,7 +673,7 @@ El compiler deberá rechazar:
 
 ---
 
-# 38. Intermediate Representation
+## 38. Intermediate Representation
 
 VoltStack deberá utilizar una representación intermedia segura.
 
@@ -688,7 +687,7 @@ Artifact generator
 
 ---
 
-# 39. ControllerCompilationIR
+## 39. ControllerCompilationIR
 
 ```php
 final readonly class ControllerCompilationIR
@@ -708,7 +707,7 @@ final readonly class ControllerCompilationIR
 
 ---
 
-# 40. IR security benefits
+## 40. IR security benefits
 
 La IR permite:
 
@@ -721,7 +720,7 @@ La IR permite:
 
 ---
 
-# 41. IR validation
+## 41. IR validation
 
 Antes de generar código deberá validarse:
 
@@ -734,7 +733,7 @@ Antes de generar código deberá validarse:
 
 ---
 
-# 42. No raw PHP injection
+## 42. No raw PHP injection
 
 Ningún valor derivado de metadata deberá insertarse directamente como PHP sin escaping y validación.
 
@@ -746,7 +745,7 @@ $code = "<?php return '{$metadataValue}';";
 
 ---
 
-# 43. Safe code generation
+## 43. Safe code generation
 
 El generador deberá usar:
 
@@ -759,7 +758,7 @@ El generador deberá usar:
 
 ---
 
-# 44. Generated identifiers
+## 44. Generated identifiers
 
 Nombres de:
 
@@ -772,7 +771,7 @@ deberán generarse desde identificadores normalizados, no desde strings arbitrar
 
 ---
 
-# 45. PHP AST generation
+## 45. PHP AST generation
 
 La opción recomendada para artifacts complejos será generar un AST propio o usar un builder tipado.
 
@@ -788,7 +787,7 @@ Syntax validation
 
 ---
 
-# 46. Artifact syntax validation
+## 46. Artifact syntax validation
 
 Todo PHP generado deberá validarse con:
 
@@ -799,7 +798,7 @@ Todo PHP generado deberá validarse con:
 
 ---
 
-# 47. Restricted PHP constructs
+## 47. Restricted PHP constructs
 
 Los artifacts generados no deberán contener salvo necesidad explícita:
 
@@ -815,7 +814,7 @@ Los artifacts generados no deberán contener salvo necesidad explícita:
 
 ---
 
-# 48. Artifact token validator
+## 48. Artifact token validator
 
 ```php
 interface PHPArtifactSecurityValidatorInterface
@@ -828,7 +827,7 @@ interface PHPArtifactSecurityValidatorInterface
 
 ---
 
-# 49. Static artifact validation
+## 49. Static artifact validation
 
 Podrá comprobar:
 
@@ -843,7 +842,7 @@ Podrá comprobar:
 
 ---
 
-# 50. No top-level side effects
+## 50. No top-level side effects
 
 Un artifact deberá limitarse a:
 
@@ -856,7 +855,7 @@ No deberá ejecutar queries o modificar estado al cargarse.
 
 ---
 
-# 51. Artifact types
+## 51. Artifact types
 
 ```php
 enum ControllerArtifactType: string
@@ -876,7 +875,7 @@ enum ControllerArtifactType: string
 
 ---
 
-# 52. CompiledArtifactInterface
+## 52. CompiledArtifactInterface
 
 ```php
 interface CompiledArtifactInterface
@@ -897,7 +896,7 @@ interface CompiledArtifactInterface
 
 ---
 
-# 53. Artifact ID
+## 53. Artifact ID
 
 El ID deberá ser:
 
@@ -909,7 +908,7 @@ El ID deberá ser:
 
 ---
 
-# 54. Artifact naming
+## 54. Artifact naming
 
 Ejemplo:
 
@@ -921,7 +920,7 @@ Se favorecerá naming content-addressed.
 
 ---
 
-# 55. Content-addressed artifacts
+## 55. Content-addressed artifacts
 
 El path podrá derivarse del hash del contenido.
 
@@ -935,7 +934,7 @@ Ventajas:
 
 ---
 
-# 56. ArtifactFingerprint
+## 56. ArtifactFingerprint
 
 ```php
 final readonly class ArtifactFingerprint
@@ -950,7 +949,7 @@ final readonly class ArtifactFingerprint
 
 ---
 
-# 57. Hash algorithm
+## 57. Hash algorithm
 
 Se utilizarán algoritmos criptográficamente seguros.
 
@@ -969,7 +968,7 @@ No se usarán:
 
 ---
 
-# 58. Fingerprint scope
+## 58. Fingerprint scope
 
 El hash deberá cubrir:
 
@@ -982,7 +981,7 @@ El hash deberá cubrir:
 
 ---
 
-# 59. Canonical fingerprint payload
+## 59. Canonical fingerprint payload
 
 ```text
 artifact_type
@@ -998,7 +997,7 @@ con serialización canónica.
 
 ---
 
-# 60. Canonical serialization
+## 60. Canonical serialization
 
 La representación deberá ser:
 
@@ -1010,7 +1009,7 @@ La representación deberá ser:
 
 ---
 
-# 61. Artifact signatures
+## 61. Artifact signatures
 
 Las firmas serán opcionales en perfil estándar y obligatorias en perfiles estrictos o distribuidos.
 
@@ -1028,7 +1027,7 @@ final readonly class ArtifactSignature
 
 ---
 
-# 62. Signature coverage
+## 62. Signature coverage
 
 La firma deberá cubrir el payload canónico del artifact y su identidad.
 
@@ -1036,7 +1035,7 @@ No bastará firmar solo el contenido del archivo.
 
 ---
 
-# 63. Asymmetric signatures
+## 63. Asymmetric signatures
 
 Para entornos distribuidos se preferirán firmas asimétricas:
 
@@ -1046,7 +1045,7 @@ Para entornos distribuidos se preferirán firmas asimétricas:
 
 ---
 
-# 64. Signing key isolation
+## 64. Signing key isolation
 
 La clave privada:
 
@@ -1058,7 +1057,7 @@ La clave privada:
 
 ---
 
-# 65. Key IDs
+## 65. Key IDs
 
 Cada firma deberá indicar `keyId`.
 
@@ -1066,7 +1065,7 @@ El runtime deberá resolverlo en un trust store.
 
 ---
 
-# 66. ArtifactTrustStore
+## 66. ArtifactTrustStore
 
 ```php
 interface ArtifactTrustStoreInterface
@@ -1081,7 +1080,7 @@ interface ArtifactTrustStoreInterface
 
 ---
 
-# 67. Key rotation
+## 67. Key rotation
 
 El sistema deberá soportar:
 
@@ -1094,13 +1093,13 @@ El sistema deberá soportar:
 
 ---
 
-# 68. Revoked signing key
+## 68. Revoked signing key
 
 Un artifact firmado por una clave revocada deberá rechazarse aunque su firma sea matemáticamente válida.
 
 ---
 
-# 69. Unsigned artifacts
+## 69. Unsigned artifacts
 
 La política deberá declarar:
 
@@ -1116,7 +1115,7 @@ enum UnsignedArtifactPolicy: string
 
 ---
 
-# 70. Production strict mode
+## 70. Production strict mode
 
 En modo estricto:
 
@@ -1129,13 +1128,13 @@ Invalid signature → terminate or fail startup
 
 ---
 
-# 71. Manifest Security
+## 71. Manifest Security
 
 El manifest representa la lista autorizada de artifacts del build.
 
 ---
 
-# 72. ArtifactManifest
+## 72. ArtifactManifest
 
 ```php
 final readonly class ArtifactManifest
@@ -1155,7 +1154,7 @@ final readonly class ArtifactManifest
 
 ---
 
-# 73. Manifest authority
+## 73. Manifest authority
 
 El runtime no deberá buscar libremente archivos en el directorio.
 
@@ -1163,7 +1162,7 @@ Solo podrá cargar artifacts presentes en el manifest activo.
 
 ---
 
-# 74. Manifest membership
+## 74. Manifest membership
 
 ```text
 Requested artifact ID
@@ -1177,7 +1176,7 @@ Load and validate
 
 ---
 
-# 75. Manifest entry
+## 75. Manifest entry
 
 ```php
 final readonly class ArtifactManifestEntry
@@ -1197,7 +1196,7 @@ final readonly class ArtifactManifestEntry
 
 ---
 
-# 76. Relative paths only
+## 76. Relative paths only
 
 El manifest deberá almacenar paths relativos al build root.
 
@@ -1205,7 +1204,7 @@ No paths absolutos dependientes del host.
 
 ---
 
-# 77. Manifest path validation
+## 77. Manifest path validation
 
 Todo path deberá:
 
@@ -1218,7 +1217,7 @@ Todo path deberá:
 
 ---
 
-# 78. Manifest signing
+## 78. Manifest signing
 
 En perfiles estrictos, el manifest completo deberá estar firmado.
 
@@ -1232,13 +1231,13 @@ Esto protege:
 
 ---
 
-# 79. Manifest before artifacts
+## 79. Manifest before artifacts
 
 El runtime deberá validar primero el manifest antes de confiar en sus entradas.
 
 ---
 
-# 80. Manifest schema version
+## 80. Manifest schema version
 
 Los manifests deberán declarar schema version.
 
@@ -1251,7 +1250,7 @@ El runtime deberá rechazar versiones:
 
 ---
 
-# 81. Manifest completeness
+## 81. Manifest completeness
 
 El build validator deberá asegurar que:
 
@@ -1264,13 +1263,13 @@ El build validator deberá asegurar que:
 
 ---
 
-# 82. Orphan artifact policy
+## 82. Orphan artifact policy
 
 Artefactos no listados en el manifest deberán ignorarse y podrán causar rechazo del build en strict mode.
 
 ---
 
-# 83. Build Identity
+## 83. Build Identity
 
 Cada compilación producirá una identidad de build.
 
@@ -1290,7 +1289,7 @@ final readonly class ControllerBuildIdentity
 
 ---
 
-# 84. Build ID
+## 84. Build ID
 
 El `buildId` deberá ser:
 
@@ -1302,7 +1301,7 @@ El `buildId` deberá ser:
 
 ---
 
-# 85. Build ID strategies
+## 85. Build ID strategies
 
 Opciones:
 
@@ -1315,7 +1314,7 @@ Para builds reproducibles se favorecerá un hash del build descriptor.
 
 ---
 
-# 86. Application fingerprint
+## 86. Application fingerprint
 
 Podrá incluir:
 
@@ -1328,7 +1327,7 @@ Podrá incluir:
 
 ---
 
-# 87. Compiler set fingerprint
+## 87. Compiler set fingerprint
 
 Debe cambiar cuando:
 
@@ -1340,7 +1339,7 @@ Debe cambiar cuando:
 
 ---
 
-# 88. Build descriptor
+## 88. Build descriptor
 
 ```php
 final readonly class BuildDescriptor
@@ -1358,7 +1357,7 @@ final readonly class BuildDescriptor
 
 ---
 
-# 89. Build chain
+## 89. Build chain
 
 Podrá mantenerse relación:
 
@@ -1374,7 +1373,7 @@ para auditoría y rollback.
 
 ---
 
-# 90. Build provenance
+## 90. Build provenance
 
 El build deberá registrar:
 
@@ -1388,13 +1387,13 @@ El build deberá registrar:
 
 ---
 
-# 91. Provenance trust
+## 91. Provenance trust
 
 La provenance podrá firmarse separadamente y almacenarse fuera del runtime.
 
 ---
 
-# 92. Build activation
+## 92. Build activation
 
 Un build no deberá usarse hasta completar:
 
@@ -1407,7 +1406,7 @@ Un build no deberá usarse hasta completar:
 
 ---
 
-# 93. Atomic activation
+## 93. Atomic activation
 
 La activación deberá ser atómica.
 
@@ -1425,7 +1424,7 @@ Nunca deberá existir un estado con manifest de un build y artifacts de otro.
 
 ---
 
-# 94. Active build pointer
+## 94. Active build pointer
 
 Podrá implementarse mediante:
 
@@ -1436,7 +1435,7 @@ Podrá implementarse mediante:
 
 ---
 
-# 95. Active pointer security
+## 95. Active pointer security
 
 El pointer deberá:
 
@@ -1448,7 +1447,7 @@ El pointer deberá:
 
 ---
 
-# 96. Symlink activation
+## 96. Symlink activation
 
 Si se usa symlink:
 
@@ -1460,7 +1459,7 @@ Si se usa symlink:
 
 ---
 
-# 97. Pointer file activation
+## 97. Pointer file activation
 
 La escritura deberá usar:
 
@@ -1474,7 +1473,7 @@ cuando la plataforma lo soporte.
 
 ---
 
-# 98. Partial deployment
+## 98. Partial deployment
 
 El sistema deberá impedir activación cuando faltan artifacts.
 
@@ -1482,7 +1481,7 @@ Un nodo no deberá cargar parcialmente un build.
 
 ---
 
-# 99. Distributed activation
+## 99. Distributed activation
 
 En despliegues multinodo:
 
@@ -1500,7 +1499,7 @@ Workers pin execution to build
 
 ---
 
-# 100. Execution build pinning
+## 100. Execution build pinning
 
 Cada request o execution deberá quedar asociado a un `buildId`.
 
@@ -1508,7 +1507,7 @@ Aunque se active un build nuevo durante la petición, esa ejecución continuará
 
 ---
 
-# 101. BuildReference
+## 101. BuildReference
 
 ```php
 final readonly class BuildReference
@@ -1524,7 +1523,7 @@ final readonly class BuildReference
 
 ---
 
-# 102. Worker build pinning
+## 102. Worker build pinning
 
 Un Worker podrá:
 
@@ -1534,7 +1533,7 @@ Un Worker podrá:
 
 ---
 
-# 103. Mixed-build prevention
+## 103. Mixed-build prevention
 
 No deberá permitirse:
 
@@ -1548,7 +1547,7 @@ Todos los artifacts de un execution bundle deberán compartir `buildId`.
 
 ---
 
-# 104. ExecutionBundle security
+## 104. ExecutionBundle security
 
 ```php
 final readonly class SecureExecutionBundle
@@ -1568,7 +1567,7 @@ final readonly class SecureExecutionBundle
 
 ---
 
-# 105. Bundle validation
+## 105. Bundle validation
 
 El bundle deberá comprobar:
 
@@ -1582,13 +1581,13 @@ El bundle deberá comprobar:
 
 ---
 
-# 106. Artifact Loader Security
+## 106. Artifact Loader Security
 
 El loader será el único componente autorizado para cargar artifacts.
 
 ---
 
-# 107. SecureArtifactLoader
+## 107. SecureArtifactLoader
 
 ```php
 interface SecureArtifactLoaderInterface
@@ -1602,7 +1601,7 @@ interface SecureArtifactLoaderInterface
 
 ---
 
-# 108. Loader responsibilities
+## 108. Loader responsibilities
 
 * manifest lookup;
 * path resolution;
@@ -1618,13 +1617,13 @@ interface SecureArtifactLoaderInterface
 
 ---
 
-# 109. No arbitrary paths
+## 109. No arbitrary paths
 
 La API pública del loader aceptará `artifactId`, no filesystem path.
 
 ---
 
-# 110. ArtifactPathPolicy
+## 110. ArtifactPathPolicy
 
 ```php
 final readonly class ArtifactPathPolicy
@@ -1641,7 +1640,7 @@ final readonly class ArtifactPathPolicy
 
 ---
 
-# 111. Canonical path check
+## 111. Canonical path check
 
 ```text
 manifest relative path
@@ -1655,7 +1654,7 @@ assert inside build root
 
 ---
 
-# 112. File type check
+## 112. File type check
 
 Los artifacts PHP deberán:
 
@@ -1668,7 +1667,7 @@ Los artifacts PHP deberán:
 
 ---
 
-# 113. Permission validation
+## 113. Permission validation
 
 En strict mode se verificará:
 
@@ -1681,7 +1680,7 @@ En strict mode se verificará:
 
 ---
 
-# 114. Size validation
+## 114. Size validation
 
 El tamaño real deberá coincidir con el manifest o estar dentro de política antes de leer.
 
@@ -1693,7 +1692,7 @@ Esto ayuda a detectar:
 
 ---
 
-# 115. Hash before include
+## 115. Hash before include
 
 El artifact deberá validarse antes de incluirse.
 
@@ -1707,7 +1706,7 @@ include
 
 ---
 
-# 116. Race between hash and include
+## 116. Race between hash and include
 
 Para evitar sustitución entre validación e include:
 
@@ -1719,7 +1718,7 @@ Para evitar sustitución entre validación e include:
 
 ---
 
-# 117. Include policy
+## 117. Include policy
 
 El include deberá ser:
 
@@ -1730,7 +1729,7 @@ El include deberá ser:
 
 ---
 
-# 118. Artifact return validation
+## 118. Artifact return validation
 
 Si un artifact devuelve datos:
 
@@ -1742,7 +1741,7 @@ el loader deberá validar su tipo.
 
 ---
 
-# 119. Generated class validation
+## 119. Generated class validation
 
 Si define una clase, deberá comprobar:
 
@@ -1754,13 +1753,13 @@ Si define una clase, deberá comprobar:
 
 ---
 
-# 120. Class collision
+## 120. Class collision
 
 Los nombres generados deberán incluir build-aware or content-aware namespaces cuando sea necesario.
 
 ---
 
-# 121. Artifact cache
+## 121. Artifact cache
 
 El loader podrá cachear artifacts validados en memoria del Worker.
 
@@ -1772,25 +1771,25 @@ La key deberá incluir:
 
 ---
 
-# 122. Cache trust
+## 122. Cache trust
 
 Solo se cacheará después de validación completa.
 
 ---
 
-# 123. Negative cache
+## 123. Negative cache
 
 Podrá cachearse una falla por ejecución o corto periodo, pero no deberá impedir recuperación tras activación de un build correcto.
 
 ---
 
-# 124. Artifact Store Security
+## 124. Artifact Store Security
 
 El Artifact Store administra persistencia de builds.
 
 ---
 
-# 125. ArtifactStoreInterface
+## 125. ArtifactStoreInterface
 
 ```php
 interface ArtifactStoreInterface
@@ -1811,7 +1810,7 @@ interface ArtifactStoreInterface
 
 ---
 
-# 126. Build staging
+## 126. Build staging
 
 Los artifacts deberán escribirse primero en:
 
@@ -1823,7 +1822,7 @@ y luego sellarse.
 
 ---
 
-# 127. Sealed build
+## 127. Sealed build
 
 Un build sellado no podrá modificarse.
 
@@ -1831,19 +1830,19 @@ Cualquier cambio deberá crear un build nuevo.
 
 ---
 
-# 128. Write-once semantics
+## 128. Write-once semantics
 
 El Artifact Store deberá evitar sobrescribir un artifact existente con fingerprint diferente.
 
 ---
 
-# 129. Staging cleanup
+## 129. Staging cleanup
 
 Los builds incompletos deberán limpiarse sin afectar builds activos.
 
 ---
 
-# 130. Build root separation
+## 130. Build root separation
 
 ```text
 artifacts/
@@ -1855,7 +1854,7 @@ artifacts/
 
 ---
 
-# 131. Filesystem permissions
+## 131. Filesystem permissions
 
 Ejemplo conceptual:
 
@@ -1867,7 +1866,7 @@ runtime: read builds and active pointer
 
 ---
 
-# 132. Privilege separation
+## 132. Privilege separation
 
 Idealmente:
 
@@ -1879,13 +1878,13 @@ serán distintos.
 
 ---
 
-# 133. Artifact store traversal
+## 133. Artifact store traversal
 
 Toda operación deberá resolver mediante build ID y relative path validados.
 
 ---
 
-# 134. Build ID validation
+## 134. Build ID validation
 
 Se aplicará regex estricta o value object.
 
@@ -1899,7 +1898,7 @@ No aceptar:
 
 ---
 
-# 135. Remote Artifact Stores
+## 135. Remote Artifact Stores
 
 Podrán usarse stores remotos:
 
@@ -1910,7 +1909,7 @@ Podrán usarse stores remotos:
 
 ---
 
-# 136. Remote content trust
+## 136. Remote content trust
 
 TLS no sustituye firma e integridad.
 
@@ -1918,7 +1917,7 @@ Todo artifact remoto deberá verificarse igual que uno local.
 
 ---
 
-# 137. Remote cache threat
+## 137. Remote cache threat
 
 Un cache remoto comprometido podría devolver:
 
@@ -1930,7 +1929,7 @@ Un cache remoto comprometido podría devolver:
 
 ---
 
-# 138. Remote cache validation
+## 138. Remote cache validation
 
 Siempre verificar:
 
@@ -1943,7 +1942,7 @@ Siempre verificar:
 
 ---
 
-# 139. Cache key design
+## 139. Cache key design
 
 ```text
 framework-version/
@@ -1955,7 +1954,7 @@ artifact-fingerprint
 
 ---
 
-# 140. Cache poisoning prevention
+## 140. Cache poisoning prevention
 
 No utilizar keys basadas en input del cliente.
 
@@ -1963,7 +1962,7 @@ No confiar en metadata del cache sin validación local.
 
 ---
 
-# 141. Remote cache write permissions
+## 141. Remote cache write permissions
 
 Solo CI o build system autorizado deberá publicar.
 
@@ -1971,7 +1970,7 @@ Runtime será read-only.
 
 ---
 
-# 142. Cache provenance
+## 142. Cache provenance
 
 Podrá registrarse:
 
@@ -1983,19 +1982,19 @@ Podrá registrarse:
 
 ---
 
-# 143. Cache eviction
+## 143. Cache eviction
 
 La ausencia por eviction no deberá activar generación dinámica en producción.
 
 ---
 
-# 144. Rollback Security
+## 144. Rollback Security
 
 Rollback es necesario, pero puede reintroducir vulnerabilidades.
 
 ---
 
-# 145. Safe rollback
+## 145. Safe rollback
 
 Un build será elegible para rollback si:
 
@@ -2008,7 +2007,7 @@ Un build será elegible para rollback si:
 
 ---
 
-# 146. BuildRevocationRegistry
+## 146. BuildRevocationRegistry
 
 ```php
 interface BuildRevocationRegistryInterface
@@ -2021,7 +2020,7 @@ interface BuildRevocationRegistryInterface
 
 ---
 
-# 147. Revocation reasons
+## 147. Revocation reasons
 
 ```php
 enum BuildRevocationReason: string
@@ -2036,7 +2035,7 @@ enum BuildRevocationReason: string
 
 ---
 
-# 148. Revoked build behavior
+## 148. Revoked build behavior
 
 Un build revocado:
 
@@ -2048,7 +2047,7 @@ Un build revocado:
 
 ---
 
-# 149. Downgrade protection
+## 149. Downgrade protection
 
 El runtime podrá mantener:
 
@@ -2058,7 +2057,7 @@ minimum_allowed_build_security_version
 
 ---
 
-# 150. Build security version
+## 150. Build security version
 
 ```php
 final readonly class BuildSecurityVersion
@@ -2073,7 +2072,7 @@ final readonly class BuildSecurityVersion
 
 ---
 
-# 151. Security epoch
+## 151. Security epoch
 
 Un cambio incompatible de seguridad podrá incrementar `epoch`.
 
@@ -2081,7 +2080,7 @@ Builds de epochs anteriores serán rechazados.
 
 ---
 
-# 152. Rollback authorization
+## 152. Rollback authorization
 
 La activación de rollback deberá requerir:
 
@@ -2093,13 +2092,13 @@ La activación de rollback deberá requerir:
 
 ---
 
-# 153. Automatic rollback
+## 153. Automatic rollback
 
 Podrá permitirse ante fallo operacional, pero nunca hacia un build revocado o bajo la versión mínima.
 
 ---
 
-# 154. Replay attacks
+## 154. Replay attacks
 
 Un attacker podría reintroducir un manifest válido pero antiguo.
 
@@ -2113,7 +2112,7 @@ Mitigaciones:
 
 ---
 
-# 155. Activation record
+## 155. Activation record
 
 ```php
 final readonly class BuildActivationRecord
@@ -2133,7 +2132,7 @@ final readonly class BuildActivationRecord
 
 ---
 
-# 156. Monotonic activation sequence
+## 156. Monotonic activation sequence
 
 Cuando sea viable, cada activación tendrá un sequence creciente.
 
@@ -2141,13 +2140,13 @@ Esto dificulta replay.
 
 ---
 
-# 157. OPcache Security
+## 157. OPcache Security
 
 OPcache mejora rendimiento pero puede mantener código obsoleto.
 
 ---
 
-# 158. OPcache threats
+## 158. OPcache threats
 
 * artifact replaced while cached;
 * stale code after activation;
@@ -2159,7 +2158,7 @@ OPcache mejora rendimiento pero puede mantener código obsoleto.
 
 ---
 
-# 159. Immutable path strategy
+## 159. Immutable path strategy
 
 La mejor defensa será usar paths únicos por build.
 
@@ -2171,13 +2170,13 @@ Así, OPcache distingue archivos por path.
 
 ---
 
-# 160. No in-place artifact replacement
+## 160. No in-place artifact replacement
 
 Nunca sobrescribir artifacts de un build activo.
 
 ---
 
-# 161. OPcache validation strategy
+## 161. OPcache validation strategy
 
 En producción con immutable releases podrá usarse configuración agresiva, siempre que:
 
@@ -2187,7 +2186,7 @@ En producción con immutable releases podrá usarse configuración agresiva, sie
 
 ---
 
-# 162. OPcache invalidation
+## 162. OPcache invalidation
 
 Solo deberá usarse como medida complementaria.
 
@@ -2195,7 +2194,7 @@ No depender exclusivamente de invalidar paths reutilizados.
 
 ---
 
-# 163. OPcache preload
+## 163. OPcache preload
 
 El preload puede cargar artifacts antes de requests.
 
@@ -2203,7 +2202,7 @@ Su seguridad es crítica.
 
 ---
 
-# 164. Preload generation
+## 164. Preload generation
 
 El preload file deberá generarse desde el manifest validado.
 
@@ -2211,7 +2210,7 @@ Nunca mediante scanning libre de directorios.
 
 ---
 
-# 165. Preload allowlist
+## 165. Preload allowlist
 
 Solo incluir:
 
@@ -2223,7 +2222,7 @@ Solo incluir:
 
 ---
 
-# 166. Non-preloadable artifacts
+## 166. Non-preloadable artifacts
 
 No deberán preloaded:
 
@@ -2236,7 +2235,7 @@ No deberán preloaded:
 
 ---
 
-# 167. Preload manifest
+## 167. Preload manifest
 
 ```php
 final readonly class PreloadManifest
@@ -2253,7 +2252,7 @@ final readonly class PreloadManifest
 
 ---
 
-# 168. Preload validation
+## 168. Preload validation
 
 Antes de iniciar el proceso:
 
@@ -2266,25 +2265,25 @@ Antes de iniciar el proceso:
 
 ---
 
-# 169. Preload build pinning
+## 169. Preload build pinning
 
 Un proceso con preload de Build A no deberá mezclar artifacts ejecutables de Build B sin reinicio cuando las clases colisionen.
 
 ---
 
-# 170. Worker restart on preload change
+## 170. Worker restart on preload change
 
 Un cambio de preload generalmente requerirá reiniciar Workers o proceso maestro.
 
 ---
 
-# 171. Preloaded class collision
+## 171. Preloaded class collision
 
 Los nombres de clases generadas deberán evitar colisiones entre releases.
 
 ---
 
-# 172. Preload side effects
+## 172. Preload side effects
 
 El preload file no deberá:
 
@@ -2296,7 +2295,7 @@ El preload file no deberá:
 
 ---
 
-# 173. OPcache poisoning
+## 173. OPcache poisoning
 
 Un atacante con escritura sobre artifact path podría afectar procesos.
 
@@ -2310,13 +2309,13 @@ La defensa principal será:
 
 ---
 
-# 174. Deployment Security
+## 174. Deployment Security
 
 El deploy deberá tratar los artifacts como release units.
 
 ---
 
-# 175. Secure deployment pipeline
+## 175. Secure deployment pipeline
 
 ```text
 Build
@@ -2346,7 +2345,7 @@ Monitor
 
 ---
 
-# 176. Deployment artifact package
+## 176. Deployment artifact package
 
 Podrá contener:
 
@@ -2359,19 +2358,19 @@ Podrá contener:
 
 ---
 
-# 177. Package-level signature
+## 177. Package-level signature
 
 Además de signatures individuales, podrá firmarse el paquete completo.
 
 ---
 
-# 178. Transport security
+## 178. Transport security
 
 La transferencia deberá usar canales autenticados y cifrados, pero la integridad se verificará independientemente.
 
 ---
 
-# 179. Extraction security
+## 179. Extraction security
 
 Si se distribuyen archives:
 
@@ -2385,7 +2384,7 @@ Si se distribuyen archives:
 
 ---
 
-# 180. Archive bomb protection
+## 180. Archive bomb protection
 
 Aplicar límites de:
 
@@ -2397,7 +2396,7 @@ Aplicar límites de:
 
 ---
 
-# 181. Deployment permissions
+## 181. Deployment permissions
 
 El deployer deberá tener capacidad limitada a:
 
@@ -2410,19 +2409,19 @@ No deberá modificar source code o signing keys salvo arquitectura específica.
 
 ---
 
-# 182. Runtime permissions
+## 182. Runtime permissions
 
 El usuario de runtime deberá ser read-only sobre builds.
 
 ---
 
-# 183. Secret separation
+## 183. Secret separation
 
 Las keys de signing no deberán estar disponibles en hosts runtime.
 
 ---
 
-# 184. Build host trust
+## 184. Build host trust
 
 El build agent deberá:
 
@@ -2435,7 +2434,7 @@ El build agent deberá:
 
 ---
 
-# 185. Reproducible builds
+## 185. Reproducible builds
 
 Objetivo deseable:
 
@@ -2447,13 +2446,13 @@ Same artifact fingerprints
 
 ---
 
-# 186. Reproducibility verification
+## 186. Reproducibility verification
 
 Podrá compilarse en dos agentes y comparar hashes para builds críticos.
 
 ---
 
-# 187. Supply Chain Security
+## 187. Supply Chain Security
 
 La cadena incluye:
 
@@ -2467,13 +2466,13 @@ La cadena incluye:
 
 ---
 
-# 188. Dependency locking
+## 188. Dependency locking
 
 La compilación deberá basarse en lockfiles.
 
 ---
 
-# 189. Composer integrity
+## 189. Composer integrity
 
 Se deberán validar:
 
@@ -2486,7 +2485,7 @@ Se deberán validar:
 
 ---
 
-# 190. Composer plugins
+## 190. Composer plugins
 
 Los plugins ejecutan código durante install.
 
@@ -2494,19 +2493,19 @@ Deberán estar explícitamente permitidos.
 
 ---
 
-# 191. Composer scripts
+## 191. Composer scripts
 
 Scripts de packages deberán revisarse y limitarse en entornos sensibles.
 
 ---
 
-# 192. Compiler package allowlist
+## 192. Compiler package allowlist
 
 Los paquetes que registran compilers deberán estar allowlisted.
 
 ---
 
-# 193. Package provenance
+## 193. Package provenance
 
 Idealmente registrar:
 
@@ -2518,37 +2517,37 @@ Idealmente registrar:
 
 ---
 
-# 194. Dependency vulnerability policy
+## 194. Dependency vulnerability policy
 
 Un build podrá bloquearse si contiene dependencias con vulnerabilidades que superen el umbral configurado.
 
 ---
 
-# 195. Security advisory snapshot
+## 195. Security advisory snapshot
 
 La decisión deberá basarse en un snapshot auditable del momento de build.
 
 ---
 
-# 196. Build image pinning
+## 196. Build image pinning
 
 Las imágenes de CI deberán fijarse por digest, no solo por tag mutable.
 
 ---
 
-# 197. CI workflow trust
+## 197. CI workflow trust
 
 Cambios en workflows deberán requerir revisión.
 
 ---
 
-# 198. Pull request security
+## 198. Pull request security
 
 Código de PR no confiable no deberá tener acceso a signing keys o secrets productivos.
 
 ---
 
-# 199. Secretless validation builds
+## 199. Secretless validation builds
 
 Los builds de validación podrán compilar y verificar sin firmar.
 
@@ -2556,7 +2555,7 @@ La firma final ocurrirá en pipeline privilegiado.
 
 ---
 
-# 200. Two-stage build
+## 200. Two-stage build
 
 ```text
 Unprivileged compilation
@@ -2568,7 +2567,7 @@ Privileged signing
 
 ---
 
-# 201. Signing service
+## 201. Signing service
 
 La firma podrá delegarse a un servicio con API limitada.
 
@@ -2584,13 +2583,13 @@ Salida:
 
 ---
 
-# 202. Signing policy
+## 202. Signing policy
 
 El signer deberá verificar que el build cumple políticas antes de firmar.
 
 ---
 
-# 203. Compromised compiler
+## 203. Compromised compiler
 
 Si un compiler se compromete:
 
@@ -2603,7 +2602,7 @@ Si un compiler se compromete:
 
 ---
 
-# 204. Compiler revocation registry
+## 204. Compiler revocation registry
 
 ```php
 interface CompilerRevocationRegistryInterface
@@ -2617,7 +2616,7 @@ interface CompilerRevocationRegistryInterface
 
 ---
 
-# 205. Artifact Revocation
+## 205. Artifact Revocation
 
 La revocación podrá operar en varios niveles:
 
@@ -2632,7 +2631,7 @@ Schema version
 
 ---
 
-# 206. ArtifactRevocationRegistry
+## 206. ArtifactRevocationRegistry
 
 ```php
 interface ArtifactRevocationRegistryInterface
@@ -2645,7 +2644,7 @@ interface ArtifactRevocationRegistryInterface
 
 ---
 
-# 207. Runtime revocation refresh
+## 207. Runtime revocation refresh
 
 El runtime podrá refrescar revocation data:
 
@@ -2658,7 +2657,7 @@ No deberá depender de acceso remoto para cada artifact load.
 
 ---
 
-# 208. Revocation cache
+## 208. Revocation cache
 
 Deberá:
 
@@ -2669,7 +2668,7 @@ Deberá:
 
 ---
 
-# 209. Offline revocation policy
+## 209. Offline revocation policy
 
 En entornos sin conectividad:
 
@@ -2679,13 +2678,13 @@ En entornos sin conectividad:
 
 ---
 
-# 210. Artifact quarantine
+## 210. Artifact quarantine
 
 Artifacts sospechosos deberán moverse fuera del path cargable o marcarse revocados.
 
 ---
 
-# 211. Forensic preservation
+## 211. Forensic preservation
 
 Antes de eliminar un artifact comprometido podrá conservarse:
 
@@ -2697,7 +2696,7 @@ Antes de eliminar un artifact comprometido podrá conservarse:
 
 ---
 
-# 212. Compatibility Security
+## 212. Compatibility Security
 
 No toda incompatibilidad es solo técnica.
 
@@ -2705,7 +2704,7 @@ Un artifact antiguo puede carecer de controles nuevos.
 
 ---
 
-# 213. Runtime compatibility matrix
+## 213. Runtime compatibility matrix
 
 Se deberá validar:
 
@@ -2718,13 +2717,13 @@ Se deberá validar:
 
 ---
 
-# 214. Minimum security schema
+## 214. Minimum security schema
 
 El runtime podrá rechazar schemas técnicamente parseables pero inseguros.
 
 ---
 
-# 215. Schema migration
+## 215. Schema migration
 
 No se deberán migrar artifacts ejecutables arbitrariamente en runtime productivo.
 
@@ -2732,7 +2731,7 @@ Se deberán recompilar desde source.
 
 ---
 
-# 216. Legacy artifact policy
+## 216. Legacy artifact policy
 
 ```php
 enum LegacyArtifactPolicy: string
@@ -2745,13 +2744,13 @@ enum LegacyArtifactPolicy: string
 
 ---
 
-# 217. Build validation
+## 217. Build validation
 
 Antes de activación deberá ejecutarse `ControllerBuildSecurityValidator`.
 
 ---
 
-# 218. ControllerBuildSecurityValidator
+## 218. ControllerBuildSecurityValidator
 
 ```php
 interface ControllerBuildSecurityValidatorInterface
@@ -2765,7 +2764,7 @@ interface ControllerBuildSecurityValidatorInterface
 
 ---
 
-# 219. Validation phases
+## 219. Validation phases
 
 ```text
 Identity
@@ -2785,7 +2784,7 @@ Permissions
 
 ---
 
-# 220. BuildSecurityValidationReport
+## 220. BuildSecurityValidationReport
 
 ```php
 final readonly class BuildSecurityValidationReport
@@ -2803,25 +2802,25 @@ final readonly class BuildSecurityValidationReport
 
 ---
 
-# 221. Warning policy
+## 221. Warning policy
 
 Warnings no deberán permitir activación si corresponden a controles obligatorios.
 
 ---
 
-# 222. Build approval
+## 222. Build approval
 
 En entornos regulados podrá requerirse aprobación del validation report.
 
 ---
 
-# 223. Warmup Security
+## 223. Warmup Security
 
 Warmup deberá cargar y validar artifacts sin ejecutar lógica de negocio.
 
 ---
 
-# 224. Warmup responsibilities
+## 224. Warmup responsibilities
 
 * load manifests;
 * validate signatures;
@@ -2833,7 +2832,7 @@ Warmup deberá cargar y validar artifacts sin ejecutar lógica de negocio.
 
 ---
 
-# 225. Warmup isolation
+## 225. Warmup isolation
 
 Deberá ejecutarse con:
 
@@ -2845,31 +2844,31 @@ Deberá ejecutarse con:
 
 ---
 
-# 226. Warmup failure
+## 226. Warmup failure
 
 Un build con warmup fallido no deberá activarse.
 
 ---
 
-# 227. Smoke testing
+## 227. Smoke testing
 
 Podrá validar rutas sintéticas usando principals y tenants de prueba aislados.
 
 ---
 
-# 228. No production data
+## 228. No production data
 
 Los smoke tests pre-activation no deberán usar datos productivos salvo entorno controlado y políticas estrictas.
 
 ---
 
-# 229. Distributed Deployment Security
+## 229. Distributed Deployment Security
 
 Los nodos deberán converger en un build consistente.
 
 ---
 
-# 230. Node readiness
+## 230. Node readiness
 
 Cada nodo deberá publicar:
 
@@ -2882,31 +2881,31 @@ Cada nodo deberá publicar:
 
 ---
 
-# 231. Quorum activation
+## 231. Quorum activation
 
 En sistemas críticos podrá requerirse quorum de nodos listos antes de activar.
 
 ---
 
-# 232. Node drift
+## 232. Node drift
 
 Se deberá detectar cuando nodos ejecutan builds diferentes fuera de una ventana de rollout permitida.
 
 ---
 
-# 233. Build ID observability
+## 233. Build ID observability
 
 Logs y traces deberán incluir `buildId` seguro.
 
 ---
 
-# 234. Rolling deployment
+## 234. Rolling deployment
 
 Durante rollout pueden coexistir builds, pero cada request permanecerá pinned a uno.
 
 ---
 
-# 235. Shared state compatibility
+## 235. Shared state compatibility
 
 La activación deberá considerar:
 
@@ -2918,13 +2917,13 @@ La activación deberá considerar:
 
 ---
 
-# 236. Artifact Store consistency
+## 236. Artifact Store consistency
 
 En object storage se deberá considerar consistencia de lectura y publicación atómica mediante manifests/versioning.
 
 ---
 
-# 237. Manifest-last publication
+## 237. Manifest-last publication
 
 Estrategia recomendada:
 
@@ -2940,7 +2939,7 @@ El manifest actúa como señal de completitud.
 
 ---
 
-# 238. Immutable object keys
+## 238. Immutable object keys
 
 No sobrescribir objetos existentes.
 
@@ -2948,13 +2947,13 @@ Publicar nuevos keys por build.
 
 ---
 
-# 239. Remote build activation
+## 239. Remote build activation
 
 El pointer activo podrá ser un objeto versionado y firmado.
 
 ---
 
-# 240. Split-brain activation
+## 240. Split-brain activation
 
 Se deberá detectar cuando distintos coordinadores activan builds diferentes.
 
@@ -2967,7 +2966,7 @@ Mitigaciones:
 
 ---
 
-# 241. Build lock
+## 241. Build lock
 
 El lock deberá tener:
 
@@ -2978,13 +2977,13 @@ El lock deberá tener:
 
 ---
 
-# 242. Fencing token
+## 242. Fencing token
 
 Evita que un deployer antiguo continúe activando después de perder el lock.
 
 ---
 
-# 243. Security Events
+## 243. Security Events
 
 Eventos principales:
 
@@ -3008,7 +3007,7 @@ controllers.compilation.security.opcache.mismatch
 
 ---
 
-# 244. Metrics
+## 244. Metrics
 
 ```text
 voltstack.controllers.compilation.security.build_failures
@@ -3024,7 +3023,7 @@ voltstack.controllers.compilation.security.build_validation_duration
 
 ---
 
-# 245. Cardinality
+## 245. Cardinality
 
 Labels permitidos:
 
@@ -3044,7 +3043,7 @@ No usar como labels:
 
 ---
 
-# 246. Audit Records
+## 246. Audit Records
 
 Se auditarán:
 
@@ -3059,7 +3058,7 @@ Se auditarán:
 
 ---
 
-# 247. BuildSecurityAuditRecord
+## 247. BuildSecurityAuditRecord
 
 ```php
 final readonly class BuildSecurityAuditRecord
@@ -3079,7 +3078,7 @@ final readonly class BuildSecurityAuditRecord
 
 ---
 
-# 248. Incident Handling
+## 248. Incident Handling
 
 Incidentes críticos:
 
@@ -3093,7 +3092,7 @@ Incidentes críticos:
 
 ---
 
-# 249. Invalid signature response
+## 249. Invalid signature response
 
 En runtime productivo:
 
@@ -3106,7 +3105,7 @@ En runtime productivo:
 
 ---
 
-# 250. Unknown active build
+## 250. Unknown active build
 
 Si el active pointer apunta a build no registrado:
 
@@ -3117,7 +3116,7 @@ Si el active pointer apunta a build no registrado:
 
 ---
 
-# 251. Mixed-build incident
+## 251. Mixed-build incident
 
 Deberá cancelar execution antes de controller invocation.
 
@@ -3125,7 +3124,7 @@ El Worker podrá terminarse.
 
 ---
 
-# 252. Security configuration
+## 252. Security configuration
 
 ```php
 // config/controller_compilation_security.php
@@ -3222,7 +3221,7 @@ return [
 
 ---
 
-# 253. Componentes principales
+## 253. Componentes principales
 
 ```text
 SecureCompilationCoordinator
@@ -3248,7 +3247,7 @@ OPcacheBuildCoordinator
 
 ---
 
-# 254. Estructura del módulo
+## 254. Estructura del módulo
 
 ```text
 src/
@@ -3388,7 +3387,7 @@ src/
 
 ---
 
-# 255. Excepciones
+## 255. Excepciones
 
 ```text
 UntrustedCompilerException
@@ -3415,7 +3414,7 @@ SupplyChainPolicyViolationException
 
 ---
 
-# 256. Public behavior
+## 256. Public behavior
 
 Estas excepciones no deberán llegar al cliente con detalles.
 
@@ -3429,13 +3428,13 @@ Normalmente producirán:
 
 ---
 
-# 257. Testing Strategy
+## 257. Testing Strategy
 
 La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 258. Compiler unit tests
+## 258. Compiler unit tests
 
 * invalid metadata;
 * unsafe identifier;
@@ -3447,7 +3446,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 259. Artifact integrity tests
+## 259. Artifact integrity tests
 
 * modified bytes;
 * truncated files;
@@ -3460,7 +3459,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 260. Manifest tests
+## 260. Manifest tests
 
 * missing artifact;
 * duplicate ID;
@@ -3473,7 +3472,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 261. Loader tests
+## 261. Loader tests
 
 * arbitrary path attempt;
 * symlink escape;
@@ -3485,7 +3484,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 262. Activation tests
+## 262. Activation tests
 
 * partial build;
 * invalid active pointer;
@@ -3497,7 +3496,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 263. OPcache tests
+## 263. OPcache tests
 
 * unique build paths;
 * stale build;
@@ -3507,7 +3506,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 264. Remote cache tests
+## 264. Remote cache tests
 
 * poisoned response;
 * stale manifest;
@@ -3518,7 +3517,7 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 265. Supply-chain tests
+## 265. Supply-chain tests
 
 * unapproved compiler;
 * changed lockfile;
@@ -3529,13 +3528,13 @@ La seguridad deberá probarse en todas las fases.
 
 ---
 
-# 266. Reproducibility tests
+## 266. Reproducibility tests
 
 Compilar dos veces y comparar fingerprints cuando el artifact sea determinista.
 
 ---
 
-# 267. Property-based testing
+## 267. Property-based testing
 
 Adecuado para:
 
@@ -3547,7 +3546,7 @@ Adecuado para:
 
 ---
 
-# 268. Fuzzing
+## 268. Fuzzing
 
 Aplicar a:
 
@@ -3560,7 +3559,7 @@ Aplicar a:
 
 ---
 
-# 269. Chaos testing
+## 269. Chaos testing
 
 Simular:
 
@@ -3573,13 +3572,13 @@ Simular:
 
 ---
 
-# 270. Dynamic-compilation equivalence
+## 270. Dynamic-compilation equivalence
 
 Los artifacts compilados deberán producir la misma semántica de seguridad que el runtime dinámico.
 
 ---
 
-# 271. Golden artifact tests
+## 271. Golden artifact tests
 
 Podrán mantenerse outputs esperados para detectar cambios no intencionales.
 
@@ -3587,7 +3586,7 @@ No deberán sustituir validación semántica.
 
 ---
 
-# 272. Security acceptance gates
+## 272. Security acceptance gates
 
 Un build no podrá publicarse si falla:
 
@@ -3601,247 +3600,247 @@ Un build no podrá publicarse si falla:
 
 ---
 
-# 273. ADR-041
+## 273. ADR-041
 
 **Los artefactos compilados serán tratados como código ejecutable, no como caché desechable.**
 
 ---
 
-# 274. ADR-042
+## 274. ADR-042
 
 **La compilación productiva estará separada del runtime de producción.**
 
 ---
 
-# 275. ADR-043
+## 275. ADR-043
 
 **La generación dinámica de artifacts estará deshabilitada por defecto en producción.**
 
 ---
 
-# 276. ADR-044
+## 276. ADR-044
 
 **Los compiladores deberán operar mediante capabilities explícitas.**
 
 ---
 
-# 277. ADR-045
+## 277. ADR-045
 
 **Los package compilers no tendrán acceso a signing keys ni activación de builds.**
 
 ---
 
-# 278. ADR-046
+## 278. ADR-046
 
 **El pipeline utilizará una representación intermedia validable antes de generar PHP.**
 
 ---
 
-# 279. ADR-047
+## 279. ADR-047
 
 **Los valores de metadata no se insertarán como PHP crudo.**
 
 ---
 
-# 280. ADR-048
+## 280. ADR-048
 
 **Todo artifact generado será validado sintáctica y estructuralmente.**
 
 ---
 
-# 281. ADR-049
+## 281. ADR-049
 
 **Los artifacts no podrán producir efectos secundarios al cargarse.**
 
 ---
 
-# 282. ADR-050
+## 282. ADR-050
 
 **Los fingerprints utilizarán algoritmos criptográficamente seguros.**
 
 ---
 
-# 283. ADR-051
+## 283. ADR-051
 
 **La identidad del artifact incluirá build, tipo, schema y dependencias.**
 
 ---
 
-# 284. ADR-052
+## 284. ADR-052
 
 **En perfiles estrictos, artifacts y manifests deberán estar firmados.**
 
 ---
 
-# 285. ADR-053
+## 285. ADR-053
 
 **Las claves privadas de firma no estarán disponibles en runtime.**
 
 ---
 
-# 286. ADR-054
+## 286. ADR-054
 
 **El runtime cargará artifacts únicamente mediante manifest membership.**
 
 ---
 
-# 287. ADR-055
+## 287. ADR-055
 
 **Los manifests almacenarán paths relativos y normalizados.**
 
 ---
 
-# 288. ADR-056
+## 288. ADR-056
 
 **Los builds serán inmutables después de ser sellados.**
 
 ---
 
-# 289. ADR-057
+## 289. ADR-057
 
 **La activación de builds será atómica.**
 
 ---
 
-# 290. ADR-058
+## 290. ADR-058
 
 **Cada execution quedará fijada a un único build.**
 
 ---
 
-# 291. ADR-059
+## 291. ADR-059
 
 **No se permitirá mezclar artifacts de builds distintos.**
 
 ---
 
-# 292. ADR-060
+## 292. ADR-060
 
 **La API del loader aceptará artifact IDs, no paths arbitrarios.**
 
 ---
 
-# 293. ADR-061
+## 293. ADR-061
 
 **Los artifacts se validarán antes de ejecutarse o incluirse.**
 
 ---
 
-# 294. ADR-062
+## 294. ADR-062
 
 **Los runtime users tendrán acceso de solo lectura a los builds.**
 
 ---
 
-# 295. ADR-063
+## 295. ADR-063
 
 **Los artifacts se almacenarán en paths únicos por build.**
 
 ---
 
-# 296. ADR-064
+## 296. ADR-064
 
 **No se reemplazarán artifacts in-place en producción.**
 
 ---
 
-# 297. ADR-065
+## 297. ADR-065
 
 **Los cambios de preload requerirán reinicio controlado del proceso cuando sea necesario.**
 
 ---
 
-# 298. ADR-066
+## 298. ADR-066
 
 **Un rollback no podrá activar un build revocado o bajo el security epoch mínimo.**
 
 ---
 
-# 299. ADR-067
+## 299. ADR-067
 
 **Las activaciones y rollbacks serán auditables.**
 
 ---
 
-# 300. ADR-068
+## 300. ADR-068
 
 **TLS no sustituirá la validación criptográfica de artifacts remotos.**
 
 ---
 
-# 301. ADR-069
+## 301. ADR-069
 
 **Los caches remotos serán read-only para el runtime.**
 
 ---
 
-# 302. ADR-070
+## 302. ADR-070
 
 **Los manifests se publicarán después de los artifacts como señal de completitud.**
 
 ---
 
-# 303. ADR-071
+## 303. ADR-071
 
 **Los Composer plugins estarán bloqueados salvo allowlist explícita.**
 
 ---
 
-# 304. ADR-072
+## 304. ADR-072
 
 **Las imágenes de build deberán fijarse por digest en perfiles estrictos.**
 
 ---
 
-# 305. ADR-073
+## 305. ADR-073
 
 **Los builds de código no confiable no tendrán acceso al signer productivo.**
 
 ---
 
-# 306. ADR-074
+## 306. ADR-074
 
 **La revocación podrá aplicarse a artifact, build, compiler, package, key o schema.**
 
 ---
 
-# 307. ADR-075
+## 307. ADR-075
 
 **Un artifact firmado por una clave revocada será rechazado.**
 
 ---
 
-# 308. ADR-076
+## 308. ADR-076
 
 **Los artifacts legacy deberán recompilarse; no se migrarán arbitrariamente en runtime.**
 
 ---
 
-# 309. ADR-077
+## 309. ADR-077
 
 **El warmup no ejecutará lógica de negocio ni requerirá contexto de usuario.**
 
 ---
 
-# 310. ADR-078
+## 310. ADR-078
 
 **Un build con warmup o smoke validation fallida no podrá activarse.**
 
 ---
 
-# 311. ADR-079
+## 311. ADR-079
 
 **El Build ID será incluido en observabilidad y contexto de ejecución.**
 
 ---
 
-# 312. ADR-080
+## 312. ADR-080
 
 **Una falla de integridad de artifacts podrá marcar el nodo como no saludable y terminar Workers afectados.**
 
 ---
 
-# 313. Implementación V1
+## 313. Implementación V1
 
 La V1 deberá incluir:
 
@@ -3872,7 +3871,7 @@ La V1 deberá incluir:
 
 ---
 
-# 314. Implementación V2
+## 314. Implementación V2
 
 Podrá incluir:
 
@@ -3889,7 +3888,7 @@ Podrá incluir:
 
 ---
 
-# 315. Implementación V3
+## 315. Implementación V3
 
 Podrá incluir:
 
@@ -3904,7 +3903,7 @@ Podrá incluir:
 
 ---
 
-# 316. Flujo seguro completo
+## 316. Flujo seguro completo
 
 ```text
 Controller Sources
@@ -3966,7 +3965,7 @@ Runtime Integrity Verification
 
 ---
 
-# 317. Conclusión
+## 317. Conclusión
 
 La seguridad de compilación no puede limitarse a generar archivos PHP y almacenarlos en una carpeta de caché.
 
@@ -4011,7 +4010,7 @@ El resultado será una arquitectura donde el runtime pueda demostrar que el cód
 
 ---
 
-# 318. Siguiente parte
+## 318. Siguiente parte
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_04.md

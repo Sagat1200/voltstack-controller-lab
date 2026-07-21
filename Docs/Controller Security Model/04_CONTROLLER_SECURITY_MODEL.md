@@ -1,6 +1,5 @@
-# CONTROLLER_SECURITY_MODEL_PART_04.md
+# Controller Security Model - Part 04: Transport & Response Security
 
-## Transport & Response Security
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -24,7 +23,9 @@
 
 ---
 
-# 1. Introducción
+## Entrega 1
+
+### 1. Introducción
 
 La capa de transporte constituye la última frontera entre la ejecución interna de un controlador y el cliente.
 
@@ -76,7 +77,7 @@ Emission
 
 ---
 
-# 2. Objetivo principal
+### 2. Objetivo principal
 
 El sistema deberá garantizar que toda respuesta producida por Controllers:
 
@@ -96,7 +97,7 @@ El sistema deberá garantizar que toda respuesta producida por Controllers:
 
 ---
 
-# 3. Principio fundamental
+### 3. Principio fundamental
 
 ```text
 A valid controller result
@@ -108,7 +109,7 @@ El resultado del controlador deberá pasar por una capa adicional de seguridad a
 
 ---
 
-# 4. Modelo general
+### 4. Modelo general
 
 ```text
 ControllerResult
@@ -132,7 +133,7 @@ ResponseEmitter
 
 ---
 
-# 5. Activos protegidos
+### 5. Activos protegidos
 
 Los principales activos serán:
 
@@ -157,7 +158,7 @@ Los principales activos serán:
 
 ---
 
-# 6. Superficie de ataque
+### 6. Superficie de ataque
 
 La superficie incluye:
 
@@ -181,7 +182,7 @@ La superficie incluye:
 
 ---
 
-# 7. Actores
+### 7. Actores
 
 ```text
 Controller
@@ -201,7 +202,7 @@ Misconfigured Application
 
 ---
 
-# 8. Categorías de amenazas
+### 8. Categorías de amenazas
 
 Amenazas principales:
 
@@ -228,7 +229,7 @@ Amenazas principales:
 
 ---
 
-# 9. Security invariant principal
+### 9. Security invariant principal
 
 ```text
 No response shall be emitted unless:
@@ -244,7 +245,7 @@ No response shall be emitted unless:
 
 ---
 
-# 10. Response Trust Model
+### 10. Response Trust Model
 
 Los elementos del pipeline se clasificarán así:
 
@@ -260,7 +261,7 @@ Proxy-derived values       Untrusted until trusted-proxy validation
 
 ---
 
-# 11. Controller result trust
+### 11. Controller result trust
 
 El resultado de un controlador no deberá considerarse automáticamente seguro.
 
@@ -277,7 +278,7 @@ Podrá contener:
 
 ---
 
-# 12. Response object trust
+### 12. Response object trust
 
 Un objeto que implemente `ResponseInterface` tampoco deberá omitir las validaciones centrales.
 
@@ -292,13 +293,13 @@ Raw transport response
 
 ---
 
-# 13. Raw response bypass
+### 13. Raw response bypass
 
 No deberá existir una API pública que permita emitir directamente bytes y headers sin pasar por controles mínimos.
 
 ---
 
-# 14. Secure Response Pipeline
+### 14. Secure Response Pipeline
 
 Pipeline recomendado:
 
@@ -330,7 +331,7 @@ Emit
 
 ---
 
-# 15. ControllerResult
+### 15. ControllerResult
 
 ```php
 interface ControllerResultInterface
@@ -345,7 +346,7 @@ interface ControllerResultInterface
 
 ---
 
-# 16. ControllerResultType
+### 16. ControllerResultType
 
 ```php
 enum ControllerResultType: string
@@ -367,7 +368,7 @@ enum ControllerResultType: string
 
 ---
 
-# 17. Result normalization
+### 17. Result normalization
 
 El normalizador deberá convertir resultados arbitrarios en representaciones explícitas.
 
@@ -383,7 +384,7 @@ generator  → StreamResponse
 
 ---
 
-# 18. Ambiguous results
+### 18. Ambiguous results
 
 Los resultados ambiguos deberán rechazarse o resolverse mediante configuración explícita.
 
@@ -397,7 +398,7 @@ El framework no deberá asumir silenciosamente que se trata de HTML seguro.
 
 ---
 
-# 19. Explicit response types
+### 19. Explicit response types
 
 Se favorecerá:
 
@@ -412,7 +413,7 @@ sobre retornos ambiguos.
 
 ---
 
-# 20. ResponseSecurityContext
+### 20. ResponseSecurityContext
 
 ```php
 final readonly class ResponseSecurityContext
@@ -433,7 +434,7 @@ final readonly class ResponseSecurityContext
 
 ---
 
-# 21. Response classification
+### 21. Response classification
 
 Toda respuesta deberá clasificarse.
 
@@ -450,7 +451,7 @@ enum ResponseSensitivity: string
 
 ---
 
-# 22. Public response
+### 22. Public response
 
 Podrá:
 
@@ -468,7 +469,7 @@ Siempre deberá respetar:
 
 ---
 
-# 23. Internal response
+### 23. Internal response
 
 Destinada a:
 
@@ -481,7 +482,7 @@ No implica ausencia de autenticación.
 
 ---
 
-# 24. Private response
+### 24. Private response
 
 Relacionada con un usuario autenticado.
 
@@ -494,7 +495,7 @@ Por defecto deberá:
 
 ---
 
-# 25. Confidential response
+### 25. Confidential response
 
 Puede incluir:
 
@@ -507,7 +508,7 @@ Deberá usar políticas más estrictas.
 
 ---
 
-# 26. Restricted response
+### 26. Restricted response
 
 La clasificación más alta.
 
@@ -523,7 +524,7 @@ Podrá requerir:
 
 ---
 
-# 27. Classification inheritance
+### 27. Classification inheritance
 
 La clasificación podrá derivarse de:
 
@@ -540,7 +541,7 @@ Se aplicará la clasificación más restrictiva.
 
 ---
 
-# 28. Response classification metadata
+### 28. Response classification metadata
 
 ```php
 #[ResponseSecurity(
@@ -554,7 +555,7 @@ public function profile(): UserProfile
 
 ---
 
-# 29. Runtime classification escalation
+### 29. Runtime classification escalation
 
 Un transformer podrá elevar la sensibilidad si detecta campos sensibles.
 
@@ -562,7 +563,7 @@ No deberá reducirla sin autorización.
 
 ---
 
-# 30. ResponseMetadata
+### 30. ResponseMetadata
 
 ```php
 final readonly class SecureResponseMetadata
@@ -582,7 +583,7 @@ final readonly class SecureResponseMetadata
 
 ---
 
-# 31. Transport profiles
+### 31. Transport profiles
 
 ```php
 enum TransportProfile: string
@@ -599,7 +600,7 @@ enum TransportProfile: string
 
 ---
 
-# 32. Browser profile
+### 32. Browser profile
 
 Deberá priorizar:
 
@@ -612,7 +613,7 @@ Deberá priorizar:
 
 ---
 
-# 33. API profile
+### 33. API profile
 
 Deberá priorizar:
 
@@ -625,7 +626,7 @@ Deberá priorizar:
 
 ---
 
-# 34. SPA profile
+### 34. SPA profile
 
 Deberá priorizar:
 
@@ -638,7 +639,7 @@ Deberá priorizar:
 
 ---
 
-# 35. Download profile
+### 35. Download profile
 
 Deberá priorizar:
 
@@ -651,7 +652,7 @@ Deberá priorizar:
 
 ---
 
-# 36. Stream profile
+### 36. Stream profile
 
 Deberá priorizar:
 
@@ -664,7 +665,7 @@ Deberá priorizar:
 
 ---
 
-# 37. Response policy resolution
+### 37. Response policy resolution
 
 ```php
 interface ResponseSecurityPolicyResolverInterface
@@ -678,7 +679,7 @@ interface ResponseSecurityPolicyResolverInterface
 
 ---
 
-# 38. Policy precedence
+### 38. Policy precedence
 
 Orden recomendado:
 
@@ -700,7 +701,7 @@ Una capa inferior no podrá desactivar una regla hard.
 
 ---
 
-# 39. ResolvedResponseSecurityPolicy
+### 39. ResolvedResponseSecurityPolicy
 
 ```php
 final readonly class ResolvedResponseSecurityPolicy
@@ -720,7 +721,7 @@ final readonly class ResolvedResponseSecurityPolicy
 
 ---
 
-# 40. Response builder
+### 40. Response builder
 
 ```php
 interface SecureResponseBuilderInterface
@@ -735,7 +736,7 @@ interface SecureResponseBuilderInterface
 
 ---
 
-# 41. SecureHttpResponse
+### 41. SecureHttpResponse
 
 ```php
 final class SecureHttpResponse
@@ -753,7 +754,7 @@ final class SecureHttpResponse
 
 ---
 
-# 42. Response immutability
+### 42. Response immutability
 
 Después de completar la fase de seguridad, la respuesta deberá congelarse.
 
@@ -769,7 +770,7 @@ Emission
 
 ---
 
-# 43. Freeze point
+### 43. Freeze point
 
 Después del freeze:
 
@@ -781,7 +782,7 @@ Después del freeze:
 
 ---
 
-# 44. Late mutation
+### 44. Late mutation
 
 Una modificación después del freeze deberá:
 
@@ -791,13 +792,13 @@ Una modificación después del freeze deberá:
 
 ---
 
-# 45. Status code validation
+### 45. Status code validation
 
 Solo podrán utilizarse códigos válidos.
 
 ---
 
-# 46. Status semantics
+### 46. Status semantics
 
 El sistema deberá validar coherencia entre:
 
@@ -815,13 +816,13 @@ Ejemplos:
 
 ---
 
-# 47. Custom status codes
+### 47. Custom status codes
 
 Deberán estar limitados a rangos válidos y perfiles compatibles.
 
 ---
 
-# 48. Reason phrases
+### 48. Reason phrases
 
 No deberán aceptar contenido derivado de usuario.
 
@@ -829,13 +830,13 @@ Podrán omitirse o generarse desde un registry seguro.
 
 ---
 
-# 49. Response Header Model
+### 49. Response Header Model
 
 Los headers representan una superficie de seguridad crítica.
 
 ---
 
-# 50. SecureHeaderBag
+### 50. SecureHeaderBag
 
 ```php
 interface SecureHeaderBagInterface
@@ -856,7 +857,7 @@ interface SecureHeaderBagInterface
 
 ---
 
-# 51. HeaderName
+### 51. HeaderName
 
 ```php
 final readonly class HeaderName
@@ -877,7 +878,7 @@ Deberá validar:
 
 ---
 
-# 52. HeaderValue
+### 52. HeaderValue
 
 Deberá rechazar:
 
@@ -889,7 +890,7 @@ Deberá rechazar:
 
 ---
 
-# 53. Response splitting
+### 53. Response splitting
 
 La inyección de:
 
@@ -903,7 +904,7 @@ VoltStack deberá bloquearla en cualquier valor de header.
 
 ---
 
-# 54. Header sources
+### 54. Header sources
 
 Los headers podrán provenir de:
 
@@ -918,7 +919,7 @@ Todos deberán pasar por validación.
 
 ---
 
-# 55. Protected headers
+### 55. Protected headers
 
 Algunos headers no podrán ser definidos directamente por controladores.
 
@@ -935,7 +936,7 @@ Ejemplos:
 
 ---
 
-# 56. Header ownership
+### 56. Header ownership
 
 ```php
 enum HeaderOwner: string
@@ -950,13 +951,13 @@ enum HeaderOwner: string
 
 ---
 
-# 57. Header precedence
+### 57. Header precedence
 
 Los headers del framework deberán poder sobrescribir valores inseguros definidos por aplicación.
 
 ---
 
-# 58. Security Header Registry
+### 58. Security Header Registry
 
 ```php
 interface SecurityHeaderRegistryInterface
@@ -973,7 +974,7 @@ interface SecurityHeaderRegistryInterface
 
 ---
 
-# 59. SecurityHeaderDefinition
+### 59. SecurityHeaderDefinition
 
 ```php
 final readonly class SecurityHeaderDefinition
@@ -990,7 +991,7 @@ final readonly class SecurityHeaderDefinition
 
 ---
 
-# 60. HeaderMergeStrategy
+### 60. HeaderMergeStrategy
 
 ```php
 enum HeaderMergeStrategy: string
@@ -1005,7 +1006,7 @@ enum HeaderMergeStrategy: string
 
 ---
 
-# 61. Header canonicalization
+### 61. Header canonicalization
 
 El sistema deberá tratar nombres de headers como case-insensitive.
 
@@ -1019,7 +1020,7 @@ CONTENT-TYPE
 
 ---
 
-# 62. Duplicate headers
+### 62. Duplicate headers
 
 La política dependerá del header.
 
@@ -1030,7 +1031,7 @@ La política dependerá del header.
 
 ---
 
-# 63. Hop-by-hop headers
+### 63. Hop-by-hop headers
 
 No deberán ser controlados por aplicaciones normales:
 
@@ -1045,7 +1046,7 @@ No deberán ser controlados por aplicaciones normales:
 
 ---
 
-# 64. Content-Length
+### 64. Content-Length
 
 Deberá ser calculado por la capa de transporte cuando aplique.
 
@@ -1053,13 +1054,13 @@ No deberá confiarse en un valor definido por controlador.
 
 ---
 
-# 65. Transfer-Encoding
+### 65. Transfer-Encoding
 
 Deberá ser responsabilidad del servidor HTTP o transport adapter.
 
 ---
 
-# 66. Header limits
+### 66. Header limits
 
 Se deberán definir límites para:
 
@@ -1070,13 +1071,13 @@ Se deberán definir límites para:
 
 ---
 
-# 67. Header overflow
+### 67. Header overflow
 
 Una respuesta que exceda límites deberá fallar antes de emisión.
 
 ---
 
-# 68. Security headers base
+### 68. Security headers base
 
 El perfil browser deberá considerar al menos:
 
@@ -1090,7 +1091,7 @@ El perfil browser deberá considerar al menos:
 
 ---
 
-# 69. X-Content-Type-Options
+### 69. X-Content-Type-Options
 
 Se utilizará:
 
@@ -1102,7 +1103,7 @@ para perfiles browser compatibles.
 
 ---
 
-# 70. MIME sniffing
+### 70. MIME sniffing
 
 La respuesta deberá declarar un content type correcto.
 
@@ -1110,7 +1111,7 @@ La respuesta deberá declarar un content type correcto.
 
 ---
 
-# 71. Frame protection
+### 71. Frame protection
 
 La política moderna deberá priorizar CSP:
 
@@ -1122,13 +1123,13 @@ Podrá emitir además `X-Frame-Options` para compatibilidad.
 
 ---
 
-# 72. Default frame policy
+### 72. Default frame policy
 
 Por defecto, páginas administrativas y privadas no deberán poder embeberse.
 
 ---
 
-# 73. Referrer Policy
+### 73. Referrer Policy
 
 Se deberá aplicar una política segura por defecto.
 
@@ -1142,7 +1143,7 @@ Podrá endurecerse para respuestas confidenciales.
 
 ---
 
-# 74. Restricted referrer policy
+### 74. Restricted referrer policy
 
 Para respuestas restringidas podrá utilizarse:
 
@@ -1152,7 +1153,7 @@ no-referrer
 
 ---
 
-# 75. Permissions Policy
+### 75. Permissions Policy
 
 Deberá deshabilitar capacidades del navegador no utilizadas.
 
@@ -1167,7 +1168,7 @@ Ejemplos:
 
 ---
 
-# 76. Header profile resolution
+### 76. Header profile resolution
 
 Los security headers deberán resolverse según:
 
@@ -1180,7 +1181,7 @@ Los security headers deberán resolverse según:
 
 ---
 
-# 77. Header policy conflicts
+### 77. Header policy conflicts
 
 Ejemplo:
 
@@ -1193,7 +1194,7 @@ Deberá prevalecer la política más restrictiva.
 
 ---
 
-# 78. Header validation before emission
+### 78. Header validation before emission
 
 ```php
 interface FinalResponseSecurityValidatorInterface
@@ -1207,7 +1208,7 @@ interface FinalResponseSecurityValidatorInterface
 
 ---
 
-# 79. Validation categories
+### 79. Validation categories
 
 El validator deberá revisar:
 
@@ -1225,7 +1226,7 @@ El validator deberá revisar:
 
 ---
 
-# 80. Resultado de esta entrega
+### 80. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -1242,9 +1243,9 @@ Secure Header Model
 Base Security Header Architecture
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 2
+
 
 **Entrega:** 2 de varias
 **Cobertura de esta entrega:** Secciones 81–170
@@ -1252,7 +1253,7 @@ Base Security Header Architecture
 
 ---
 
-# 81. Content-Type Security
+### 81. Content-Type Security
 
 El tipo de contenido deberá resolverse de forma explícita y coherente con el cuerpo.
 
@@ -1273,7 +1274,7 @@ Una discrepancia podrá provocar:
 
 ---
 
-# 82. Content type resolution
+### 82. Content type resolution
 
 ```php
 interface ResponseContentTypeResolverInterface
@@ -1288,7 +1289,7 @@ interface ResponseContentTypeResolverInterface
 
 ---
 
-# 83. ResolvedContentType
+### 83. ResolvedContentType
 
 ```php
 final readonly class ResolvedContentType
@@ -1305,7 +1306,7 @@ final readonly class ResolvedContentType
 
 ---
 
-# 84. MediaType
+### 84. MediaType
 
 ```php
 final readonly class MediaType
@@ -1321,7 +1322,7 @@ final readonly class MediaType
 
 ---
 
-# 85. Canonical media types
+### 85. Canonical media types
 
 VoltStack deberá mantener un registro canónico.
 
@@ -1343,7 +1344,7 @@ image/jpeg
 
 ---
 
-# 86. MIME Registry
+### 86. MIME Registry
 
 ```php
 interface MimeTypeRegistryInterface
@@ -1360,7 +1361,7 @@ interface MimeTypeRegistryInterface
 
 ---
 
-# 87. Trusted MIME mappings
+### 87. Trusted MIME mappings
 
 Los mappings críticos deberán provenir del framework o configuración confiable.
 
@@ -1372,7 +1373,7 @@ No deberá permitirse que un usuario final registre arbitrariamente:
 
 ---
 
-# 88. Extension trust
+### 88. Extension trust
 
 La extensión de un archivo no será evidencia suficiente del tipo real.
 
@@ -1386,7 +1387,7 @@ Para descargas sensibles podrá combinarse:
 
 ---
 
-# 89. MIME detection limits
+### 89. MIME detection limits
 
 La detección heurística no deberá utilizarse como única garantía.
 
@@ -1394,7 +1395,7 @@ Podrá confundirse con archivos políglotas.
 
 ---
 
-# 90. Polyglot files
+### 90. Polyglot files
 
 Un archivo podrá ser válido para más de un parser.
 
@@ -1409,7 +1410,7 @@ Por ello deberán existir políticas específicas por tipo.
 
 ---
 
-# 91. Charset security
+### 91. Charset security
 
 Las respuestas textuales deberán declarar charset cuando corresponda.
 
@@ -1421,19 +1422,19 @@ UTF-8
 
 ---
 
-# 92. Charset normalization
+### 92. Charset normalization
 
 No deberán aceptarse charsets arbitrarios derivados de input.
 
 ---
 
-# 93. UTF-7
+### 93. UTF-7
 
 No deberá emitirse ni negociarse UTF-7.
 
 ---
 
-# 94. Invalid byte sequences
+### 94. Invalid byte sequences
 
 El encoder deberá definir una política:
 
@@ -1446,7 +1447,7 @@ Para contenido HTML y JSON se recomienda rechazar o normalizar de forma segura.
 
 ---
 
-# 95. Content-Type ownership
+### 95. Content-Type ownership
 
 `Content-Type` será propiedad de la capa de contenido.
 
@@ -1454,13 +1455,13 @@ Un controlador podrá solicitar un tipo, pero deberá validarse.
 
 ---
 
-# 96. Content-Type override
+### 96. Content-Type override
 
 La aplicación no deberá cambiar el tipo después de codificar el body.
 
 ---
 
-# 97. Body-content coherence
+### 97. Body-content coherence
 
 El validator deberá comprobar:
 
@@ -1473,25 +1474,25 @@ Binary download    → approved binary media type
 
 ---
 
-# 98. Missing Content-Type
+### 98. Missing Content-Type
 
 Una respuesta con body no vacío deberá tener un tipo explícito, salvo protocolos especiales controlados.
 
 ---
 
-# 99. Empty responses
+### 99. Empty responses
 
 Las respuestas `204` y `304` deberán seguir reglas específicas y no incluir cuerpos inconsistentes.
 
 ---
 
-# 100. Content Negotiation
+### 100. Content Negotiation
 
 La negociación deberá ser explícita, limitada y determinista.
 
 ---
 
-# 101. Negotiation inputs
+### 101. Negotiation inputs
 
 Podrá considerar:
 
@@ -1504,7 +1505,7 @@ Podrá considerar:
 
 ---
 
-# 102. Accept header trust
+### 102. Accept header trust
 
 `Accept` es input no confiable.
 
@@ -1518,7 +1519,7 @@ Deberá limitarse:
 
 ---
 
-# 103. Negotiation algorithm
+### 103. Negotiation algorithm
 
 ```text
 Supported representations
@@ -1532,13 +1533,13 @@ Selected representation
 
 ---
 
-# 104. No implicit HTML fallback
+### 104. No implicit HTML fallback
 
 Una API que no soporte el tipo solicitado no deberá devolver una página HTML de error por defecto.
 
 ---
 
-# 105. Negotiation failure
+### 105. Negotiation failure
 
 Deberá producir una respuesta controlada, normalmente equivalente a:
 
@@ -1550,7 +1551,7 @@ con formato seguro y coherente.
 
 ---
 
-# 106. Wildcard handling
+### 106. Wildcard handling
 
 `*/*` podrá resolverse al tipo por defecto de la ruta.
 
@@ -1558,7 +1559,7 @@ No deberá activar formatos experimentales o inseguros.
 
 ---
 
-# 107. Format aliases
+### 107. Format aliases
 
 Aliases como:
 
@@ -1572,7 +1573,7 @@ deberán resolverse mediante registry, no concatenación.
 
 ---
 
-# 108. URL format parameters
+### 108. URL format parameters
 
 Parámetros como:
 
@@ -1584,7 +1585,7 @@ deberán validarse contra formatos soportados.
 
 ---
 
-# 109. Query format parameters
+### 109. Query format parameters
 
 El uso de:
 
@@ -1596,13 +1597,13 @@ deberá estar deshabilitado por defecto o controlado por ruta.
 
 ---
 
-# 110. Negotiation ambiguity
+### 110. Negotiation ambiguity
 
 Si múltiples tipos tienen igual prioridad, se utilizará una regla determinista.
 
 ---
 
-# 111. API version negotiation
+### 111. API version negotiation
 
 No deberá depender únicamente de media types arbitrarios.
 
@@ -1610,7 +1611,7 @@ El framework deberá validar versiones conocidas.
 
 ---
 
-# 112. Vary header
+### 112. Vary header
 
 Cuando la representación dependa de `Accept`, deberá considerarse:
 
@@ -1622,19 +1623,19 @@ sin crear combinaciones de cache incontrolables.
 
 ---
 
-# 113. Vary limits
+### 113. Vary limits
 
 No deberán añadirse valores derivados arbitrariamente del request.
 
 ---
 
-# 114. HTML Response Security
+### 114. HTML Response Security
 
 Las respuestas HTML tienen el mayor riesgo de ejecución activa en navegador.
 
 ---
 
-# 115. HTML response types
+### 115. HTML response types
 
 Se distinguirán:
 
@@ -1648,13 +1649,13 @@ Raw HTML
 
 ---
 
-# 116. Raw HTML
+### 116. Raw HTML
 
 El raw HTML deberá ser una capacidad restringida.
 
 ---
 
-# 117. Safe HTML wrapper
+### 117. Safe HTML wrapper
 
 ```php
 final readonly class TrustedHtml
@@ -1671,13 +1672,13 @@ La construcción deberá estar limitada a servicios autorizados.
 
 ---
 
-# 118. HTML escaping
+### 118. HTML escaping
 
 Todo dato insertado en templates deberá escaparse según contexto.
 
 ---
 
-# 119. Contextual escaping
+### 119. Contextual escaping
 
 Los contextos no son equivalentes:
 
@@ -1690,13 +1691,13 @@ Los contextos no son equivalentes:
 
 ---
 
-# 120. Template compiler security
+### 120. Template compiler security
 
 El compilador Volt deberá emitir escapes contextuales cuando sea posible.
 
 ---
 
-# 121. Explicit unescaped output
+### 121. Explicit unescaped output
 
 Una directiva de output sin escape deberá:
 
@@ -1707,13 +1708,13 @@ Una directiva de output sin escape deberá:
 
 ---
 
-# 122. Rich text sanitation
+### 122. Rich text sanitation
 
 Contenido HTML de usuarios deberá pasar por un sanitizer basado en allowlist.
 
 ---
 
-# 123. HtmlSanitizerInterface
+### 123. HtmlSanitizerInterface
 
 ```php
 interface HtmlSanitizerInterface
@@ -1727,7 +1728,7 @@ interface HtmlSanitizerInterface
 
 ---
 
-# 124. HtmlSanitizationPolicy
+### 124. HtmlSanitizationPolicy
 
 Deberá controlar:
 
@@ -1742,7 +1743,7 @@ Deberá controlar:
 
 ---
 
-# 125. Event handler attributes
+### 125. Event handler attributes
 
 Deberán eliminarse atributos como:
 
@@ -1756,7 +1757,7 @@ salvo una capacidad muy restringida que no debería existir para contenido de us
 
 ---
 
-# 126. URL attributes
+### 126. URL attributes
 
 Atributos como:
 
@@ -1770,7 +1771,7 @@ deberán validar schemes y destinos.
 
 ---
 
-# 127. Dangerous URL schemes
+### 127. Dangerous URL schemes
 
 Se deberán rechazar o restringir:
 
@@ -1783,13 +1784,13 @@ file:
 
 ---
 
-# 128. Data URLs
+### 128. Data URLs
 
 Solo podrán permitirse para tipos concretos y tamaños limitados.
 
 ---
 
-# 129. SVG security
+### 129. SVG security
 
 SVG deberá considerarse contenido activo.
 
@@ -1803,19 +1804,19 @@ Puede contener:
 
 ---
 
-# 130. Inline SVG
+### 130. Inline SVG
 
 Solo deberá permitirse desde fuentes confiables o tras sanitización específica.
 
 ---
 
-# 131. Uploaded SVG
+### 131. Uploaded SVG
 
 Por defecto deberá servirse como descarga o desde un origen aislado, no inline en la aplicación principal.
 
 ---
 
-# 132. HTML base tag
+### 132. HTML base tag
 
 El tag `<base>` podrá alterar resolución de URLs.
 
@@ -1823,31 +1824,31 @@ Deberá estar prohibido en contenido sanitizado.
 
 ---
 
-# 133. Meta refresh
+### 133. Meta refresh
 
 Deberá prohibirse en contenido de usuario.
 
 ---
 
-# 134. Embedded forms
+### 134. Embedded forms
 
 Los formularios dentro de rich text deberán eliminarse por defecto.
 
 ---
 
-# 135. Iframes
+### 135. Iframes
 
 Deberán estar prohibidos salvo allowlist explícita de orígenes.
 
 ---
 
-# 136. Sandboxed iframe
+### 136. Sandboxed iframe
 
 Cuando se permita embedding, deberá preferirse `sandbox` con capacidades mínimas.
 
 ---
 
-# 137. HTML comments
+### 137. HTML comments
 
 Pueden revelar información interna.
 
@@ -1855,13 +1856,13 @@ El build de producción podrá eliminar comentarios no necesarios.
 
 ---
 
-# 138. Source maps y HTML
+### 138. Source maps y HTML
 
 No deberán exponerse referencias a source maps internos en producción si contienen rutas o código sensible.
 
 ---
 
-# 139. Debug toolbar
+### 139. Debug toolbar
 
 No deberá inyectarse en respuestas:
 
@@ -1873,13 +1874,13 @@ No deberá inyectarse en respuestas:
 
 ---
 
-# 140. Content Security Policy
+### 140. Content Security Policy
 
 CSP será el principal mecanismo browser-side para limitar ejecución de contenido.
 
 ---
 
-# 141. CSP Engine
+### 141. CSP Engine
 
 ```php
 interface ContentSecurityPolicyEngineInterface
@@ -1893,7 +1894,7 @@ interface ContentSecurityPolicyEngineInterface
 
 ---
 
-# 142. CSP directives
+### 142. CSP directives
 
 El motor deberá soportar al menos:
 
@@ -1915,7 +1916,7 @@ El motor deberá soportar al menos:
 
 ---
 
-# 143. Secure CSP baseline
+### 143. Secure CSP baseline
 
 Baseline conceptual:
 
@@ -1931,7 +1932,7 @@ Deberá adaptarse a las necesidades reales.
 
 ---
 
-# 144. CSP policy composition
+### 144. CSP policy composition
 
 Las políticas podrán provenir de:
 
@@ -1944,25 +1945,25 @@ Las políticas podrán provenir de:
 
 ---
 
-# 145. CSP conflict resolution
+### 145. CSP conflict resolution
 
 La combinación deberá producir la intersección o la opción más restrictiva cuando sea posible.
 
 ---
 
-# 146. CSP widening
+### 146. CSP widening
 
 Una ruta no deberá ampliar una política global sin una capability explícita.
 
 ---
 
-# 147. CSP nonce model
+### 147. CSP nonce model
 
 Los scripts inline autorizados deberán usar nonce por respuesta.
 
 ---
 
-# 148. CspNonce
+### 148. CspNonce
 
 ```php
 final readonly class CspNonce
@@ -1976,7 +1977,7 @@ final readonly class CspNonce
 
 ---
 
-# 149. Nonce generation
+### 149. Nonce generation
 
 El nonce deberá:
 
@@ -1988,49 +1989,49 @@ El nonce deberá:
 
 ---
 
-# 150. Nonce exposure
+### 150. Nonce exposure
 
 Podrá insertarse en HTML generado, pero no deberá persistirse ni registrarse.
 
 ---
 
-# 151. Nonce propagation
+### 151. Nonce propagation
 
 El renderer Volt y el asset manager deberán recibir el nonce mediante contexto seguro.
 
 ---
 
-# 152. Nonce misuse
+### 152. Nonce misuse
 
 No deberá permitirse que contenido de usuario controle el atributo nonce.
 
 ---
 
-# 153. CSP hashes
+### 153. CSP hashes
 
 Para scripts o estilos estáticos inline podrán utilizarse hashes aprobados.
 
 ---
 
-# 154. Hash generation
+### 154. Hash generation
 
 Los hashes deberán corresponder exactamente al contenido emitido.
 
 ---
 
-# 155. Dynamic inline code
+### 155. Dynamic inline code
 
 No deberá depender de hashes si el contenido cambia por request.
 
 ---
 
-# 156. unsafe-inline
+### 156. unsafe-inline
 
 Deberá estar prohibido en perfiles Strict y High Security.
 
 ---
 
-# 157. unsafe-eval
+### 157. unsafe-eval
 
 Deberá evitarse.
 
@@ -2038,19 +2039,19 @@ El frontend runtime de VoltStack deberá diseñarse sin requerirlo.
 
 ---
 
-# 158. strict-dynamic
+### 158. strict-dynamic
 
 Podrá utilizarse cuando la estrategia de carga y compatibilidad lo permitan.
 
 ---
 
-# 159. Script source allowlist
+### 159. Script source allowlist
 
 Los dominios externos deberán declararse explícitamente.
 
 ---
 
-# 160. Wildcard sources
+### 160. Wildcard sources
 
 No deberán permitirse wildcards amplios como:
 
@@ -2063,7 +2064,7 @@ en perfiles estrictos.
 
 ---
 
-# 161. CDN scripts
+### 161. CDN scripts
 
 Scripts de CDN deberán requerir:
 
@@ -2074,7 +2075,7 @@ Scripts de CDN deberán requerir:
 
 ---
 
-# 162. Subresource Integrity
+### 162. Subresource Integrity
 
 ```php
 final readonly class SubresourceIntegrity
@@ -2089,13 +2090,13 @@ final readonly class SubresourceIntegrity
 
 ---
 
-# 163. SRI requirements
+### 163. SRI requirements
 
 Deberá usarse en assets externos estáticos cuando sea viable.
 
 ---
 
-# 164. CSP report mode
+### 164. CSP report mode
 
 VoltStack deberá soportar:
 
@@ -2107,7 +2108,7 @@ para despliegue gradual.
 
 ---
 
-# 165. CSP reports
+### 165. CSP reports
 
 Los reportes son input no confiable.
 
@@ -2121,13 +2122,13 @@ Deberán:
 
 ---
 
-# 166. CSP violation endpoint
+### 166. CSP violation endpoint
 
 Deberá estar aislado de la lógica normal de Controllers cuando sea posible.
 
 ---
 
-# 167. CSP per route
+### 167. CSP per route
 
 Rutas especiales podrán declarar requirements adicionales.
 
@@ -2140,13 +2141,13 @@ Rutas especiales podrán declarar requirements adicionales.
 
 ---
 
-# 168. Component CSP requirements
+### 168. Component CSP requirements
 
 Los componentes podrán declarar necesidades, pero no URLs arbitrarias en runtime.
 
 ---
 
-# 169. Asset manifest integration
+### 169. Asset manifest integration
 
 El asset pipeline deberá aportar:
 
@@ -2159,7 +2160,7 @@ El asset pipeline deberá aportar:
 
 ---
 
-# 170. Resultado de esta entrega
+### 170. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -2178,9 +2179,9 @@ CSP Hashes
 SRI Integration
 CSP Reporting
 ```
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 3
+
 
 **Entrega:** 3 de varias
 **Cobertura de esta entrega:** Secciones 171–260
@@ -2188,7 +2189,7 @@ CSP Reporting
 
 ---
 
-# 171. Trusted Types
+### 171. Trusted Types
 
 Trusted Types deberá considerarse una defensa adicional contra DOM-based XSS.
 
@@ -2206,7 +2207,7 @@ Ejemplos:
 
 ---
 
-# 172. Trusted Types scope
+### 172. Trusted Types scope
 
 Trusted Types aplicará principalmente a:
 
@@ -2220,7 +2221,7 @@ Trusted Types aplicará principalmente a:
 
 ---
 
-# 173. Trusted Types CSP directive
+### 173. Trusted Types CSP directive
 
 El CSP Engine deberá soportar:
 
@@ -2236,7 +2237,7 @@ trusted-types
 
 ---
 
-# 174. Trusted Types enforcement profiles
+### 174. Trusted Types enforcement profiles
 
 ```php
 enum TrustedTypesMode: string
@@ -2249,7 +2250,7 @@ enum TrustedTypesMode: string
 
 ---
 
-# 175. Report-only migration
+### 175. Report-only migration
 
 La adopción recomendada será:
 
@@ -2265,7 +2266,7 @@ Enforced
 
 ---
 
-# 176. Trusted Types policies
+### 176. Trusted Types policies
 
 VoltStack deberá usar políticas con nombres controlados.
 
@@ -2280,13 +2281,13 @@ voltstack-assets
 
 ---
 
-# 177. Policy creation restrictions
+### 177. Policy creation restrictions
 
 La aplicación no deberá crear políticas arbitrarias sin registro previo.
 
 ---
 
-# 178. TrustedTypesPolicyRegistry
+### 178. TrustedTypesPolicyRegistry
 
 ```php
 interface TrustedTypesPolicyRegistryInterface
@@ -2303,7 +2304,7 @@ interface TrustedTypesPolicyRegistryInterface
 
 ---
 
-# 179. TrustedTypesPolicyDefinition
+### 179. TrustedTypesPolicyDefinition
 
 ```php
 final readonly class TrustedTypesPolicyDefinition
@@ -2319,7 +2320,7 @@ final readonly class TrustedTypesPolicyDefinition
 
 ---
 
-# 180. Trusted Types capabilities
+### 180. Trusted Types capabilities
 
 ```php
 enum TrustedTypesCapability: string
@@ -2332,7 +2333,7 @@ enum TrustedTypesCapability: string
 
 ---
 
-# 181. HTML policy
+### 181. HTML policy
 
 La política para crear HTML deberá depender de:
 
@@ -2343,19 +2344,19 @@ La política para crear HTML deberá depender de:
 
 ---
 
-# 182. Script policy
+### 182. Script policy
 
 La creación dinámica de scripts deberá estar prohibida por defecto.
 
 ---
 
-# 183. Script URL policy
+### 183. Script URL policy
 
 Solo deberá aceptar URLs provenientes del asset manifest o de una allowlist congelada.
 
 ---
 
-# 184. Runtime sinks
+### 184. Runtime sinks
 
 El frontend runtime deberá centralizar todos los sinks peligrosos.
 
@@ -2363,7 +2364,7 @@ No deberán existir asignaciones dispersas a `innerHTML`.
 
 ---
 
-# 185. Safe DOM update API
+### 185. Safe DOM update API
 
 ```text
 Volt DOM Patcher
@@ -2377,7 +2378,7 @@ DOM Sink
 
 ---
 
-# 186. Unsafe plugin behavior
+### 186. Unsafe plugin behavior
 
 Un plugin frontend que escriba HTML arbitrario deberá:
 
@@ -2388,7 +2389,7 @@ Un plugin frontend que escriba HTML arbitrario deberá:
 
 ---
 
-# 187. Trusted Types violations
+### 187. Trusted Types violations
 
 Deberán integrarse con:
 
@@ -2399,13 +2400,13 @@ Deberán integrarse con:
 
 ---
 
-# 188. Hydration and Trusted Types
+### 188. Hydration and Trusted Types
 
 Los payloads de hidratación no deberán convertirse directamente en HTML.
 
 ---
 
-# 189. Hydration payload model
+### 189. Hydration payload model
 
 ```text
 JSON State
@@ -2419,7 +2420,7 @@ Safe DOM Operations
 
 ---
 
-# 190. Server-provided HTML fragments
+### 190. Server-provided HTML fragments
 
 Si el protocolo permite fragments HTML, deberán envolverse como:
 
@@ -2437,7 +2438,7 @@ final readonly class TrustedHydrationFragment
 
 ---
 
-# 191. Fragment fingerprints
+### 191. Fragment fingerprints
 
 Un fragment podrá vincularse a:
 
@@ -2448,7 +2449,7 @@ Un fragment podrá vincularse a:
 
 ---
 
-# 192. Fragment policy
+### 192. Fragment policy
 
 Los fragments no deberán incluir:
 
@@ -2460,7 +2461,7 @@ Los fragments no deberán incluir:
 
 ---
 
-# 193. Inline Asset Security
+### 193. Inline Asset Security
 
 Los assets inline incluyen:
 
@@ -2473,7 +2474,7 @@ Los assets inline incluyen:
 
 ---
 
-# 194. Inline script policy
+### 194. Inline script policy
 
 Los scripts inline deberán usar:
 
@@ -2485,19 +2486,19 @@ en ese orden de preferencia según el caso.
 
 ---
 
-# 195. Dynamic inline scripts
+### 195. Dynamic inline scripts
 
 No deberán construirse concatenando datos de usuario.
 
 ---
 
-# 196. Inline JSON
+### 196. Inline JSON
 
 El JSON embebido en HTML deberá codificarse de forma segura.
 
 ---
 
-# 197. JSON script blocks
+### 197. JSON script blocks
 
 Podrá utilizarse:
 
@@ -2514,7 +2515,7 @@ siempre que:
 
 ---
 
-# 198. Script closing sequence
+### 198. Script closing sequence
 
 El encoder deberá impedir que el payload introduzca:
 
@@ -2526,7 +2527,7 @@ de forma ejecutable.
 
 ---
 
-# 199. Hydration script data
+### 199. Hydration script data
 
 Se recomienda emitir estado hidratado mediante:
 
@@ -2537,19 +2538,19 @@ Se recomienda emitir estado hidratado mediante:
 
 ---
 
-# 200. Inline styles
+### 200. Inline styles
 
 Los estilos inline deberán evitarse en perfiles estrictos.
 
 ---
 
-# 201. Style nonces
+### 201. Style nonces
 
 Cuando se requieran estilos inline, podrán usar nonces CSP.
 
 ---
 
-# 202. User-controlled CSS
+### 202. User-controlled CSS
 
 CSS controlado por usuarios deberá tratarse como riesgoso.
 
@@ -2563,7 +2564,7 @@ Puede provocar:
 
 ---
 
-# 203. CSS sanitizer
+### 203. CSS sanitizer
 
 Contenido CSS permitido deberá pasar por un parser y allowlist.
 
@@ -2571,7 +2572,7 @@ No por expresiones regulares simples.
 
 ---
 
-# 204. Dangerous CSS features
+### 204. Dangerous CSS features
 
 Deberán restringirse:
 
@@ -2584,7 +2585,7 @@ Deberán restringirse:
 
 ---
 
-# 205. Inline SVG assets
+### 205. Inline SVG assets
 
 Los SVG propios podrán compilarse como assets confiables.
 
@@ -2592,7 +2593,7 @@ Los SVG dinámicos deberán sanitizarse.
 
 ---
 
-# 206. Import Maps
+### 206. Import Maps
 
 Si VoltStack soporta import maps, estos deberán:
 
@@ -2603,7 +2604,7 @@ Si VoltStack soporta import maps, estos deberán:
 
 ---
 
-# 207. Module scripts
+### 207. Module scripts
 
 El CSP Engine deberá contemplar:
 
@@ -2615,7 +2616,7 @@ El CSP Engine deberá contemplar:
 
 ---
 
-# 208. Preload hints
+### 208. Preload hints
 
 Headers como:
 
@@ -2627,13 +2628,13 @@ deberán construirse desde recursos validados.
 
 ---
 
-# 209. Link header injection
+### 209. Link header injection
 
 Las URLs y parámetros del header `Link` deberán serializarse con un builder seguro.
 
 ---
 
-# 210. Resource hints
+### 210. Resource hints
 
 Se controlarán:
 
@@ -2645,19 +2646,19 @@ Se controlarán:
 
 ---
 
-# 211. Cross-origin resource hints
+### 211. Cross-origin resource hints
 
 No deberán generarse para dominios no aprobados.
 
 ---
 
-# 212. Clickjacking Protection
+### 212. Clickjacking Protection
 
 Clickjacking intenta cargar una aplicación dentro de un frame para engañar al usuario.
 
 ---
 
-# 213. Primary control
+### 213. Primary control
 
 La defensa principal será:
 
@@ -2667,7 +2668,7 @@ Content-Security-Policy: frame-ancestors
 
 ---
 
-# 214. Compatibility control
+### 214. Compatibility control
 
 Podrá emitirse además:
 
@@ -2677,7 +2678,7 @@ X-Frame-Options
 
 ---
 
-# 215. FramePolicy
+### 215. FramePolicy
 
 ```php
 enum FramePolicy: string
@@ -2690,7 +2691,7 @@ enum FramePolicy: string
 
 ---
 
-# 216. Default frame policy
+### 216. Default frame policy
 
 El default recomendado será:
 
@@ -2708,13 +2709,13 @@ para:
 
 ---
 
-# 217. Same-origin framing
+### 217. Same-origin framing
 
 Solo deberá habilitarse cuando una funcionalidad real lo requiera.
 
 ---
 
-# 218. Allowed frame origins
+### 218. Allowed frame origins
 
 Los orígenes deberán ser:
 
@@ -2726,13 +2727,13 @@ Los orígenes deberán ser:
 
 ---
 
-# 219. Dynamic frame origins
+### 219. Dynamic frame origins
 
 No deberán derivarse directamente de parámetros de request.
 
 ---
 
-# 220. Embeddable routes
+### 220. Embeddable routes
 
 Una ruta embebible deberá declarar explícitamente:
 
@@ -2744,13 +2745,13 @@ Una ruta embebible deberá declarar explícitamente:
 
 ---
 
-# 221. Embed token
+### 221. Embed token
 
 Para widgets embebibles podrá requerirse un token scoped.
 
 ---
 
-# 222. Embedded application profile
+### 222. Embedded application profile
 
 El perfil embebido deberá ajustar:
 
@@ -2764,7 +2765,7 @@ El perfil embebido deberá ajustar:
 
 ---
 
-# 223. UI redressing
+### 223. UI redressing
 
 Además de framing, se deberán considerar:
 
@@ -2776,13 +2777,13 @@ Además de framing, se deberán considerar:
 
 ---
 
-# 224. Frame busting JavaScript
+### 224. Frame busting JavaScript
 
 No deberá considerarse una defensa suficiente.
 
 ---
 
-# 225. postMessage security
+### 225. postMessage security
 
 Los componentes embebidos deberán validar:
 
@@ -2794,7 +2795,7 @@ Los componentes embebidos deberán validar:
 
 ---
 
-# 226. Wildcard postMessage
+### 226. Wildcard postMessage
 
 No deberá usarse:
 
@@ -2806,25 +2807,25 @@ para datos sensibles.
 
 ---
 
-# 227. HTTPS Enforcement
+### 227. HTTPS Enforcement
 
 La seguridad del transporte dependerá de HTTPS correctamente aplicado.
 
 ---
 
-# 228. Secure scheme resolution
+### 228. Secure scheme resolution
 
 La aplicación deberá determinar el scheme real únicamente después de validar trusted proxies.
 
 ---
 
-# 229. Direct request scheme
+### 229. Direct request scheme
 
 Sin proxy confiable, se utilizará la información directa de la conexión.
 
 ---
 
-# 230. Proxy-provided scheme
+### 230. Proxy-provided scheme
 
 Headers como:
 
@@ -2835,7 +2836,7 @@ solo serán confiables desde proxies registrados.
 
 ---
 
-# 231. HTTPS redirect
+### 231. HTTPS redirect
 
 Cuando se requiera HTTPS, la redirección deberá usar:
 
@@ -2846,7 +2847,7 @@ Cuando se requiera HTTPS, la redirección deberá usar:
 
 ---
 
-# 232. HTTPS redirect loops
+### 232. HTTPS redirect loops
 
 La configuración deberá detectar:
 
@@ -2857,7 +2858,7 @@ La configuración deberá detectar:
 
 ---
 
-# 233. Sensitive route HTTPS requirement
+### 233. Sensitive route HTTPS requirement
 
 Rutas sensibles no deberán ejecutarse sobre HTTP.
 
@@ -2871,7 +2872,7 @@ Ejemplos:
 
 ---
 
-# 234. Secure transport guard
+### 234. Secure transport guard
 
 ```php
 interface SecureTransportGuardInterface
@@ -2885,13 +2886,13 @@ interface SecureTransportGuardInterface
 
 ---
 
-# 235. Strict-Transport-Security
+### 235. Strict-Transport-Security
 
 HSTS indica al navegador que el dominio deberá utilizar HTTPS.
 
 ---
 
-# 236. HstsPolicy
+### 236. HstsPolicy
 
 ```php
 final readonly class HstsPolicy
@@ -2907,25 +2908,25 @@ final readonly class HstsPolicy
 
 ---
 
-# 237. HSTS emission
+### 237. HSTS emission
 
 Solo deberá emitirse sobre conexiones HTTPS consideradas seguras.
 
 ---
 
-# 238. HSTS default
+### 238. HSTS default
 
 Un perfil de producción podrá usar un `max-age` amplio después de validar la infraestructura.
 
 ---
 
-# 239. includeSubDomains
+### 239. includeSubDomains
 
 Solo deberá activarse cuando todos los subdominios relevantes soporten HTTPS.
 
 ---
 
-# 240. HSTS preload
+### 240. HSTS preload
 
 La opción `preload` implica compromisos operativos adicionales.
 
@@ -2933,25 +2934,25 @@ No deberá activarse automáticamente.
 
 ---
 
-# 241. HSTS rollback risk
+### 241. HSTS rollback risk
 
 Una política larga puede dificultar recuperar subdominios que no soporten HTTPS.
 
 ---
 
-# 242. Development environment
+### 242. Development environment
 
 HSTS deberá deshabilitarse o aislarse en desarrollo local.
 
 ---
 
-# 243. HTTPS downgrade
+### 243. HTTPS downgrade
 
 VoltStack deberá impedir enlaces y redirects que degraden de HTTPS a HTTP en contextos protegidos.
 
 ---
 
-# 244. Mixed content
+### 244. Mixed content
 
 El CSP Engine podrá emitir:
 
@@ -2967,7 +2968,7 @@ block-all-mixed-content
 
 ---
 
-# 245. Secure URL generation
+### 245. Secure URL generation
 
 El URL Generator deberá conocer:
 
@@ -2978,19 +2979,19 @@ El URL Generator deberá conocer:
 
 ---
 
-# 246. Absolute URL security
+### 246. Absolute URL security
 
 Las URLs absolutas no deberán depender de un `Host` no validado.
 
 ---
 
-# 247. Referrer Policy avanzada
+### 247. Referrer Policy avanzada
 
 La política deberá adaptarse a la sensibilidad de la respuesta.
 
 ---
 
-# 248. ReferrerPolicy
+### 248. ReferrerPolicy
 
 ```php
 enum ReferrerPolicy: string
@@ -3005,7 +3006,7 @@ enum ReferrerPolicy: string
 
 ---
 
-# 249. Default referrer policy
+### 249. Default referrer policy
 
 Para navegación general:
 
@@ -3017,7 +3018,7 @@ será un baseline razonable.
 
 ---
 
-# 250. Confidential response policy
+### 250. Confidential response policy
 
 Para respuestas confidenciales:
 
@@ -3035,7 +3036,7 @@ según funcionalidad.
 
 ---
 
-# 251. URL sensitivity
+### 251. URL sensitivity
 
 Datos sensibles no deberán colocarse en URLs.
 
@@ -3043,19 +3044,19 @@ La referrer policy reduce exposición, pero no corrige una URL insegura.
 
 ---
 
-# 252. Query string leakage
+### 252. Query string leakage
 
 Tokens, correos, IDs sensibles y secretos no deberán persistir en query strings.
 
 ---
 
-# 253. Per-route referrer policy
+### 253. Per-route referrer policy
 
 Las rutas podrán endurecer la política, pero no debilitar un hard baseline sin capability.
 
 ---
 
-# 254. Meta referrer
+### 254. Meta referrer
 
 La política deberá emitirse preferentemente como header.
 
@@ -3063,13 +3064,13 @@ El meta tag no sustituye la política de transporte.
 
 ---
 
-# 255. Permissions Policy avanzada
+### 255. Permissions Policy avanzada
 
 Permissions Policy limitará capacidades del navegador por documento y frames.
 
 ---
 
-# 256. PermissionsPolicyEngine
+### 256. PermissionsPolicyEngine
 
 ```php
 interface PermissionsPolicyEngineInterface
@@ -3083,7 +3084,7 @@ interface PermissionsPolicyEngineInterface
 
 ---
 
-# 257. Browser capabilities
+### 257. Browser capabilities
 
 El registry deberá contemplar capacidades como:
 
@@ -3103,13 +3104,13 @@ El registry deberá contemplar capacidades como:
 
 ---
 
-# 258. Default deny
+### 258. Default deny
 
 Las capacidades no utilizadas deberían denegarse.
 
 ---
 
-# 259. Capability allowlists
+### 259. Capability allowlists
 
 Las allowlists podrán incluir:
 
@@ -3121,7 +3122,7 @@ No deberán aceptar input directo del cliente.
 
 ---
 
-# 260. Resultado de esta entrega
+### 260. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -3144,9 +3145,9 @@ Advanced Referrer Policy
 Permissions Policy Foundations
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 4
+
 
 **Entrega:** 4 de varias
 **Cobertura de esta entrega:** Secciones 261–350
@@ -3154,7 +3155,7 @@ Permissions Policy Foundations
 
 ---
 
-# 261. Permissions Policy enforcement
+### 261. Permissions Policy enforcement
 
 Permissions Policy no deberá tratarse como un header decorativo.
 
@@ -3169,7 +3170,7 @@ Su resolución deberá estar conectada con:
 
 ---
 
-# 262. Capability declaration
+### 262. Capability declaration
 
 Toda funcionalidad que requiera una capacidad sensible deberá declararla explícitamente.
 
@@ -3185,7 +3186,7 @@ public function scanDocument(): Response
 
 ---
 
-# 263. BrowserCapabilityScope
+### 263. BrowserCapabilityScope
 
 ```php
 enum BrowserCapabilityScope: string
@@ -3198,7 +3199,7 @@ enum BrowserCapabilityScope: string
 
 ---
 
-# 264. Capability aggregation
+### 264. Capability aggregation
 
 Las capacidades requeridas podrán provenir de:
 
@@ -3212,7 +3213,7 @@ La política final deberá aplicar la unión de requerimientos permitidos y post
 
 ---
 
-# 265. Capability escalation
+### 265. Capability escalation
 
 Una ruta podrá solicitar una capacidad adicional, pero no deberá recibirla cuando:
 
@@ -3224,7 +3225,7 @@ Una ruta podrá solicitar una capacidad adicional, pero no deberá recibirla cua
 
 ---
 
-# 266. Capability downgrade
+### 266. Capability downgrade
 
 El framework podrá reducir permisos en tiempo de ejecución según:
 
@@ -3236,13 +3237,13 @@ El framework podrá reducir permisos en tiempo de ejecución según:
 
 ---
 
-# 267. Runtime capability request
+### 267. Runtime capability request
 
 El frontend no deberá poder ampliar la política enviando metadata en el request.
 
 ---
 
-# 268. Permissions Policy builder
+### 268. Permissions Policy builder
 
 ```php
 interface PermissionsPolicyBuilderInterface
@@ -3256,7 +3257,7 @@ interface PermissionsPolicyBuilderInterface
 
 ---
 
-# 269. Canonical serialization
+### 269. Canonical serialization
 
 La política deberá serializarse de forma determinista.
 
@@ -3269,31 +3270,31 @@ Esto facilita:
 
 ---
 
-# 270. Unsupported directives
+### 270. Unsupported directives
 
 El framework podrá omitir directivas no soportadas por el navegador, pero no deberá sustituirlas por permisos más amplios.
 
 ---
 
-# 271. Iframe permission delegation
+### 271. Iframe permission delegation
 
 Un documento padre deberá delegar explícitamente capacidades a iframes autorizados.
 
 ---
 
-# 272. allow attribute
+### 272. allow attribute
 
 El atributo `allow` de un iframe deberá generarse desde el mismo modelo de capabilities que el header.
 
 ---
 
-# 273. Header-iframe consistency
+### 273. Header-iframe consistency
 
 No deberá existir una delegación en el iframe que contradiga la política global.
 
 ---
 
-# 274. Sensitive capabilities
+### 274. Sensitive capabilities
 
 Deberán considerarse especialmente sensibles:
 
@@ -3309,7 +3310,7 @@ Deberán considerarse especialmente sensibles:
 
 ---
 
-# 275. Permission audit events
+### 275. Permission audit events
 
 Se deberán generar eventos cuando:
 
@@ -3320,7 +3321,7 @@ Se deberán generar eventos cuando:
 
 ---
 
-# 276. Cross-Origin Isolation
+### 276. Cross-Origin Isolation
 
 Cross-origin isolation permite habilitar capacidades avanzadas del navegador con mayor separación de procesos y recursos.
 
@@ -3334,7 +3335,7 @@ Puede ser necesaria para:
 
 ---
 
-# 277. Isolation components
+### 277. Isolation components
 
 El aislamiento moderno combina principalmente:
 
@@ -3346,7 +3347,7 @@ El aislamiento moderno combina principalmente:
 
 ---
 
-# 278. CrossOriginIsolationMode
+### 278. CrossOriginIsolationMode
 
 ```php
 enum CrossOriginIsolationMode: string
@@ -3359,7 +3360,7 @@ enum CrossOriginIsolationMode: string
 
 ---
 
-# 279. Isolation eligibility
+### 279. Isolation eligibility
 
 No todas las rutas deberán usar aislamiento.
 
@@ -3374,7 +3375,7 @@ Podrá ser problemático para páginas con múltiples integraciones externas.
 
 ---
 
-# 280. Isolation profile
+### 280. Isolation profile
 
 ```php
 final readonly class CrossOriginIsolationProfile
@@ -3391,13 +3392,13 @@ final readonly class CrossOriginIsolationProfile
 
 ---
 
-# 281. Cross-Origin-Opener-Policy
+### 281. Cross-Origin-Opener-Policy
 
 COOP controla la relación entre ventanas y browsing context groups.
 
 ---
 
-# 282. COOP values
+### 282. COOP values
 
 ```php
 enum CrossOriginOpenerPolicy: string
@@ -3410,7 +3411,7 @@ enum CrossOriginOpenerPolicy: string
 
 ---
 
-# 283. COOP default
+### 283. COOP default
 
 Para rutas que requieran aislamiento fuerte:
 
@@ -3420,7 +3421,7 @@ same-origin
 
 ---
 
-# 284. Popup compatibility
+### 284. Popup compatibility
 
 `same-origin` puede romper integraciones que dependen de `window.opener`.
 
@@ -3432,7 +3433,7 @@ Ejemplos:
 
 ---
 
-# 285. OAuth routes
+### 285. OAuth routes
 
 Las rutas involucradas en autenticación mediante popup podrán requerir:
 
@@ -3444,7 +3445,7 @@ o un flujo de navegación distinto.
 
 ---
 
-# 286. Opener isolation
+### 286. Opener isolation
 
 La aplicación no deberá depender de `window.opener` sin validar:
 
@@ -3455,13 +3456,13 @@ La aplicación no deberá depender de `window.opener` sin validar:
 
 ---
 
-# 287. Cross-Origin-Embedder-Policy
+### 287. Cross-Origin-Embedder-Policy
 
 COEP controla si el documento puede cargar recursos cross-origin que no concedan permiso explícito.
 
 ---
 
-# 288. COEP values
+### 288. COEP values
 
 ```php
 enum CrossOriginEmbedderPolicy: string
@@ -3474,7 +3475,7 @@ enum CrossOriginEmbedderPolicy: string
 
 ---
 
-# 289. Require-Corp
+### 289. Require-Corp
 
 `require-corp` exigirá que recursos cross-origin:
 
@@ -3483,13 +3484,13 @@ enum CrossOriginEmbedderPolicy: string
 
 ---
 
-# 290. Credentialless
+### 290. Credentialless
 
 `credentialless` podrá facilitar ciertos recursos cross-origin al omitir credenciales, pero deberá evaluarse cuidadosamente.
 
 ---
 
-# 291. COEP compatibility
+### 291. COEP compatibility
 
 Antes de activar COEP se deberán verificar:
 
@@ -3504,13 +3505,13 @@ Antes de activar COEP se deberán verificar:
 
 ---
 
-# 292. Cross-Origin-Resource-Policy
+### 292. Cross-Origin-Resource-Policy
 
 CORP permite que un recurso declare quién puede cargarlo.
 
 ---
 
-# 293. CORP values
+### 293. CORP values
 
 ```php
 enum CrossOriginResourcePolicy: string
@@ -3523,7 +3524,7 @@ enum CrossOriginResourcePolicy: string
 
 ---
 
-# 294. Default resource policy
+### 294. Default resource policy
 
 Para recursos privados:
 
@@ -3539,7 +3540,7 @@ same-site
 
 ---
 
-# 295. Public assets
+### 295. Public assets
 
 Un asset público destinado a múltiples orígenes podrá declarar:
 
@@ -3551,7 +3552,7 @@ solo cuando esa distribución sea intencional.
 
 ---
 
-# 296. Resource classification
+### 296. Resource classification
 
 El CORP deberá resolverse según:
 
@@ -3563,13 +3564,13 @@ El CORP deberá resolverse según:
 
 ---
 
-# 297. API responses and CORP
+### 297. API responses and CORP
 
 Las respuestas API privadas no deberán quedar cargables como recursos cross-origin no autorizados.
 
 ---
 
-# 298. Cross-origin isolation validator
+### 298. Cross-origin isolation validator
 
 ```php
 interface CrossOriginIsolationValidatorInterface
@@ -3583,7 +3584,7 @@ interface CrossOriginIsolationValidatorInterface
 
 ---
 
-# 299. Isolation consistency
+### 299. Isolation consistency
 
 El validator deberá comprobar:
 
@@ -3597,19 +3598,19 @@ El validator deberá comprobar:
 
 ---
 
-# 300. Report-only headers
+### 300. Report-only headers
 
 VoltStack podrá emitir variantes report-only durante migración cuando el navegador las soporte.
 
 ---
 
-# 301. Isolation reports
+### 301. Isolation reports
 
 Los reportes deberán tratarse como input no confiable y pasar por límites de tamaño y frecuencia.
 
 ---
 
-# 302. Origin-Agent-Cluster
+### 302. Origin-Agent-Cluster
 
 El header:
 
@@ -3621,19 +3622,19 @@ puede solicitar aislamiento por origen.
 
 ---
 
-# 303. Origin agent cluster policy
+### 303. Origin agent cluster policy
 
 Podrá habilitarse para aplicaciones que quieran evitar compartir ciertos recursos de proceso entre orígenes relacionados.
 
 ---
 
-# 304. Agent cluster compatibility
+### 304. Agent cluster compatibility
 
 No deberá asumirse que todos los navegadores aplicarán exactamente el mismo comportamiento.
 
 ---
 
-# 305. Browser isolation profiles
+### 305. Browser isolation profiles
 
 ```php
 enum BrowserIsolationProfile: string
@@ -3648,7 +3649,7 @@ enum BrowserIsolationProfile: string
 
 ---
 
-# 306. Standard profile
+### 306. Standard profile
 
 Podrá usar:
 
@@ -3659,7 +3660,7 @@ Podrá usar:
 
 ---
 
-# 307. Embedded profile
+### 307. Embedded profile
 
 Deberá coordinar:
 
@@ -3672,7 +3673,7 @@ Deberá coordinar:
 
 ---
 
-# 308. CrossOriginIsolated profile
+### 308. CrossOriginIsolated profile
 
 Requerirá:
 
@@ -3684,13 +3685,13 @@ Requerirá:
 
 ---
 
-# 309. OAuthPopup profile
+### 309. OAuthPopup profile
 
 Deberá preservar compatibilidad con el popup sin debilitar el resto de la aplicación.
 
 ---
 
-# 310. LegacyCompatible profile
+### 310. LegacyCompatible profile
 
 Podrá omitir mecanismos no soportados, pero mantendrá:
 
@@ -3702,7 +3703,7 @@ Podrá omitir mecanismos no soportados, pero mantendrá:
 
 ---
 
-# 311. CORS Security Model
+### 311. CORS Security Model
 
 CORS controla qué orígenes pueden leer respuestas desde navegadores.
 
@@ -3710,13 +3711,13 @@ No es un mecanismo general de autenticación.
 
 ---
 
-# 312. CORS misconception
+### 312. CORS misconception
 
 Permitir un origen no implica que ese origen sea confiable para todas las operaciones.
 
 ---
 
-# 313. CORS trust boundary
+### 313. CORS trust boundary
 
 ```text
 Browser Origin
@@ -3734,7 +3735,7 @@ Response Header Emission
 
 ---
 
-# 314. CorsPolicy
+### 314. CorsPolicy
 
 ```php
 final readonly class CorsPolicy
@@ -3754,7 +3755,7 @@ final readonly class CorsPolicy
 
 ---
 
-# 315. CORS policy resolution
+### 315. CORS policy resolution
 
 Las políticas podrán definirse por:
 
@@ -3767,7 +3768,7 @@ Las políticas podrán definirse por:
 
 ---
 
-# 316. Default CORS policy
+### 316. Default CORS policy
 
 Por defecto:
 
@@ -3777,7 +3778,7 @@ No cross-origin access
 
 ---
 
-# 317. Origin header trust
+### 317. Origin header trust
 
 `Origin` es input no confiable.
 
@@ -3792,7 +3793,7 @@ Deberá:
 
 ---
 
-# 318. Origin structure
+### 318. Origin structure
 
 Un origin válido estará formado por:
 
@@ -3804,7 +3805,7 @@ No incluye path, query ni fragment.
 
 ---
 
-# 319. Null origin
+### 319. Null origin
 
 El valor:
 
@@ -3823,13 +3824,13 @@ Deberá rechazarse por defecto.
 
 ---
 
-# 320. Exact origin matching
+### 320. Exact origin matching
 
 La estrategia preferida será coincidencia exacta.
 
 ---
 
-# 321. Origin allowlist
+### 321. Origin allowlist
 
 Ejemplo:
 
@@ -3842,7 +3843,7 @@ Ejemplo:
 
 ---
 
-# 322. Wildcard origins
+### 322. Wildcard origins
 
 El uso de:
 
@@ -3854,13 +3855,13 @@ solo deberá permitirse para recursos públicos sin credenciales.
 
 ---
 
-# 323. Wildcard with credentials
+### 323. Wildcard with credentials
 
 No deberá combinarse wildcard origin con credenciales.
 
 ---
 
-# 324. Reflected origins
+### 324. Reflected origins
 
 No deberá reflejarse cualquier `Origin` recibido.
 
@@ -3868,13 +3869,13 @@ Solo podrá reflejarse después de validarlo contra la política.
 
 ---
 
-# 325. Regex origin matchers
+### 325. Regex origin matchers
 
 Deberán evitarse cuando una lista exacta sea suficiente.
 
 ---
 
-# 326. Safe subdomain matcher
+### 326. Safe subdomain matcher
 
 Cuando sea necesario permitir subdominios, deberá utilizarse un matcher estructurado.
 
@@ -3892,7 +3893,7 @@ final readonly class SubdomainOriginMatcher
 
 ---
 
-# 327. Suffix matching risk
+### 327. Suffix matching risk
 
 No deberá validarse mediante:
 
@@ -3908,13 +3909,13 @@ evil-example.com
 
 ---
 
-# 328. Internationalized domains
+### 328. Internationalized domains
 
 Los hosts deberán normalizarse de forma segura antes de comparar.
 
 ---
 
-# 329. Port handling
+### 329. Port handling
 
 El puerto forma parte del origin.
 
@@ -3932,7 +3933,7 @@ son orígenes distintos.
 
 ---
 
-# 330. Dynamic tenant origins
+### 330. Dynamic tenant origins
 
 En sistemas multi-tenant, los origins podrán resolverse desde configuración confiable del tenant.
 
@@ -3940,7 +3941,7 @@ No desde parámetros arbitrarios de la petición.
 
 ---
 
-# 331. Tenant origin registry
+### 331. Tenant origin registry
 
 ```php
 interface TenantOriginRegistryInterface
@@ -3951,13 +3952,13 @@ interface TenantOriginRegistryInterface
 
 ---
 
-# 332. Tenant context validation
+### 332. Tenant context validation
 
 El tenant utilizado para resolver CORS deberá provenir del routing y tenant resolution confiable.
 
 ---
 
-# 333. CORS and authentication
+### 333. CORS and authentication
 
 CORS no sustituye:
 
@@ -3968,7 +3969,7 @@ CORS no sustituye:
 
 ---
 
-# 334. Credentialed CORS
+### 334. Credentialed CORS
 
 Cuando `allowCredentials` sea verdadero:
 
@@ -3980,19 +3981,19 @@ Cuando `allowCredentials` sea verdadero:
 
 ---
 
-# 335. Access-Control-Allow-Credentials
+### 335. Access-Control-Allow-Credentials
 
 Solo deberá emitirse cuando la ruta realmente admita credenciales cross-origin.
 
 ---
 
-# 336. Credential minimization
+### 336. Credential minimization
 
 Una API debería preferir tokens explícitos antes que cookies cross-site cuando la arquitectura lo permita.
 
 ---
 
-# 337. Allowed methods
+### 337. Allowed methods
 
 Los métodos deberán declararse explícitamente.
 
@@ -4004,25 +4005,25 @@ Ejemplo:
 
 ---
 
-# 338. Method normalization
+### 338. Method normalization
 
 Los métodos deberán compararse mediante representación canónica.
 
 ---
 
-# 339. Unsafe methods
+### 339. Unsafe methods
 
 Operaciones mutables requerirán controles adicionales.
 
 ---
 
-# 340. Allowed request headers
+### 340. Allowed request headers
 
 Solo deberán permitirse headers necesarios.
 
 ---
 
-# 341. Arbitrary request headers
+### 341. Arbitrary request headers
 
 No deberá reflejarse ciegamente:
 
@@ -4032,7 +4033,7 @@ Access-Control-Request-Headers
 
 ---
 
-# 342. Header name validation
+### 342. Header name validation
 
 Cada header solicitado deberá:
 
@@ -4044,13 +4045,13 @@ Cada header solicitado deberá:
 
 ---
 
-# 343. Exposed response headers
+### 343. Exposed response headers
 
 Los headers visibles al frontend cross-origin deberán limitarse.
 
 ---
 
-# 344. Sensitive exposed headers
+### 344. Sensitive exposed headers
 
 No deberán exponerse:
 
@@ -4062,13 +4063,13 @@ No deberán exponerse:
 
 ---
 
-# 345. CORS preflight
+### 345. CORS preflight
 
 Las peticiones `OPTIONS` de preflight deberán resolverse antes de ejecutar lógica de negocio.
 
 ---
 
-# 346. Preflight validator
+### 346. Preflight validator
 
 ```php
 interface CorsPreflightValidatorInterface
@@ -4082,7 +4083,7 @@ interface CorsPreflightValidatorInterface
 
 ---
 
-# 347. Preflight inputs
+### 347. Preflight inputs
 
 Deberá validar:
 
@@ -4095,19 +4096,19 @@ Deberá validar:
 
 ---
 
-# 348. Preflight authentication
+### 348. Preflight authentication
 
 Normalmente el preflight no deberá requerir sesión de aplicación para responder, pero tampoco deberá revelar información sensible sobre rutas internas.
 
 ---
 
-# 349. Route disclosure
+### 349. Route disclosure
 
 VoltStack deberá evitar diferencias excesivas que permitan enumerar rutas protegidas mediante preflight.
 
 ---
 
-# 350. Resultado de esta entrega
+### 350. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -4126,16 +4127,16 @@ Credentialed CORS
 Tenant-Aware CORS
 Preflight Foundations
 ```
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 5
+
 
 **Entrega:** 5 de varias
 **Cobertura:** Secciones **351–440**
 
 ---
 
-# 351. Preflight Response Generation
+### 351. Preflight Response Generation
 
 Las respuestas a solicitudes **CORS Preflight** deberán generarse completamente antes de que el request alcance el pipeline de Controllers.
 
@@ -4160,7 +4161,7 @@ Terminate Request
 
 ---
 
-# 352. OPTIONS Short-Circuit
+### 352. OPTIONS Short-Circuit
 
 Cuando una petición corresponda a un **Preflight válido**, el framework deberá finalizar inmediatamente el procesamiento.
 
@@ -4175,7 +4176,7 @@ No deberán ejecutarse:
 
 ---
 
-# 353. Preflight Response Builder
+### 353. Preflight Response Builder
 
 ```php
 interface CorsPreflightResponseBuilderInterface
@@ -4189,7 +4190,7 @@ interface CorsPreflightResponseBuilderInterface
 
 ---
 
-# 354. Invalid Preflight
+### 354. Invalid Preflight
 
 Las solicitudes inválidas deberán responder con un error controlado.
 
@@ -4202,19 +4203,19 @@ Nunca deberán revelar:
 
 ---
 
-# 355. Missing Origin
+### 355. Missing Origin
 
 Una petición OPTIONS sin Origin no deberá tratarse automáticamente como Preflight.
 
 ---
 
-# 356. Missing Access-Control-Request-Method
+### 356. Missing Access-Control-Request-Method
 
 La ausencia del encabezado correspondiente impedirá considerar la petición como Preflight.
 
 ---
 
-# 357. Unsupported Requested Method
+### 357. Unsupported Requested Method
 
 Si el método solicitado no pertenece a la política CORS:
 
@@ -4227,13 +4228,13 @@ la petición deberá rechazarse.
 
 ---
 
-# 358. Unsupported Requested Headers
+### 358. Unsupported Requested Headers
 
 Los encabezados solicitados deberán validarse individualmente.
 
 ---
 
-# 359. Canonical Header Comparison
+### 359. Canonical Header Comparison
 
 La comparación utilizará nombres normalizados.
 
@@ -4247,7 +4248,7 @@ representan el mismo encabezado.
 
 ---
 
-# 360. Access-Control-Max-Age
+### 360. Access-Control-Max-Age
 
 El tiempo de cache del Preflight deberá configurarse cuidadosamente.
 
@@ -4255,7 +4256,7 @@ No deberá exceder políticas corporativas.
 
 ---
 
-# 361. Preflight Cache
+### 361. Preflight Cache
 
 Los navegadores pueden reutilizar la respuesta.
 
@@ -4263,7 +4264,7 @@ El framework deberá generar respuestas deterministas.
 
 ---
 
-# 362. Vary Header
+### 362. Vary Header
 
 Cuando corresponda deberá emitirse:
 
@@ -4282,13 +4283,13 @@ Access-Control-Request-Headers
 
 ---
 
-# 363. Cache Poisoning Prevention
+### 363. Cache Poisoning Prevention
 
 Nunca deberá mezclarse una respuesta CORS entre distintos orígenes.
 
 ---
 
-# 364. Response Reuse
+### 364. Response Reuse
 
 Las respuestas cacheadas deberán depender de:
 
@@ -4299,7 +4300,7 @@ Las respuestas cacheadas deberán depender de:
 
 ---
 
-# 365. Preflight Metrics
+### 365. Preflight Metrics
 
 Se recomienda registrar:
 
@@ -4312,13 +4313,13 @@ Se recomienda registrar:
 
 ---
 
-# 366. Private Network Access
+### 366. Private Network Access
 
 Los navegadores modernos introducen restricciones para recursos de redes privadas.
 
 ---
 
-# 367. PNA Policy
+### 367. PNA Policy
 
 ```php
 enum PrivateNetworkPolicy
@@ -4331,7 +4332,7 @@ enum PrivateNetworkPolicy
 
 ---
 
-# 368. Access-Control-Allow-Private-Network
+### 368. Access-Control-Allow-Private-Network
 
 Solo deberá emitirse cuando:
 
@@ -4341,25 +4342,25 @@ Solo deberá emitirse cuando:
 
 ---
 
-# 369. Internal APIs
+### 369. Internal APIs
 
 Las APIs administrativas no deberán habilitar PNA por defecto.
 
 ---
 
-# 370. Local Network Exposure
+### 370. Local Network Exposure
 
 El framework deberá impedir exponer accidentalmente servicios internos mediante configuraciones CORS incorrectas.
 
 ---
 
-# 371. CSRF Security Model
+### 371. CSRF Security Model
 
 Cross Site Request Forgery sigue siendo una amenaza para aplicaciones basadas en cookies.
 
 ---
 
-# 372. Threat Model
+### 372. Threat Model
 
 ```text
 Victim Browser
@@ -4375,7 +4376,7 @@ Protected Endpoint
 
 ---
 
-# 373. CSRF Protection Scope
+### 373. CSRF Protection Scope
 
 La protección deberá aplicarse sobre:
 
@@ -4389,7 +4390,7 @@ La protección deberá aplicarse sobre:
 
 ---
 
-# 374. Safe Methods
+### 374. Safe Methods
 
 Por defecto:
 
@@ -4404,7 +4405,7 @@ no deberán modificar estado.
 
 ---
 
-# 375. Unsafe Methods
+### 375. Unsafe Methods
 
 Se consideran:
 
@@ -4417,7 +4418,7 @@ y cualquier método personalizado que modifique recursos.
 
 ---
 
-# 376. CsrfProtectionMode
+### 376. CsrfProtectionMode
 
 ```php
 enum CsrfProtectionMode
@@ -4431,13 +4432,13 @@ enum CsrfProtectionMode
 
 ---
 
-# 377. Default Strategy
+### 377. Default Strategy
 
 VoltStack utilizará tokens sincronizados como estrategia principal.
 
 ---
 
-# 378. CsrfToken
+### 378. CsrfToken
 
 ```php
 final readonly class CsrfToken
@@ -4452,19 +4453,19 @@ final readonly class CsrfToken
 
 ---
 
-# 379. Token Entropy
+### 379. Token Entropy
 
 Los tokens deberán generarse mediante un RNG criptográficamente seguro.
 
 ---
 
-# 380. Token Length
+### 380. Token Length
 
 Se recomienda una longitud mínima equivalente a 256 bits de entropía.
 
 ---
 
-# 381. Token Rotation
+### 381. Token Rotation
 
 Podrá configurarse:
 
@@ -4475,31 +4476,31 @@ Podrá configurarse:
 
 ---
 
-# 382. Token Lifetime
+### 382. Token Lifetime
 
 Los tokens expirados deberán rechazarse.
 
 ---
 
-# 383. Session Binding
+### 383. Session Binding
 
 El token deberá estar asociado a la sesión correspondiente.
 
 ---
 
-# 384. User Binding
+### 384. User Binding
 
 Opcionalmente podrá asociarse también al usuario autenticado.
 
 ---
 
-# 385. Double Submit Cookies
+### 385. Double Submit Cookies
 
 VoltStack soportará esta estrategia para escenarios específicos.
 
 ---
 
-# 386. Double Submit Validation
+### 386. Double Submit Validation
 
 ```text
 Cookie
@@ -4513,37 +4514,37 @@ Constant Time Compare
 
 ---
 
-# 387. Constant-Time Comparison
+### 387. Constant-Time Comparison
 
 Las comparaciones de tokens deberán evitar ataques por timing.
 
 ---
 
-# 388. Missing Token
+### 388. Missing Token
 
 La ausencia del token deberá producir rechazo inmediato.
 
 ---
 
-# 389. Invalid Token
+### 389. Invalid Token
 
 Los tokens inválidos no deberán indicar cuál parte falló.
 
 ---
 
-# 390. Replay Protection
+### 390. Replay Protection
 
 Podrá habilitarse protección contra reutilización de tokens en operaciones críticas.
 
 ---
 
-# 391. SPA CSRF
+### 391. SPA CSRF
 
 El runtime SPA deberá transportar automáticamente el token.
 
 ---
 
-# 392. Volt Protocol CSRF
+### 392. Volt Protocol CSRF
 
 El protocolo Volt incorporará el token dentro del contexto de hidratación.
 
@@ -4551,13 +4552,13 @@ Nunca en URLs.
 
 ---
 
-# 393. Hydration Requests
+### 393. Hydration Requests
 
 Todas las solicitudes de hidratación mutables deberán validar CSRF.
 
 ---
 
-# 394. AJAX Protection
+### 394. AJAX Protection
 
 Las solicitudes AJAX deberán incluir:
 
@@ -4569,31 +4570,31 @@ o el encabezado configurado.
 
 ---
 
-# 395. API Tokens
+### 395. API Tokens
 
 Las APIs autenticadas mediante Bearer Tokens podrán deshabilitar CSRF cuando no utilicen cookies.
 
 ---
 
-# 396. Stateless APIs
+### 396. Stateless APIs
 
 Las APIs verdaderamente stateless no requerirán protección CSRF.
 
 ---
 
-# 397. Mixed Authentication
+### 397. Mixed Authentication
 
 Aplicaciones híbridas deberán evaluar individualmente cada endpoint.
 
 ---
 
-# 398. Cookie Security
+### 398. Cookie Security
 
 Las cookies representan uno de los activos más sensibles del transporte HTTP.
 
 ---
 
-# 399. SecureCookie
+### 399. SecureCookie
 
 ```php
 final readonly class SecureCookie
@@ -4608,19 +4609,19 @@ final readonly class SecureCookie
 
 ---
 
-# 400. Cookie Validation
+### 400. Cookie Validation
 
 Toda cookie deberá validarse antes de emitirse.
 
 ---
 
-# 401. Cookie Name Rules
+### 401. Cookie Name Rules
 
 Los nombres deberán cumplir RFC y evitar caracteres ambiguos.
 
 ---
 
-# 402. Cookie Prefixes
+### 402. Cookie Prefixes
 
 Se soportarán:
 
@@ -4631,7 +4632,7 @@ __Secure-
 
 ---
 
-# 403. __Host-
+### 403. __Host-
 
 Una cookie con este prefijo deberá cumplir:
 
@@ -4641,7 +4642,7 @@ Una cookie con este prefijo deberá cumplir:
 
 ---
 
-# 404. __Secure-
+### 404. __Secure-
 
 Requerirá:
 
@@ -4651,19 +4652,19 @@ Secure=true
 
 ---
 
-# 405. Secure Attribute
+### 405. Secure Attribute
 
 Las cookies sensibles deberán marcarse siempre como Secure.
 
 ---
 
-# 406. HttpOnly
+### 406. HttpOnly
 
 Las cookies de sesión deberán utilizar HttpOnly.
 
 ---
 
-# 407. SameSite
+### 407. SameSite
 
 ```php
 enum SameSitePolicy
@@ -4676,7 +4677,7 @@ enum SameSitePolicy
 
 ---
 
-# 408. Default SameSite
+### 408. Default SameSite
 
 Se recomienda:
 
@@ -4688,13 +4689,13 @@ para la mayoría de aplicaciones.
 
 ---
 
-# 409. Strict Mode
+### 409. Strict Mode
 
 Ideal para operaciones altamente sensibles.
 
 ---
 
-# 410. None Mode
+### 410. None Mode
 
 Solo deberá utilizarse junto con:
 
@@ -4704,19 +4705,19 @@ Secure
 
 ---
 
-# 411. Cookie Path
+### 411. Cookie Path
 
 El Path deberá limitar el alcance cuando sea posible.
 
 ---
 
-# 412. Cookie Domain
+### 412. Cookie Domain
 
 El Domain deberá minimizarse.
 
 ---
 
-# 413. Cookie Lifetime
+### 413. Cookie Lifetime
 
 Se distinguirán:
 
@@ -4726,19 +4727,19 @@ Se distinguirán:
 
 ---
 
-# 414. Session Cookie
+### 414. Session Cookie
 
 Las cookies de sesión deberán expirar al finalizar la sesión del navegador cuando así se configure.
 
 ---
 
-# 415. Session Fixation
+### 415. Session Fixation
 
 VoltStack deberá regenerar el identificador de sesión tras autenticación.
 
 ---
 
-# 416. Session Rotation
+### 416. Session Rotation
 
 También podrá regenerarse después de:
 
@@ -4749,7 +4750,7 @@ También podrá regenerarse después de:
 
 ---
 
-# 417. Session Identifier
+### 417. Session Identifier
 
 Nunca deberá exponerse en:
 
@@ -4759,37 +4760,37 @@ Nunca deberá exponerse en:
 
 ---
 
-# 418. Cookie Encryption
+### 418. Cookie Encryption
 
 Las cookies podrán cifrarse mediante el sistema criptográfico del framework.
 
 ---
 
-# 419. Cookie Signing
+### 419. Cookie Signing
 
 Adicionalmente podrán firmarse.
 
 ---
 
-# 420. Tampering Detection
+### 420. Tampering Detection
 
 Una cookie modificada deberá invalidarse completamente.
 
 ---
 
-# 421. Cookie Serialization
+### 421. Cookie Serialization
 
 El serializador deberá ser determinista.
 
 ---
 
-# 422. Oversized Cookies
+### 422. Oversized Cookies
 
 Se impondrán límites para evitar problemas de interoperabilidad.
 
 ---
 
-# 423. Cookie Limits
+### 423. Cookie Limits
 
 Se controlarán:
 
@@ -4800,19 +4801,19 @@ Se controlarán:
 
 ---
 
-# 424. Third-Party Cookies
+### 424. Third-Party Cookies
 
 Su utilización deberá minimizarse.
 
 ---
 
-# 425. Browser Compatibility
+### 425. Browser Compatibility
 
 Las políticas deberán adaptarse a diferencias conocidas entre navegadores.
 
 ---
 
-# 426. Cookie Audit
+### 426. Cookie Audit
 
 Se registrarán:
 
@@ -4823,7 +4824,7 @@ Se registrarán:
 
 ---
 
-# 427. SecureCookieBag
+### 427. SecureCookieBag
 
 ```php
 interface SecureCookieBagInterface
@@ -4836,19 +4837,19 @@ interface SecureCookieBagInterface
 
 ---
 
-# 428. Cookie Freeze
+### 428. Cookie Freeze
 
 Después del freeze ninguna cookie podrá modificarse.
 
 ---
 
-# 429. Immutable Response Cookies
+### 429. Immutable Response Cookies
 
 Las cookies formarán parte de la respuesta inmutable.
 
 ---
 
-# 430. Cookie Validation Pipeline
+### 430. Cookie Validation Pipeline
 
 ```text
 Create
@@ -4866,7 +4867,7 @@ Emit
 
 ---
 
-# 431. Session Security Context
+### 431. Session Security Context
 
 El contexto de transporte deberá conocer:
 
@@ -4877,19 +4878,19 @@ El contexto de transporte deberá conocer:
 
 ---
 
-# 432. Tenant Isolation
+### 432. Tenant Isolation
 
 Las cookies de un tenant no deberán interferir con otro.
 
 ---
 
-# 433. Multi-Domain Deployments
+### 433. Multi-Domain Deployments
 
 Se soportarán políticas independientes por dominio.
 
 ---
 
-# 434. Logout
+### 434. Logout
 
 El cierre de sesión deberá invalidar:
 
@@ -4900,13 +4901,13 @@ El cierre de sesión deberá invalidar:
 
 ---
 
-# 435. Forced Logout
+### 435. Forced Logout
 
 El sistema podrá invalidar sesiones comprometidas globalmente.
 
 ---
 
-# 436. Cookie Metrics
+### 436. Cookie Metrics
 
 Se recopilarán métricas sobre:
 
@@ -4917,7 +4918,7 @@ Se recopilarán métricas sobre:
 
 ---
 
-# 437. Security Events
+### 437. Security Events
 
 Eventos relevantes:
 
@@ -4928,7 +4929,7 @@ Eventos relevantes:
 
 ---
 
-# 438. Testing Strategy
+### 438. Testing Strategy
 
 Se incluirán pruebas para:
 
@@ -4941,7 +4942,7 @@ Se incluirán pruebas para:
 
 ---
 
-# 439. ADR
+### 439. ADR
 
 **ADR-093**
 
@@ -4949,7 +4950,7 @@ Se incluirán pruebas para:
 
 ---
 
-# 440. Resultado de esta entrega
+### 440. Resultado de esta entrega
 
 Esta entrega introduce:
 
@@ -4966,9 +4967,9 @@ Esta entrega introduce:
 ✓ Cookie Signing
 ✓ Multi-Tenant Cookie Isolation
 ```
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 6
+
 
 **Entrega:** 6 de varias
 **Cobertura:** Secciones **441–540**
@@ -4976,7 +4977,7 @@ Esta entrega introduce:
 
 ---
 
-# 441. Redirect Security Model
+### 441. Redirect Security Model
 
 Las redirecciones representan una transición de confianza entre:
 
@@ -4999,7 +5000,7 @@ Una redirección incorrectamente validada puede provocar:
 
 ---
 
-# 442. Redirect pipeline
+### 442. Redirect pipeline
 
 ```text
 Redirect Request
@@ -5025,7 +5026,7 @@ Emission
 
 ---
 
-# 443. RedirectResponse
+### 443. RedirectResponse
 
 ```php
 final class RedirectResponse extends SecureHttpResponse
@@ -5041,7 +5042,7 @@ final class RedirectResponse extends SecureHttpResponse
 
 ---
 
-# 444. RedirectTarget
+### 444. RedirectTarget
 
 ```php
 final readonly class RedirectTarget
@@ -5056,7 +5057,7 @@ final readonly class RedirectTarget
 
 ---
 
-# 445. RedirectTargetType
+### 445. RedirectTargetType
 
 ```php
 enum RedirectTargetType: string
@@ -5071,7 +5072,7 @@ enum RedirectTargetType: string
 
 ---
 
-# 446. Internal routes
+### 446. Internal routes
 
 Las redirecciones internas deberán generarse preferentemente mediante nombres de ruta.
 
@@ -5084,7 +5085,7 @@ return Response::redirectToRoute(
 
 ---
 
-# 447. Route-based redirects
+### 447. Route-based redirects
 
 El URL Generator deberá:
 
@@ -5097,13 +5098,13 @@ El URL Generator deberá:
 
 ---
 
-# 448. Raw redirect URLs
+### 448. Raw redirect URLs
 
 Las URLs crudas deberán considerarse no confiables hasta validación.
 
 ---
 
-# 449. Open redirect
+### 449. Open redirect
 
 Nunca deberá utilizarse directamente un valor como:
 
@@ -5115,7 +5116,7 @@ para construir el header `Location`.
 
 ---
 
-# 450. Safe return URL
+### 450. Safe return URL
 
 Los parámetros de retorno deberán transformarse en un objeto validado.
 
@@ -5132,13 +5133,13 @@ final readonly class SafeReturnUrl
 
 ---
 
-# 451. Relative redirects
+### 451. Relative redirects
 
 Las redirecciones relativas internas serán preferibles cuando no se necesite una URL absoluta.
 
 ---
 
-# 452. Scheme validation
+### 452. Scheme validation
 
 Solo deberán permitirse schemes explícitamente soportados.
 
@@ -5151,7 +5152,7 @@ http en desarrollo controlado
 
 ---
 
-# 453. Dangerous redirect schemes
+### 453. Dangerous redirect schemes
 
 Deberán rechazarse:
 
@@ -5167,7 +5168,7 @@ salvo capacidades internas extraordinarias y aisladas.
 
 ---
 
-# 454. Protocol-relative URLs
+### 454. Protocol-relative URLs
 
 Las URLs como:
 
@@ -5181,7 +5182,7 @@ No deberán heredarse silenciosamente del scheme actual.
 
 ---
 
-# 455. Backslash normalization
+### 455. Backslash normalization
 
 Los parsers deberán controlar diferencias entre:
 
@@ -5194,7 +5195,7 @@ para evitar interpretaciones divergentes entre servidor y navegador.
 
 ---
 
-# 456. Encoded separators
+### 456. Encoded separators
 
 Deberán validarse secuencias como:
 
@@ -5208,7 +5209,7 @@ cuando puedan cambiar la interpretación del destino.
 
 ---
 
-# 457. User information in URLs
+### 457. User information in URLs
 
 No deberán permitirse destinos con credenciales embebidas.
 
@@ -5220,7 +5221,7 @@ https://trusted.example@evil.example
 
 ---
 
-# 458. Host normalization
+### 458. Host normalization
 
 El host deberá:
 
@@ -5233,7 +5234,7 @@ El host deberá:
 
 ---
 
-# 459. Same-origin redirect
+### 459. Same-origin redirect
 
 Una URL solo será same-origin si coinciden:
 
@@ -5245,7 +5246,7 @@ port
 
 ---
 
-# 460. Same-site redirect
+### 460. Same-site redirect
 
 Same-site no deberá confundirse con same-origin.
 
@@ -5253,13 +5254,13 @@ Podrá involucrar subdominios distintos y riesgos diferentes.
 
 ---
 
-# 461. Trusted external redirects
+### 461. Trusted external redirects
 
 Las redirecciones externas deberán requerir una política explícita.
 
 ---
 
-# 462. Redirect allowlist
+### 462. Redirect allowlist
 
 ```php
 interface TrustedRedirectOriginRegistryInterface
@@ -5273,7 +5274,7 @@ interface TrustedRedirectOriginRegistryInterface
 
 ---
 
-# 463. Redirect purpose
+### 463. Redirect purpose
 
 Una entrada de allowlist deberá indicar su propósito.
 
@@ -5287,7 +5288,7 @@ Ejemplos:
 
 ---
 
-# 464. Redirect capability
+### 464. Redirect capability
 
 ```php
 enum RedirectCapability: string
@@ -5301,19 +5302,19 @@ enum RedirectCapability: string
 
 ---
 
-# 465. Controller redirect permissions
+### 465. Controller redirect permissions
 
 Los Controllers no deberán emitir redirecciones externas salvo que posean la capability correspondiente.
 
 ---
 
-# 466. Signed redirect state
+### 466. Signed redirect state
 
 Flujos externos deberán utilizar state firmado cuando sea necesario.
 
 ---
 
-# 467. OAuth state
+### 467. OAuth state
 
 Los callbacks OAuth deberán validar:
 
@@ -5326,13 +5327,13 @@ Los callbacks OAuth deberán validar:
 
 ---
 
-# 468. Redirect parameter leakage
+### 468. Redirect parameter leakage
 
 No deberán enviarse secretos en query strings de redirecciones.
 
 ---
 
-# 469. Fragment handling
+### 469. Fragment handling
 
 Los fragments no se envían al servidor, pero pueden contener información visible al frontend.
 
@@ -5340,7 +5341,7 @@ Deberán utilizarse con precaución.
 
 ---
 
-# 470. Redirect status codes
+### 470. Redirect status codes
 
 ```php
 enum RedirectStatus: int
@@ -5355,7 +5356,7 @@ enum RedirectStatus: int
 
 ---
 
-# 471. Method preservation
+### 471. Method preservation
 
 `307` y `308` preservan el método y body.
 
@@ -5363,7 +5364,7 @@ No deberán utilizarse inadvertidamente después de operaciones sensibles.
 
 ---
 
-# 472. Post-Redirect-Get
+### 472. Post-Redirect-Get
 
 Después de formularios mutables se recomienda:
 
@@ -5377,7 +5378,7 @@ GET
 
 ---
 
-# 473. Permanent redirect safety
+### 473. Permanent redirect safety
 
 Los redirects permanentes pueden ser cacheados por clientes e intermediarios.
 
@@ -5385,7 +5386,7 @@ Deberán utilizarse solo cuando el cambio sea estable.
 
 ---
 
-# 474. Redirect loop detection
+### 474. Redirect loop detection
 
 El framework podrá detectar:
 
@@ -5396,7 +5397,7 @@ El framework podrá detectar:
 
 ---
 
-# 475. Redirect audit
+### 475. Redirect audit
 
 Las redirecciones externas deberán poder auditarse con:
 
@@ -5410,19 +5411,19 @@ Las redirecciones externas deberán poder auditarse con:
 
 ---
 
-# 476. Redirect response body
+### 476. Redirect response body
 
 El body opcional de una redirección no deberá reflejar sin escape la URL destino.
 
 ---
 
-# 477. Location header security
+### 477. Location header security
 
 `Location` deberá generarse exclusivamente mediante un serializador de URI seguro.
 
 ---
 
-# 478. File Response Security
+### 478. File Response Security
 
 Las respuestas de archivo pueden exponer:
 
@@ -5436,7 +5437,7 @@ Las respuestas de archivo pueden exponer:
 
 ---
 
-# 479. File response model
+### 479. File response model
 
 ```php
 interface FileResponseInterface
@@ -5451,7 +5452,7 @@ interface FileResponseInterface
 
 ---
 
-# 480. SecureFileSource
+### 480. SecureFileSource
 
 ```php
 interface SecureFileSource
@@ -5468,7 +5469,7 @@ interface SecureFileSource
 
 ---
 
-# 481. File source types
+### 481. File source types
 
 ```php
 enum FileSourceType: string
@@ -5483,13 +5484,13 @@ enum FileSourceType: string
 
 ---
 
-# 482. Raw filesystem paths
+### 482. Raw filesystem paths
 
 Los Controllers no deberán devolver rutas arbitrarias directamente.
 
 ---
 
-# 483. Storage abstraction
+### 483. Storage abstraction
 
 El framework deberá resolver archivos mediante:
 
@@ -5501,7 +5502,7 @@ El framework deberá resolver archivos mediante:
 
 ---
 
-# 484. Path traversal
+### 484. Path traversal
 
 Deberán bloquearse secuencias como:
 
@@ -5515,13 +5516,13 @@ y sus variantes normalizadas.
 
 ---
 
-# 485. Canonical path validation
+### 485. Canonical path validation
 
 La ruta final deberá resolverse y comprobarse dentro de una raíz autorizada.
 
 ---
 
-# 486. Symlink policy
+### 486. Symlink policy
 
 Los enlaces simbólicos deberán:
 
@@ -5531,19 +5532,19 @@ Los enlaces simbólicos deberán:
 
 ---
 
-# 487. Time-of-check to time-of-use
+### 487. Time-of-check to time-of-use
 
 La validación y apertura del archivo deberán minimizar condiciones TOCTOU.
 
 ---
 
-# 488. File descriptors
+### 488. File descriptors
 
 Cuando sea posible, el sistema deberá validar y servir el mismo descriptor abierto.
 
 ---
 
-# 489. Tenant-scoped files
+### 489. Tenant-scoped files
 
 Todo archivo multi-tenant deberá validar:
 
@@ -5557,13 +5558,13 @@ File ownership tenant
 
 ---
 
-# 490. Authorization continuity
+### 490. Authorization continuity
 
 La autorización deberá mantenerse desde la resolución hasta la apertura del stream.
 
 ---
 
-# 491. Temporary files
+### 491. Temporary files
 
 Los archivos temporales deberán:
 
@@ -5575,13 +5576,13 @@ Los archivos temporales deberán:
 
 ---
 
-# 492. Remote files
+### 492. Remote files
 
 No deberá convertirse una URL arbitraria en descarga proxy.
 
 ---
 
-# 493. Server-side request forgery
+### 493. Server-side request forgery
 
 Los archivos remotos deberán pasar por controles SSRF:
 
@@ -5594,13 +5595,13 @@ Los archivos remotos deberán pasar por controles SSRF:
 
 ---
 
-# 494. MIME validation for files
+### 494. MIME validation for files
 
 El tipo MIME deberá resolverse según una política confiable.
 
 ---
 
-# 495. Dangerous inline file types
+### 495. Dangerous inline file types
 
 Deberán tratarse con especial cuidado:
 
@@ -5614,7 +5615,7 @@ Deberán tratarse con especial cuidado:
 
 ---
 
-# 496. Inline vs attachment
+### 496. Inline vs attachment
 
 ```php
 enum ContentDispositionType: string
@@ -5626,13 +5627,13 @@ enum ContentDispositionType: string
 
 ---
 
-# 497. Default disposition
+### 497. Default disposition
 
 Los uploads de usuario deberán servirse como attachment por defecto, especialmente cuando sean contenido activo.
 
 ---
 
-# 498. Safe inline rendering
+### 498. Safe inline rendering
 
 Solo deberá permitirse inline cuando:
 
@@ -5643,7 +5644,7 @@ Solo deberá permitirse inline cuando:
 
 ---
 
-# 499. Content-Disposition builder
+### 499. Content-Disposition builder
 
 ```php
 interface ContentDispositionBuilderInterface
@@ -5657,7 +5658,7 @@ interface ContentDispositionBuilderInterface
 
 ---
 
-# 500. Download filename security
+### 500. Download filename security
 
 Los nombres deberán limpiarse para impedir:
 
@@ -5670,7 +5671,7 @@ Los nombres deberán limpiarse para impedir:
 
 ---
 
-# 501. SafeDownloadFilename
+### 501. SafeDownloadFilename
 
 ```php
 final readonly class SafeDownloadFilename
@@ -5686,13 +5687,13 @@ final readonly class SafeDownloadFilename
 
 ---
 
-# 502. Filename normalization
+### 502. Filename normalization
 
 Se deberá aplicar normalización Unicode consistente.
 
 ---
 
-# 503. Double extensions
+### 503. Double extensions
 
 Nombres como:
 
@@ -5704,25 +5705,25 @@ deberán tratarse como sospechosos.
 
 ---
 
-# 504. Extension-MIME coherence
+### 504. Extension-MIME coherence
 
 La extensión presentada deberá ser coherente con el MIME emitido.
 
 ---
 
-# 505. International filenames
+### 505. International filenames
 
 Se deberá soportar correctamente `filename*` con encoding seguro.
 
 ---
 
-# 506. Header injection in filenames
+### 506. Header injection in filenames
 
 Todo salto de línea deberá provocar rechazo.
 
 ---
 
-# 507. File size limits
+### 507. File size limits
 
 Se deberán definir límites por:
 
@@ -5734,25 +5735,25 @@ Se deberán definir límites por:
 
 ---
 
-# 508. Large file handling
+### 508. Large file handling
 
 Los archivos grandes deberán transmitirse mediante streaming controlado.
 
 ---
 
-# 509. Memory safety
+### 509. Memory safety
 
 No deberán cargarse archivos grandes completamente en memoria.
 
 ---
 
-# 510. Download authorization token
+### 510. Download authorization token
 
 Las descargas temporales podrán utilizar URLs firmadas.
 
 ---
 
-# 511. Signed download URL
+### 511. Signed download URL
 
 ```php
 final readonly class SignedDownloadGrant
@@ -5770,7 +5771,7 @@ final readonly class SignedDownloadGrant
 
 ---
 
-# 512. Signed URL scope
+### 512. Signed URL scope
 
 La firma deberá incluir:
 
@@ -5783,13 +5784,13 @@ La firma deberá incluir:
 
 ---
 
-# 513. Signed URL replay
+### 513. Signed URL replay
 
 Podrá permitirse reutilización limitada o uso único según sensibilidad.
 
 ---
 
-# 514. Download audit events
+### 514. Download audit events
 
 Se deberán registrar:
 
@@ -5803,13 +5804,13 @@ Se deberán registrar:
 
 ---
 
-# 515. Streaming Response Security
+### 515. Streaming Response Security
 
 Streaming modifica el modelo normal porque la respuesta comienza antes de completarse.
 
 ---
 
-# 516. Streaming pipeline
+### 516. Streaming pipeline
 
 ```text
 Authorize
@@ -5831,7 +5832,7 @@ Close or Abort
 
 ---
 
-# 517. Header freeze before stream
+### 517. Header freeze before stream
 
 Una vez enviado el primer byte:
 
@@ -5842,7 +5843,7 @@ Una vez enviado el primer byte:
 
 ---
 
-# 518. StreamResponse
+### 518. StreamResponse
 
 ```php
 final class StreamResponse extends SecureHttpResponse
@@ -5858,7 +5859,7 @@ final class StreamResponse extends SecureHttpResponse
 
 ---
 
-# 519. StreamSecurityPolicy
+### 519. StreamSecurityPolicy
 
 ```php
 final readonly class StreamSecurityPolicy
@@ -5877,31 +5878,31 @@ final readonly class StreamSecurityPolicy
 
 ---
 
-# 520. Bounded streams
+### 520. Bounded streams
 
 Todo stream deberá tener límites o una justificación explícita de operación prolongada.
 
 ---
 
-# 521. Stream cancellation
+### 521. Stream cancellation
 
 El sistema deberá detectar desconexión del cliente y cancelar trabajo innecesario.
 
 ---
 
-# 522. Worker protection
+### 522. Worker protection
 
 Una conexión lenta no deberá monopolizar indefinidamente un worker.
 
 ---
 
-# 523. Backpressure
+### 523. Backpressure
 
 El adapter de transporte deberá respetar backpressure cuando sea posible.
 
 ---
 
-# 524. Slow client attack
+### 524. Slow client attack
 
 Se deberán implementar:
 
@@ -5913,19 +5914,19 @@ Se deberán implementar:
 
 ---
 
-# 525. Output chunk validation
+### 525. Output chunk validation
 
 Los chunks deberán ser compatibles con el tipo de contenido.
 
 ---
 
-# 526. Text stream encoding
+### 526. Text stream encoding
 
 Los streams textuales deberán preservar límites válidos de encoding.
 
 ---
 
-# 527. JSON streaming
+### 527. JSON streaming
 
 No deberá emitirse una secuencia JSON inválida.
 
@@ -5937,7 +5938,7 @@ Podrán usarse formatos explícitos como:
 
 ---
 
-# 528. NDJSON response
+### 528. NDJSON response
 
 ```text
 Content-Type: application/x-ndjson
@@ -5947,13 +5948,13 @@ Cada línea deberá codificarse de forma independiente.
 
 ---
 
-# 529. Stream exceptions
+### 529. Stream exceptions
 
 Una excepción después de iniciar el body no podrá transformarse en una respuesta de error convencional.
 
 ---
 
-# 530. Post-start failures
+### 530. Post-start failures
 
 El sistema deberá:
 
@@ -5965,7 +5966,7 @@ El sistema deberá:
 
 ---
 
-# 531. Stream completion state
+### 531. Stream completion state
 
 ```php
 enum StreamCompletionState: string
@@ -5980,25 +5981,25 @@ enum StreamCompletionState: string
 
 ---
 
-# 532. Output buffering
+### 532. Output buffering
 
 El buffering deberá ser explícito y limitado.
 
 ---
 
-# 533. Nested output buffers
+### 533. Nested output buffers
 
 Los buffers PHP preexistentes deberán inspeccionarse antes del streaming.
 
 ---
 
-# 534. Accidental output
+### 534. Accidental output
 
 Whitespace, warnings o debug output antes de los headers deberán considerarse errores de transporte.
 
 ---
 
-# 535. OutputCaptureGuard
+### 535. OutputCaptureGuard
 
 ```php
 interface OutputCaptureGuardInterface
@@ -6013,13 +6014,13 @@ interface OutputCaptureGuardInterface
 
 ---
 
-# 536. Warning leakage
+### 536. Warning leakage
 
 Warnings, notices y deprecations no deberán mezclarse con el response body en producción.
 
 ---
 
-# 537. Binary stream integrity
+### 537. Binary stream integrity
 
 Los bytes no deberán alterarse mediante:
 
@@ -6030,7 +6031,7 @@ Los bytes no deberán alterarse mediante:
 
 ---
 
-# 538. Chunk audit policy
+### 538. Chunk audit policy
 
 No deberán registrarse cuerpos sensibles completos.
 
@@ -6044,7 +6045,7 @@ El audit deberá limitarse a:
 
 ---
 
-# 539. Stream rate limiting
+### 539. Stream rate limiting
 
 Podrán aplicarse límites por:
 
@@ -6057,7 +6058,7 @@ Podrán aplicarse límites por:
 
 ---
 
-# 540. Resultado de esta entrega
+### 540. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -6081,9 +6082,9 @@ Output Buffer Integrity
 Stream Lifecycle Auditing
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 7
+
 
 **Entrega:** 7 de varias
 **Cobertura:** Secciones **541–640**
@@ -6091,7 +6092,7 @@ Stream Lifecycle Auditing
 
 ---
 
-# 541. Server-Sent Events Security
+### 541. Server-Sent Events Security
 
 Server-Sent Events permiten mantener una conexión HTTP abierta para enviar eventos unidireccionales desde el servidor al cliente.
 
@@ -6109,7 +6110,7 @@ Este modelo introduce riesgos particulares:
 
 ---
 
-# 542. SSE transport profile
+### 542. SSE transport profile
 
 Las respuestas SSE deberán usar un perfil específico.
 
@@ -6125,7 +6126,7 @@ enum EventStreamProfile: string
 
 ---
 
-# 543. SSE response requirements
+### 543. SSE response requirements
 
 Una respuesta SSE deberá emitir como mínimo:
 
@@ -6139,7 +6140,7 @@ La responsabilidad final de `Connection` dependerá del servidor y del adapter d
 
 ---
 
-# 544. SSE content type
+### 544. SSE content type
 
 El content type deberá ser exactamente:
 
@@ -6151,13 +6152,13 @@ con charset compatible cuando aplique.
 
 ---
 
-# 545. SSE cache policy
+### 545. SSE cache policy
 
 Los streams SSE autenticados no deberán almacenarse en caches compartidas.
 
 ---
 
-# 546. SSE response builder
+### 546. SSE response builder
 
 ```php
 interface EventStreamResponseBuilderInterface
@@ -6172,7 +6173,7 @@ interface EventStreamResponseBuilderInterface
 
 ---
 
-# 547. EventStreamResponse
+### 547. EventStreamResponse
 
 ```php
 final class EventStreamResponse extends SecureHttpResponse
@@ -6188,7 +6189,7 @@ final class EventStreamResponse extends SecureHttpResponse
 
 ---
 
-# 548. EventStreamSecurityPolicy
+### 548. EventStreamSecurityPolicy
 
 ```php
 final readonly class EventStreamSecurityPolicy
@@ -6208,7 +6209,7 @@ final readonly class EventStreamSecurityPolicy
 
 ---
 
-# 549. Event source trust
+### 549. Event source trust
 
 Un event source deberá considerarse semiconfiable.
 
@@ -6223,7 +6224,7 @@ Sus eventos deberán pasar por:
 
 ---
 
-# 550. SSE event model
+### 550. SSE event model
 
 ```php
 final readonly class ServerSentEvent
@@ -6240,7 +6241,7 @@ final readonly class ServerSentEvent
 
 ---
 
-# 551. SSE field validation
+### 551. SSE field validation
 
 Los campos permitidos serán:
 
@@ -6253,7 +6254,7 @@ No deberán emitirse campos arbitrarios.
 
 ---
 
-# 552. Event name validation
+### 552. Event name validation
 
 El nombre del evento deberá:
 
@@ -6264,7 +6265,7 @@ El nombre del evento deberá:
 
 ---
 
-# 553. Event ID validation
+### 553. Event ID validation
 
 El ID deberá ser:
 
@@ -6276,13 +6277,13 @@ El ID deberá ser:
 
 ---
 
-# 554. Event data encoding
+### 554. Event data encoding
 
 Cada línea del payload deberá emitirse como una línea `data:` independiente.
 
 ---
 
-# 555. Newline normalization
+### 555. Newline normalization
 
 El encoder deberá normalizar:
 
@@ -6296,7 +6297,7 @@ para impedir que un payload introduzca campos SSE adicionales.
 
 ---
 
-# 556. SSE injection
+### 556. SSE injection
 
 Un valor como:
 
@@ -6309,7 +6310,7 @@ no deberá poder inyectarse como estructura de protocolo desde el contenido de u
 
 ---
 
-# 557. SseEventEncoder
+### 557. SseEventEncoder
 
 ```php
 interface SseEventEncoderInterface
@@ -6322,13 +6323,13 @@ interface SseEventEncoderInterface
 
 ---
 
-# 558. Event payload format
+### 558. Event payload format
 
 Aunque SSE transmite texto, el contenido podrá usar JSON seguro.
 
 ---
 
-# 559. JSON event data
+### 559. JSON event data
 
 ```php
 $event = new ServerSentEvent(
@@ -6340,7 +6341,7 @@ $event = new ServerSentEvent(
 
 ---
 
-# 560. Sensitive data filtering
+### 560. Sensitive data filtering
 
 Antes de codificar un evento deberán aplicarse:
 
@@ -6352,7 +6353,7 @@ Antes de codificar un evento deberán aplicarse:
 
 ---
 
-# 561. Event-level authorization
+### 561. Event-level authorization
 
 No será suficiente autorizar solo al abrir la conexión.
 
@@ -6360,13 +6361,13 @@ Cada evento podrá requerir validación adicional.
 
 ---
 
-# 562. Long-lived authorization
+### 562. Long-lived authorization
 
 Los permisos pueden cambiar mientras la conexión permanece abierta.
 
 ---
 
-# 563. Reauthorization interval
+### 563. Reauthorization interval
 
 ```php
 final readonly class ReauthorizationPolicy
@@ -6382,7 +6383,7 @@ final readonly class ReauthorizationPolicy
 
 ---
 
-# 564. Session expiration during SSE
+### 564. Session expiration during SSE
 
 Cuando expire la sesión, el stream deberá:
 
@@ -6392,13 +6393,13 @@ Cuando expire la sesión, el stream deberá:
 
 ---
 
-# 565. User revocation
+### 565. User revocation
 
 Una revocación de usuario o sesión deberá poder finalizar streams activos.
 
 ---
 
-# 566. Tenant context persistence
+### 566. Tenant context persistence
 
 El tenant context deberá fijarse al abrir la conexión.
 
@@ -6406,13 +6407,13 @@ No podrá cambiarse mediante mensajes del cliente.
 
 ---
 
-# 567. Cross-tenant event leakage
+### 567. Cross-tenant event leakage
 
 Todo evento deberá comprobar que pertenece al tenant vinculado al stream.
 
 ---
 
-# 568. SSE connection registry
+### 568. SSE connection registry
 
 ```php
 interface EventStreamConnectionRegistryInterface
@@ -6431,7 +6432,7 @@ interface EventStreamConnectionRegistryInterface
 
 ---
 
-# 569. Heartbeats
+### 569. Heartbeats
 
 Los heartbeats permiten:
 
@@ -6441,7 +6442,7 @@ Los heartbeats permiten:
 
 ---
 
-# 570. Heartbeat data
+### 570. Heartbeat data
 
 El heartbeat no deberá incluir información sensible.
 
@@ -6453,19 +6454,19 @@ Podrá emitirse como comentario:
 
 ---
 
-# 571. Heartbeat limits
+### 571. Heartbeat limits
 
 Una frecuencia demasiado alta podrá causar carga innecesaria.
 
 ---
 
-# 572. Reconnection security
+### 572. Reconnection security
 
 El navegador puede reconectar automáticamente una conexión SSE.
 
 ---
 
-# 573. Last-Event-ID
+### 573. Last-Event-ID
 
 El cliente podrá enviar:
 
@@ -6477,13 +6478,13 @@ para continuar desde un cursor.
 
 ---
 
-# 574. Last-Event-ID trust
+### 574. Last-Event-ID trust
 
 Este valor será input no confiable.
 
 ---
 
-# 575. Cursor validation
+### 575. Cursor validation
 
 El cursor deberá:
 
@@ -6495,7 +6496,7 @@ El cursor deberá:
 
 ---
 
-# 576. Signed event cursor
+### 576. Signed event cursor
 
 ```php
 final readonly class SignedEventCursor
@@ -6513,25 +6514,25 @@ final readonly class SignedEventCursor
 
 ---
 
-# 577. Cursor replay
+### 577. Cursor replay
 
 La reutilización podrá permitirse solo dentro de la ventana de retención definida.
 
 ---
 
-# 578. Cursor enumeration
+### 578. Cursor enumeration
 
 Los cursores no deberán ser secuenciales cuando eso permita inferir volumen o acceder a eventos ajenos.
 
 ---
 
-# 579. Retry directive
+### 579. Retry directive
 
 El valor `retry` deberá limitarse a un rango permitido.
 
 ---
 
-# 580. Reconnect storm protection
+### 580. Reconnect storm protection
 
 El sistema deberá mitigar reconexiones masivas mediante:
 
@@ -6543,7 +6544,7 @@ El sistema deberá mitigar reconexiones masivas mediante:
 
 ---
 
-# 581. SSE connection limits
+### 581. SSE connection limits
 
 Se definirán límites por:
 
@@ -6556,19 +6557,19 @@ Se definirán límites por:
 
 ---
 
-# 582. Worker model
+### 582. Worker model
 
 En FrankenPHP u otros runtimes persistentes, las conexiones SSE deberán diseñarse para no bloquear recursos desproporcionadamente.
 
 ---
 
-# 583. SSE buffering
+### 583. SSE buffering
 
 Algunos proxies pueden acumular eventos antes de enviarlos.
 
 ---
 
-# 584. Proxy buffering control
+### 584. Proxy buffering control
 
 El adapter podrá emitir headers específicos del proxy cuando estén autorizados.
 
@@ -6576,7 +6577,7 @@ No deberán emitirse headers dependientes de infraestructura desde Controllers.
 
 ---
 
-# 585. SSE compression
+### 585. SSE compression
 
 La compresión puede incrementar latencia por buffering.
 
@@ -6584,7 +6585,7 @@ Deberá estar deshabilitada por defecto salvo validación específica.
 
 ---
 
-# 586. SSE error handling
+### 586. SSE error handling
 
 Una vez iniciado el stream, los errores deberán convertirse en:
 
@@ -6597,7 +6598,7 @@ Nunca en stack trace.
 
 ---
 
-# 587. SSE completion states
+### 587. SSE completion states
 
 ```php
 enum EventStreamCompletionState: string
@@ -6615,7 +6616,7 @@ enum EventStreamCompletionState: string
 
 ---
 
-# 588. Range Request Security
+### 588. Range Request Security
 
 Las solicitudes de rango permiten obtener partes de un recurso.
 
@@ -6630,7 +6631,7 @@ Se utilizan para:
 
 ---
 
-# 589. Range header
+### 589. Range header
 
 El cliente podrá enviar:
 
@@ -6640,13 +6641,13 @@ Range: bytes=0-1023
 
 ---
 
-# 590. Range trust
+### 590. Range trust
 
 `Range` será input no confiable.
 
 ---
 
-# 591. RangeRequestParser
+### 591. RangeRequestParser
 
 ```php
 interface RangeRequestParserInterface
@@ -6660,7 +6661,7 @@ interface RangeRequestParserInterface
 
 ---
 
-# 592. Range units
+### 592. Range units
 
 VoltStack soportará inicialmente:
 
@@ -6672,13 +6673,13 @@ Otros units deberán rechazarse salvo soporte explícito.
 
 ---
 
-# 593. Single-range default
+### 593. Single-range default
 
 Por seguridad y simplicidad podrá permitirse únicamente un rango por request.
 
 ---
 
-# 594. Multi-range requests
+### 594. Multi-range requests
 
 Las respuestas multipart requieren mayor complejidad.
 
@@ -6686,7 +6687,7 @@ Podrán deshabilitarse por defecto.
 
 ---
 
-# 595. Range limits
+### 595. Range limits
 
 Se deberán controlar:
 
@@ -6699,19 +6700,19 @@ Se deberán controlar:
 
 ---
 
-# 596. Overlapping ranges
+### 596. Overlapping ranges
 
 Los rangos solapados deberán rechazarse o normalizarse.
 
 ---
 
-# 597. Range amplification
+### 597. Range amplification
 
 Un atacante podría solicitar múltiples rangos redundantes para aumentar la respuesta.
 
 ---
 
-# 598. Unsatisfiable range
+### 598. Unsatisfiable range
 
 Un rango inválido deberá responder de forma controlada con semántica equivalente a:
 
@@ -6721,13 +6722,13 @@ Un rango inválido deberá responder de forma controlada con semántica equivale
 
 ---
 
-# 599. Content-Range
+### 599. Content-Range
 
 El header deberá construirse exclusivamente desde valores validados.
 
 ---
 
-# 600. Partial response status
+### 600. Partial response status
 
 Una respuesta parcial válida utilizará:
 
@@ -6737,13 +6738,13 @@ Una respuesta parcial válida utilizará:
 
 ---
 
-# 601. Accept-Ranges
+### 601. Accept-Ranges
 
 Solo deberá emitirse cuando el recurso y la política permitan rangos.
 
 ---
 
-# 602. Restricted resources
+### 602. Restricted resources
 
 Los recursos restricted podrán deshabilitar rangos para simplificar:
 
@@ -6754,13 +6755,13 @@ Los recursos restricted podrán deshabilitar rangos para simplificar:
 
 ---
 
-# 603. Range authorization continuity
+### 603. Range authorization continuity
 
 Cada rango deberá mantener la misma autorización del recurso completo.
 
 ---
 
-# 604. Signed URL and range binding
+### 604. Signed URL and range binding
 
 Una URL firmada podrá limitar:
 
@@ -6771,19 +6772,19 @@ Una URL firmada podrá limitar:
 
 ---
 
-# 605. Range cache interaction
+### 605. Range cache interaction
 
 Las respuestas parciales deberán tener políticas coherentes de cache y validators.
 
 ---
 
-# 606. If-Range
+### 606. If-Range
 
 El cliente podrá enviar `If-Range` para condicionar el rango a un validator.
 
 ---
 
-# 607. If-Range validation
+### 607. If-Range validation
 
 Solo deberá procesarse con:
 
@@ -6793,13 +6794,13 @@ Solo deberá procesarse con:
 
 ---
 
-# 608. Stale range protection
+### 608. Stale range protection
 
 Si el validator no coincide, deberá enviarse la representación completa según política.
 
 ---
 
-# 609. Compression Security
+### 609. Compression Security
 
 La compresión reduce tamaño de respuestas, pero modifica:
 
@@ -6811,7 +6812,7 @@ La compresión reduce tamaño de respuestas, pero modifica:
 
 ---
 
-# 610. CompressionPolicy
+### 610. CompressionPolicy
 
 ```php
 final readonly class CompressionPolicy
@@ -6829,7 +6830,7 @@ final readonly class CompressionPolicy
 
 ---
 
-# 611. CompressionMode
+### 611. CompressionMode
 
 ```php
 enum CompressionMode: string
@@ -6842,7 +6843,7 @@ enum CompressionMode: string
 
 ---
 
-# 612. Compression ownership
+### 612. Compression ownership
 
 La compresión deberá pertenecer a:
 
@@ -6855,13 +6856,13 @@ No al Controller.
 
 ---
 
-# 613. Accept-Encoding trust
+### 613. Accept-Encoding trust
 
 El header `Accept-Encoding` será input no confiable y deberá parsearse con límites.
 
 ---
 
-# 614. Supported encodings
+### 614. Supported encodings
 
 Podrán soportarse:
 
@@ -6872,7 +6873,7 @@ Podrán soportarse:
 
 ---
 
-# 615. Encoding negotiation
+### 615. Encoding negotiation
 
 La selección deberá considerar:
 
@@ -6885,7 +6886,7 @@ La selección deberá considerar:
 
 ---
 
-# 616. Incompressible content
+### 616. Incompressible content
 
 No deberá comprimirse contenido ya comprimido como:
 
@@ -6897,13 +6898,13 @@ No deberá comprimirse contenido ya comprimido como:
 
 ---
 
-# 617. BREACH-style side channels
+### 617. BREACH-style side channels
 
 La compresión de respuestas que mezclan secretos y input reflejado puede filtrar información mediante diferencias de tamaño.
 
 ---
 
-# 618. Sensitive compression policy
+### 618. Sensitive compression policy
 
 Las respuestas que contengan:
 
@@ -6916,7 +6917,7 @@ podrán deshabilitar compresión.
 
 ---
 
-# 619. Reflection-aware compression
+### 619. Reflection-aware compression
 
 El clasificador podrá detectar respuestas que combinen:
 
@@ -6930,7 +6931,7 @@ y elevar la política a `Disabled`.
 
 ---
 
-# 620. Compression oracle mitigation
+### 620. Compression oracle mitigation
 
 Las defensas podrán incluir:
 
@@ -6943,13 +6944,13 @@ Las defensas podrán incluir:
 
 ---
 
-# 621. Compression CPU exhaustion
+### 621. Compression CPU exhaustion
 
 La compresión podrá utilizarse para consumir CPU.
 
 ---
 
-# 622. Compression limits
+### 622. Compression limits
 
 Se deberán establecer:
 
@@ -6961,7 +6962,7 @@ Se deberán establecer:
 
 ---
 
-# 623. Vary Accept-Encoding
+### 623. Vary Accept-Encoding
 
 Cuando existan variantes comprimidas deberá emitirse:
 
@@ -6971,7 +6972,7 @@ Vary: Accept-Encoding
 
 ---
 
-# 624. Precompressed assets
+### 624. Precompressed assets
 
 El asset pipeline podrá generar:
 
@@ -6983,13 +6984,13 @@ Estas deberán vincularse al mismo fingerprint lógico.
 
 ---
 
-# 625. Compression integrity
+### 625. Compression integrity
 
 El `Content-Encoding` emitido deberá corresponder exactamente a los bytes transportados.
 
 ---
 
-# 626. Content-Length Integrity
+### 626. Content-Length Integrity
 
 `Content-Length` define el tamaño del body transportado cuando aplica.
 
@@ -7003,13 +7004,13 @@ Una inconsistencia puede provocar:
 
 ---
 
-# 627. Content-Length ownership
+### 627. Content-Length ownership
 
 Solo la capa de transporte podrá definirlo.
 
 ---
 
-# 628. Content-Length calculation
+### 628. Content-Length calculation
 
 Deberá calcularse después de:
 
@@ -7020,43 +7021,43 @@ Deberá calcularse después de:
 
 ---
 
-# 629. Unknown length
+### 629. Unknown length
 
 Para streams de longitud desconocida no deberá inventarse un valor.
 
 ---
 
-# 630. Duplicate Content-Length
+### 630. Duplicate Content-Length
 
 Una respuesta no deberá contener múltiples valores ambiguos.
 
 ---
 
-# 631. Conflicting Content-Length
+### 631. Conflicting Content-Length
 
 Valores diferentes deberán provocar fallo cerrado.
 
 ---
 
-# 632. Transfer-Encoding Integrity
+### 632. Transfer-Encoding Integrity
 
 `Transfer-Encoding` será controlado exclusivamente por el servidor o adapter.
 
 ---
 
-# 633. Content-Length and Transfer-Encoding conflict
+### 633. Content-Length and Transfer-Encoding conflict
 
 No deberán emitirse ambos cuando la semántica sea ambigua.
 
 ---
 
-# 634. Response Splitting Defenses
+### 634. Response Splitting Defenses
 
 Response splitting ocurre cuando input no confiable altera la estructura de headers o status line.
 
 ---
 
-# 635. CRLF rejection
+### 635. CRLF rejection
 
 Se rechazarán:
 
@@ -7069,7 +7070,7 @@ en todos los valores estructurales.
 
 ---
 
-# 636. Structured header builders
+### 636. Structured header builders
 
 Headers complejos deberán construirse mediante tipos dedicados:
 
@@ -7083,25 +7084,25 @@ Headers complejos deberán construirse mediante tipos dedicados:
 
 ---
 
-# 637. No string concatenation
+### 637. No string concatenation
 
 No se deberá construir un header crítico mediante concatenación directa de strings.
 
 ---
 
-# 638. Header serialization boundary
+### 638. Header serialization boundary
 
 La serialización final deberá ocurrir una sola vez dentro del adapter de transporte.
 
 ---
 
-# 639. Response smuggling interaction
+### 639. Response smuggling interaction
 
 Aunque el request smuggling suele originarse en la petición, una respuesta mal delimitada puede desincronizar conexiones persistentes e intermediarios.
 
 ---
 
-# 640. Resultado de esta entrega
+### 640. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -7121,9 +7122,9 @@ Response Splitting Defenses
 Response Smuggling Foundations
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 8
+
 
 **Entrega:** 8 de varias
 **Cobertura:** Secciones **641–740**
@@ -7131,7 +7132,7 @@ Response Smuggling Foundations
 
 ---
 
-# 641. HTTP Smuggling Defense Model
+### 641. HTTP Smuggling Defense Model
 
 HTTP smuggling aparece cuando dos componentes interpretan de forma diferente los límites de una petición o respuesta.
 
@@ -7164,7 +7165,7 @@ podrá producirse desincronización.
 
 ---
 
-# 642. Smuggling trust boundary
+### 642. Smuggling trust boundary
 
 VoltStack no controla todas las capas de infraestructura, pero deberá:
 
@@ -7177,13 +7178,13 @@ VoltStack no controla todas las capas de infraestructura, pero deberá:
 
 ---
 
-# 643. Request framing validation
+### 643. Request framing validation
 
 Antes de ejecutar Controllers, la capa HTTP deberá validar la coherencia del framing del request.
 
 ---
 
-# 644. Content-Length and Transfer-Encoding
+### 644. Content-Length and Transfer-Encoding
 
 Una petición que contenga ambos deberá:
 
@@ -7194,7 +7195,7 @@ El comportamiento por defecto deberá ser fail closed.
 
 ---
 
-# 645. Duplicate Content-Length
+### 645. Duplicate Content-Length
 
 Múltiples headers `Content-Length` deberán aceptarse únicamente si la infraestructura los normaliza de manera segura y todos los valores son idénticos.
 
@@ -7202,13 +7203,13 @@ VoltStack deberá preferir rechazo.
 
 ---
 
-# 646. Conflicting body lengths
+### 646. Conflicting body lengths
 
 Valores diferentes deberán provocar el cierre de la petición antes del routing.
 
 ---
 
-# 647. Transfer-Encoding canonicalization
+### 647. Transfer-Encoding canonicalization
 
 El valor deberá parsearse como una lista estructurada.
 
@@ -7216,13 +7217,13 @@ No mediante comparaciones parciales de strings.
 
 ---
 
-# 648. Unsupported transfer codings
+### 648. Unsupported transfer codings
 
 Los codings no soportados deberán rechazarse.
 
 ---
 
-# 649. Obfuscated transfer encodings
+### 649. Obfuscated transfer encodings
 
 Deberán detectarse variantes ambiguas con:
 
@@ -7234,7 +7235,7 @@ Deberán detectarse variantes ambiguas con:
 
 ---
 
-# 650. Chunked request validation
+### 650. Chunked request validation
 
 Los cuerpos chunked deberán ser procesados por el servidor HTTP o adapter confiable.
 
@@ -7242,7 +7243,7 @@ Los Controllers nunca deberán interpretar chunks manualmente.
 
 ---
 
-# 651. Chunk extension policy
+### 651. Chunk extension policy
 
 Las extensiones de chunks deberán ignorarse o rechazarse según las capacidades del servidor.
 
@@ -7250,31 +7251,31 @@ No deberán exponerse a la aplicación.
 
 ---
 
-# 652. Trailer headers
+### 652. Trailer headers
 
 Los trailers deberán estar deshabilitados por defecto para la lógica de aplicación.
 
 ---
 
-# 653. Request trailer trust
+### 653. Request trailer trust
 
 Un trailer no deberá sobrescribir headers ya validados.
 
 ---
 
-# 654. Header whitespace normalization
+### 654. Header whitespace normalization
 
 Whitespace ambiguo deberá normalizarse antes de interpretar headers críticos.
 
 ---
 
-# 655. Obsolete line folding
+### 655. Obsolete line folding
 
 La continuación de headers mediante line folding obsoleto deberá rechazarse.
 
 ---
 
-# 656. Null-byte rejection
+### 656. Null-byte rejection
 
 Los null bytes deberán rechazarse en:
 
@@ -7287,13 +7288,13 @@ Los null bytes deberán rechazarse en:
 
 ---
 
-# 657. Connection reuse after parse error
+### 657. Connection reuse after parse error
 
 Ante errores de framing, la conexión deberá cerrarse cuando la infraestructura lo permita.
 
 ---
 
-# 658. Response desynchronization
+### 658. Response desynchronization
 
 VoltStack deberá garantizar que cada respuesta tenga:
 
@@ -7305,7 +7306,7 @@ VoltStack deberá garantizar que cada respuesta tenga:
 
 ---
 
-# 659. SmugglingSecurityGuard
+### 659. SmugglingSecurityGuard
 
 ```php
 interface SmugglingSecurityGuardInterface
@@ -7323,7 +7324,7 @@ interface SmugglingSecurityGuardInterface
 
 ---
 
-# 660. Validation outcomes
+### 660. Validation outcomes
 
 ```php
 enum SmugglingValidationStatus: string
@@ -7337,7 +7338,7 @@ enum SmugglingValidationStatus: string
 
 ---
 
-# 661. Infrastructure mismatch
+### 661. Infrastructure mismatch
 
 VoltStack deberá poder detectar configuraciones incompatibles entre:
 
@@ -7349,13 +7350,13 @@ VoltStack deberá poder detectar configuraciones incompatibles entre:
 
 ---
 
-# 662. Deployment health check
+### 662. Deployment health check
 
 El sistema podrá ejecutar pruebas de salud específicas para framing HTTP en entornos controlados.
 
 ---
 
-# 663. Reverse Proxy Trust Model
+### 663. Reverse Proxy Trust Model
 
 Los reverse proxies pueden aportar información necesaria sobre:
 
@@ -7370,13 +7371,13 @@ Esta información será no confiable hasta validar el emisor.
 
 ---
 
-# 664. Direct peer identity
+### 664. Direct peer identity
 
 La primera decisión deberá basarse en la IP o identidad de la conexión directa.
 
 ---
 
-# 665. Trusted proxy definition
+### 665. Trusted proxy definition
 
 ```php
 final readonly class TrustedProxyDefinition
@@ -7393,7 +7394,7 @@ final readonly class TrustedProxyDefinition
 
 ---
 
-# 666. Proxy capabilities
+### 666. Proxy capabilities
 
 ```php
 enum ProxyCapability: string
@@ -7409,7 +7410,7 @@ enum ProxyCapability: string
 
 ---
 
-# 667. Trusted Proxy Registry
+### 667. Trusted Proxy Registry
 
 ```php
 interface TrustedProxyRegistryInterface
@@ -7428,13 +7429,13 @@ interface TrustedProxyRegistryInterface
 
 ---
 
-# 668. Registry freeze
+### 668. Registry freeze
 
 El registry deberá congelarse durante el bootstrap de producción.
 
 ---
 
-# 669. Network matchers
+### 669. Network matchers
 
 Podrán soportarse:
 
@@ -7446,13 +7447,13 @@ Podrán soportarse:
 
 ---
 
-# 670. Broad trust ranges
+### 670. Broad trust ranges
 
 No deberán configurarse redes demasiado amplias sin una justificación explícita.
 
 ---
 
-# 671. Trust all proxies
+### 671. Trust all proxies
 
 Una opción equivalente a:
 
@@ -7465,7 +7466,7 @@ deberá prohibirse en producción por defecto.
 
 ---
 
-# 672. Cloud proxy ranges
+### 672. Cloud proxy ranges
 
 Los rangos administrados por proveedores deberán:
 
@@ -7476,7 +7477,7 @@ Los rangos administrados por proveedores deberán:
 
 ---
 
-# 673. Proxy identity beyond IP
+### 673. Proxy identity beyond IP
 
 En infraestructuras avanzadas podrán utilizarse:
 
@@ -7488,7 +7489,7 @@ En infraestructuras avanzadas podrán utilizarse:
 
 ---
 
-# 674. Forwarded Header
+### 674. Forwarded Header
 
 VoltStack deberá soportar el header estándar:
 
@@ -7500,7 +7501,7 @@ mediante un parser estructurado.
 
 ---
 
-# 675. Forwarded element
+### 675. Forwarded element
 
 Un elemento podrá incluir:
 
@@ -7513,7 +7514,7 @@ proto=
 
 ---
 
-# 676. ForwardedHeaderParser
+### 676. ForwardedHeaderParser
 
 ```php
 interface ForwardedHeaderParserInterface
@@ -7526,7 +7527,7 @@ interface ForwardedHeaderParserInterface
 
 ---
 
-# 677. Parsing limits
+### 677. Parsing limits
 
 Se deberán limitar:
 
@@ -7538,37 +7539,37 @@ Se deberán limitar:
 
 ---
 
-# 678. Quoted values
+### 678. Quoted values
 
 Los valores quoted deberán procesarse según una gramática estricta.
 
 ---
 
-# 679. Obfuscated identifiers
+### 679. Obfuscated identifiers
 
 Los identificadores obfuscados podrán conservarse para auditoría, pero no deberán convertirse en IPs.
 
 ---
 
-# 680. IPv6 forwarded values
+### 680. IPv6 forwarded values
 
 Los literales IPv6 deberán parsearse correctamente, incluidos brackets y port cuando corresponda.
 
 ---
 
-# 681. Unknown forwarded values
+### 681. Unknown forwarded values
 
 El valor `unknown` no deberá utilizarse para tomar decisiones de seguridad.
 
 ---
 
-# 682. Forwarded chain direction
+### 682. Forwarded chain direction
 
 VoltStack deberá definir con claridad el orden en que interpreta la cadena.
 
 ---
 
-# 683. Trust chain walking
+### 683. Trust chain walking
 
 La resolución recomendada será:
 
@@ -7584,13 +7585,13 @@ First untrusted client address
 
 ---
 
-# 684. Stop at first untrusted hop
+### 684. Stop at first untrusted hop
 
 No deberán utilizarse valores anteriores al primer hop no confiable.
 
 ---
 
-# 685. X-Forwarded-* support
+### 685. X-Forwarded-* support
 
 Por compatibilidad podrán procesarse:
 
@@ -7602,13 +7603,13 @@ Por compatibilidad podrán procesarse:
 
 ---
 
-# 686. Header precedence
+### 686. Header precedence
 
 No deberán combinarse automáticamente `Forwarded` y `X-Forwarded-*` si producen resultados distintos.
 
 ---
 
-# 687. Forwarding strategy
+### 687. Forwarding strategy
 
 ```php
 enum ForwardingHeaderStrategy: string
@@ -7622,7 +7623,7 @@ enum ForwardingHeaderStrategy: string
 
 ---
 
-# 688. Recommended conflict strategy
+### 688. Recommended conflict strategy
 
 En perfiles estrictos se recomienda:
 
@@ -7632,7 +7633,7 @@ RejectOnConflict
 
 ---
 
-# 689. X-Forwarded-For parsing
+### 689. X-Forwarded-For parsing
 
 Cada elemento deberá:
 
@@ -7643,13 +7644,13 @@ Cada elemento deberá:
 
 ---
 
-# 690. Client IP Resolution
+### 690. Client IP Resolution
 
 La IP del cliente no deberá resolverse tomando simplemente el primer valor del header.
 
 ---
 
-# 691. ClientAddressResolver
+### 691. ClientAddressResolver
 
 ```php
 interface ClientAddressResolverInterface
@@ -7664,7 +7665,7 @@ interface ClientAddressResolverInterface
 
 ---
 
-# 692. ResolvedClientAddress
+### 692. ResolvedClientAddress
 
 ```php
 final readonly class ResolvedClientAddress
@@ -7680,7 +7681,7 @@ final readonly class ResolvedClientAddress
 
 ---
 
-# 693. ClientAddressConfidence
+### 693. ClientAddressConfidence
 
 ```php
 enum ClientAddressConfidence: string
@@ -7694,7 +7695,7 @@ enum ClientAddressConfidence: string
 
 ---
 
-# 694. IP-based security limits
+### 694. IP-based security limits
 
 La IP no deberá ser el único factor para:
 
@@ -7705,19 +7706,19 @@ La IP no deberá ser el único factor para:
 
 ---
 
-# 695. Rate limiting
+### 695. Rate limiting
 
 Sí podrá utilizarse como una señal dentro de rate limiting y detección de abuso.
 
 ---
 
-# 696. IP privacy
+### 696. IP privacy
 
 Las direcciones deberán almacenarse y registrarse conforme a la política de privacidad de la aplicación.
 
 ---
 
-# 697. Scheme Resolution
+### 697. Scheme Resolution
 
 El scheme efectivo deberá resolverse desde:
 
@@ -7727,7 +7728,7 @@ El scheme efectivo deberá resolverse desde:
 
 ---
 
-# 698. SchemeResolver
+### 698. SchemeResolver
 
 ```php
 interface EffectiveSchemeResolverInterface
@@ -7741,7 +7742,7 @@ interface EffectiveSchemeResolverInterface
 
 ---
 
-# 699. Allowed schemes
+### 699. Allowed schemes
 
 Para HTTP web se permitirán:
 
@@ -7752,7 +7753,7 @@ Cualquier otro valor deberá rechazarse.
 
 ---
 
-# 700. Forwarded proto validation
+### 700. Forwarded proto validation
 
 No deberán aceptarse valores como:
 
@@ -7766,7 +7767,7 @@ sin parsing y normalización estrictos.
 
 ---
 
-# 701. Secure scheme confidence
+### 701. Secure scheme confidence
 
 El sistema deberá conocer si HTTPS fue:
 
@@ -7777,7 +7778,7 @@ El sistema deberá conocer si HTTPS fue:
 
 ---
 
-# 702. EffectiveScheme
+### 702. EffectiveScheme
 
 ```php
 final readonly class EffectiveScheme
@@ -7793,25 +7794,25 @@ final readonly class EffectiveScheme
 
 ---
 
-# 703. HSTS dependency
+### 703. HSTS dependency
 
 HSTS solo deberá emitirse cuando el scheme efectivo seguro sea confiable.
 
 ---
 
-# 704. Secure cookie dependency
+### 704. Secure cookie dependency
 
 Las cookies `Secure` podrán emitirse detrás de TLS termination únicamente si la cadena de proxy ha sido validada.
 
 ---
 
-# 705. Port Resolution
+### 705. Port Resolution
 
 El puerto efectivo deberá derivarse de forma coherente con el scheme y host.
 
 ---
 
-# 706. Forwarded port validation
+### 706. Forwarded port validation
 
 El valor deberá:
 
@@ -7822,7 +7823,7 @@ El valor deberá:
 
 ---
 
-# 707. Default ports
+### 707. Default ports
 
 Se normalizarán:
 
@@ -7833,7 +7834,7 @@ https → 443
 
 ---
 
-# 708. Port mismatch
+### 708. Port mismatch
 
 Una discrepancia entre:
 
@@ -7845,7 +7846,7 @@ deberá registrarse o rechazarse según política.
 
 ---
 
-# 709. Host Header Security
+### 709. Host Header Security
 
 El header `Host` influye en:
 
@@ -7860,7 +7861,7 @@ El header `Host` influye en:
 
 ---
 
-# 710. Host poisoning
+### 710. Host poisoning
 
 Un `Host` no validado puede provocar:
 
@@ -7872,7 +7873,7 @@ Un `Host` no validado puede provocar:
 
 ---
 
-# 711. ValidatedHost
+### 711. ValidatedHost
 
 ```php
 final readonly class ValidatedHost
@@ -7889,7 +7890,7 @@ final readonly class ValidatedHost
 
 ---
 
-# 712. HostTrustSource
+### 712. HostTrustSource
 
 ```php
 enum HostTrustSource: string
@@ -7903,7 +7904,7 @@ enum HostTrustSource: string
 
 ---
 
-# 713. Host syntax validation
+### 713. Host syntax validation
 
 El host deberá rechazar:
 
@@ -7919,13 +7920,13 @@ El host deberá rechazar:
 
 ---
 
-# 714. IDN normalization
+### 714. IDN normalization
 
 Los hosts internacionales deberán normalizarse a una forma ASCII canónica antes de comparar.
 
 ---
 
-# 715. Trailing dot
+### 715. Trailing dot
 
 La política deberá decidir si normaliza:
 
@@ -7943,31 +7944,31 @@ de forma consistente.
 
 ---
 
-# 716. Mixed-case host
+### 716. Mixed-case host
 
 La comparación deberá ser case-insensitive.
 
 ---
 
-# 717. Duplicate Host headers
+### 717. Duplicate Host headers
 
 Múltiples headers `Host` deberán provocar rechazo.
 
 ---
 
-# 718. HTTP/2 authority
+### 718. HTTP/2 authority
 
 En HTTP/2 y HTTP/3 deberá validarse `:authority` de forma equivalente.
 
 ---
 
-# 719. Host and authority conflict
+### 719. Host and authority conflict
 
 Si ambos están presentes y difieren, la petición deberá rechazarse.
 
 ---
 
-# 720. Allowed Host Registry
+### 720. Allowed Host Registry
 
 ```php
 interface AllowedHostRegistryInterface
@@ -7981,7 +7982,7 @@ interface AllowedHostRegistryInterface
 
 ---
 
-# 721. AllowedHostDefinition
+### 721. AllowedHostDefinition
 
 ```php
 final readonly class AllowedHostDefinition
@@ -7999,7 +8000,7 @@ final readonly class AllowedHostDefinition
 
 ---
 
-# 722. Host purposes
+### 722. Host purposes
 
 ```php
 enum HostPurpose: string
@@ -8015,19 +8016,19 @@ enum HostPurpose: string
 
 ---
 
-# 723. Default host policy
+### 723. Default host policy
 
 Toda petición con host no reconocido deberá rechazarse antes del routing de aplicación.
 
 ---
 
-# 724. Wildcard hosts
+### 724. Wildcard hosts
 
 Los wildcard deberán utilizar matchers estructurados.
 
 ---
 
-# 725. Subdomain tenant matching
+### 725. Subdomain tenant matching
 
 Un host como:
 
@@ -8039,13 +8040,13 @@ deberá resolver el tenant mediante una regla registrada y no mediante extracci�
 
 ---
 
-# 726. Registrable domain validation
+### 726. Registrable domain validation
 
 El sistema deberá evitar tratar como subdominio válido un host fuera del dominio registrable esperado.
 
 ---
 
-# 727. Reserved subdomains
+### 727. Reserved subdomains
 
 Se podrán reservar:
 
@@ -8058,13 +8059,13 @@ Se podrán reservar:
 
 ---
 
-# 728. Tenant host collision
+### 728. Tenant host collision
 
 No podrán coexistir tenants con hosts canónicamente equivalentes.
 
 ---
 
-# 729. Custom tenant domains
+### 729. Custom tenant domains
 
 Los dominios personalizados deberán pasar por:
 
@@ -8076,13 +8077,13 @@ Los dominios personalizados deberán pasar por:
 
 ---
 
-# 730. Canonical Host Enforcement
+### 730. Canonical Host Enforcement
 
 Una aplicación podrá definir un host canónico para evitar variantes ambiguas.
 
 ---
 
-# 731. Canonical host redirect
+### 731. Canonical host redirect
 
 La redirección deberá:
 
@@ -8094,19 +8095,19 @@ La redirección deberá:
 
 ---
 
-# 732. Unsafe method canonicalization
+### 732. Unsafe method canonicalization
 
 Las peticiones mutables no deberán redirigirse automáticamente a otro host sin evaluar preservación del método y del body.
 
 ---
 
-# 733. Canonical host for APIs
+### 733. Canonical host for APIs
 
 Las APIs podrán rechazar en lugar de redirigir.
 
 ---
 
-# 734. Absolute URL Poisoning Prevention
+### 734. Absolute URL Poisoning Prevention
 
 Toda URL absoluta generada deberá usar:
 
@@ -8117,31 +8118,31 @@ Toda URL absoluta generada deberá usar:
 
 ---
 
-# 735. Password reset URLs
+### 735. Password reset URLs
 
 Nunca deberán derivarse de un host no validado.
 
 ---
 
-# 736. Email link generation
+### 736. Email link generation
 
 Los enlaces enviados por email deberán preferir un origen configurado o una identidad de tenant validada.
 
 ---
 
-# 737. Signed URL host binding
+### 737. Signed URL host binding
 
 Las firmas deberán incluir el host cuando el enlace sea host-specific.
 
 ---
 
-# 738. Proxy Chain Audit
+### 738. Proxy Chain Audit
 
 VoltStack deberá producir una representación auditable de la cadena de transporte sin exponerla al cliente.
 
 ---
 
-# 739. ProxyChainAuditRecord
+### 739. ProxyChainAuditRecord
 
 ```php
 final readonly class ProxyChainAuditRecord
@@ -8161,7 +8162,7 @@ final readonly class ProxyChainAuditRecord
 
 ---
 
-# 740. Resultado de esta entrega
+### 740. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -8184,9 +8185,9 @@ Absolute URL Poisoning Prevention
 Proxy Chain Auditing
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 9
+
 
 **Entrega:** 9 de varias
 **Cobertura:** Secciones **741–840**
@@ -8194,7 +8195,7 @@ Proxy Chain Auditing
 
 ---
 
-# 741. Cache-Control Security Model
+### 741. Cache-Control Security Model
 
 El sistema de cache HTTP deberá diseñarse bajo el principio de que **una respuesta incorrectamente cacheada constituye una fuga de información**.
 
@@ -8210,7 +8211,7 @@ El objetivo no es únicamente mejorar el rendimiento, sino garantizar:
 
 ---
 
-# 742. Cache trust boundaries
+### 742. Cache trust boundaries
 
 VoltStack deberá considerar los siguientes niveles de cache:
 
@@ -8232,7 +8233,7 @@ Cada uno tendrá un nivel de confianza diferente.
 
 ---
 
-# 743. Cache ownership
+### 743. Cache ownership
 
 Los Controllers no deberán construir manualmente encabezados `Cache-Control`.
 
@@ -8240,7 +8241,7 @@ La decisión pertenecerá al motor de seguridad de respuestas.
 
 ---
 
-# 744. CachePolicy
+### 744. CachePolicy
 
 ```php
 final readonly class CachePolicy
@@ -8257,7 +8258,7 @@ final readonly class CachePolicy
 
 ---
 
-# 745. CacheVisibility
+### 745. CacheVisibility
 
 ```php
 enum CacheVisibility: string
@@ -8270,7 +8271,7 @@ enum CacheVisibility: string
 
 ---
 
-# 746. CacheStorageMode
+### 746. CacheStorageMode
 
 ```php
 enum CacheStorageMode: string
@@ -8283,7 +8284,7 @@ enum CacheStorageMode: string
 
 ---
 
-# 747. Default policy
+### 747. Default policy
 
 Toda respuesta autenticada utilizará por defecto:
 
@@ -8296,7 +8297,7 @@ salvo que exista una política explícita diferente.
 
 ---
 
-# 748. Public responses
+### 748. Public responses
 
 Una respuesta pública deberá cumplir:
 
@@ -8308,19 +8309,19 @@ Una respuesta pública deberá cumplir:
 
 ---
 
-# 749. Private responses
+### 749. Private responses
 
 Una respuesta privada podrá almacenarse únicamente por el navegador del usuario.
 
 ---
 
-# 750. Restricted responses
+### 750. Restricted responses
 
 Las respuestas clasificadas como **Restricted** no deberán almacenarse en ningún nivel.
 
 ---
 
-# 751. Cache-Control Builder
+### 751. Cache-Control Builder
 
 ```php
 interface CacheControlBuilderInterface
@@ -8334,13 +8335,13 @@ interface CacheControlBuilderInterface
 
 ---
 
-# 752. Header normalization
+### 752. Header normalization
 
 Los encabezados de cache deberán serializarse siempre en el mismo orden.
 
 ---
 
-# 753. Immutable resources
+### 753. Immutable resources
 
 Los recursos versionados podrán declararse como:
 
@@ -8352,7 +8353,7 @@ cuando el fingerprint garantice unicidad.
 
 ---
 
-# 754. Fingerprinted assets
+### 754. Fingerprinted assets
 
 Los assets generados por el pipeline podrán utilizar:
 
@@ -8364,13 +8365,13 @@ como identificador inmutable.
 
 ---
 
-# 755. Runtime responses
+### 755. Runtime responses
 
 Las respuestas generadas dinámicamente no deberán declararse `immutable`.
 
 ---
 
-# 756. Sensitive endpoints
+### 756. Sensitive endpoints
 
 Los siguientes endpoints deberán utilizar `no-store`:
 
@@ -8385,7 +8386,7 @@ Los siguientes endpoints deberán utilizar `no-store`:
 
 ---
 
-# 757. Authentication responses
+### 757. Authentication responses
 
 Nunca deberán almacenarse respuestas que contengan:
 
@@ -8396,19 +8397,19 @@ Nunca deberán almacenarse respuestas que contengan:
 
 ---
 
-# 758. Redirect cache policy
+### 758. Redirect cache policy
 
 Las redirecciones permanentes deberán revisarse cuidadosamente antes de permitir cache compartido.
 
 ---
 
-# 759. Download cache policy
+### 759. Download cache policy
 
 Las descargas protegidas deberán especificar una política explícita.
 
 ---
 
-# 760. Streaming cache policy
+### 760. Streaming cache policy
 
 Los streams:
 
@@ -8420,7 +8421,7 @@ normalmente no deberán almacenarse.
 
 ---
 
-# 761. CDN Security Model
+### 761. CDN Security Model
 
 Los CDN representan un cache compartido.
 
@@ -8428,13 +8429,13 @@ Por tanto, deberán considerarse no confiables para información privada.
 
 ---
 
-# 762. Shared cache eligibility
+### 762. Shared cache eligibility
 
 Una respuesta solo podrá almacenarse en cache compartido cuando sea completamente independiente del usuario.
 
 ---
 
-# 763. Personalized responses
+### 763. Personalized responses
 
 Las respuestas personalizadas nunca deberán publicarse mediante:
 
@@ -8444,13 +8445,13 @@ Cache-Control: public
 
 ---
 
-# 764. Tenant-aware caching
+### 764. Tenant-aware caching
 
 En aplicaciones multi-tenant, el tenant formará parte del contexto de cache.
 
 ---
 
-# 765. Cache partitioning
+### 765. Cache partitioning
 
 La clave lógica incluirá:
 
@@ -8462,25 +8463,25 @@ La clave lógica incluirá:
 
 ---
 
-# 766. Authorization-aware cache
+### 766. Authorization-aware cache
 
 Las respuestas cuyo contenido dependa de permisos deberán excluirse del cache compartido.
 
 ---
 
-# 767. Capability-aware cache
+### 767. Capability-aware cache
 
 Si el contenido cambia según capacidades del usuario, dichas capacidades deberán formar parte del contexto de variación o la respuesta deberá marcarse como privada.
 
 ---
 
-# 768. Vary Security Model
+### 768. Vary Security Model
 
 El encabezado `Vary` controla la selección de representaciones.
 
 ---
 
-# 769. VaryBuilder
+### 769. VaryBuilder
 
 ```php
 interface VaryBuilderInterface
@@ -8493,7 +8494,7 @@ interface VaryBuilderInterface
 
 ---
 
-# 770. Supported Vary headers
+### 770. Supported Vary headers
 
 Se admitirán únicamente encabezados explícitamente aprobados, por ejemplo:
 
@@ -8504,13 +8505,13 @@ Se admitirán únicamente encabezados explícitamente aprobados, por ejemplo:
 
 ---
 
-# 771. Unsafe Vary
+### 771. Unsafe Vary
 
 No deberá variarse por encabezados arbitrarios proporcionados por el usuario.
 
 ---
 
-# 772. Vary normalization
+### 772. Vary normalization
 
 Los nombres incluidos en `Vary` deberán:
 
@@ -8520,19 +8521,19 @@ Los nombres incluidos en `Vary` deberán:
 
 ---
 
-# 773. Excessive variation
+### 773. Excessive variation
 
 Una cantidad excesiva de dimensiones de variación puede degradar significativamente la eficiencia del cache.
 
 ---
 
-# 774. Cache key integrity
+### 774. Cache key integrity
 
 La clave utilizada para cache deberá construirse mediante componentes estructurados.
 
 ---
 
-# 775. CacheKeyContext
+### 775. CacheKeyContext
 
 ```php
 final readonly class CacheKeyContext
@@ -8550,19 +8551,19 @@ final readonly class CacheKeyContext
 
 ---
 
-# 776. Cache poisoning
+### 776. Cache poisoning
 
 Una representación no deberá sobrescribir otra representación incompatible.
 
 ---
 
-# 777. Variant confusion
+### 777. Variant confusion
 
 Dos respuestas distintas no deberán producir la misma clave de cache.
 
 ---
 
-# 778. Cache metadata
+### 778. Cache metadata
 
 Cada entrada deberá almacenar:
 
@@ -8576,13 +8577,13 @@ Cada entrada deberá almacenar:
 
 ---
 
-# 779. Cache invalidation
+### 779. Cache invalidation
 
 Toda invalidación deberá ser explícita y auditable.
 
 ---
 
-# 780. Invalidation events
+### 780. Invalidation events
 
 Eventos típicos:
 
@@ -8595,19 +8596,19 @@ Eventos típicos:
 
 ---
 
-# 781. ETag Security Model
+### 781. ETag Security Model
 
 ETag permite validar representaciones sin retransmitir el contenido completo.
 
 ---
 
-# 782. ETag ownership
+### 782. ETag ownership
 
 El cálculo de ETag no pertenecerá al Controller.
 
 ---
 
-# 783. ETagStrategy
+### 783. ETagStrategy
 
 ```php
 enum ETagStrategy: string
@@ -8619,19 +8620,19 @@ enum ETagStrategy: string
 
 ---
 
-# 784. Strong validators
+### 784. Strong validators
 
 Los ETag fuertes representan exactamente los bytes transmitidos.
 
 ---
 
-# 785. Weak validators
+### 785. Weak validators
 
 Los ETag débiles representan equivalencia semántica.
 
 ---
 
-# 786. ETagBuilder
+### 786. ETagBuilder
 
 ```php
 interface ETagBuilderInterface
@@ -8645,13 +8646,13 @@ interface ETagBuilderInterface
 
 ---
 
-# 787. Stable generation
+### 787. Stable generation
 
 El algoritmo de generación deberá ser determinista.
 
 ---
 
-# 788. Secret leakage
+### 788. Secret leakage
 
 El ETag no deberá revelar:
 
@@ -8662,7 +8663,7 @@ El ETag no deberá revelar:
 
 ---
 
-# 789. EntityTag
+### 789. EntityTag
 
 ```php
 final readonly class EntityTag
@@ -8677,19 +8678,19 @@ final readonly class EntityTag
 
 ---
 
-# 790. Representation scope
+### 790. Representation scope
 
 Cada representación tendrá su propio ETag.
 
 ---
 
-# 791. Compression variants
+### 791. Compression variants
 
 Una representación comprimida podrá requerir un validator distinto.
 
 ---
 
-# 792. Content negotiation
+### 792. Content negotiation
 
 Los distintos formatos:
 
@@ -8701,19 +8702,19 @@ no compartirán el mismo validator.
 
 ---
 
-# 793. Tenant isolation
+### 793. Tenant isolation
 
 Dos tenants nunca deberán compartir un ETag cuando el contenido sea diferente.
 
 ---
 
-# 794. Personalized responses
+### 794. Personalized responses
 
 Las respuestas personalizadas podrán omitir ETag cuando el beneficio sea mínimo o exista riesgo de reutilización indebida.
 
 ---
 
-# 795. If-None-Match
+### 795. If-None-Match
 
 El parser deberá soportar correctamente:
 
@@ -8723,7 +8724,7 @@ If-None-Match
 
 ---
 
-# 796. EntityTag comparison
+### 796. EntityTag comparison
 
 La comparación distinguirá correctamente:
 
@@ -8732,7 +8733,7 @@ La comparación distinguirá correctamente:
 
 ---
 
-# 797. Wildcard entity tag
+### 797. Wildcard entity tag
 
 El valor:
 
@@ -8744,7 +8745,7 @@ deberá interpretarse conforme a la semántica del estándar.
 
 ---
 
-# 798. Conditional request validator
+### 798. Conditional request validator
 
 ```php
 interface ConditionalRequestValidatorInterface
@@ -8758,19 +8759,19 @@ interface ConditionalRequestValidatorInterface
 
 ---
 
-# 799. Last-Modified Security
+### 799. Last-Modified Security
 
 El encabezado deberá representar el instante real de modificación de la representación.
 
 ---
 
-# 800. Trusted timestamps
+### 800. Trusted timestamps
 
 Las fechas deberán derivarse de una fuente confiable y consistente.
 
 ---
 
-# 801. LastModifiedBuilder
+### 801. LastModifiedBuilder
 
 ```php
 interface LastModifiedBuilderInterface
@@ -8783,37 +8784,37 @@ interface LastModifiedBuilderInterface
 
 ---
 
-# 802. Future timestamps
+### 802. Future timestamps
 
 No deberán emitirse fechas futuras salvo casos excepcionalmente documentados.
 
 ---
 
-# 803. Clock consistency
+### 803. Clock consistency
 
 Todos los nodos del cluster deberán mantener sincronización horaria adecuada.
 
 ---
 
-# 804. If-Modified-Since
+### 804. If-Modified-Since
 
 Las fechas recibidas deberán validarse estrictamente.
 
 ---
 
-# 805. If-Unmodified-Since
+### 805. If-Unmodified-Since
 
 Podrá utilizarse para proteger operaciones concurrentes.
 
 ---
 
-# 806. Date parsing
+### 806. Date parsing
 
 Las fechas inválidas deberán rechazarse silenciosamente según el estándar, sin provocar errores internos.
 
 ---
 
-# 807. Conditional evaluation order
+### 807. Conditional evaluation order
 
 La evaluación seguirá un orden determinista entre:
 
@@ -8825,13 +8826,13 @@ La evaluación seguirá un orden determinista entre:
 
 ---
 
-# 808. Precondition failure
+### 808. Precondition failure
 
 Cuando una precondición falle, la respuesta deberá indicar el estado correspondiente sin revelar información adicional.
 
 ---
 
-# 809. Not Modified responses
+### 809. Not Modified responses
 
 Una respuesta equivalente a:
 
@@ -8843,25 +8844,25 @@ no deberá incluir un cuerpo de contenido.
 
 ---
 
-# 810. 304 metadata
+### 810. 304 metadata
 
 Los encabezados emitidos deberán ser coherentes con la representación validada.
 
 ---
 
-# 811. Validator consistency
+### 811. Validator consistency
 
 No deberán emitirse simultáneamente validadores incompatibles.
 
 ---
 
-# 812. Weak validator usage
+### 812. Weak validator usage
 
 Los validadores débiles no deberán emplearse para operaciones que requieran igualdad byte a byte.
 
 ---
 
-# 813. Cache validator registry
+### 813. Cache validator registry
 
 ```php
 interface CacheValidatorRegistryInterface
@@ -8874,37 +8875,37 @@ interface CacheValidatorRegistryInterface
 
 ---
 
-# 814. Validator lifecycle
+### 814. Validator lifecycle
 
 Los validadores deberán invalidarse cuando cambie la representación.
 
 ---
 
-# 815. Deployment awareness
+### 815. Deployment awareness
 
 Un despliegue podrá invalidar representaciones si cambia su semántica.
 
 ---
 
-# 816. Multi-node consistency
+### 816. Multi-node consistency
 
 Todos los nodos deberán calcular el mismo validator para la misma representación.
 
 ---
 
-# 817. Conditional GET
+### 817. Conditional GET
 
 Las peticiones GET condicionales deberán evitar trabajo innecesario cuando la representación permanezca válida.
 
 ---
 
-# 818. Conditional HEAD
+### 818. Conditional HEAD
 
 HEAD seguirá las mismas reglas de validación que GET.
 
 ---
 
-# 819. Cache audit
+### 819. Cache audit
 
 El framework registrará:
 
@@ -8917,7 +8918,7 @@ El framework registrará:
 
 ---
 
-# 820. Cache metrics
+### 820. Cache metrics
 
 Métricas recomendadas:
 
@@ -8930,37 +8931,37 @@ Métricas recomendadas:
 
 ---
 
-# 821. Stale content policy
+### 821. Stale content policy
 
 Las respuestas obsoletas deberán controlarse mediante políticas explícitas.
 
 ---
 
-# 822. Stale revalidation
+### 822. Stale revalidation
 
 Cuando la política lo permita, el cache podrá revalidar antes de servir una representación.
 
 ---
 
-# 823. Stale-if-error
+### 823. Stale-if-error
 
 Podrá configurarse para mejorar disponibilidad, siempre que la sensibilidad de la respuesta lo permita.
 
 ---
 
-# 824. Stale-while-revalidate
+### 824. Stale-while-revalidate
 
 Los recursos públicos podrán aprovechar esta estrategia bajo límites definidos.
 
 ---
 
-# 825. Sensitive stale data
+### 825. Sensitive stale data
 
 Nunca deberán servirse respuestas obsoletas que contengan datos sensibles o personalizados.
 
 ---
 
-# 826. Cache poisoning defense
+### 826. Cache poisoning defense
 
 Toda representación deberá comprobar:
 
@@ -8972,25 +8973,25 @@ Toda representación deberá comprobar:
 
 ---
 
-# 827. Header confusion
+### 827. Header confusion
 
 Los encabezados utilizados para construir la clave no deberán aceptar variantes ambiguas.
 
 ---
 
-# 828. Response classification
+### 828. Response classification
 
 La clasificación de seguridad formará parte del modelo de cache.
 
 ---
 
-# 829. Runtime cache isolation
+### 829. Runtime cache isolation
 
 Los caches internos del runtime deberán respetar el mismo aislamiento que los caches HTTP.
 
 ---
 
-# 830. Cache security events
+### 830. Cache security events
 
 Eventos relevantes:
 
@@ -9002,7 +9003,7 @@ Eventos relevantes:
 
 ---
 
-# 831. Testing strategy
+### 831. Testing strategy
 
 Las pruebas deberán cubrir:
 
@@ -9016,31 +9017,31 @@ Las pruebas deberán cubrir:
 
 ---
 
-# 832. Security audit
+### 832. Security audit
 
 Las decisiones de cache deberán ser completamente auditables.
 
 ---
 
-# 833. Deployment verification
+### 833. Deployment verification
 
 Durante el despliegue podrán ejecutarse verificaciones de coherencia de validadores y políticas.
 
 ---
 
-# 834. Backward compatibility
+### 834. Backward compatibility
 
 Los cambios en estrategias de cache deberán poder versionarse para evitar comportamientos inconsistentes.
 
 ---
 
-# 835. Performance considerations
+### 835. Performance considerations
 
 La seguridad del cache no deberá depender de optimizaciones específicas del servidor HTTP.
 
 ---
 
-# 836. Documentation requirements
+### 836. Documentation requirements
 
 Toda política personalizada de cache deberá documentarse indicando:
 
@@ -9051,25 +9052,25 @@ Toda política personalizada de cache deberá documentarse indicando:
 
 ---
 
-# 837. ADR-111
+### 837. ADR-111
 
 **Separación entre clasificación de seguridad y política de cache.**
 
 ---
 
-# 838. ADR-112
+### 838. ADR-112
 
 **Los Controllers nunca construirán manualmente encabezados Cache-Control, ETag o Last-Modified.**
 
 ---
 
-# 839. ADR-113
+### 839. ADR-113
 
 **Toda representación cacheable deberá poseer una política de variación determinista.**
 
 ---
 
-# 840. Resultado de esta entrega
+### 840. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -9091,9 +9092,9 @@ Validator Lifecycle
 Cache Auditing and Metrics
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_04.md
 
-## Transport & Response Security
+## Entrega 10
+
 
 **Entrega:** 10 de 10
 **Cobertura:** Secciones **841–950**
@@ -9102,7 +9103,7 @@ Cache Auditing and Metrics
 
 ---
 
-# 841. Response Integrity Security Model
+### 841. Response Integrity Security Model
 
 La integridad de una respuesta garantiza que:
 
@@ -9133,7 +9134,7 @@ Client Verification
 
 ---
 
-# 842. Integrity dimensions
+### 842. Integrity dimensions
 
 VoltStack distinguirá entre:
 
@@ -9146,13 +9147,13 @@ VoltStack distinguirá entre:
 
 ---
 
-# 843. Logical integrity
+### 843. Logical integrity
 
 La integridad lógica asegura que el contenido corresponde al resultado autorizado del Controller.
 
 ---
 
-# 844. Representation integrity
+### 844. Representation integrity
 
 La integridad de representación asegura que los bytes serializados coinciden con:
 
@@ -9164,7 +9165,7 @@ La integridad de representación asegura que los bytes serializados coinciden co
 
 ---
 
-# 845. Transport integrity
+### 845. Transport integrity
 
 La integridad de transporte depende principalmente de:
 
@@ -9176,13 +9177,13 @@ La integridad de transporte depende principalmente de:
 
 ---
 
-# 846. Authenticity
+### 846. Authenticity
 
 La autenticidad permite verificar que la respuesta fue producida por una entidad autorizada.
 
 ---
 
-# 847. Freshness
+### 847. Freshness
 
 La frescura evita aceptar respuestas:
 
@@ -9193,7 +9194,7 @@ La frescura evita aceptar respuestas:
 
 ---
 
-# 848. ResponseIntegrityPolicy
+### 848. ResponseIntegrityPolicy
 
 ```php
 final readonly class ResponseIntegrityPolicy
@@ -9211,7 +9212,7 @@ final readonly class ResponseIntegrityPolicy
 
 ---
 
-# 849. IntegrityMode
+### 849. IntegrityMode
 
 ```php
 enum IntegrityMode: string
@@ -9225,7 +9226,7 @@ enum IntegrityMode: string
 
 ---
 
-# 850. Default integrity mode
+### 850. Default integrity mode
 
 Las respuestas web convencionales utilizarán normalmente:
 
@@ -9241,7 +9242,7 @@ Las firmas criptográficas externas deberán reservarse para escenarios que real
 
 ---
 
-# 851. High-integrity scenarios
+### 851. High-integrity scenarios
 
 Podrán requerir firmas de respuesta:
 
@@ -9257,7 +9258,7 @@ Podrán requerir firmas de respuesta:
 
 ---
 
-# 852. ResponseIntegrityEngine
+### 852. ResponseIntegrityEngine
 
 ```php
 interface ResponseIntegrityEngineInterface
@@ -9272,7 +9273,7 @@ interface ResponseIntegrityEngineInterface
 
 ---
 
-# 853. Integrity processing order
+### 853. Integrity processing order
 
 La protección deberá aplicarse después de completar la representación final.
 
@@ -9298,7 +9299,7 @@ El orden exacto podrá variar según si la firma protege la representación o el
 
 ---
 
-# 854. Representation versus transfer integrity
+### 854. Representation versus transfer integrity
 
 VoltStack deberá diferenciar:
 
@@ -9309,7 +9310,7 @@ VoltStack deberá diferenciar:
 
 ---
 
-# 855. Digest Security Model
+### 855. Digest Security Model
 
 Un digest permite detectar modificaciones accidentales o maliciosas del contenido.
 
@@ -9317,7 +9318,7 @@ No demuestra por sí solo quién produjo la respuesta.
 
 ---
 
-# 856. DigestAlgorithm
+### 856. DigestAlgorithm
 
 ```php
 enum DigestAlgorithm: string
@@ -9330,7 +9331,7 @@ enum DigestAlgorithm: string
 
 ---
 
-# 857. Deprecated digest algorithms
+### 857. Deprecated digest algorithms
 
 No deberán utilizarse para integridad de seguridad:
 
@@ -9340,7 +9341,7 @@ No deberán utilizarse para integridad de seguridad:
 
 ---
 
-# 858. DigestPolicy
+### 858. DigestPolicy
 
 ```php
 final readonly class DigestPolicy
@@ -9357,7 +9358,7 @@ final readonly class DigestPolicy
 
 ---
 
-# 859. DigestScope
+### 859. DigestScope
 
 ```php
 enum DigestScope: string
@@ -9370,7 +9371,7 @@ enum DigestScope: string
 
 ---
 
-# 860. Digest builder
+### 860. Digest builder
 
 ```php
 interface ResponseDigestBuilderInterface
@@ -9384,13 +9385,13 @@ interface ResponseDigestBuilderInterface
 
 ---
 
-# 861. Streaming digest
+### 861. Streaming digest
 
 Para streams, el digest deberá calcularse incrementalmente.
 
 ---
 
-# 862. Digest and unknown streams
+### 862. Digest and unknown streams
 
 Cuando no sea posible conocer el digest antes de emitir headers, podrán utilizarse:
 
@@ -9403,13 +9404,13 @@ Los trailers permanecerán deshabilitados salvo soporte seguro de toda la cadena
 
 ---
 
-# 863. Download digest
+### 863. Download digest
 
 Las descargas sensibles podrán publicar un digest separado mediante metadata segura.
 
 ---
 
-# 864. Digest mismatch
+### 864. Digest mismatch
 
 Una discrepancia deberá producir:
 
@@ -9421,13 +9422,13 @@ Una discrepancia deberá producir:
 
 ---
 
-# 865. Digest confidentiality
+### 865. Digest confidentiality
 
 Un digest no deberá utilizarse como sustituto de autorización.
 
 ---
 
-# 866. Low-entropy content risk
+### 866. Low-entropy content risk
 
 Los hashes de contenido predecible pueden permitir inferencias.
 
@@ -9435,13 +9436,13 @@ No deberán exponerse innecesariamente para recursos privados.
 
 ---
 
-# 867. HTTP Message Signatures
+### 867. HTTP Message Signatures
 
 VoltStack podrá soportar firmas estructuradas de mensajes HTTP mediante un módulo especializado.
 
 ---
 
-# 868. SignaturePolicy
+### 868. SignaturePolicy
 
 ```php
 final readonly class SignaturePolicy
@@ -9459,7 +9460,7 @@ final readonly class SignaturePolicy
 
 ---
 
-# 869. SignatureAlgorithm
+### 869. SignatureAlgorithm
 
 ```php
 enum SignatureAlgorithm: string
@@ -9473,13 +9474,13 @@ enum SignatureAlgorithm: string
 
 ---
 
-# 870. Algorithm selection
+### 870. Algorithm selection
 
 Se preferirán firmas asimétricas cuando múltiples consumidores deban verificar sin conocer la clave privada.
 
 ---
 
-# 871. HMAC usage
+### 871. HMAC usage
 
 HMAC podrá utilizarse en relaciones cerradas entre sistemas confiables.
 
@@ -9487,7 +9488,7 @@ No deberá compartirse una clave global entre múltiples tenants o integraciones
 
 ---
 
-# 872. Signed components
+### 872. Signed components
 
 Una firma podrá cubrir:
 
@@ -9505,7 +9506,7 @@ Una firma podrá cubrir:
 
 ---
 
-# 873. SignatureComponentSet
+### 873. SignatureComponentSet
 
 ```php
 final readonly class SignatureComponentSet
@@ -9521,7 +9522,7 @@ final readonly class SignatureComponentSet
 
 ---
 
-# 874. Mandatory signed components
+### 874. Mandatory signed components
 
 Toda respuesta firmada deberá incluir como mínimo:
 
@@ -9533,7 +9534,7 @@ Toda respuesta firmada deberá incluir como mínimo:
 
 ---
 
-# 875. Request-response binding
+### 875. Request-response binding
 
 Una respuesta firmada podrá vincularse al request mediante:
 
@@ -9546,25 +9547,25 @@ Una respuesta firmada podrá vincularse al request mediante:
 
 ---
 
-# 876. Cross-request substitution
+### 876. Cross-request substitution
 
 Sin binding, una respuesta válida podría reutilizarse en otro contexto.
 
 ---
 
-# 877. Tenant binding
+### 877. Tenant binding
 
 En sistemas multi-tenant, la identidad del tenant deberá formar parte del material firmado cuando sea relevante.
 
 ---
 
-# 878. User binding
+### 878. User binding
 
 Las respuestas personalizadas de alto valor podrán firmarse para un usuario o sesión concreta.
 
 ---
 
-# 879. SignatureInputBuilder
+### 879. SignatureInputBuilder
 
 ```php
 interface SignatureInputBuilderInterface
@@ -9579,7 +9580,7 @@ interface SignatureInputBuilderInterface
 
 ---
 
-# 880. Canonicalization
+### 880. Canonicalization
 
 La canonicalización deberá ser:
 
@@ -9591,13 +9592,13 @@ La canonicalización deberá ser:
 
 ---
 
-# 881. Signature header ownership
+### 881. Signature header ownership
 
 Solo el motor de integridad podrá emitir headers de firma.
 
 ---
 
-# 882. Signature key identifiers
+### 882. Signature key identifiers
 
 El identificador de clave no deberá exponer:
 
@@ -9609,7 +9610,7 @@ El identificador de clave no deberá exponer:
 
 ---
 
-# 883. Key lifecycle
+### 883. Key lifecycle
 
 Las claves deberán tener:
 
@@ -9623,19 +9624,19 @@ Las claves deberán tener:
 
 ---
 
-# 884. Key rotation
+### 884. Key rotation
 
 La rotación deberá permitir una ventana de verificación de respuestas previamente emitidas.
 
 ---
 
-# 885. Key revocation
+### 885. Key revocation
 
 Una clave comprometida deberá poder revocarse inmediatamente.
 
 ---
 
-# 886. Verification key publication
+### 886. Verification key publication
 
 Las claves públicas podrán distribuirse mediante:
 
@@ -9646,7 +9647,7 @@ Las claves públicas podrán distribuirse mediante:
 
 ---
 
-# 887. Key isolation
+### 887. Key isolation
 
 Las claves de respuesta deberán separarse de:
 
@@ -9658,7 +9659,7 @@ Las claves de respuesta deberán separarse de:
 
 ---
 
-# 888. Hardware-backed keys
+### 888. Hardware-backed keys
 
 Perfiles de alta seguridad podrán utilizar:
 
@@ -9669,19 +9670,19 @@ Perfiles de alta seguridad podrán utilizar:
 
 ---
 
-# 889. Signing failures
+### 889. Signing failures
 
 Si una respuesta requiere firma y el servicio de firma falla, la respuesta no deberá emitirse sin protección.
 
 ---
 
-# 890. Signature downgrade
+### 890. Signature downgrade
 
 No deberá degradarse silenciosamente de `Signed` a `DigestOnly`.
 
 ---
 
-# 891. Signature verification telemetry
+### 891. Signature verification telemetry
 
 Los consumidores integrados podrán reportar:
 
@@ -9694,13 +9695,13 @@ Los consumidores integrados podrán reportar:
 
 ---
 
-# 892. Replay Protection
+### 892. Replay Protection
 
 Una firma válida no siempre impide replay.
 
 ---
 
-# 893. FreshnessPolicy
+### 893. FreshnessPolicy
 
 ```php
 final readonly class FreshnessPolicy
@@ -9717,19 +9718,19 @@ final readonly class FreshnessPolicy
 
 ---
 
-# 894. Created and expires
+### 894. Created and expires
 
 Las respuestas firmadas deberán incluir una ventana temporal explícita.
 
 ---
 
-# 895. Clock skew
+### 895. Clock skew
 
 La tolerancia de reloj deberá ser limitada y configurable.
 
 ---
 
-# 896. Nonce registry
+### 896. Nonce registry
 
 ```php
 interface ResponseNonceRegistryInterface
@@ -9746,7 +9747,7 @@ interface ResponseNonceRegistryInterface
 
 ---
 
-# 897. Single-use responses
+### 897. Single-use responses
 
 Podrán utilizarse para:
 
@@ -9757,7 +9758,7 @@ Podrán utilizarse para:
 
 ---
 
-# 898. Replay storage
+### 898. Replay storage
 
 El registro de nonces deberá:
 
@@ -9769,7 +9770,7 @@ El registro de nonces deberá:
 
 ---
 
-# 899. Context Binding Policy
+### 899. Context Binding Policy
 
 ```php
 final readonly class ContextBindingPolicy
@@ -9787,13 +9788,13 @@ final readonly class ContextBindingPolicy
 
 ---
 
-# 900. Response Provenance
+### 900. Response Provenance
 
 Toda respuesta deberá poder asociarse internamente a su origen de ejecución.
 
 ---
 
-# 901. ResponseProvenance
+### 901. ResponseProvenance
 
 ```php
 final readonly class ResponseProvenance
@@ -9813,19 +9814,19 @@ final readonly class ResponseProvenance
 
 ---
 
-# 902. Provenance exposure
+### 902. Provenance exposure
 
 No toda metadata de procedencia deberá enviarse al cliente.
 
 ---
 
-# 903. Public provenance
+### 903. Public provenance
 
 Podrán exponerse únicamente identificadores no sensibles y necesarios para soporte.
 
 ---
 
-# 904. Internal provenance
+### 904. Internal provenance
 
 El detalle completo permanecerá en:
 
@@ -9836,13 +9837,13 @@ El detalle completo permanecerá en:
 
 ---
 
-# 905. Release binding
+### 905. Release binding
 
 Las respuestas firmadas de alto valor podrán vincularse al release que las produjo.
 
 ---
 
-# 906. Node anomaly detection
+### 906. Node anomaly detection
 
 Si respuestas equivalentes difieren entre nodos, deberá investigarse:
 
@@ -9854,13 +9855,13 @@ Si respuestas equivalentes difieren entre nodos, deberá investigarse:
 
 ---
 
-# 907. Transport Audit System
+### 907. Transport Audit System
 
 VoltStack deberá mantener un sistema de auditoría específico para seguridad de transporte y respuesta.
 
 ---
 
-# 908. TransportAuditRecord
+### 908. TransportAuditRecord
 
 ```php
 final readonly class TransportAuditRecord
@@ -9883,7 +9884,7 @@ final readonly class TransportAuditRecord
 
 ---
 
-# 909. Audit objectives
+### 909. Audit objectives
 
 El sistema deberá permitir responder:
 
@@ -9897,7 +9898,7 @@ El sistema deberá permitir responder:
 
 ---
 
-# 910. Audit data minimization
+### 910. Audit data minimization
 
 Los registros no deberán incluir automáticamente:
 
@@ -9909,7 +9910,7 @@ Los registros no deberán incluir automáticamente:
 
 ---
 
-# 911. Header audit representation
+### 911. Header audit representation
 
 Los headers sensibles deberán representarse mediante:
 
@@ -9920,13 +9921,13 @@ Los headers sensibles deberán representarse mediante:
 
 ---
 
-# 912. Audit immutability
+### 912. Audit immutability
 
 Los registros de seguridad deberán protegerse contra modificación no autorizada.
 
 ---
 
-# 913. Audit retention
+### 913. Audit retention
 
 La retención dependerá de:
 
@@ -9938,7 +9939,7 @@ La retención dependerá de:
 
 ---
 
-# 914. Audit correlation
+### 914. Audit correlation
 
 Los registros deberán correlacionarse con:
 
@@ -9952,13 +9953,13 @@ Los registros deberán correlacionarse con:
 
 ---
 
-# 915. Security Telemetry
+### 915. Security Telemetry
 
 La telemetría deberá detectar desviaciones antes de convertirse en incidentes.
 
 ---
 
-# 916. Transport metrics
+### 916. Transport metrics
 
 Métricas recomendadas:
 
@@ -9975,13 +9976,13 @@ Métricas recomendadas:
 
 ---
 
-# 917. Security metric labels
+### 917. Security metric labels
 
 Las labels deberán evitar cardinalidad excesiva.
 
 ---
 
-# 918. Safe metric dimensions
+### 918. Safe metric dimensions
 
 Podrán utilizarse:
 
@@ -9994,7 +9995,7 @@ Podrán utilizarse:
 
 ---
 
-# 919. Unsafe metric dimensions
+### 919. Unsafe metric dimensions
 
 Deberán evitarse:
 
@@ -10007,7 +10008,7 @@ Deberán evitarse:
 
 ---
 
-# 920. SecurityEventBus
+### 920. SecurityEventBus
 
 ```php
 interface SecurityEventBusInterface
@@ -10020,7 +10021,7 @@ interface SecurityEventBusInterface
 
 ---
 
-# 921. Transport security events
+### 921. Transport security events
 
 El framework deberá incluir eventos como:
 
@@ -10038,7 +10039,7 @@ El framework deberá incluir eventos como:
 
 ---
 
-# 922. Security event severity
+### 922. Security event severity
 
 ```php
 enum SecurityEventSeverity: string
@@ -10053,7 +10054,7 @@ enum SecurityEventSeverity: string
 
 ---
 
-# 923. Severity resolution
+### 923. Severity resolution
 
 La severidad deberá considerar:
 
@@ -10067,7 +10068,7 @@ La severidad deberá considerar:
 
 ---
 
-# 924. Alert thresholds
+### 924. Alert thresholds
 
 No todo evento deberá producir una alerta inmediata.
 
@@ -10081,13 +10082,13 @@ El sistema deberá soportar:
 
 ---
 
-# 925. Threat Intelligence Hooks
+### 925. Threat Intelligence Hooks
 
 VoltStack podrá exponer hooks para enriquecer eventos con inteligencia externa.
 
 ---
 
-# 926. ThreatIntelligenceProvider
+### 926. ThreatIntelligenceProvider
 
 ```php
 interface ThreatIntelligenceProviderInterface
@@ -10100,7 +10101,7 @@ interface ThreatIntelligenceProviderInterface
 
 ---
 
-# 927. Threat observations
+### 927. Threat observations
 
 Podrán incluir:
 
@@ -10115,13 +10116,13 @@ Podrán incluir:
 
 ---
 
-# 928. Threat intelligence trust
+### 928. Threat intelligence trust
 
 La inteligencia externa será una señal, no una verdad absoluta.
 
 ---
 
-# 929. Automated response
+### 929. Automated response
 
 Las respuestas automáticas podrán incluir:
 
@@ -10136,13 +10137,13 @@ No deberán realizar acciones destructivas irreversibles sin política explícit
 
 ---
 
-# 930. Incident Reporting
+### 930. Incident Reporting
 
 Los incidentes de transporte deberán generar un expediente estructurado.
 
 ---
 
-# 931. TransportSecurityIncident
+### 931. TransportSecurityIncident
 
 ```php
 final readonly class TransportSecurityIncident
@@ -10163,7 +10164,7 @@ final readonly class TransportSecurityIncident
 
 ---
 
-# 932. IncidentStatus
+### 932. IncidentStatus
 
 ```php
 enum IncidentStatus: string
@@ -10178,7 +10179,7 @@ enum IncidentStatus: string
 
 ---
 
-# 933. Incident containment
+### 933. Incident containment
 
 Las acciones de contención podrán incluir:
 
@@ -10192,13 +10193,13 @@ Las acciones de contención podrán incluir:
 
 ---
 
-# 934. Emergency security profile
+### 934. Emergency security profile
 
 VoltStack deberá soportar activar un perfil de emergencia sin modificar cada Controller.
 
 ---
 
-# 935. EmergencyTransportProfile
+### 935. EmergencyTransportProfile
 
 ```php
 final readonly class EmergencyTransportProfile
@@ -10217,13 +10218,13 @@ final readonly class EmergencyTransportProfile
 
 ---
 
-# 936. Runtime Observability
+### 936. Runtime Observability
 
 El sistema deberá proporcionar observabilidad sin debilitar la seguridad.
 
 ---
 
-# 937. Response trace span
+### 937. Response trace span
 
 Cada respuesta podrá generar spans para:
 
@@ -10238,13 +10239,13 @@ Cada respuesta podrá generar spans para:
 
 ---
 
-# 938. Sensitive trace attributes
+### 938. Sensitive trace attributes
 
 Los valores sensibles deberán redactarse antes de enviarse a sistemas de tracing.
 
 ---
 
-# 939. Debug mode restrictions
+### 939. Debug mode restrictions
 
 El modo debug nunca deberá:
 
@@ -10256,7 +10257,7 @@ El modo debug nunca deberá:
 
 ---
 
-# 940. Production Hardening Profile
+### 940. Production Hardening Profile
 
 VoltStack deberá proporcionar un perfil endurecido para producción.
 
@@ -10272,7 +10273,7 @@ enum TransportHardeningProfile: string
 
 ---
 
-# 941. Standard production profile
+### 941. Standard production profile
 
 Deberá habilitar como mínimo:
 
@@ -10290,7 +10291,7 @@ Deberá habilitar como mínimo:
 
 ---
 
-# 942. Strict production profile
+### 942. Strict production profile
 
 Añadirá:
 
@@ -10304,7 +10305,7 @@ Añadirá:
 
 ---
 
-# 943. Regulated profile
+### 943. Regulated profile
 
 Podrá añadir:
 
@@ -10319,7 +10320,7 @@ Podrá añadir:
 
 ---
 
-# 944. Compliance Mapping
+### 944. Compliance Mapping
 
 VoltStack podrá incluir mapas de cumplimiento hacia controles externos.
 
@@ -10327,7 +10328,7 @@ Estos mapas serán ayudas de ingeniería, no certificaciones automáticas.
 
 ---
 
-# 945. OWASP ASVS mapping
+### 945. OWASP ASVS mapping
 
 El modelo deberá mapear, entre otros:
 
@@ -10342,7 +10343,7 @@ El modelo deberá mapear, entre otros:
 
 ---
 
-# 946. NIST mapping
+### 946. NIST mapping
 
 Podrán documentarse relaciones con funciones como:
 
@@ -10354,7 +10355,7 @@ Podrán documentarse relaciones con funciones como:
 
 ---
 
-# 947. PCI-oriented profile
+### 947. PCI-oriented profile
 
 Aplicaciones que procesen datos de pago deberán reforzar:
 
@@ -10369,7 +10370,7 @@ Aplicaciones que procesen datos de pago deberán reforzar:
 
 ---
 
-# 948. Production Hardening Checklist
+### 948. Production Hardening Checklist
 
 Antes de producción deberá verificarse:
 
@@ -10404,7 +10405,7 @@ Antes de producción deberá verificarse:
 
 ---
 
-# 949. Security ADRs
+### 949. Security ADRs
 
 ## ADR-114 — Response integrity is a transport concern
 
@@ -10476,7 +10477,7 @@ Ninguna respuesta será emitida antes de completar la validación final aplicabl
 
 ---
 
-# 950. Conclusión de CONTROLLER_SECURITY_MODEL_PART_04
+### 950. Conclusión de CONTROLLER_SECURITY_MODEL_PART_04
 
 `CONTROLLER_SECURITY_MODEL_PART_04.md` define el modelo completo de seguridad de transporte y respuestas de VoltStack.
 

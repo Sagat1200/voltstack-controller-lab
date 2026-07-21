@@ -1,6 +1,5 @@
-# CONTROLLER_SECURITY_MODEL_PART_02.md
+# Controller Security Model - Part 02: Runtime & Controller Security
 
-## Runtime & Controller Security
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 Esta segunda parte define los controles de seguridad aplicados durante la ejecución real de un controlador.
 
@@ -57,7 +56,7 @@ El objetivo es impedir que datos no confiables controlen:
 
 ---
 
-# 2. Objetivos de seguridad del runtime
+## 2. Objetivos de seguridad del runtime
 
 El runtime deberá garantizar:
 
@@ -76,7 +75,7 @@ El runtime deberá garantizar:
 
 ---
 
-# 3. Principio de target cerrado
+## 3. Principio de target cerrado
 
 El cliente nunca seleccionará directamente:
 
@@ -101,7 +100,7 @@ Validated Controller Target
 
 ---
 
-# 4. ControllerTarget
+## 4. ControllerTarget
 
 ```php
 final readonly class ControllerTarget
@@ -120,7 +119,7 @@ final readonly class ControllerTarget
 
 ---
 
-# 5. ControllerTargetType
+## 5. ControllerTargetType
 
 ```php
 enum ControllerTargetType: string
@@ -138,7 +137,7 @@ enum ControllerTargetType: string
 
 ---
 
-# 6. Tipos restringidos
+## 6. Tipos restringidos
 
 Por defecto se restringirán:
 
@@ -152,7 +151,7 @@ Por defecto se restringirán:
 
 ---
 
-# 7. Controller Resolution Security
+## 7. Controller Resolution Security
 
 El `ControllerResolver` deberá operar sobre un target ya validado.
 
@@ -168,7 +167,7 @@ interface SecureControllerResolverInterface
 
 ---
 
-# 8. ControllerResolutionSecurityContext
+## 8. ControllerResolutionSecurityContext
 
 ```php
 final readonly class ControllerResolutionSecurityContext
@@ -186,7 +185,7 @@ final readonly class ControllerResolutionSecurityContext
 
 ---
 
-# 9. Resolución por class string
+## 9. Resolución por class string
 
 Solo se aceptarán class strings que:
 
@@ -201,7 +200,7 @@ Solo se aceptarán class strings que:
 
 ---
 
-# 10. Namespace allowlist
+## 10. Namespace allowlist
 
 ```php
 final readonly class ControllerNamespacePolicy
@@ -225,7 +224,7 @@ Ejemplo:
 
 ---
 
-# 11. Denylist secundaria
+## 11. Denylist secundaria
 
 La allowlist será la defensa principal.
 
@@ -238,7 +237,7 @@ La denylist podrá bloquear:
 
 ---
 
-# 12. Controller Resolution Registry
+## 12. Controller Resolution Registry
 
 ```php
 interface ControllerResolutionRegistryInterface
@@ -257,7 +256,7 @@ interface ControllerResolutionRegistryInterface
 
 ---
 
-# 13. Resolución de aliases
+## 13. Resolución de aliases
 
 Los aliases deberán:
 
@@ -270,7 +269,7 @@ Los aliases deberán:
 
 ---
 
-# 14. Alias cycles
+## 14. Alias cycles
 
 Ejemplo inválido:
 
@@ -283,7 +282,7 @@ El registry deberá rechazarlo durante boot o compilación.
 
 ---
 
-# 15. Service controller security
+## 15. Service controller security
 
 Un controlador resuelto desde el contenedor deberá:
 
@@ -295,7 +294,7 @@ Un controlador resuelto desde el contenedor deberá:
 
 ---
 
-# 16. Controller scopes
+## 16. Controller scopes
 
 ```php
 enum ControllerScope: string
@@ -309,7 +308,7 @@ enum ControllerScope: string
 
 ---
 
-# 17. Scope por defecto
+## 17. Scope por defecto
 
 El scope recomendado será:
 
@@ -321,7 +320,7 @@ Esto reduce contaminación entre requests.
 
 ---
 
-# 18. Worker-scoped controllers
+## 18. Worker-scoped controllers
 
 Solo deberán permitirse cuando:
 
@@ -334,7 +333,7 @@ Solo deberán permitirse cuando:
 
 ---
 
-# 19. Singleton controllers
+## 19. Singleton controllers
 
 Deberán evitarse salvo que:
 
@@ -345,7 +344,7 @@ Deberán evitarse salvo que:
 
 ---
 
-# 20. Closure security
+## 20. Closure security
 
 Las closures solo podrán utilizarse cuando:
 
@@ -356,7 +355,7 @@ Las closures solo podrán utilizarse cuando:
 
 ---
 
-# 21. Static method security
+## 21. Static method security
 
 Los métodos estáticos estarán deshabilitados por defecto.
 
@@ -370,7 +369,7 @@ Cuando se habiliten deberán:
 
 ---
 
-# 22. Action Exposure Model
+## 22. Action Exposure Model
 
 Un método público no será automáticamente una acción.
 
@@ -382,7 +381,7 @@ Exposed controller action
 
 ---
 
-# 23. ControllerExposureRegistry
+## 23. ControllerExposureRegistry
 
 ```php
 interface ControllerExposureRegistryInterface
@@ -402,7 +401,7 @@ interface ControllerExposureRegistryInterface
 
 ---
 
-# 24. ExposedControllerAction
+## 24. ExposedControllerAction
 
 ```php
 final readonly class ExposedControllerAction
@@ -420,7 +419,7 @@ final readonly class ExposedControllerAction
 
 ---
 
-# 25. Fuentes de exposición
+## 25. Fuentes de exposición
 
 La exposición podrá originarse en:
 
@@ -434,7 +433,7 @@ Nunca en convenciones ambiguas como “todos los métodos públicos”.
 
 ---
 
-# 26. Exposición mediante attributes
+## 26. Exposición mediante attributes
 
 Ejemplo conceptual:
 
@@ -449,7 +448,7 @@ El attribute deberá ser procesado por el sistema de Attributes y convertido en 
 
 ---
 
-# 27. Restricciones de método
+## 27. Restricciones de método
 
 Un action method deberá ser:
 
@@ -464,7 +463,7 @@ Un action method deberá ser:
 
 ---
 
-# 28. Métodos mágicos prohibidos
+## 28. Métodos mágicos prohibidos
 
 No podrán exponerse:
 
@@ -482,7 +481,7 @@ __invoke
 
 ---
 
-# 29. Métodos heredados
+## 29. Métodos heredados
 
 Por defecto, un método heredado no se considerará expuesto solo porque la subclase esté registrada.
 
@@ -494,7 +493,7 @@ La exposición deberá indicar:
 
 ---
 
-# 30. Traits
+## 30. Traits
 
 Los métodos introducidos por traits deberán someterse a las mismas reglas.
 
@@ -502,13 +501,13 @@ La exposición no se heredará implícitamente desde el trait.
 
 ---
 
-# 31. Interfaces
+## 31. Interfaces
 
 Una interface podrá definir un contrato de action, pero no deberá exponer implementaciones automáticamente.
 
 ---
 
-# 32. ControllerExposurePolicy
+## 32. ControllerExposurePolicy
 
 ```php
 final readonly class ControllerExposurePolicy
@@ -526,7 +525,7 @@ final readonly class ControllerExposurePolicy
 
 ---
 
-# 33. Exposure fingerprint
+## 33. Exposure fingerprint
 
 La exposición deberá formar parte del fingerprint del artifact.
 
@@ -542,7 +541,7 @@ invalidará el plan compilado.
 
 ---
 
-# 34. Method Visibility Guard
+## 34. Method Visibility Guard
 
 ```php
 interface ControllerMethodVisibilityGuardInterface
@@ -556,7 +555,7 @@ interface ControllerMethodVisibilityGuardInterface
 
 ---
 
-# 35. Reflection usage
+## 35. Reflection usage
 
 La reflexión podrá utilizarse:
 
@@ -569,7 +568,7 @@ No deberá utilizarse repetidamente en la ruta caliente de producción.
 
 ---
 
-# 36. Compiled exposure plan
+## 36. Compiled exposure plan
 
 ```php
 final readonly class CompiledControllerExposurePlan
@@ -590,7 +589,7 @@ final readonly class CompiledControllerExposurePlan
 
 ---
 
-# 37. Route-to-action binding
+## 37. Route-to-action binding
 
 Una acción podrá restringirse a rutas específicas.
 
@@ -598,7 +597,7 @@ Esto evita que un alias o una ruta nueva reutilice accidentalmente una acción c
 
 ---
 
-# 38. Route signature validation
+## 38. Route signature validation
 
 Antes de invocar:
 
@@ -610,7 +609,7 @@ action.allowed_route_signatures
 
 ---
 
-# 39. Internal actions
+## 39. Internal actions
 
 Podrá existir clasificación:
 
@@ -627,7 +626,7 @@ enum ControllerActionExposure: string
 
 ---
 
-# 40. Internal action security
+## 40. Internal action security
 
 Una acción `Internal` deberá requerir:
 
@@ -644,7 +643,7 @@ X-Internal: true
 
 ---
 
-# 41. System actions
+## 41. System actions
 
 Solo podrán invocarse desde contextos privilegiados del framework.
 
@@ -656,7 +655,7 @@ Ejemplos:
 
 ---
 
-# 42. Disabled actions
+## 42. Disabled actions
 
 Una acción deshabilitada deberá permanecer rechazada aunque:
 
@@ -667,7 +666,7 @@ Una acción deshabilitada deberá permanecer rechazada aunque:
 
 ---
 
-# 43. Target revocation
+## 43. Target revocation
 
 El sistema podrá mantener un registry de targets revocados.
 
@@ -682,7 +681,7 @@ interface ControllerTargetRevocationRegistryInterface
 
 ---
 
-# 44. Parameter Injection Security
+## 44. Parameter Injection Security
 
 Los parámetros representan una de las superficies más sensibles.
 
@@ -698,7 +697,7 @@ Framework internals
 
 ---
 
-# 45. ParameterSecurityDefinition
+## 45. ParameterSecurityDefinition
 
 ```php
 final readonly class ParameterSecurityDefinition
@@ -718,7 +717,7 @@ final readonly class ParameterSecurityDefinition
 
 ---
 
-# 46. ParameterSource
+## 46. ParameterSource
 
 ```php
 enum ParameterSource: string
@@ -742,7 +741,7 @@ enum ParameterSource: string
 
 ---
 
-# 47. ParameterTrustLevel
+## 47. ParameterTrustLevel
 
 ```php
 enum ParameterTrustLevel: string
@@ -756,7 +755,7 @@ enum ParameterTrustLevel: string
 
 ---
 
-# 48. Explicit source binding
+## 48. Explicit source binding
 
 Cada parámetro deberá tener una fuente determinista.
 
@@ -771,7 +770,7 @@ public function update(
 
 ---
 
-# 49. Source ambiguity
+## 49. Source ambiguity
 
 Si un nombre aparece en varias fuentes:
 
@@ -785,7 +784,7 @@ el engine no deberá elegir silenciosamente salvo que exista una política expl�
 
 ---
 
-# 50. Source precedence
+## 50. Source precedence
 
 Podrá existir precedencia para compatibilidad, pero deberá estar:
 
@@ -796,7 +795,7 @@ Podrá existir precedencia para compatibilidad, pero deberá estar:
 
 ---
 
-# 51. Strict parameter mode
+## 51. Strict parameter mode
 
 En strict mode:
 
@@ -807,7 +806,7 @@ En strict mode:
 
 ---
 
-# 52. Route parameter security
+## 52. Route parameter security
 
 Los route parameters deberán:
 
@@ -820,7 +819,7 @@ Los route parameters deberán:
 
 ---
 
-# 53. Query parameter security
+## 53. Query parameter security
 
 Controles:
 
@@ -834,7 +833,7 @@ Controles:
 
 ---
 
-# 54. Body security
+## 54. Body security
 
 El body deberá protegerse con:
 
@@ -848,7 +847,7 @@ El body deberá protegerse con:
 
 ---
 
-# 55. JSON security
+## 55. JSON security
 
 El parser deberá considerar:
 
@@ -862,7 +861,7 @@ El parser deberá considerar:
 
 ---
 
-# 56. Duplicate JSON keys
+## 56. Duplicate JSON keys
 
 La política recomendada será rechazar claves duplicadas.
 
@@ -870,7 +869,7 @@ Esto evita interpretaciones diferentes entre componentes.
 
 ---
 
-# 57. Header parameter security
+## 57. Header parameter security
 
 Solo podrán inyectarse headers explícitamente permitidos.
 
@@ -887,13 +886,13 @@ Para ellos deberán existir value objects o contextos especializados.
 
 ---
 
-# 58. Cookie parameter security
+## 58. Cookie parameter security
 
 Las cookies se considerarán no confiables aunque estén firmadas, salvo después de validación criptográfica y de contexto.
 
 ---
 
-# 59. Session injection
+## 59. Session injection
 
 El controller no deberá recibir almacenamiento de sesión mutable completo por defecto.
 
@@ -905,13 +904,13 @@ Se favorecerán:
 
 ---
 
-# 60. Principal injection
+## 60. Principal injection
 
 La identidad deberá inyectarse desde el `ControllerSecurityContext`, nunca desde parámetros del request.
 
 ---
 
-# 61. Tenant injection
+## 61. Tenant injection
 
 El tenant deberá inyectarse desde un resolver confiable y verificado.
 
@@ -927,7 +926,7 @@ salvo que ese valor sea solo una señal y se verifique contra una identidad aute
 
 ---
 
-# 62. Container injection
+## 62. Container injection
 
 Solo se inyectarán servicios permitidos.
 
@@ -942,7 +941,7 @@ interface ControllerInjectableServiceRegistryInterface
 
 ---
 
-# 63. Arbitrary service injection
+## 63. Arbitrary service injection
 
 No deberá permitirse que un controller solicite cualquier servicio del contenedor sin restricciones.
 
@@ -957,7 +956,7 @@ Se podrán bloquear:
 
 ---
 
-# 64. Injection capabilities
+## 64. Injection capabilities
 
 Los servicios podrán declarar capabilities:
 
@@ -975,7 +974,7 @@ El compilador podrá advertir o bloquear combinaciones peligrosas.
 
 ---
 
-# 65. Scalar coercion
+## 65. Scalar coercion
 
 La coerción deberá ser explícita.
 
@@ -992,7 +991,7 @@ El modo estricto deberá rechazarlos cuando sean ambiguos.
 
 ---
 
-# 66. Boolean coercion
+## 66. Boolean coercion
 
 Valores permitidos recomendados:
 
@@ -1009,7 +1008,7 @@ La política exacta deberá configurarse y compilarse.
 
 ---
 
-# 67. Integer coercion
+## 67. Integer coercion
 
 Deberá validar:
 
@@ -1022,7 +1021,7 @@ Deberá validar:
 
 ---
 
-# 68. Float coercion
+## 68. Float coercion
 
 Deberá considerar:
 
@@ -1035,7 +1034,7 @@ Deberá considerar:
 
 ---
 
-# 69. String normalization
+## 69. String normalization
 
 Podrá incluir:
 
@@ -1049,7 +1048,7 @@ La normalización no deberá alterar identificadores de forma insegura.
 
 ---
 
-# 70. Enum resolution
+## 70. Enum resolution
 
 Solo se resolverán enums declarados en el parameter plan.
 
@@ -1057,7 +1056,7 @@ No se permitirá elegir el enum class desde el request.
 
 ---
 
-# 71. Union types
+## 71. Union types
 
 Los union types pueden producir ambigüedad.
 
@@ -1076,7 +1075,7 @@ La política deberá definir:
 
 ---
 
-# 72. Variadic parameters
+## 72. Variadic parameters
 
 Los variadics deberán tener:
 
@@ -1088,7 +1087,7 @@ Los variadics deberán tener:
 
 ---
 
-# 73. Sensitive parameters
+## 73. Sensitive parameters
 
 Un parámetro marcado sensible:
 
@@ -1100,7 +1099,7 @@ Un parámetro marcado sensible:
 
 ---
 
-# 74. SensitiveParameter attribute
+## 74. SensitiveParameter attribute
 
 Podrá integrarse con:
 
@@ -1113,7 +1112,7 @@ y con metadata propia de VoltStack.
 
 ---
 
-# 75. Parameter Security Guard
+## 75. Parameter Security Guard
 
 ```php
 interface ParameterSecurityGuardInterface
@@ -1128,7 +1127,7 @@ interface ParameterSecurityGuardInterface
 
 ---
 
-# 76. Parameter budgets
+## 76. Parameter budgets
 
 ```php
 final readonly class ParameterResolutionBudget
@@ -1145,7 +1144,7 @@ final readonly class ParameterResolutionBudget
 
 ---
 
-# 77. DTO Hydration Security
+## 77. DTO Hydration Security
 
 La hydration deberá ser schema-driven.
 
@@ -1165,7 +1164,7 @@ Immutable DTO
 
 ---
 
-# 78. DTO schema
+## 78. DTO schema
 
 ```php
 final readonly class DTOHydrationSchema
@@ -1183,7 +1182,7 @@ final readonly class DTOHydrationSchema
 
 ---
 
-# 79. UnknownFieldPolicy
+## 79. UnknownFieldPolicy
 
 ```php
 enum UnknownFieldPolicy: string
@@ -1196,7 +1195,7 @@ enum UnknownFieldPolicy: string
 
 ---
 
-# 80. Política recomendada
+## 80. Política recomendada
 
 Para input sensible o comandos:
 
@@ -1214,7 +1213,7 @@ solo cuando esté claramente documentado.
 
 ---
 
-# 81. Constructor-only hydration
+## 81. Constructor-only hydration
 
 La V1 deberá favorecer DTOs construidos por constructor.
 
@@ -1227,7 +1226,7 @@ Evitará:
 
 ---
 
-# 82. Property hydration
+## 82. Property hydration
 
 Cuando se permita deberá limitarse a propiedades:
 
@@ -1240,7 +1239,7 @@ Cuando se permita deberá limitarse a propiedades:
 
 ---
 
-# 83. Magic methods
+## 83. Magic methods
 
 No se deberán usar automáticamente:
 
@@ -1254,7 +1253,7 @@ durante hydration.
 
 ---
 
-# 84. DTO polymorphism
+## 84. DTO polymorphism
 
 La selección de subclase desde input estará deshabilitada por defecto.
 
@@ -1268,7 +1267,7 @@ Nunca se confiará en campos como:
 
 ---
 
-# 85. Discriminated unions
+## 85. Discriminated unions
 
 Cuando se necesite polimorfismo deberá existir una allowlist explícita.
 
@@ -1281,7 +1280,7 @@ Cuando se necesite polimorfismo deberá existir una allowlist explícita.
 
 ---
 
-# 86. Nested DTO depth
+## 86. Nested DTO depth
 
 La profundidad deberá limitarse para evitar:
 
@@ -1292,7 +1291,7 @@ La profundidad deberá limitarse para evitar:
 
 ---
 
-# 87. Collection hydration
+## 87. Collection hydration
 
 Las colecciones deberán tener:
 
@@ -1303,7 +1302,7 @@ Las colecciones deberán tener:
 
 ---
 
-# 88. DTO validation order
+## 88. DTO validation order
 
 ```text
 Structural validation
@@ -1321,13 +1320,13 @@ Construction
 
 ---
 
-# 89. Cross-field validation
+## 89. Cross-field validation
 
 Deberá ejecutarse antes de invocar código de dominio cuando sea posible.
 
 ---
 
-# 90. DTO side effects
+## 90. DTO side effects
 
 Constructores de DTO utilizados para hydration no deberán producir:
 
@@ -1339,7 +1338,7 @@ Constructores de DTO utilizados para hydration no deberán producir:
 
 ---
 
-# 91. DTO allowlist
+## 91. DTO allowlist
 
 Solo clases registradas como hydratable podrán construirse desde input.
 
@@ -1352,7 +1351,7 @@ interface HydratableDTORegistryInterface
 
 ---
 
-# 92. DTO compiler
+## 92. DTO compiler
 
 El compiler deberá producir:
 
@@ -1364,7 +1363,7 @@ sin reflexión en runtime.
 
 ---
 
-# 93. CompiledDTOHydrationPlan
+## 93. CompiledDTOHydrationPlan
 
 ```php
 final readonly class CompiledDTOHydrationPlan
@@ -1383,7 +1382,7 @@ final readonly class CompiledDTOHydrationPlan
 
 ---
 
-# 94. Model Binding Security
+## 94. Model Binding Security
 
 El model binding no deberá ser solo una búsqueda por ID.
 
@@ -1403,7 +1402,7 @@ Resource authorization
 
 ---
 
-# 95. ModelBindingDefinition
+## 95. ModelBindingDefinition
 
 ```php
 final readonly class ModelBindingDefinition
@@ -1422,7 +1421,7 @@ final readonly class ModelBindingDefinition
 
 ---
 
-# 96. Model class allowlist
+## 96. Model class allowlist
 
 Solo modelos registrados podrán resolverse automáticamente.
 
@@ -1430,7 +1429,7 @@ El model class no podrá provenir del cliente.
 
 ---
 
-# 97. Route key restrictions
+## 97. Route key restrictions
 
 El route key deberá ser:
 
@@ -1442,7 +1441,7 @@ El route key deberá ser:
 
 ---
 
-# 98. Tenant-first binding
+## 98. Tenant-first binding
 
 Para modelos tenant-bound:
 
@@ -1455,13 +1454,13 @@ No se deberá cargar primero globalmente y filtrar después.
 
 ---
 
-# 99. Cross-tenant hiding
+## 99. Cross-tenant hiding
 
 La política recomendada será devolver semántica de no encontrado para evitar enumeración.
 
 ---
 
-# 100. Parent-scoped binding
+## 100. Parent-scoped binding
 
 Ejemplo:
 
@@ -1477,7 +1476,7 @@ task.project_id = resolved project.id
 
 ---
 
-# 101. Scoped binding graph
+## 101. Scoped binding graph
 
 Los bindings deberán poder declarar relaciones:
 
@@ -1489,7 +1488,7 @@ Tenant
 
 ---
 
-# 102. Binding order
+## 102. Binding order
 
 El engine deberá resolver en orden topológico.
 
@@ -1497,7 +1496,7 @@ Un child binding no deberá ejecutarse antes de validar su parent.
 
 ---
 
-# 103. Soft-deleted models
+## 103. Soft-deleted models
 
 Por defecto no se incluirán.
 
@@ -1510,7 +1509,7 @@ Cuando se permitan deberán requerir:
 
 ---
 
-# 104. Global scopes
+## 104. Global scopes
 
 No deberán eliminarse automáticamente durante binding.
 
@@ -1518,7 +1517,7 @@ Bypasses como `withoutGlobalScopes()` deberán estar prohibidos salvo definició
 
 ---
 
-# 105. Model binding authorization
+## 105. Model binding authorization
 
 La existencia del modelo no implica permiso.
 
@@ -1526,7 +1525,7 @@ Después del lookup deberá evaluarse una policy de recurso.
 
 ---
 
-# 106. Timing disclosure
+## 106. Timing disclosure
 
 Cuando sea relevante, el sistema podrá normalizar respuestas para evitar diferenciar fácilmente:
 
@@ -1536,7 +1535,7 @@ Cuando sea relevante, el sistema podrá normalizar respuestas para evitar difere
 
 ---
 
-# 107. Binding cache
+## 107. Binding cache
 
 Solo podrá existir por ejecución o request.
 
@@ -1550,7 +1549,7 @@ La key deberá incluir:
 
 ---
 
-# 108. Binding side effects
+## 108. Binding side effects
 
 El binding no deberá:
 
@@ -1562,7 +1561,7 @@ El binding no deberá:
 
 ---
 
-# 109. Lazy loading
+## 109. Lazy loading
 
 Podrá deshabilitarse durante autorización para evitar:
 
@@ -1573,13 +1572,13 @@ Podrá deshabilitarse durante autorización para evitar:
 
 ---
 
-# 110. File Parameter Security
+## 110. File Parameter Security
 
 Los archivos subidos requieren tratamiento separado.
 
 ---
 
-# 111. UploadedFileDescriptor
+## 111. UploadedFileDescriptor
 
 ```php
 final readonly class UploadedFileDescriptor
@@ -1598,7 +1597,7 @@ final readonly class UploadedFileDescriptor
 
 ---
 
-# 112. Client filename
+## 112. Client filename
 
 Se considerará metadata no confiable.
 
@@ -1606,7 +1605,7 @@ No deberá utilizarse directamente como path de destino.
 
 ---
 
-# 113. Filename normalization
+## 113. Filename normalization
 
 Deberá:
 
@@ -1619,7 +1618,7 @@ Deberá:
 
 ---
 
-# 114. MIME validation
+## 114. MIME validation
 
 Se distinguirá:
 
@@ -1633,13 +1632,13 @@ La decisión deberá usar detección server-side cuando sea posible.
 
 ---
 
-# 115. Extension validation
+## 115. Extension validation
 
 La extensión nunca será la única prueba del tipo de archivo.
 
 ---
 
-# 116. Upload limits
+## 116. Upload limits
 
 Por ruta podrán configurarse:
 
@@ -1653,7 +1652,7 @@ Por ruta podrán configurarse:
 
 ---
 
-# 117. Archive bombs
+## 117. Archive bombs
 
 Si se inspeccionan archivos comprimidos deberán limitarse:
 
@@ -1665,7 +1664,7 @@ Si se inspeccionan archivos comprimidos deberán limitarse:
 
 ---
 
-# 118. Temporary storage
+## 118. Temporary storage
 
 Los uploads deberán almacenarse:
 
@@ -1677,7 +1676,7 @@ Los uploads deberán almacenarse:
 
 ---
 
-# 119. Upload scanning
+## 119. Upload scanning
 
 La arquitectura permitirá integrar:
 
@@ -1691,13 +1690,13 @@ Document sanitizer
 
 ---
 
-# 120. Quarantine
+## 120. Quarantine
 
 Un archivo no validado no deberá moverse directamente a storage permanente público.
 
 ---
 
-# 121. Image security
+## 121. Image security
 
 Las imágenes podrán requerir:
 
@@ -1709,7 +1708,7 @@ Las imágenes podrán requerir:
 
 ---
 
-# 122. File execution prevention
+## 122. File execution prevention
 
 Los uploads nunca deberán ejecutarse como PHP u otro código.
 
@@ -1717,7 +1716,7 @@ El storage público deberá impedir interpretación de scripts.
 
 ---
 
-# 123. Authorization Pipeline
+## 123. Authorization Pipeline
 
 La autorización se dividirá en fases.
 
@@ -1739,7 +1738,7 @@ Result obligations
 
 ---
 
-# 124. Route-level authorization
+## 124. Route-level authorization
 
 Adecuada para:
 
@@ -1751,7 +1750,7 @@ Adecuada para:
 
 ---
 
-# 125. Pre-binding authorization
+## 125. Pre-binding authorization
 
 Evita trabajo costoso y reduce exposición.
 
@@ -1765,7 +1764,7 @@ antes de resolver la orden.
 
 ---
 
-# 126. Resource-level authorization
+## 126. Resource-level authorization
 
 Evalúa:
 
@@ -1778,7 +1777,7 @@ Evalúa:
 
 ---
 
-# 127. Invocation authorization
+## 127. Invocation authorization
 
 Último guard antes de ejecutar.
 
@@ -1792,7 +1791,7 @@ Deberá verificar que la decisión:
 
 ---
 
-# 128. AuthorizationDecisionToken
+## 128. AuthorizationDecisionToken
 
 ```php
 final readonly class AuthorizationDecisionToken
@@ -1810,13 +1809,13 @@ final readonly class AuthorizationDecisionToken
 
 ---
 
-# 129. Decision token purpose
+## 129. Decision token purpose
 
 Evita que una decisión calculada para una acción sea reutilizada accidentalmente en otra.
 
 ---
 
-# 130. Time-sensitive authorization
+## 130. Time-sensitive authorization
 
 Algunas decisiones podrán tener TTL corto.
 
@@ -1829,7 +1828,7 @@ Ejemplos:
 
 ---
 
-# 131. TOCTOU
+## 131. TOCTOU
 
 Existe riesgo entre autorización y mutación.
 
@@ -1843,7 +1842,7 @@ Mitigaciones:
 
 ---
 
-# 132. Field-level authorization
+## 132. Field-level authorization
 
 Podrá aplicarse a:
 
@@ -1855,7 +1854,7 @@ Podrá aplicarse a:
 
 ---
 
-# 133. Input field filtering
+## 133. Input field filtering
 
 No deberá limitarse a ignorar campos no autorizados.
 
@@ -1863,7 +1862,7 @@ Para operaciones sensibles se deberá rechazar explícitamente el intento.
 
 ---
 
-# 134. Authorization obligations
+## 134. Authorization obligations
 
 Ejemplos:
 
@@ -1877,7 +1876,7 @@ Allow + restrict transport
 
 ---
 
-# 135. Policy composition
+## 135. Policy composition
 
 Estrategias:
 
@@ -1893,13 +1892,13 @@ La estrategia deberá ser explícita.
 
 ---
 
-# 136. Deny overrides
+## 136. Deny overrides
 
 Será la estrategia recomendada para políticas de seguridad acumulativas.
 
 ---
 
-# 137. Policy purity
+## 137. Policy purity
 
 Las policies deberán ser idealmente libres de side effects.
 
@@ -1913,13 +1912,13 @@ No deberán:
 
 ---
 
-# 138. Policy query limits
+## 138. Policy query limits
 
 Se deberán detectar o limitar evaluaciones excesivas.
 
 ---
 
-# 139. Authorization N+1
+## 139. Authorization N+1
 
 En colecciones deberá evitarse evaluar una policy con queries individuales por elemento.
 
@@ -1932,13 +1931,13 @@ Podrán existir:
 
 ---
 
-# 140. Tenant Isolation
+## 140. Tenant Isolation
 
 El tenant será parte del contexto de seguridad, no solo un filtro de base de datos.
 
 ---
 
-# 141. TenantResolutionResult
+## 141. TenantResolutionResult
 
 ```php
 final readonly class TenantResolutionResult
@@ -1955,7 +1954,7 @@ final readonly class TenantResolutionResult
 
 ---
 
-# 142. TenantResolutionSource
+## 142. TenantResolutionSource
 
 ```php
 enum TenantResolutionSource: string
@@ -1970,7 +1969,7 @@ enum TenantResolutionSource: string
 
 ---
 
-# 143. Tenant source trust
+## 143. Tenant source trust
 
 Cada source tendrá un nivel de confianza.
 
@@ -1978,7 +1977,7 @@ Un header simple enviado por el cliente no será suficiente.
 
 ---
 
-# 144. Host-based tenant resolution
+## 144. Host-based tenant resolution
 
 Deberá validar:
 
@@ -1992,7 +1991,7 @@ Deberá validar:
 
 ---
 
-# 145. Signed tenant headers
+## 145. Signed tenant headers
 
 Solo serán aceptables cuando:
 
@@ -2004,7 +2003,7 @@ Solo serán aceptables cuando:
 
 ---
 
-# 146. TenantContext
+## 146. TenantContext
 
 ```php
 final readonly class TenantContext
@@ -2020,7 +2019,7 @@ final readonly class TenantContext
 
 ---
 
-# 147. TenantIsolationMode
+## 147. TenantIsolationMode
 
 ```php
 enum TenantIsolationMode: string
@@ -2034,7 +2033,7 @@ enum TenantIsolationMode: string
 
 ---
 
-# 148. Tenant invariant
+## 148. Tenant invariant
 
 Toda operación tenant-bound deberá portar el tenant context hasta:
 
@@ -2048,7 +2047,7 @@ Toda operación tenant-bound deberá portar el tenant context hasta:
 
 ---
 
-# 149. Tenant cache isolation
+## 149. Tenant cache isolation
 
 Las keys deberán incluir tenant identity validada.
 
@@ -2056,7 +2055,7 @@ No deberá aceptarse un tenant ID derivado directamente del request.
 
 ---
 
-# 150. Tenant storage isolation
+## 150. Tenant storage isolation
 
 Las rutas de storage deberán resolverse desde un componente confiable.
 
@@ -2070,7 +2069,7 @@ sin normalización y aislamiento.
 
 ---
 
-# 151. Tenant event isolation
+## 151. Tenant event isolation
 
 Los eventos deberán incluir tenant context cuando correspondan.
 
@@ -2078,7 +2077,7 @@ Los listeners no deberán usar un contexto global persistente fuera de la ejecuc
 
 ---
 
-# 152. Cross-tenant admin operations
+## 152. Cross-tenant admin operations
 
 Deberán requerir:
 
@@ -2091,7 +2090,7 @@ Deberán requerir:
 
 ---
 
-# 153. Tenant switching
+## 153. Tenant switching
 
 Cambiar tenant dentro de una ejecución estará prohibido por defecto.
 
@@ -2099,13 +2098,13 @@ Cuando se permita deberá crear un contexto hijo explícito y auditable.
 
 ---
 
-# 154. Interceptor Security
+## 154. Interceptor Security
 
 Los interceptores pueden modificar el flujo y son altamente privilegiados.
 
 ---
 
-# 155. Interceptor trust levels
+## 155. Interceptor trust levels
 
 ```php
 enum InterceptorTrustLevel: string
@@ -2119,7 +2118,7 @@ enum InterceptorTrustLevel: string
 
 ---
 
-# 156. Security-critical interceptors
+## 156. Security-critical interceptors
 
 Ejemplos:
 
@@ -2133,13 +2132,13 @@ Ejemplos:
 
 ---
 
-# 157. Mandatory interceptors
+## 157. Mandatory interceptors
 
 No podrán eliminarse desde metadata de menor confianza.
 
 ---
 
-# 158. Reserved phases
+## 158. Reserved phases
 
 ```text
 SecurityInitialize
@@ -2156,13 +2155,13 @@ SecurityFinalize
 
 ---
 
-# 159. Priority restrictions
+## 159. Priority restrictions
 
 Un interceptor de aplicación no podrá colocarse antes de ciertos interceptores del framework.
 
 ---
 
-# 160. Interceptor ordering policy
+## 160. Interceptor ordering policy
 
 ```php
 final readonly class InterceptorOrderingPolicy
@@ -2179,7 +2178,7 @@ final readonly class InterceptorOrderingPolicy
 
 ---
 
-# 161. Short-circuit security
+## 161. Short-circuit security
 
 Un interceptor podrá hacer short-circuit, pero no deberá saltarse:
 
@@ -2191,7 +2190,7 @@ Un interceptor podrá hacer short-circuit, pero no deberá saltarse:
 
 ---
 
-# 162. Authorization short-circuit
+## 162. Authorization short-circuit
 
 Cuando deniegue:
 
@@ -2203,7 +2202,7 @@ Cuando deniegue:
 
 ---
 
-# 163. Interceptor capabilities
+## 163. Interceptor capabilities
 
 Podrán declararse:
 
@@ -2220,7 +2219,7 @@ RegisterCleanup
 
 ---
 
-# 164. Capability enforcement
+## 164. Capability enforcement
 
 El runtime no puede sandboxear completamente PHP, pero podrá:
 
@@ -2232,7 +2231,7 @@ El runtime no puede sandboxear completamente PHP, pero podrá:
 
 ---
 
-# 165. Interceptor state
+## 165. Interceptor state
 
 El scope por defecto deberá ser `Execution`.
 
@@ -2240,13 +2239,13 @@ Un interceptor Worker-scoped deberá ser inmutable.
 
 ---
 
-# 166. Interceptor exception handling
+## 166. Interceptor exception handling
 
 Una excepción en un interceptor de seguridad deberá producir fail-closed.
 
 ---
 
-# 167. Retry interceptor security
+## 167. Retry interceptor security
 
 No deberá reejecutar:
 
@@ -2258,7 +2257,7 @@ No deberá reejecutar:
 
 ---
 
-# 168. Transaction interceptor security
+## 168. Transaction interceptor security
 
 Deberá asegurar rollback en:
 
@@ -2269,7 +2268,7 @@ Deberá asegurar rollback en:
 
 ---
 
-# 169. Cache interceptor security
+## 169. Cache interceptor security
 
 No deberá cachear respuestas sensibles sin verificar:
 
@@ -2282,13 +2281,13 @@ No deberá cachear respuestas sensibles sin verificar:
 
 ---
 
-# 170. Invocation Security
+## 170. Invocation Security
 
 El `ControllerInvoker` será una primitive mínima, pero deberá estar protegido por guards externos e internos.
 
 ---
 
-# 171. Secure invocation request
+## 171. Secure invocation request
 
 ```php
 final readonly class SecureControllerInvocationRequest
@@ -2307,7 +2306,7 @@ final readonly class SecureControllerInvocationRequest
 
 ---
 
-# 172. Invocation preconditions
+## 172. Invocation preconditions
 
 Antes de invocar:
 
@@ -2324,7 +2323,7 @@ Invocation count = 0
 
 ---
 
-# 173. Invocation count
+## 173. Invocation count
 
 Cada execution deberá registrar el número de invocaciones.
 
@@ -2338,7 +2337,7 @@ Retries controlados requerirán un execution attempt distinto.
 
 ---
 
-# 174. Argument integrity
+## 174. Argument integrity
 
 Los argumentos deberán estar sellados después de la resolución.
 
@@ -2353,19 +2352,19 @@ interface SealableArgumentCollectionInterface
 
 ---
 
-# 175. Post-authorization mutation
+## 175. Post-authorization mutation
 
 Después de autorizar un recurso no deberá reemplazarse silenciosamente por otro argumento.
 
 ---
 
-# 176. Invocation strategy allowlist
+## 176. Invocation strategy allowlist
 
 Solo strategies registradas y congeladas podrán ejecutarse.
 
 ---
 
-# 177. Dynamic call functions
+## 177. Dynamic call functions
 
 No deberán usarse con input no validado:
 
@@ -2378,7 +2377,7 @@ El plan deberá contener referencias ya validadas.
 
 ---
 
-# 178. Reflection invocation
+## 178. Reflection invocation
 
 Si se utiliza `ReflectionMethod::invokeArgs`, deberá hacerse sobre:
 
@@ -2389,7 +2388,7 @@ Si se utiliza `ReflectionMethod::invokeArgs`, deberá hacerse sobre:
 
 ---
 
-# 179. Controller construction
+## 179. Controller construction
 
 El constructor deberá resolverse por el Container siguiendo dependencies permitidas.
 
@@ -2397,19 +2396,19 @@ No se deberá hidratar el controller desde request.
 
 ---
 
-# 180. Controller properties
+## 180. Controller properties
 
 El framework no deberá asignar automáticamente request data a propiedades del controller.
 
 ---
 
-# 181. Controller state reset
+## 181. Controller state reset
 
 Los controllers no execution-scoped deberán implementar un contrato de reset o demostrar inmutabilidad.
 
 ---
 
-# 182. ResettableControllerInterface
+## 182. ResettableControllerInterface
 
 ```php
 interface ResettableControllerInterface
@@ -2420,13 +2419,13 @@ interface ResettableControllerInterface
 
 ---
 
-# 183. Static state
+## 183. Static state
 
 El uso de propiedades estáticas mutables en controllers deberá detectarse mediante análisis arquitectónico o testing.
 
 ---
 
-# 184. Global state
+## 184. Global state
 
 Se deberá evitar:
 
@@ -2438,7 +2437,7 @@ Se deberá evitar:
 
 ---
 
-# 185. Environment access
+## 185. Environment access
 
 Los controllers no deberían acceder directamente a secretos mediante `getenv()`.
 
@@ -2446,25 +2445,25 @@ Deberán recibir abstracciones con capabilities limitadas.
 
 ---
 
-# 186. Command execution
+## 186. Command execution
 
 Servicios que ejecutan procesos del sistema deberán estar bloqueados para inyección automática general.
 
 ---
 
-# 187. Serialization during invocation
+## 187. Serialization during invocation
 
 No deberá serializarse arbitrariamente el controller o arguments para retries internos.
 
 ---
 
-# 188. Lifecycle Security
+## 188. Lifecycle Security
 
 La máquina de estados debe impedir bypasses y estados imposibles.
 
 ---
 
-# 189. Security-relevant states
+## 189. Security-relevant states
 
 ```text
 SecurityInitializing
@@ -2483,7 +2482,7 @@ Estos pueden ser flags o milestones vinculados al lifecycle general.
 
 ---
 
-# 190. Security milestone guard
+## 190. Security milestone guard
 
 ```php
 interface SecurityMilestoneGuardInterface
@@ -2497,7 +2496,7 @@ interface SecurityMilestoneGuardInterface
 
 ---
 
-# 191. Required milestones
+## 191. Required milestones
 
 Antes de `Invocation` deberán haberse alcanzado:
 
@@ -2514,7 +2513,7 @@ ResourceAuthorizationAllowed
 
 ---
 
-# 192. State tampering
+## 192. State tampering
 
 El execution state deberá ser mutable solo por el Lifecycle Manager.
 
@@ -2522,13 +2521,13 @@ Controllers e interceptores no deberán cambiarlo directamente.
 
 ---
 
-# 193. Cancellation security
+## 193. Cancellation security
 
 La cancelación no deberá omitir cleanup ni audit.
 
 ---
 
-# 194. Deadline security
+## 194. Deadline security
 
 Los deadlines deberán propagarse a:
 
@@ -2541,7 +2540,7 @@ Los deadlines deberán propagarse a:
 
 ---
 
-# 195. Cleanup security
+## 195. Cleanup security
 
 Cleanup deberá eliminar:
 
@@ -2556,7 +2555,7 @@ Cleanup deberá eliminar:
 
 ---
 
-# 196. Cleanup failure
+## 196. Cleanup failure
 
 Un fallo al limpiar datos sensibles puede requerir:
 
@@ -2568,7 +2567,7 @@ Terminate
 
 ---
 
-# 197. Resource ownership
+## 197. Resource ownership
 
 Todo recurso sensible registrado deberá tener owner:
 
@@ -2579,19 +2578,19 @@ Todo recurso sensible registrado deberá tener owner:
 
 ---
 
-# 198. Secret lifetime
+## 198. Secret lifetime
 
 Los secretos temporales deberán mantenerse el menor tiempo posible y no copiarse innecesariamente.
 
 ---
 
-# 199. Subrequest Security
+## 199. Subrequest Security
 
 Los subrequests pueden introducir confusión de identidad y autorización.
 
 ---
 
-# 200. Subrequest identity inheritance
+## 200. Subrequest identity inheritance
 
 Por defecto heredarán:
 
@@ -2609,13 +2608,13 @@ Pero deberán obtener:
 
 ---
 
-# 201. No authorization inheritance
+## 201. No authorization inheritance
 
 Una decisión `Allow` del parent no autoriza automáticamente el child.
 
 ---
 
-# 202. SubrequestSecurityContext
+## 202. SubrequestSecurityContext
 
 ```php
 final readonly class SubrequestSecurityContext
@@ -2632,13 +2631,13 @@ final readonly class SubrequestSecurityContext
 
 ---
 
-# 203. Subrequest depth
+## 203. Subrequest depth
 
 Se limitará para prevenir recursion y DoS.
 
 ---
 
-# 204. Internal subrequests
+## 204. Internal subrequests
 
 No deberán convertirse automáticamente en trusted system calls.
 
@@ -2646,13 +2645,13 @@ Continuarán sujetos a políticas, salvo un canal interno explícito y restringi
 
 ---
 
-# 205. Principal elevation in subrequests
+## 205. Principal elevation in subrequests
 
 Estará prohibida por defecto.
 
 ---
 
-# 206. Tenant switching in subrequests
+## 206. Tenant switching in subrequests
 
 Requerirá:
 
@@ -2663,19 +2662,19 @@ Requerirá:
 
 ---
 
-# 207. Response isolation
+## 207. Response isolation
 
 La respuesta del subrequest no deberá emitirse directamente al cliente salvo que el parent la adopte mediante una operación explícita.
 
 ---
 
-# 208. Recursion Security
+## 208. Recursion Security
 
 El sistema deberá mantener un execution graph.
 
 ---
 
-# 209. Execution graph
+## 209. Execution graph
 
 ```php
 final class ControllerExecutionGraph
@@ -2693,7 +2692,7 @@ final class ControllerExecutionGraph
 
 ---
 
-# 210. Recursion keys
+## 210. Recursion keys
 
 Podrán incluir:
 
@@ -2705,7 +2704,7 @@ Podrán incluir:
 
 ---
 
-# 211. Recursion policies
+## 211. Recursion policies
 
 ```text
 Deny same action recursion
@@ -2716,7 +2715,7 @@ Allow explicit recursive components
 
 ---
 
-# 212. Error handler recursion
+## 212. Error handler recursion
 
 Se deberá detectar cuando el error handler vuelve a provocar el mismo error.
 
@@ -2724,19 +2723,19 @@ Deberá activarse emergency fallback.
 
 ---
 
-# 213. Authorization recursion
+## 213. Authorization recursion
 
 Policies que se invocan mutuamente deberán tener detection y budget.
 
 ---
 
-# 214. Retry Security
+## 214. Retry Security
 
 Todo retry deberá crear un `ExecutionAttempt`.
 
 ---
 
-# 215. ExecutionAttempt
+## 215. ExecutionAttempt
 
 ```php
 final readonly class ExecutionAttempt
@@ -2753,7 +2752,7 @@ final readonly class ExecutionAttempt
 
 ---
 
-# 216. Retry eligibility
+## 216. Retry eligibility
 
 Solo será elegible si:
 
@@ -2764,7 +2763,7 @@ Solo será elegible si:
 
 ---
 
-# 217. Authorization revalidation
+## 217. Authorization revalidation
 
 Deberá revalidarse cuando:
 
@@ -2777,7 +2776,7 @@ Deberá revalidarse cuando:
 
 ---
 
-# 218. Retry budgets
+## 218. Retry budgets
 
 ```php
 final readonly class RetrySecurityBudget
@@ -2793,7 +2792,7 @@ final readonly class RetrySecurityBudget
 
 ---
 
-# 219. Idempotency key security
+## 219. Idempotency key security
 
 Una idempotency key deberá:
 
@@ -2806,19 +2805,19 @@ Una idempotency key deberá:
 
 ---
 
-# 220. Replay protection
+## 220. Replay protection
 
 La misma key con payload diferente deberá rechazarse.
 
 ---
 
-# 221. Cancellation Security
+## 221. Cancellation Security
 
 La cancellation token deberá ser controlada por framework o runtime confiable.
 
 ---
 
-# 222. Client disconnect
+## 222. Client disconnect
 
 Podrá provocar cancelación, pero no deberá impedir:
 
@@ -2829,13 +2828,13 @@ Podrá provocar cancelación, pero no deberá impedir:
 
 ---
 
-# 223. User-triggered cancellation
+## 223. User-triggered cancellation
 
 Solo podrá afectar la ejecución propia, salvo permisos administrativos.
 
 ---
 
-# 224. Cancellation race
+## 224. Cancellation race
 
 El lifecycle deberá resolver de forma determinista carreras entre:
 
@@ -2846,7 +2845,7 @@ El lifecycle deberá resolver de forma determinista carreras entre:
 
 ---
 
-# 225. Partial response cancellation
+## 225. Partial response cancellation
 
 Si ya se emitieron bytes:
 
@@ -2858,19 +2857,19 @@ Si ya se emitieron bytes:
 
 ---
 
-# 226. FrankenPHP Worker Isolation
+## 226. FrankenPHP Worker Isolation
 
 Los Workers persistentes amplifican cualquier fuga de estado.
 
 ---
 
-# 227. Worker trust model
+## 227. Worker trust model
 
 El Worker será reutilizable únicamente mientras se mantengan invariantes de aislamiento.
 
 ---
 
-# 228. Request scope
+## 228. Request scope
 
 Cada request deberá crear un scope nuevo que contenga:
 
@@ -2885,7 +2884,7 @@ Cada request deberá crear un scope nuevo que contenga:
 
 ---
 
-# 229. Execution scope
+## 229. Execution scope
 
 Un request podrá contener múltiples executions o subrequests.
 
@@ -2893,7 +2892,7 @@ Cada una tendrá scope propio.
 
 ---
 
-# 230. Worker-safe services
+## 230. Worker-safe services
 
 Un servicio Worker-scoped deberá ser:
 
@@ -2904,7 +2903,7 @@ Un servicio Worker-scoped deberá ser:
 
 ---
 
-# 231. Forbidden Worker state
+## 231. Forbidden Worker state
 
 No deberá persistir:
 
@@ -2923,7 +2922,7 @@ Upload descriptors
 
 ---
 
-# 232. WorkerSecurityResetter
+## 232. WorkerSecurityResetter
 
 ```php
 interface WorkerSecurityResetterInterface
@@ -2936,7 +2935,7 @@ interface WorkerSecurityResetterInterface
 
 ---
 
-# 233. Reset order
+## 233. Reset order
 
 ```text
 Stop active work
@@ -2958,7 +2957,7 @@ Validate worker state
 
 ---
 
-# 234. Worker state validation
+## 234. Worker state validation
 
 Después del reset se deberá verificar:
 
@@ -2972,7 +2971,7 @@ Después del reset se deberá verificar:
 
 ---
 
-# 235. Leak detection
+## 235. Leak detection
 
 Podrá ejecutarse:
 
@@ -2983,7 +2982,7 @@ Podrá ejecutarse:
 
 ---
 
-# 236. WorkerSecuritySnapshot
+## 236. WorkerSecuritySnapshot
 
 ```php
 final readonly class WorkerSecuritySnapshot
@@ -3001,7 +3000,7 @@ final readonly class WorkerSecuritySnapshot
 
 ---
 
-# 237. Worker disposition
+## 237. Worker disposition
 
 ```php
 enum WorkerSecurityDisposition: string
@@ -3016,19 +3015,19 @@ enum WorkerSecurityDisposition: string
 
 ---
 
-# 238. Reuse
+## 238. Reuse
 
 Solo cuando todas las invariantes se cumplen.
 
 ---
 
-# 239. Reset
+## 239. Reset
 
 Cuando existe estado residual recuperable.
 
 ---
 
-# 240. RestartRecommended
+## 240. RestartRecommended
 
 Cuando hay incertidumbre razonable, por ejemplo:
 
@@ -3039,7 +3038,7 @@ Cuando hay incertidumbre razonable, por ejemplo:
 
 ---
 
-# 241. Terminate
+## 241. Terminate
 
 Ante pérdida de confianza:
 
@@ -3051,13 +3050,13 @@ Ante pérdida de confianza:
 
 ---
 
-# 242. Quarantine
+## 242. Quarantine
 
 Podrá utilizarse en plataformas con supervisión avanzada para retirar el Worker del pool y conservar diagnóstico.
 
 ---
 
-# 243. Worker cache security
+## 243. Worker cache security
 
 Solo podrán almacenarse:
 
@@ -3068,19 +3067,19 @@ Solo podrán almacenarse:
 
 ---
 
-# 244. No security decision caching across requests
+## 244. No security decision caching across requests
 
 Las decisiones de autorización no podrán permanecer en Worker cache general.
 
 ---
 
-# 245. Static variable audit
+## 245. Static variable audit
 
 Las clases runtime deberán revisarse para detectar static mutable state.
 
 ---
 
-# 246. Global context adapters
+## 246. Global context adapters
 
 Si existen helpers como:
 
@@ -3096,7 +3095,7 @@ No podrán almacenar directamente el objeto en una propiedad estática persisten
 
 ---
 
-# 247. Async and concurrency awareness
+## 247. Async and concurrency awareness
 
 FrankenPHP puede atender Workers con patrones concurrentes según configuración futura.
 
@@ -3104,7 +3103,7 @@ Los contextos deberán ser localizables por execution, no por global mutable sta
 
 ---
 
-# 248. Context carrier
+## 248. Context carrier
 
 ```php
 interface ExecutionContextCarrierInterface
@@ -3120,19 +3119,19 @@ interface ExecutionContextCarrierInterface
 
 ---
 
-# 249. Context restoration
+## 249. Context restoration
 
 `runWith()` deberá restaurar el contexto anterior incluso ante excepción.
 
 ---
 
-# 250. Fiber safety
+## 250. Fiber safety
 
 Cuando se utilicen Fibers, el contexto deberá ser Fiber-local o propagado explícitamente.
 
 ---
 
-# 251. Security exceptions
+## 251. Security exceptions
 
 Excepciones principales:
 
@@ -3155,7 +3154,7 @@ WorkerSecurityLeakException
 
 ---
 
-# 252. Public error mapping
+## 252. Public error mapping
 
 Estas excepciones no deberán exponer detalles internos.
 
@@ -3168,7 +3167,7 @@ ControllerNotExposedException
 
 ---
 
-# 253. Security events del runtime
+## 253. Security events del runtime
 
 ```text
 controllers.security.target.validated
@@ -3190,7 +3189,7 @@ controllers.security.worker.terminated
 
 ---
 
-# 254. Runtime security metrics
+## 254. Runtime security metrics
 
 ```text
 voltstack.controllers.security.target_rejections
@@ -3205,7 +3204,7 @@ voltstack.controllers.security.worker_terminations
 
 ---
 
-# 255. Audit requirements
+## 255. Audit requirements
 
 Se auditarán especialmente:
 
@@ -3219,7 +3218,7 @@ Se auditarán especialmente:
 
 ---
 
-# 256. Runtime security configuration
+## 256. Runtime security configuration
 
 ```php
 // config/controller_security_runtime.php
@@ -3317,7 +3316,7 @@ return [
 
 ---
 
-# 257. Estructura del módulo Runtime
+## 257. Estructura del módulo Runtime
 
 ```text
 src/
@@ -3439,7 +3438,7 @@ src/
 
 ---
 
-# 258. Testing requirements
+## 258. Testing requirements
 
 La suite deberá cubrir:
 
@@ -3461,7 +3460,7 @@ La suite deberá cubrir:
 
 ---
 
-# 259. Dynamic vs compiled equivalence
+## 259. Dynamic vs compiled equivalence
 
 Todos los controles deberán producir el mismo resultado en ambos modos:
 
@@ -3472,7 +3471,7 @@ Compiled security plan
 
 ---
 
-# 260. Worker testing sequence
+## 260. Worker testing sequence
 
 ```text
 Request A: User A / Tenant A
@@ -3486,7 +3485,7 @@ Assert no A state visible
 
 ---
 
-# 261. Security fuzzing
+## 261. Security fuzzing
 
 Se recomienda fuzzing para:
 
@@ -3500,115 +3499,115 @@ Se recomienda fuzzing para:
 
 ---
 
-# 262. ADR-023
+## 262. ADR-023
 
 **La resolución de controladores operará únicamente sobre targets confiables y registrados.**
 
 ---
 
-# 263. ADR-024
+## 263. ADR-024
 
 **Los métodos públicos no estarán expuestos salvo declaración explícita.**
 
 ---
 
-# 264. ADR-025
+## 264. ADR-025
 
 **La exposición de una acción podrá vincularse a firmas de ruta específicas.**
 
 ---
 
-# 265. ADR-026
+## 265. ADR-026
 
 **Las fuentes de parámetros serán explícitas en strict mode.**
 
 ---
 
-# 266. ADR-027
+## 266. ADR-027
 
 **Los conflictos entre fuentes de parámetros producirán rechazo, no precedencia silenciosa.**
 
 ---
 
-# 267. ADR-028
+## 267. ADR-028
 
 **La hydration de DTOs será schema-driven y allowlist-only.**
 
 ---
 
-# 268. ADR-029
+## 268. ADR-029
 
 **El polimorfismo de DTO estará deshabilitado por defecto.**
 
 ---
 
-# 269. ADR-030
+## 269. ADR-030
 
 **El model binding aplicará tenant scope antes del lookup efectivo.**
 
 ---
 
-# 270. ADR-031
+## 270. ADR-031
 
 **Todo modelo resuelto requerirá autorización de recurso cuando la ruta esté protegida.**
 
 ---
 
-# 271. ADR-032
+## 271. ADR-032
 
 **Los uploads permanecerán en cuarentena hasta completar validación.**
 
 ---
 
-# 272. ADR-033
+## 272. ADR-033
 
 **Los interceptores de seguridad ocuparán fases reservadas no reordenables por extensiones comunes.**
 
 ---
 
-# 273. ADR-034
+## 273. ADR-034
 
 **Los argumentos serán sellados antes de la invocación.**
 
 ---
 
-# 274. ADR-035
+## 274. ADR-035
 
 **Toda invocación requerirá un token de decisión vinculado al target y execution.**
 
 ---
 
-# 275. ADR-036
+## 275. ADR-036
 
 **Las decisiones de autorización no se heredarán automáticamente en subrequests.**
 
 ---
 
-# 276. ADR-037
+## 276. ADR-037
 
 **Los retries de escritura requerirán idempotencia o garantía equivalente.**
 
 ---
 
-# 277. ADR-038
+## 277. ADR-038
 
 **Los Workers validarán sus invariantes de seguridad después de cada request.**
 
 ---
 
-# 278. ADR-039
+## 278. ADR-039
 
 **Un Worker con fuga de contexto no recuperable será terminado.**
 
 ---
 
-# 279. ADR-040
+## 279. ADR-040
 
 **Los contextos globales se resolverán desde execution scope y nunca mediante estado estático persistente.**
 
 ---
 
-# 280. Implementación V1
+## 280. Implementación V1
 
 La V1 deberá incluir:
 
@@ -3633,7 +3632,7 @@ La V1 deberá incluir:
 
 ---
 
-# 281. Fuera de PART 02
+## 281. Fuera de PART 02
 
 Se desarrollará posteriormente:
 
@@ -3656,7 +3655,7 @@ Se desarrollará posteriormente:
 
 ---
 
-# 282. Flujo seguro de runtime
+## 282. Flujo seguro de runtime
 
 ```text
 Trusted Route Match
@@ -3709,7 +3708,7 @@ Worker Security Reset
 
 ---
 
-# 283. Conclusión de PART 02
+## 283. Conclusión de PART 02
 
 Esta parte define las defensas operativas que impiden que una petición no confiable controle el runtime de Controllers.
 
@@ -3738,7 +3737,7 @@ El diseño mantiene las mismas garantías en:
 
 ---
 
-# 284. Siguiente parte
+## 284. Siguiente parte
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_03.md

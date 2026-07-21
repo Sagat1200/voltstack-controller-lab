@@ -1,6 +1,5 @@
-# CONTROLLER_SECURITY_MODEL.md
+# Controller Security Model - Part 1: Security Foundations & Threat Model
 
-## PART 01 — Security Foundations & Threat Model
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Controller Security Model** define el modelo integral de seguridad del subsistema Controllers de VoltStack.
 
@@ -55,7 +54,7 @@ El modelo deberá proteger tanto el modo dinámico como el modo compilado.
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Garantizar que una ejecución de controlador:
 
@@ -72,7 +71,7 @@ Garantizar que una ejecución de controlador:
 
 ---
 
-# 3. Seguridad como propiedad transversal
+## 3. Seguridad como propiedad transversal
 
 La seguridad no deberá residir únicamente en middleware.
 
@@ -93,7 +92,7 @@ Cada subsistema será responsable de proteger sus propios límites.
 
 ---
 
-# 4. Principios fundamentales
+## 4. Principios fundamentales
 
 VoltStack seguirá estos principios:
 
@@ -116,7 +115,7 @@ VoltStack seguirá estos principios:
 
 ---
 
-# 5. Secure by default
+## 5. Secure by default
 
 Una capacidad insegura no deberá habilitarse implícitamente.
 
@@ -133,7 +132,7 @@ Ejemplos:
 
 ---
 
-# 6. Deny by default
+## 6. Deny by default
 
 Cuando no exista una decisión explícita:
 
@@ -148,7 +147,7 @@ No transport policy → use hardened default
 
 ---
 
-# 7. Least privilege
+## 7. Least privilege
 
 Cada componente tendrá acceso únicamente a lo necesario.
 
@@ -162,7 +161,7 @@ Ejemplos:
 
 ---
 
-# 8. Defense in depth
+## 8. Defense in depth
 
 Una misma amenaza deberá ser contenida en varias capas.
 
@@ -184,7 +183,7 @@ Aunque falle una capa, las demás deberán impedir la ejecución.
 
 ---
 
-# 9. Fail closed
+## 9. Fail closed
 
 Cuando una decisión de seguridad no pueda completarse:
 
@@ -200,7 +199,7 @@ El sistema deberá rechazar la operación, salvo políticas explícitas y segura
 
 ---
 
-# 10. Separación entre seguridad y conveniencia
+## 10. Separación entre seguridad y conveniencia
 
 Las abstracciones de conveniencia no deberán reducir garantías.
 
@@ -214,7 +213,7 @@ Ejemplos:
 
 ---
 
-# 11. Objetivos de seguridad
+## 11. Objetivos de seguridad
 
 El modelo protegerá:
 
@@ -231,7 +230,7 @@ Non-repudiation when applicable
 
 ---
 
-# 12. Confidencialidad
+## 12. Confidencialidad
 
 Se deberá evitar exposición de:
 
@@ -251,7 +250,7 @@ Se deberá evitar exposición de:
 
 ---
 
-# 13. Integridad
+## 13. Integridad
 
 Se deberá impedir modificación no autorizada de:
 
@@ -268,7 +267,7 @@ Se deberá impedir modificación no autorizada de:
 
 ---
 
-# 14. Disponibilidad
+## 14. Disponibilidad
 
 El sistema deberá resistir:
 
@@ -287,7 +286,7 @@ El sistema deberá resistir:
 
 ---
 
-# 15. Autenticidad
+## 15. Autenticidad
 
 La identidad utilizada para decisiones deberá provenir de fuentes confiables.
 
@@ -311,7 +310,7 @@ Nunca deberá confiarse directamente en:
 
 ---
 
-# 16. Autorización
+## 16. Autorización
 
 Toda acción protegida deberá validar:
 
@@ -326,7 +325,7 @@ Toda acción protegida deberá validar:
 
 ---
 
-# 17. Aislamiento
+## 17. Aislamiento
 
 El aislamiento se aplicará entre:
 
@@ -343,7 +342,7 @@ El aislamiento se aplicará entre:
 
 ---
 
-# 18. Trazabilidad
+## 18. Trazabilidad
 
 Las decisiones críticas deberán poder auditarse sin registrar información sensible.
 
@@ -360,7 +359,7 @@ Se podrá registrar:
 
 ---
 
-# 19. Modelo de confianza
+## 19. Modelo de confianza
 
 VoltStack distinguirá entre componentes confiables y no confiables.
 
@@ -373,7 +372,7 @@ Privileged
 
 ---
 
-# 20. Entradas no confiables
+## 20. Entradas no confiables
 
 Se considerarán no confiables:
 
@@ -395,7 +394,7 @@ Se considerarán no confiables:
 
 ---
 
-# 21. Componentes semi-confiables
+## 21. Componentes semi-confiables
 
 Podrán considerarse semi-confiables:
 
@@ -410,7 +409,7 @@ Aunque formen parte de la aplicación, deberán operar bajo contratos y límites
 
 ---
 
-# 22. Componentes confiables
+## 22. Componentes confiables
 
 Componentes de confianza:
 
@@ -425,7 +424,7 @@ Componentes de confianza:
 
 ---
 
-# 23. Componentes privilegiados
+## 23. Componentes privilegiados
 
 Componentes privilegiados:
 
@@ -440,7 +439,7 @@ Su acceso deberá ser limitado.
 
 ---
 
-# 24. Trust boundaries
+## 24. Trust boundaries
 
 Los límites principales serán:
 
@@ -460,7 +459,7 @@ Observability → External Backend
 
 ---
 
-# 25. Boundary: Client to Server
+## 25. Boundary: Client to Server
 
 Amenazas:
 
@@ -484,7 +483,7 @@ Controles:
 
 ---
 
-# 26. Boundary: Server to Request Object
+## 26. Boundary: Server to Request Object
 
 El Request deberá ser una representación normalizada.
 
@@ -499,7 +498,7 @@ No deberá conservar simultáneamente múltiples interpretaciones ambiguas de:
 
 ---
 
-# 27. Boundary: Request to Routing
+## 27. Boundary: Request to Routing
 
 Routing deberá recibir:
 
@@ -513,7 +512,7 @@ Routing no deberá confiar en headers de proxy sin configuración explícita.
 
 ---
 
-# 28. Boundary: Routing to Controllers
+## 28. Boundary: Routing to Controllers
 
 Routing únicamente podrá producir targets validados.
 
@@ -529,7 +528,7 @@ No deberá aceptar controller class o method directamente desde input del usuari
 
 ---
 
-# 29. Boundary: Pipeline to Application Code
+## 29. Boundary: Pipeline to Application Code
 
 Antes de entrar a código de aplicación deberán completarse:
 
@@ -543,7 +542,7 @@ Antes de entrar a código de aplicación deberán completarse:
 
 ---
 
-# 30. Boundary: Application Code to Data Layer
+## 30. Boundary: Application Code to Data Layer
 
 Controllers no deberán asumir que el acceso a datos está autorizado únicamente porque el objeto fue resuelto.
 
@@ -556,7 +555,7 @@ El Data Layer deberá mantener:
 
 ---
 
-# 31. Boundary: Runtime Build
+## 31. Boundary: Runtime Build
 
 Los artifacts compilados deberán provenir de un build confiable.
 
@@ -574,7 +573,7 @@ Runtime loading
 
 ---
 
-# 32. Boundary: Worker Persistence
+## 32. Boundary: Worker Persistence
 
 El Worker es confiable únicamente mientras mantenga aislamiento.
 
@@ -592,7 +591,7 @@ Después de una ejecución deberá eliminar:
 
 ---
 
-# 33. Boundary: Observability Export
+## 33. Boundary: Observability Export
 
 Antes de exportar datos:
 
@@ -610,13 +609,13 @@ Exporter
 
 ---
 
-# 34. Activos protegidos
+## 34. Activos protegidos
 
 El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 35. Activos de identidad
+## 35. Activos de identidad
 
 * user identity;
 * service identity;
@@ -628,7 +627,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 36. Activos de autorización
+## 36. Activos de autorización
 
 * roles;
 * permissions;
@@ -641,7 +640,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 37. Activos de datos
+## 37. Activos de datos
 
 * domain entities;
 * DTO contents;
@@ -654,7 +653,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 38. Activos de ejecución
+## 38. Activos de ejecución
 
 * controller target;
 * resolved parameters;
@@ -666,7 +665,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 39. Activos compilados
+## 39. Activos compilados
 
 * artifacts;
 * manifests;
@@ -679,7 +678,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 40. Activos de infraestructura
+## 40. Activos de infraestructura
 
 * secrets;
 * database credentials;
@@ -692,7 +691,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 41. Activos de observabilidad
+## 41. Activos de observabilidad
 
 * logs;
 * traces;
@@ -704,7 +703,7 @@ El modelo deberá identificar activos de seguridad.
 
 ---
 
-# 42. Actores del modelo
+## 42. Actores del modelo
 
 ```text
 Anonymous client
@@ -723,7 +722,7 @@ Compromised dependency
 
 ---
 
-# 43. Anonymous client
+## 43. Anonymous client
 
 Puede intentar:
 
@@ -736,7 +735,7 @@ Puede intentar:
 
 ---
 
-# 44. Authenticated user
+## 44. Authenticated user
 
 Puede intentar:
 
@@ -749,7 +748,7 @@ Puede intentar:
 
 ---
 
-# 45. Privileged user
+## 45. Privileged user
 
 Puede intentar:
 
@@ -760,7 +759,7 @@ Puede intentar:
 
 ---
 
-# 46. Package author
+## 46. Package author
 
 Un paquete puede introducir:
 
@@ -772,7 +771,7 @@ Un paquete puede introducir:
 
 ---
 
-# 47. System operator
+## 47. System operator
 
 Puede afectar:
 
@@ -787,7 +786,7 @@ El modelo deberá minimizar confianza implícita incluso en operaciones.
 
 ---
 
-# 48. Build system
+## 48. Build system
 
 El sistema de build es un actor privilegiado.
 
@@ -802,7 +801,7 @@ Su compromiso comprometería integridad del runtime.
 
 ---
 
-# 49. External services
+## 49. External services
 
 Sus respuestas deberán considerarse no confiables aunque el servicio sea legítimo.
 
@@ -815,7 +814,7 @@ Podrán contener:
 
 ---
 
-# 50. Categorías de amenazas
+## 50. Categorías de amenazas
 
 Se utilizará una clasificación inspirada en STRIDE:
 
@@ -830,7 +829,7 @@ Elevation of Privilege
 
 ---
 
-# 51. Spoofing
+## 51. Spoofing
 
 Ejemplos:
 
@@ -843,7 +842,7 @@ Ejemplos:
 
 ---
 
-# 52. Tampering
+## 52. Tampering
 
 Ejemplos:
 
@@ -856,7 +855,7 @@ Ejemplos:
 
 ---
 
-# 53. Repudiation
+## 53. Repudiation
 
 Ejemplos:
 
@@ -868,7 +867,7 @@ Ejemplos:
 
 ---
 
-# 54. Information Disclosure
+## 54. Information Disclosure
 
 Ejemplos:
 
@@ -883,7 +882,7 @@ Ejemplos:
 
 ---
 
-# 55. Denial of Service
+## 55. Denial of Service
 
 Ejemplos:
 
@@ -899,7 +898,7 @@ Ejemplos:
 
 ---
 
-# 56. Elevation of Privilege
+## 56. Elevation of Privilege
 
 Ejemplos:
 
@@ -913,7 +912,7 @@ Ejemplos:
 
 ---
 
-# 57. Superficie de ataque
+## 57. Superficie de ataque
 
 La superficie se divide en:
 
@@ -935,7 +934,7 @@ Extension surface
 
 ---
 
-# 58. Transport surface
+## 58. Transport surface
 
 Incluye:
 
@@ -952,7 +951,7 @@ Incluye:
 
 ---
 
-# 59. Routing surface
+## 59. Routing surface
 
 Incluye:
 
@@ -966,7 +965,7 @@ Incluye:
 
 ---
 
-# 60. Controller resolution surface
+## 60. Controller resolution surface
 
 Incluye:
 
@@ -981,7 +980,7 @@ Incluye:
 
 ---
 
-# 61. Parameter surface
+## 61. Parameter surface
 
 Incluye:
 
@@ -997,7 +996,7 @@ Incluye:
 
 ---
 
-# 62. Metadata surface
+## 62. Metadata surface
 
 Incluye:
 
@@ -1011,7 +1010,7 @@ Incluye:
 
 ---
 
-# 63. Authorization surface
+## 63. Authorization surface
 
 Incluye:
 
@@ -1026,7 +1025,7 @@ Incluye:
 
 ---
 
-# 64. Invocation surface
+## 64. Invocation surface
 
 Incluye:
 
@@ -1040,7 +1039,7 @@ Incluye:
 
 ---
 
-# 65. Transformation surface
+## 65. Transformation surface
 
 Incluye:
 
@@ -1056,7 +1055,7 @@ Incluye:
 
 ---
 
-# 66. Exception surface
+## 66. Exception surface
 
 Incluye:
 
@@ -1070,7 +1069,7 @@ Incluye:
 
 ---
 
-# 67. Compilation surface
+## 67. Compilation surface
 
 Incluye:
 
@@ -1085,7 +1084,7 @@ Incluye:
 
 ---
 
-# 68. Worker surface
+## 68. Worker surface
 
 Incluye:
 
@@ -1099,7 +1098,7 @@ Incluye:
 
 ---
 
-# 69. Observability surface
+## 69. Observability surface
 
 Incluye:
 
@@ -1113,7 +1112,7 @@ Incluye:
 
 ---
 
-# 70. Extension surface
+## 70. Extension surface
 
 Incluye:
 
@@ -1126,7 +1125,7 @@ Incluye:
 
 ---
 
-# 71. Threat: Dynamic controller injection
+## 71. Threat: Dynamic controller injection
 
 Ataque:
 
@@ -1148,7 +1147,7 @@ Mitigación:
 
 ---
 
-# 72. Threat: Method exposure
+## 72. Threat: Method exposure
 
 Riesgo:
 
@@ -1164,7 +1163,7 @@ Solo serán invocables métodos registrados explícitamente como acciones.
 
 ---
 
-# 73. Threat: Parameter source confusion
+## 73. Threat: Parameter source confusion
 
 Ejemplo:
 
@@ -1184,7 +1183,7 @@ Mitigación:
 
 ---
 
-# 74. Threat: Mass assignment through DTO hydration
+## 74. Threat: Mass assignment through DTO hydration
 
 Mitigación:
 
@@ -1197,7 +1196,7 @@ Mitigación:
 
 ---
 
-# 75. Threat: Unauthorized model binding
+## 75. Threat: Unauthorized model binding
 
 Ejemplo:
 
@@ -1221,7 +1220,7 @@ Model resolution
 
 ---
 
-# 76. Threat: Tenant ID manipulation
+## 76. Threat: Tenant ID manipulation
 
 No se confiará en un tenant ID proporcionado directamente por el cliente.
 
@@ -1235,7 +1234,7 @@ El tenant deberá derivarse de una fuente autenticada:
 
 ---
 
-# 77. Threat: Metadata privilege escalation
+## 77. Threat: Metadata privilege escalation
 
 Un package podría agregar metadata de autorización permisiva.
 
@@ -1250,7 +1249,7 @@ Mitigación:
 
 ---
 
-# 78. Threat: Interceptor order manipulation
+## 78. Threat: Interceptor order manipulation
 
 Un interceptor malicioso podría ejecutarse antes de autorización.
 
@@ -1264,7 +1263,7 @@ Mitigación:
 
 ---
 
-# 79. Threat: Invocation plan tampering
+## 79. Threat: Invocation plan tampering
 
 Mitigación:
 
@@ -1277,7 +1276,7 @@ Mitigación:
 
 ---
 
-# 80. Threat: Response data leakage
+## 80. Threat: Response data leakage
 
 Mitigación:
 
@@ -1290,7 +1289,7 @@ Mitigación:
 
 ---
 
-# 81. Threat: Open redirect
+## 81. Threat: Open redirect
 
 Mitigación:
 
@@ -1302,7 +1301,7 @@ Mitigación:
 
 ---
 
-# 82. Threat: Header injection
+## 82. Threat: Header injection
 
 Mitigación:
 
@@ -1314,7 +1313,7 @@ Mitigación:
 
 ---
 
-# 83. Threat: Cookie weakening
+## 83. Threat: Cookie weakening
 
 Una respuesta no deberá reducir cookies protegidas accidentalmente.
 
@@ -1329,7 +1328,7 @@ Mitigación:
 
 ---
 
-# 84. Threat: Exception disclosure
+## 84. Threat: Exception disclosure
 
 Mitigación:
 
@@ -1342,7 +1341,7 @@ Mitigación:
 
 ---
 
-# 85. Threat: Log injection
+## 85. Threat: Log injection
 
 Mitigación:
 
@@ -1355,7 +1354,7 @@ Mitigación:
 
 ---
 
-# 86. Threat: Worker state leakage
+## 86. Threat: Worker state leakage
 
 Mitigación:
 
@@ -1368,7 +1367,7 @@ Mitigación:
 
 ---
 
-# 87. Threat: Build downgrade
+## 87. Threat: Build downgrade
 
 Un operador o atacante podría activar un build antiguo vulnerable.
 
@@ -1383,7 +1382,7 @@ Mitigación:
 
 ---
 
-# 88. Threat: Artifact substitution
+## 88. Threat: Artifact substitution
 
 Mitigación:
 
@@ -1399,7 +1398,7 @@ Todos deberán coincidir.
 
 ---
 
-# 89. Threat: Cache poisoning
+## 89. Threat: Cache poisoning
 
 Mitigación:
 
@@ -1412,7 +1411,7 @@ Mitigación:
 
 ---
 
-# 90. Threat: Recursive execution
+## 90. Threat: Recursive execution
 
 Mitigación:
 
@@ -1424,7 +1423,7 @@ Mitigación:
 
 ---
 
-# 91. Threat: Retry amplification
+## 91. Threat: Retry amplification
 
 Mitigación:
 
@@ -1437,7 +1436,7 @@ Mitigación:
 
 ---
 
-# 92. Threat: Streaming abuse
+## 92. Threat: Streaming abuse
 
 Mitigación:
 
@@ -1451,7 +1450,7 @@ Mitigación:
 
 ---
 
-# 93. Threat: Upload abuse
+## 93. Threat: Upload abuse
 
 Mitigación:
 
@@ -1466,7 +1465,7 @@ Mitigación:
 
 ---
 
-# 94. Threat: Content-type confusion
+## 94. Threat: Content-type confusion
 
 Mitigación:
 
@@ -1478,7 +1477,7 @@ Mitigación:
 
 ---
 
-# 95. Threat: Request smuggling
+## 95. Threat: Request smuggling
 
 Principalmente se mitigará en servidor y proxy, pero VoltStack deberá:
 
@@ -1489,7 +1488,7 @@ Principalmente se mitigará en servidor y proxy, pero VoltStack deberá:
 
 ---
 
-# 96. Threat: Host header attacks
+## 96. Threat: Host header attacks
 
 Mitigación:
 
@@ -1502,7 +1501,7 @@ Mitigación:
 
 ---
 
-# 97. Threat: CSRF
+## 97. Threat: CSRF
 
 Aplicable a acciones autenticadas basadas en cookies.
 
@@ -1516,7 +1515,7 @@ Mitigación:
 
 ---
 
-# 98. Threat: CORS misconfiguration
+## 98. Threat: CORS misconfiguration
 
 Mitigación:
 
@@ -1529,7 +1528,7 @@ Mitigación:
 
 ---
 
-# 99. Threat: SSRF through controllers
+## 99. Threat: SSRF through controllers
 
 Mitigación transversal:
 
@@ -1542,7 +1541,7 @@ Mitigación transversal:
 
 ---
 
-# 100. Threat: Deserialization attacks
+## 100. Threat: Deserialization attacks
 
 VoltStack no deberá usar deserialización insegura para input de usuario.
 
@@ -1555,7 +1554,7 @@ Se evitará:
 
 ---
 
-# 101. Threat: Prototype-like property pollution
+## 101. Threat: Prototype-like property pollution
 
 Aunque PHP no tenga prototype chain como JavaScript, deberá evitarse:
 
@@ -1566,7 +1565,7 @@ Aunque PHP no tenga prototype chain como JavaScript, deberá evitarse:
 
 ---
 
-# 102. Security Context
+## 102. Security Context
 
 Toda ejecución tendrá un contexto de seguridad.
 
@@ -1587,7 +1586,7 @@ final readonly class ControllerSecurityContext
 
 ---
 
-# 103. Principal
+## 103. Principal
 
 ```php
 interface PrincipalInterface
@@ -1604,7 +1603,7 @@ interface PrincipalInterface
 
 ---
 
-# 104. Principal types
+## 104. Principal types
 
 ```php
 enum PrincipalType: string
@@ -1620,7 +1619,7 @@ enum PrincipalType: string
 
 ---
 
-# 105. Authentication strength
+## 105. Authentication strength
 
 ```php
 enum AuthenticationStrength: int
@@ -1637,7 +1636,7 @@ Las políticas podrán requerir un nivel mínimo.
 
 ---
 
-# 106. Tenant identity
+## 106. Tenant identity
 
 ```php
 final readonly class TenantIdentity
@@ -1653,7 +1652,7 @@ final readonly class TenantIdentity
 
 ---
 
-# 107. Security attributes
+## 107. Security attributes
 
 Podrán incluir:
 
@@ -1671,7 +1670,7 @@ No deberán aceptar valores directos sin validación.
 
 ---
 
-# 108. Security Context Factory
+## 108. Security Context Factory
 
 ```php
 interface ControllerSecurityContextFactoryInterface
@@ -1685,7 +1684,7 @@ interface ControllerSecurityContextFactoryInterface
 
 ---
 
-# 109. Security context lifecycle
+## 109. Security context lifecycle
 
 ```text
 Create
@@ -1703,7 +1702,7 @@ No deberá mutarse durante una decisión crítica.
 
 ---
 
-# 110. Impersonation context
+## 110. Impersonation context
 
 Cuando exista impersonation deberán conservarse:
 
@@ -1716,7 +1715,7 @@ Cuando exista impersonation deberán conservarse:
 
 ---
 
-# 111. Security Decision
+## 111. Security Decision
 
 ```php
 final readonly class SecurityDecision
@@ -1733,7 +1732,7 @@ final readonly class SecurityDecision
 
 ---
 
-# 112. Decision effects
+## 112. Decision effects
 
 ```php
 enum SecurityDecisionEffect: string
@@ -1747,7 +1746,7 @@ enum SecurityDecisionEffect: string
 
 ---
 
-# 113. Abstain semantics
+## 113. Abstain semantics
 
 `Abstain` no equivaldrá a `Allow`.
 
@@ -1763,7 +1762,7 @@ salvo estrategia explícita distinta.
 
 ---
 
-# 114. Security obligations
+## 114. Security obligations
 
 Una decisión podrá incluir obligaciones:
 
@@ -1778,7 +1777,7 @@ Una decisión podrá incluir obligaciones:
 
 ---
 
-# 115. Security Policy Registry
+## 115. Security Policy Registry
 
 ```php
 interface ControllerSecurityPolicyRegistryInterface
@@ -1797,7 +1796,7 @@ interface ControllerSecurityPolicyRegistryInterface
 
 ---
 
-# 116. Security Policy
+## 116. Security Policy
 
 ```php
 interface ControllerSecurityPolicyInterface
@@ -1812,7 +1811,7 @@ interface ControllerSecurityPolicyInterface
 
 ---
 
-# 117. Security evaluation request
+## 117. Security evaluation request
 
 ```php
 final readonly class SecurityEvaluationRequest
@@ -1830,7 +1829,7 @@ final readonly class SecurityEvaluationRequest
 
 ---
 
-# 118. Security Decision Engine
+## 118. Security Decision Engine
 
 ```php
 interface ControllerSecurityDecisionEngineInterface
@@ -1843,7 +1842,7 @@ interface ControllerSecurityDecisionEngineInterface
 
 ---
 
-# 119. Pipeline de seguridad
+## 119. Pipeline de seguridad
 
 ```text
 Request
@@ -1875,7 +1874,7 @@ Audit and Cleanup
 
 ---
 
-# 120. Security stages
+## 120. Security stages
 
 ```text
 ValidateRequestSecurityStage
@@ -1894,7 +1893,7 @@ FinalizeSecurityAuditStage
 
 ---
 
-# 121. Pre-binding authorization
+## 121. Pre-binding authorization
 
 Algunas decisiones deberán realizarse antes de resolver modelos o DTOs costosos.
 
@@ -1908,7 +1907,7 @@ Si no, no deberá ejecutarse model binding.
 
 ---
 
-# 122. Resource authorization
+## 122. Resource authorization
 
 Después de resolver un recurso:
 
@@ -1926,7 +1925,7 @@ Esta autorización deberá validar:
 
 ---
 
-# 123. Invocation guard
+## 123. Invocation guard
 
 Última defensa antes del controller:
 
@@ -1942,7 +1941,7 @@ interface ControllerInvocationSecurityGuardInterface
 
 ---
 
-# 124. Result security
+## 124. Result security
 
 Antes de transformar una respuesta deberán aplicarse políticas:
 
@@ -1955,7 +1954,7 @@ Antes de transformar una respuesta deberán aplicarse políticas:
 
 ---
 
-# 125. Transport security
+## 125. Transport security
 
 Antes de emitir:
 
@@ -1969,7 +1968,7 @@ Antes de emitir:
 
 ---
 
-# 126. Security metadata
+## 126. Security metadata
 
 Las rutas y controladores podrán declarar:
 
@@ -1990,7 +1989,7 @@ allowed_transports
 
 ---
 
-# 127. Security metadata immutability
+## 127. Security metadata immutability
 
 Las keys críticas no podrán ser debilitadas por metadata de menor prioridad.
 
@@ -2005,7 +2004,7 @@ El override deberá rechazarse.
 
 ---
 
-# 128. Security merge rules
+## 128. Security merge rules
 
 Tipos de merge:
 
@@ -2020,7 +2019,7 @@ Exact match required
 
 ---
 
-# 129. Most restrictive wins
+## 129. Most restrictive wins
 
 Aplicable a:
 
@@ -2032,7 +2031,7 @@ Aplicable a:
 
 ---
 
-# 130. Union
+## 130. Union
 
 Aplicable a obligaciones:
 
@@ -2042,7 +2041,7 @@ audit + mask + no-cache
 
 ---
 
-# 131. Intersection
+## 131. Intersection
 
 Aplicable a allowlists:
 
@@ -2054,7 +2053,7 @@ Global allowed methods
 
 ---
 
-# 132. Immutable security metadata
+## 132. Immutable security metadata
 
 Algunas keys solo podrán definirse en niveles confiables:
 
@@ -2066,7 +2065,7 @@ Algunas keys solo podrán definirse en niveles confiables:
 
 ---
 
-# 133. Security Metadata Validator
+## 133. Security Metadata Validator
 
 ```php
 interface ControllerSecurityMetadataValidatorInterface
@@ -2080,7 +2079,7 @@ interface ControllerSecurityMetadataValidatorInterface
 
 ---
 
-# 134. Security policy compilation
+## 134. Security policy compilation
 
 Las políticas estáticas podrán convertirse en:
 
@@ -2092,7 +2091,7 @@ Este plan deberá formar parte del execution bundle.
 
 ---
 
-# 135. CompiledControllerSecurityPlan
+## 135. CompiledControllerSecurityPlan
 
 ```php
 final readonly class CompiledControllerSecurityPlan
@@ -2114,7 +2113,7 @@ final readonly class CompiledControllerSecurityPlan
 
 ---
 
-# 136. Seguridad dinámica y compilada
+## 136. Seguridad dinámica y compilada
 
 El modo compilado no deberá precalcular decisiones dependientes del usuario.
 
@@ -2136,7 +2135,7 @@ No podrá compilar:
 
 ---
 
-# 137. Decision cache
+## 137. Decision cache
 
 Podrá existir caché por ejecución.
 
@@ -2156,7 +2155,7 @@ interface SecurityDecisionCacheInterface
 
 ---
 
-# 138. Restricciones del decision cache
+## 138. Restricciones del decision cache
 
 Nunca deberá compartirse entre:
 
@@ -2168,7 +2167,7 @@ Nunca deberá compartirse entre:
 
 ---
 
-# 139. SecurityDecisionKey
+## 139. SecurityDecisionKey
 
 Deberá considerar:
 
@@ -2182,7 +2181,7 @@ Deberá considerar:
 
 ---
 
-# 140. Security budgets
+## 140. Security budgets
 
 Cada ejecución podrá tener límites:
 
@@ -2201,7 +2200,7 @@ final readonly class ControllerSecurityBudget
 
 ---
 
-# 141. Policy evaluation limits
+## 141. Policy evaluation limits
 
 Esto evita:
 
@@ -2213,7 +2212,7 @@ Esto evita:
 
 ---
 
-# 142. Security failure model
+## 142. Security failure model
 
 Errores se clasificarán en:
 
@@ -2230,13 +2229,13 @@ SecurityInfrastructureFailure
 
 ---
 
-# 143. Authentication failure
+## 143. Authentication failure
 
 Debe producir una representación adecuada sin revelar si un recurso existe cuando eso sea sensible.
 
 ---
 
-# 144. Authorization denial
+## 144. Authorization denial
 
 No deberá incluir:
 
@@ -2250,7 +2249,7 @@ Estos datos podrán registrarse internamente de forma sanitizada.
 
 ---
 
-# 145. Tenant violation
+## 145. Tenant violation
 
 Deberá tratarse como evento de alta relevancia.
 
@@ -2264,7 +2263,7 @@ La política será configurable.
 
 ---
 
-# 146. Security infrastructure failure
+## 146. Security infrastructure failure
 
 Ejemplos:
 
@@ -2277,7 +2276,7 @@ En producción deberá fallar cerrado.
 
 ---
 
-# 147. Security events
+## 147. Security events
 
 Eventos principales:
 
@@ -2299,7 +2298,7 @@ controllers.security.worker.reset
 
 ---
 
-# 148. Security metrics
+## 148. Security metrics
 
 Prefijo:
 
@@ -2323,7 +2322,7 @@ worker_security_resets
 
 ---
 
-# 149. Cardinalidad segura
+## 149. Cardinalidad segura
 
 No deberán usarse como labels:
 
@@ -2345,7 +2344,7 @@ Sí podrán usarse:
 
 ---
 
-# 150. Auditoría
+## 150. Auditoría
 
 Acciones auditables:
 
@@ -2361,7 +2360,7 @@ Acciones auditables:
 
 ---
 
-# 151. Audit record
+## 151. Audit record
 
 ```php
 final readonly class ControllerSecurityAuditRecord
@@ -2383,7 +2382,7 @@ final readonly class ControllerSecurityAuditRecord
 
 ---
 
-# 152. Pseudonimización
+## 152. Pseudonimización
 
 Los identificadores en auditoría podrán transformarse mediante:
 
@@ -2394,7 +2393,7 @@ Los identificadores en auditoría podrán transformarse mediante:
 
 ---
 
-# 153. Security observability separation
+## 153. Security observability separation
 
 Se distinguirán:
 
@@ -2409,7 +2408,7 @@ No deberán mezclarse sin política.
 
 ---
 
-# 154. Security log integrity
+## 154. Security log integrity
 
 Podrán utilizarse:
 
@@ -2421,7 +2420,7 @@ Podrán utilizarse:
 
 ---
 
-# 155. Security configuration
+## 155. Security configuration
 
 ```php
 // config/controller_security.php
@@ -2484,7 +2483,7 @@ return [
 
 ---
 
-# 156. Componentes del módulo
+## 156. Componentes del módulo
 
 ```text
 ControllerSecurityManager
@@ -2501,7 +2500,7 @@ CompiledControllerSecurityPlan
 
 ---
 
-# 157. ControllerSecurityManager
+## 157. ControllerSecurityManager
 
 ```php
 interface ControllerSecurityManagerInterface
@@ -2523,7 +2522,7 @@ interface ControllerSecurityManagerInterface
 
 ---
 
-# 158. Security registry freeze
+## 158. Security registry freeze
 
 Antes de comenzar a servir requests:
 
@@ -2537,7 +2536,7 @@ Freeze registries
 
 ---
 
-# 159. Extensiones de seguridad
+## 159. Extensiones de seguridad
 
 Las extensiones deberán declarar:
 
@@ -2551,7 +2550,7 @@ Las extensiones deberán declarar:
 
 ---
 
-# 160. Extension capability model
+## 160. Extension capability model
 
 Ejemplo:
 
@@ -2569,7 +2568,7 @@ enum SecurityExtensionCapability: string
 
 ---
 
-# 161. Extension sandbox conceptual
+## 161. Extension sandbox conceptual
 
 PHP no provee sandbox real dentro del mismo proceso.
 
@@ -2584,7 +2583,7 @@ Por ello se aplicarán:
 
 ---
 
-# 162. Security invariants
+## 162. Security invariants
 
 Invariantes globales:
 
@@ -2600,7 +2599,7 @@ No response emitted after fatal security violation
 
 ---
 
-# 163. Invariante de autenticación
+## 163. Invariante de autenticación
 
 Si una acción requiere autenticación:
 
@@ -2612,7 +2611,7 @@ antes de resolver recursos protegidos.
 
 ---
 
-# 164. Invariante de tenant
+## 164. Invariante de tenant
 
 Si una acción requiere tenant:
 
@@ -2623,7 +2622,7 @@ security.tenant.verified == true
 
 ---
 
-# 165. Invariante de invocación
+## 165. Invariante de invocación
 
 ```text
 target.exposed == true
@@ -2633,7 +2632,7 @@ authorization.effect == Allow
 
 ---
 
-# 166. Invariante de artifact
+## 166. Invariante de artifact
 
 ```text
 artifact.build_id == execution.build_id
@@ -2643,7 +2642,7 @@ artifact.manifest_member == true
 
 ---
 
-# 167. Invariante de Worker
+## 167. Invariante de Worker
 
 Después de cleanup:
 
@@ -2656,7 +2655,7 @@ decision_cache.empty == true
 
 ---
 
-# 168. Invariante de observabilidad
+## 168. Invariante de observabilidad
 
 ```text
 exported_signal.sanitized == true
@@ -2664,7 +2663,7 @@ exported_signal.sanitized == true
 
 ---
 
-# 169. Security testing requirements
+## 169. Security testing requirements
 
 Cada control deberá tener:
 
@@ -2677,7 +2676,7 @@ Cada control deberá tener:
 
 ---
 
-# 170. Threat-model-driven testing
+## 170. Threat-model-driven testing
 
 Cada amenaza identificada deberá mapearse a:
 
@@ -2695,7 +2694,7 @@ Operational response
 
 ---
 
-# 171. Threat register
+## 171. Threat register
 
 El proyecto mantendrá un registro:
 
@@ -2713,7 +2712,7 @@ Status
 
 ---
 
-# 172. Risk levels
+## 172. Risk levels
 
 ```php
 enum SecurityRiskLevel: string
@@ -2727,7 +2726,7 @@ enum SecurityRiskLevel: string
 
 ---
 
-# 173. Risk evaluation
+## 173. Risk evaluation
 
 Podrá considerar:
 
@@ -2739,7 +2738,7 @@ con ajustes por detectabilidad y controles compensatorios.
 
 ---
 
-# 174. Critical risks
+## 174. Critical risks
 
 Ejemplos:
 
@@ -2753,7 +2752,7 @@ Ejemplos:
 
 ---
 
-# 175. Security hardening profiles
+## 175. Security hardening profiles
 
 VoltStack podrá ofrecer:
 
@@ -2766,7 +2765,7 @@ High Security
 
 ---
 
-# 176. Development profile
+## 176. Development profile
 
 Permite:
 
@@ -2783,7 +2782,7 @@ Nunca deberá deshabilitar controles estructurales como:
 
 ---
 
-# 177. Standard profile
+## 177. Standard profile
 
 Adecuado para aplicaciones generales.
 
@@ -2797,7 +2796,7 @@ Incluye:
 
 ---
 
-# 178. Strict profile
+## 178. Strict profile
 
 Incluye:
 
@@ -2811,7 +2810,7 @@ Incluye:
 
 ---
 
-# 179. High Security profile
+## 179. High Security profile
 
 Podrá incluir:
 
@@ -2826,7 +2825,7 @@ Podrá incluir:
 
 ---
 
-# 180. Secure deployment assumptions
+## 180. Secure deployment assumptions
 
 Producción deberá usar:
 
@@ -2842,7 +2841,7 @@ Producción deberá usar:
 
 ---
 
-# 181. Security ownership
+## 181. Security ownership
 
 Responsabilidades:
 
@@ -2857,7 +2856,7 @@ Security team → threat review
 
 ---
 
-# 182. Security review gates
+## 182. Security review gates
 
 Cambios que requieren revisión:
 
@@ -2872,7 +2871,7 @@ Cambios que requieren revisión:
 
 ---
 
-# 183. Deprecación segura
+## 183. Deprecación segura
 
 Una capacidad insegura deberá:
 
@@ -2884,7 +2883,7 @@ Una capacidad insegura deberá:
 
 ---
 
-# 184. Compatibility and security
+## 184. Compatibility and security
 
 La compatibilidad hacia atrás no deberá mantener vulnerabilidades críticas.
 
@@ -2892,7 +2891,7 @@ VoltStack podrá introducir cambios incompatibles cuando sean necesarios para co
 
 ---
 
-# 185. Incident response hooks
+## 185. Incident response hooks
 
 El sistema podrá emitir señales para:
 
@@ -2906,7 +2905,7 @@ El sistema podrá emitir señales para:
 
 ---
 
-# 186. SecurityIncident
+## 186. SecurityIncident
 
 ```php
 final readonly class ControllerSecurityIncident
@@ -2924,7 +2923,7 @@ final readonly class ControllerSecurityIncident
 
 ---
 
-# 187. Worker disposition por seguridad
+## 187. Worker disposition por seguridad
 
 ```text
 Reuse
@@ -2936,7 +2935,7 @@ Quarantine
 
 ---
 
-# 188. Terminate scenarios
+## 188. Terminate scenarios
 
 Un Worker deberá terminar ante:
 
@@ -2949,7 +2948,7 @@ Un Worker deberá terminar ante:
 
 ---
 
-# 189. Security documentation requirements
+## 189. Security documentation requirements
 
 Toda capacidad deberá documentar:
 
@@ -2964,7 +2963,7 @@ Toda capacidad deberá documentar:
 
 ---
 
-# 190. Estructura inicial del módulo
+## 190. Estructura inicial del módulo
 
 ```text
 src/
@@ -3055,139 +3054,139 @@ src/
 
 ---
 
-# 191. ADR-001
+## 191. ADR-001
 
 **La seguridad será una propiedad transversal del pipeline, no únicamente middleware.**
 
 ---
 
-# 192. ADR-002
+## 192. ADR-002
 
 **VoltStack utilizará deny-by-default para decisiones de seguridad.**
 
 ---
 
-# 193. ADR-003
+## 193. ADR-003
 
 **Los métodos públicos no serán automáticamente acciones invocables.**
 
 ---
 
-# 194. ADR-004
+## 194. ADR-004
 
 **Los controller targets nunca podrán derivarse directamente de input del cliente.**
 
 ---
 
-# 195. ADR-005
+## 195. ADR-005
 
 **Las políticas de seguridad se resolverán mediante un engine central.**
 
 ---
 
-# 196. ADR-006
+## 196. ADR-006
 
 **La metadata crítica utilizará reglas de merge restrictivas.**
 
 ---
 
-# 197. ADR-007
+## 197. ADR-007
 
 **La autorización previa y la autorización de recurso serán fases distintas.**
 
 ---
 
-# 198. ADR-008
+## 198. ADR-008
 
 **El tenant deberá provenir de una fuente verificada.**
 
 ---
 
-# 199. ADR-009
+## 199. ADR-009
 
 **El binding de modelos siempre respetará tenant y resource scopes.**
 
 ---
 
-# 200. ADR-010
+## 200. ADR-010
 
 **Los artifacts compilados no contendrán decisiones finales dependientes del usuario.**
 
 ---
 
-# 201. ADR-011
+## 201. ADR-011
 
 **Cada ejecución tendrá un contexto de seguridad inmutable.**
 
 ---
 
-# 202. ADR-012
+## 202. ADR-012
 
 **Los Workers no compartirán contextos ni decisiones de seguridad entre requests.**
 
 ---
 
-# 203. ADR-013
+## 203. ADR-013
 
 **Los artifacts deberán pertenecer al build activo de la ejecución.**
 
 ---
 
-# 204. ADR-014
+## 204. ADR-014
 
 **Las fallas de infraestructura de seguridad producirán fail-closed en producción.**
 
 ---
 
-# 205. ADR-015
+## 205. ADR-015
 
 **Las señales de observabilidad deberán sanitizarse antes de exportarse.**
 
 ---
 
-# 206. ADR-016
+## 206. ADR-016
 
 **Las decisiones Abstain no se interpretarán como Allow.**
 
 ---
 
-# 207. ADR-017
+## 207. ADR-017
 
 **Los controles de seguridad deberán ser equivalentes en modo dinámico y compilado.**
 
 ---
 
-# 208. ADR-018
+## 208. ADR-018
 
 **Los custom security extensions deberán declarar capabilities.**
 
 ---
 
-# 209. ADR-019
+## 209. ADR-019
 
 **Las violaciones de tenant se tratarán como incidentes de seguridad.**
 
 ---
 
-# 210. ADR-020
+## 210. ADR-020
 
 **Los builds inseguros podrán revocarse aunque sean técnicamente compatibles.**
 
 ---
 
-# 211. ADR-021
+## 211. ADR-021
 
 **El Worker podrá ser terminado ante una pérdida de confianza interna.**
 
 ---
 
-# 212. ADR-022
+## 212. ADR-022
 
 **La compatibilidad no tendrá prioridad sobre la corrección de vulnerabilidades críticas.**
 
 ---
 
-# 213. Implementación V1 de fundamentos
+## 213. Implementación V1 de fundamentos
 
 La V1 deberá incluir:
 
@@ -3211,7 +3210,7 @@ La V1 deberá incluir:
 
 ---
 
-# 214. Fuera de PART 01
+## 214. Fuera de PART 01
 
 Las siguientes áreas se detallarán en partes posteriores:
 
@@ -3238,7 +3237,7 @@ Las siguientes áreas se detallarán en partes posteriores:
 
 ---
 
-# 215. Flujo conceptual completo
+## 215. Flujo conceptual completo
 
 ```text
 Untrusted Request
@@ -3285,7 +3284,7 @@ Audit and Cleanup
 
 ---
 
-# 216. Conclusión de PART 01
+## 216. Conclusión de PART 01
 
 La primera parte del **Controller Security Model** establece las bases que gobernarán todo el subsistema Controllers.
 
@@ -3306,7 +3305,7 @@ La siguiente parte profundizará en la protección concreta del runtime de contr
 
 ---
 
-# 217. Siguiente parte
+## 217. Siguiente parte
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_02.md

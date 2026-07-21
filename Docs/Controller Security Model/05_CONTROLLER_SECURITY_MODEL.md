@@ -1,6 +1,5 @@
-# CONTROLLER_SECURITY_MODEL_PART_05.md
+# Controller Security Model - Part 05: Authentication, Session & Identity Security
 
-## Authentication, Session & Identity Security
 
 **Documento:** Parte 05
 **Entrega:** 1 de varias
@@ -10,7 +9,9 @@
 
 ---
 
-# 1. Introducción
+## Entrega 1
+
+### 1. Introducción
 
 `CONTROLLER_SECURITY_MODEL_PART_05.md` define la arquitectura de seguridad para:
 
@@ -31,7 +32,7 @@ El objetivo es que los Controllers de VoltStack nunca tengan que implementar dir
 
 ---
 
-# 2. Principio fundamental
+### 2. Principio fundamental
 
 Un Controller no autentica usuarios.
 
@@ -55,7 +56,7 @@ Controller
 
 ---
 
-# 3. Separación de responsabilidades
+### 3. Separación de responsabilidades
 
 VoltStack distinguirá claramente:
 
@@ -69,7 +70,7 @@ VoltStack distinguirá claramente:
 
 ---
 
-# 4. Identification
+### 4. Identification
 
 La identificación responde:
 
@@ -87,7 +88,7 @@ Ejemplos:
 
 ---
 
-# 5. Authentication
+### 5. Authentication
 
 La autenticación responde:
 
@@ -95,7 +96,7 @@ La autenticación responde:
 
 ---
 
-# 6. Authorization
+### 6. Authorization
 
 La autorización responde:
 
@@ -105,7 +106,7 @@ Autenticación y autorización deberán permanecer desacopladas.
 
 ---
 
-# 7. Identity Security Pipeline
+### 7. Identity Security Pipeline
 
 ```text
 Incoming Request
@@ -133,7 +134,7 @@ Controller Dispatch
 
 ---
 
-# 8. Security goals
+### 8. Security goals
 
 El sistema deberá garantizar:
 
@@ -149,7 +150,7 @@ El sistema deberá garantizar:
 
 ---
 
-# 9. Threat model
+### 9. Threat model
 
 El modelo considerará ataques como:
 
@@ -172,7 +173,7 @@ El modelo considerará ataques como:
 
 ---
 
-# 10. Protected assets
+### 10. Protected assets
 
 Los activos protegidos incluyen:
 
@@ -191,7 +192,7 @@ Los activos protegidos incluyen:
 
 ---
 
-# 11. Trust boundaries
+### 11. Trust boundaries
 
 ```text
 Browser
@@ -213,7 +214,7 @@ Protected Resources
 
 ---
 
-# 12. Identity types
+### 12. Identity types
 
 ```php
 enum IdentityType: string
@@ -229,7 +230,7 @@ enum IdentityType: string
 
 ---
 
-# 13. IdentityIdentifier
+### 13. IdentityIdentifier
 
 ```php
 final readonly class IdentityIdentifier
@@ -245,7 +246,7 @@ final readonly class IdentityIdentifier
 
 ---
 
-# 14. Stable subject identifiers
+### 14. Stable subject identifiers
 
 El identificador interno deberá ser:
 
@@ -258,7 +259,7 @@ El identificador interno deberá ser:
 
 ---
 
-# 15. Mutable identity attributes
+### 15. Mutable identity attributes
 
 No deberán utilizarse como clave primaria de identidad:
 
@@ -270,7 +271,7 @@ No deberán utilizarse como clave primaria de identidad:
 
 ---
 
-# 16. Identity provider
+### 16. Identity provider
 
 ```php
 interface IdentityProviderInterface
@@ -283,7 +284,7 @@ interface IdentityProviderInterface
 
 ---
 
-# 17. IdentityRecord
+### 17. IdentityRecord
 
 ```php
 final readonly class IdentityRecord
@@ -301,7 +302,7 @@ final readonly class IdentityRecord
 
 ---
 
-# 18. IdentityStatus
+### 18. IdentityStatus
 
 ```php
 enum IdentityStatus: string
@@ -317,13 +318,13 @@ enum IdentityStatus: string
 
 ---
 
-# 19. Status validation
+### 19. Status validation
 
 Solo identidades `Active` podrán autenticarse normalmente.
 
 ---
 
-# 20. Pending identities
+### 20. Pending identities
 
 Las cuentas pendientes podrán acceder únicamente a flujos limitados como:
 
@@ -334,7 +335,7 @@ Las cuentas pendientes podrán acceder únicamente a flujos limitados como:
 
 ---
 
-# 21. Suspended identities
+### 21. Suspended identities
 
 Una cuenta suspendida deberá:
 
@@ -345,7 +346,7 @@ Una cuenta suspendida deberá:
 
 ---
 
-# 22. Locked identities
+### 22. Locked identities
 
 El bloqueo podrá ser:
 
@@ -357,19 +358,19 @@ El bloqueo podrá ser:
 
 ---
 
-# 23. Disabled identities
+### 23. Disabled identities
 
 Una identidad deshabilitada deberá considerarse no autenticable.
 
 ---
 
-# 24. Deleted identities
+### 24. Deleted identities
 
 Los identificadores eliminados no deberán reutilizarse automáticamente.
 
 ---
 
-# 25. Identity context
+### 25. Identity context
 
 ```php
 final readonly class IdentityContext
@@ -386,7 +387,7 @@ final readonly class IdentityContext
 
 ---
 
-# 26. Actor versus subject
+### 26. Actor versus subject
 
 VoltStack distinguirá:
 
@@ -402,7 +403,7 @@ Esto será esencial para:
 
 ---
 
-# 27. ActorContext
+### 27. ActorContext
 
 ```php
 final readonly class ActorContext
@@ -419,7 +420,7 @@ final readonly class ActorContext
 
 ---
 
-# 28. Authentication methods
+### 28. Authentication methods
 
 VoltStack podrá soportar:
 
@@ -439,7 +440,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 29. AuthenticationMethod
+### 29. AuthenticationMethod
 
 ```php
 enum AuthenticationMethod: string
@@ -462,7 +463,7 @@ enum AuthenticationMethod: string
 
 ---
 
-# 30. Authentication factor categories
+### 30. Authentication factor categories
 
 ```php
 enum AuthenticationFactorCategory: string
@@ -477,13 +478,13 @@ enum AuthenticationFactorCategory: string
 
 ---
 
-# 31. Factor strength
+### 31. Factor strength
 
 No todos los métodos poseen el mismo nivel de confianza.
 
 ---
 
-# 32. Authentication strength
+### 32. Authentication strength
 
 ```php
 enum AuthenticationStrength: int
@@ -499,7 +500,7 @@ enum AuthenticationStrength: int
 
 ---
 
-# 33. Authentication Assurance Level
+### 33. Authentication Assurance Level
 
 ```php
 enum AuthenticationAssuranceLevel: string
@@ -513,7 +514,7 @@ enum AuthenticationAssuranceLevel: string
 
 ---
 
-# 34. Assurance calculation
+### 34. Assurance calculation
 
 El assurance level deberá derivarse de:
 
@@ -527,7 +528,7 @@ El assurance level deberá derivarse de:
 
 ---
 
-# 35. AuthenticationState
+### 35. AuthenticationState
 
 ```php
 final readonly class AuthenticationState
@@ -546,13 +547,13 @@ final readonly class AuthenticationState
 
 ---
 
-# 36. Anonymous identity
+### 36. Anonymous identity
 
 Las peticiones sin autenticación deberán usar una identidad anónima explícita.
 
 ---
 
-# 37. Anonymous context
+### 37. Anonymous context
 
 ```php
 IdentityIdentifier(
@@ -564,13 +565,13 @@ IdentityIdentifier(
 
 ---
 
-# 38. No nullable identity context
+### 38. No nullable identity context
 
 El sistema deberá evitar representar el anonimato mediante `null` disperso en toda la aplicación.
 
 ---
 
-# 39. Authentication policy
+### 39. Authentication policy
 
 ```php
 interface AuthenticationPolicyInterface
@@ -584,7 +585,7 @@ interface AuthenticationPolicyInterface
 
 ---
 
-# 40. AuthenticationAttempt
+### 40. AuthenticationAttempt
 
 ```php
 final readonly class AuthenticationAttempt
@@ -601,7 +602,7 @@ final readonly class AuthenticationAttempt
 
 ---
 
-# 41. CredentialEnvelope
+### 41. CredentialEnvelope
 
 ```php
 final readonly class CredentialEnvelope
@@ -617,7 +618,7 @@ final readonly class CredentialEnvelope
 
 ---
 
-# 42. SensitiveValue
+### 42. SensitiveValue
 
 Las credenciales deberán almacenarse temporalmente en un tipo sensible.
 
@@ -632,7 +633,7 @@ final class SensitiveValue
 
 ---
 
-# 43. Credential redaction
+### 43. Credential redaction
 
 Las credenciales nunca deberán aparecer en:
 
@@ -646,19 +647,19 @@ Las credenciales nunca deberán aparecer en:
 
 ---
 
-# 44. Credential lifetime
+### 44. Credential lifetime
 
 Las credenciales en memoria deberán mantenerse únicamente durante la verificación.
 
 ---
 
-# 45. Credential zeroization
+### 45. Credential zeroization
 
 Cuando el runtime lo permita, los buffers sensibles deberán limpiarse después del uso.
 
 ---
 
-# 46. Credential extraction
+### 46. Credential extraction
 
 La extracción deberá depender del método:
 
@@ -671,7 +672,7 @@ La extracción deberá depender del método:
 
 ---
 
-# 47. CredentialExtractor
+### 47. CredentialExtractor
 
 ```php
 interface CredentialExtractorInterface
@@ -688,13 +689,13 @@ interface CredentialExtractorInterface
 
 ---
 
-# 48. Multiple credentials
+### 48. Multiple credentials
 
 Una petición con múltiples esquemas incompatibles deberá rechazarse o resolverse mediante política explícita.
 
 ---
 
-# 49. Credential precedence
+### 49. Credential precedence
 
 No deberá existir precedencia implícita entre:
 
@@ -705,7 +706,7 @@ No deberá existir precedencia implícita entre:
 
 ---
 
-# 50. Authentication scheme selection
+### 50. Authentication scheme selection
 
 ```php
 interface AuthenticationSchemeResolverInterface
@@ -719,7 +720,7 @@ interface AuthenticationSchemeResolverInterface
 
 ---
 
-# 51. AuthenticationScheme
+### 51. AuthenticationScheme
 
 ```php
 final readonly class AuthenticationScheme
@@ -736,7 +737,7 @@ final readonly class AuthenticationScheme
 
 ---
 
-# 52. Route authentication metadata
+### 52. Route authentication metadata
 
 ```php
 #[RequiresAuthentication(
@@ -753,7 +754,7 @@ public function billing(): Response
 
 ---
 
-# 53. Controller requirements
+### 53. Controller requirements
 
 Los Controllers podrán declarar:
 
@@ -766,13 +767,13 @@ Los Controllers podrán declarar:
 
 ---
 
-# 54. Authentication freshness
+### 54. Authentication freshness
 
 Algunas operaciones deberán exigir autenticación reciente.
 
 ---
 
-# 55. FreshAuthenticationRequirement
+### 55. FreshAuthenticationRequirement
 
 ```php
 final readonly class FreshAuthenticationRequirement
@@ -787,7 +788,7 @@ final readonly class FreshAuthenticationRequirement
 
 ---
 
-# 56. Sensitive operations
+### 56. Sensitive operations
 
 Podrán requerir autenticación reciente:
 
@@ -802,13 +803,13 @@ Podrán requerir autenticación reciente:
 
 ---
 
-# 57. Step-up authentication
+### 57. Step-up authentication
 
 Una sesión válida podrá necesitar elevar temporalmente su assurance.
 
 ---
 
-# 58. StepUpAuthenticationService
+### 58. StepUpAuthenticationService
 
 ```php
 interface StepUpAuthenticationServiceInterface
@@ -826,7 +827,7 @@ interface StepUpAuthenticationServiceInterface
 
 ---
 
-# 59. Step-up scope
+### 59. Step-up scope
 
 La elevación podrá estar vinculada a:
 
@@ -838,13 +839,13 @@ La elevación podrá estar vinculada a:
 
 ---
 
-# 60. Global elevation risk
+### 60. Global elevation risk
 
 Una elevación no deberá aumentar indefinidamente todos los privilegios de la sesión.
 
 ---
 
-# 61. Authentication challenge
+### 61. Authentication challenge
 
 ```php
 final readonly class AuthenticationChallenge
@@ -862,7 +863,7 @@ final readonly class AuthenticationChallenge
 
 ---
 
-# 62. Challenge properties
+### 62. Challenge properties
 
 Todo challenge deberá ser:
 
@@ -874,7 +875,7 @@ Todo challenge deberá ser:
 
 ---
 
-# 63. Challenge registry
+### 63. Challenge registry
 
 ```php
 interface AuthenticationChallengeRegistryInterface
@@ -891,19 +892,19 @@ interface AuthenticationChallengeRegistryInterface
 
 ---
 
-# 64. Challenge replay
+### 64. Challenge replay
 
 Los challenges consumidos deberán rechazarse.
 
 ---
 
-# 65. Challenge expiration
+### 65. Challenge expiration
 
 Los challenges expirados deberán eliminarse o invalidarse.
 
 ---
 
-# 66. Authentication result
+### 66. Authentication result
 
 ```php
 final readonly class AuthenticationResult
@@ -920,7 +921,7 @@ final readonly class AuthenticationResult
 
 ---
 
-# 67. AuthenticationResultStatus
+### 67. AuthenticationResultStatus
 
 ```php
 enum AuthenticationResultStatus: string
@@ -936,7 +937,7 @@ enum AuthenticationResultStatus: string
 
 ---
 
-# 68. Generic authentication failures
+### 68. Generic authentication failures
 
 La respuesta externa no deberá revelar si falló:
 
@@ -948,7 +949,7 @@ La respuesta externa no deberá revelar si falló:
 
 ---
 
-# 69. Internal failure classification
+### 69. Internal failure classification
 
 Internamente sí deberán diferenciarse las causas para:
 
@@ -960,7 +961,7 @@ Internamente sí deberán diferenciarse las causas para:
 
 ---
 
-# 70. AuthenticationFailure
+### 70. AuthenticationFailure
 
 ```php
 enum AuthenticationFailure: string
@@ -979,7 +980,7 @@ enum AuthenticationFailure: string
 
 ---
 
-# 71. Account enumeration prevention
+### 71. Account enumeration prevention
 
 El sistema deberá evitar diferencias observables en:
 
@@ -992,19 +993,19 @@ El sistema deberá evitar diferencias observables en:
 
 ---
 
-# 72. Timing normalization
+### 72. Timing normalization
 
 Los intentos con identidad inexistente deberán ejecutar una operación de verificación simulada cuando sea razonable.
 
 ---
 
-# 73. Dummy password hash
+### 73. Dummy password hash
 
 El framework podrá mantener un hash dummy para reducir diferencias de timing.
 
 ---
 
-# 74. Authentication rate limiting
+### 74. Authentication rate limiting
 
 Los límites deberán considerar:
 
@@ -1017,7 +1018,7 @@ Los límites deberán considerar:
 
 ---
 
-# 75. AuthRateLimitKey
+### 75. AuthRateLimitKey
 
 ```php
 final readonly class AuthRateLimitKey
@@ -1034,25 +1035,25 @@ final readonly class AuthRateLimitKey
 
 ---
 
-# 76. IP-only rate limiting risk
+### 76. IP-only rate limiting risk
 
 Limitar únicamente por IP puede afectar redes compartidas y ser evadido mediante botnets.
 
 ---
 
-# 77. Identity-only rate limiting risk
+### 77. Identity-only rate limiting risk
 
 Limitar únicamente por identidad puede permitir bloquear cuentas mediante ataques externos.
 
 ---
 
-# 78. Composite throttling
+### 78. Composite throttling
 
 VoltStack deberá combinar múltiples señales.
 
 ---
 
-# 79. Password spraying detection
+### 79. Password spraying detection
 
 Se deberá detectar el patrón:
 
@@ -1064,7 +1065,7 @@ Muchas identidades
 
 ---
 
-# 80. Credential stuffing detection
+### 80. Credential stuffing detection
 
 Se deberá detectar:
 
@@ -1076,7 +1077,7 @@ Muchas identidades
 
 ---
 
-# 81. Brute-force detection
+### 81. Brute-force detection
 
 Se deberá detectar:
 
@@ -1088,7 +1089,7 @@ Una identidad
 
 ---
 
-# 82. AuthenticationRiskEngine
+### 82. AuthenticationRiskEngine
 
 ```php
 interface AuthenticationRiskEngineInterface
@@ -1102,7 +1103,7 @@ interface AuthenticationRiskEngineInterface
 
 ---
 
-# 83. Risk signals
+### 83. Risk signals
 
 El motor podrá considerar:
 
@@ -1119,7 +1120,7 @@ El motor podrá considerar:
 
 ---
 
-# 84. Risk score
+### 84. Risk score
 
 ```php
 final readonly class AuthenticationRiskAssessment
@@ -1136,7 +1137,7 @@ final readonly class AuthenticationRiskAssessment
 
 ---
 
-# 85. AuthenticationRiskLevel
+### 85. AuthenticationRiskLevel
 
 ```php
 enum AuthenticationRiskLevel: string
@@ -1150,7 +1151,7 @@ enum AuthenticationRiskLevel: string
 
 ---
 
-# 86. AuthenticationRiskAction
+### 86. AuthenticationRiskAction
 
 ```php
 enum AuthenticationRiskAction: string
@@ -1166,7 +1167,7 @@ enum AuthenticationRiskAction: string
 
 ---
 
-# 87. Risk engine limitations
+### 87. Risk engine limitations
 
 El motor de riesgo deberá ser una señal complementaria.
 
@@ -1174,25 +1175,25 @@ No deberá reemplazar verificaciones criptográficas.
 
 ---
 
-# 88. Explainable risk decisions
+### 88. Explainable risk decisions
 
 Las decisiones deberán conservar razones internas auditables.
 
 ---
 
-# 89. User-facing risk messages
+### 89. User-facing risk messages
 
 Los mensajes externos deberán evitar revelar reglas de detección.
 
 ---
 
-# 90. Device identity
+### 90. Device identity
 
 VoltStack podrá asociar sesiones a dispositivos conocidos.
 
 ---
 
-# 91. DeviceIdentifier
+### 91. DeviceIdentifier
 
 ```php
 final readonly class DeviceIdentifier
@@ -1209,7 +1210,7 @@ final readonly class DeviceIdentifier
 
 ---
 
-# 92. DeviceTrustLevel
+### 92. DeviceTrustLevel
 
 ```php
 enum DeviceTrustLevel: string
@@ -1224,7 +1225,7 @@ enum DeviceTrustLevel: string
 
 ---
 
-# 93. Device fingerprinting
+### 93. Device fingerprinting
 
 El fingerprinting pasivo deberá utilizarse con precaución debido a:
 
@@ -1236,7 +1237,7 @@ El fingerprinting pasivo deberá utilizarse con precaución debido a:
 
 ---
 
-# 94. Device cookie
+### 94. Device cookie
 
 Una cookie de dispositivo deberá:
 
@@ -1248,13 +1249,13 @@ Una cookie de dispositivo deberá:
 
 ---
 
-# 95. Trusted device
+### 95. Trusted device
 
 Un dispositivo confiable no deberá eliminar completamente la necesidad de autenticación.
 
 ---
 
-# 96. Managed devices
+### 96. Managed devices
 
 Los dispositivos administrados podrán aportar señales como:
 
@@ -1266,7 +1267,7 @@ Los dispositivos administrados podrán aportar señales como:
 
 ---
 
-# 97. Compromised device
+### 97. Compromised device
 
 Una señal de compromiso podrá provocar:
 
@@ -1278,7 +1279,7 @@ Una señal de compromiso podrá provocar:
 
 ---
 
-# 98. Authentication events
+### 98. Authentication events
 
 Eventos iniciales del sistema:
 
@@ -1294,7 +1295,7 @@ Eventos iniciales del sistema:
 
 ---
 
-# 99. Principios arquitectónicos de esta entrega
+### 99. Principios arquitectónicos de esta entrega
 
 ```text
 1. Identificación, autenticación y autorización son procesos distintos.
@@ -1311,7 +1312,7 @@ Eventos iniciales del sistema:
 
 ---
 
-# 100. Resultado de esta entrega
+### 100. Resultado de esta entrega
 
 Esta primera entrega establece:
 
@@ -1363,9 +1364,9 @@ Entrega 2
 - Passwordless authentication foundations
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 2
+
 
 **Documento:** Parte 05
 **Entrega:** 2 de varias
@@ -1374,7 +1375,7 @@ Entrega 2
 
 ---
 
-# 101. Password Security Architecture
+### 101. Password Security Architecture
 
 VoltStack tratará las contraseñas como credenciales de alto riesgo.
 
@@ -1391,7 +1392,7 @@ El sistema deberá diseñarse para reducir:
 
 ---
 
-# 102. Password subsystem boundaries
+### 102. Password subsystem boundaries
 
 El subsistema de contraseñas deberá permanecer separado de:
 
@@ -1405,7 +1406,7 @@ El subsistema de contraseñas deberá permanecer separado de:
 
 ---
 
-# 103. PasswordCredential
+### 103. PasswordCredential
 
 ```php
 final class PasswordCredential
@@ -1425,7 +1426,7 @@ final class PasswordCredential
 
 ---
 
-# 104. Password value restrictions
+### 104. Password value restrictions
 
 Una contraseña no deberá:
 
@@ -1438,7 +1439,7 @@ Una contraseña no deberá:
 
 ---
 
-# 105. Password lifecycle
+### 105. Password lifecycle
 
 ```text
 Input
@@ -1458,7 +1459,7 @@ Zeroization
 
 ---
 
-# 106. PasswordPolicyEngine
+### 106. PasswordPolicyEngine
 
 ```php
 interface PasswordPolicyEngineInterface
@@ -1472,7 +1473,7 @@ interface PasswordPolicyEngineInterface
 
 ---
 
-# 107. PasswordPolicyContext
+### 107. PasswordPolicyContext
 
 ```php
 final readonly class PasswordPolicyContext
@@ -1490,7 +1491,7 @@ final readonly class PasswordPolicyContext
 
 ---
 
-# 108. PasswordOperation
+### 108. PasswordOperation
 
 ```php
 enum PasswordOperation: string
@@ -1505,7 +1506,7 @@ enum PasswordOperation: string
 
 ---
 
-# 109. Policy composition
+### 109. Policy composition
 
 La política deberá poder componerse mediante reglas como:
 
@@ -1520,13 +1521,13 @@ La política deberá poder componerse mediante reglas como:
 
 ---
 
-# 110. Length-first policy
+### 110. Length-first policy
 
 VoltStack deberá priorizar longitud y resistencia real sobre reglas arbitrarias de composición.
 
 ---
 
-# 111. Minimum password length
+### 111. Minimum password length
 
 El mínimo deberá ser configurable por perfil.
 
@@ -1545,7 +1546,7 @@ final readonly class PasswordLengthPolicy
 
 ---
 
-# 112. Maximum password length
+### 112. Maximum password length
 
 Deberá existir un máximo razonable para evitar:
 
@@ -1558,13 +1559,13 @@ El límite no deberá ser tan bajo que impida passphrases.
 
 ---
 
-# 113. Unicode passwords
+### 113. Unicode passwords
 
 VoltStack deberá definir una política explícita para Unicode.
 
 ---
 
-# 114. Unicode normalization
+### 114. Unicode normalization
 
 La normalización puede cambiar la semántica de una contraseña.
 
@@ -1572,7 +1573,7 @@ Por defecto, el framework no deberá aplicar transformaciones invisibles sin una
 
 ---
 
-# 115. Whitespace preservation
+### 115. Whitespace preservation
 
 No deberán eliminarse automáticamente:
 
@@ -1582,7 +1583,7 @@ No deberán eliminarse automáticamente:
 
 ---
 
-# 116. Password composition rules
+### 116. Password composition rules
 
 No deberán exigirse obligatoriamente combinaciones como:
 
@@ -1595,7 +1596,7 @@ salvo requerimiento regulatorio explícito.
 
 ---
 
-# 117. Password strength estimation
+### 117. Password strength estimation
 
 El framework podrá integrar un estimador de resistencia basado en:
 
@@ -1608,7 +1609,7 @@ El framework podrá integrar un estimador de resistencia basado en:
 
 ---
 
-# 118. PasswordStrengthEstimator
+### 118. PasswordStrengthEstimator
 
 ```php
 interface PasswordStrengthEstimatorInterface
@@ -1622,7 +1623,7 @@ interface PasswordStrengthEstimatorInterface
 
 ---
 
-# 119. PasswordStrengthAssessment
+### 119. PasswordStrengthAssessment
 
 ```php
 final readonly class PasswordStrengthAssessment
@@ -1638,7 +1639,7 @@ final readonly class PasswordStrengthAssessment
 
 ---
 
-# 120. PasswordStrengthLevel
+### 120. PasswordStrengthLevel
 
 ```php
 enum PasswordStrengthLevel: string
@@ -1653,7 +1654,7 @@ enum PasswordStrengthLevel: string
 
 ---
 
-# 121. Identity similarity checks
+### 121. Identity similarity checks
 
 Las contraseñas podrán compararse contra:
 
@@ -1665,19 +1666,19 @@ Las contraseñas podrán compararse contra:
 
 ---
 
-# 122. Sensitive comparison data
+### 122. Sensitive comparison data
 
 Los atributos de identidad utilizados para estas comparaciones deberán permanecer protegidos y no registrarse junto a la contraseña.
 
 ---
 
-# 123. Password hashing architecture
+### 123. Password hashing architecture
 
 El hash deberá calcularse exclusivamente mediante un servicio dedicado.
 
 ---
 
-# 124. PasswordHasher
+### 124. PasswordHasher
 
 ```php
 interface PasswordHasherInterface
@@ -1701,7 +1702,7 @@ interface PasswordHasherInterface
 
 ---
 
-# 125. PasswordHash
+### 125. PasswordHash
 
 ```php
 final readonly class PasswordHash
@@ -1719,13 +1720,13 @@ final readonly class PasswordHash
 
 ---
 
-# 126. Preferred algorithm
+### 126. Preferred algorithm
 
 VoltStack deberá preferir `Argon2id` cuando esté disponible de forma segura.
 
 ---
 
-# 127. PasswordHashingProfile
+### 127. PasswordHashingProfile
 
 ```php
 final readonly class PasswordHashingProfile
@@ -1744,7 +1745,7 @@ final readonly class PasswordHashingProfile
 
 ---
 
-# 128. PasswordHashAlgorithm
+### 128. PasswordHashAlgorithm
 
 ```php
 enum PasswordHashAlgorithm: string
@@ -1757,7 +1758,7 @@ enum PasswordHashAlgorithm: string
 
 ---
 
-# 129. Algorithm fallback
+### 129. Algorithm fallback
 
 Los algoritmos alternativos deberán existir solo para:
 
@@ -1768,7 +1769,7 @@ Los algoritmos alternativos deberán existir solo para:
 
 ---
 
-# 130. Argon2id profile selection
+### 130. Argon2id profile selection
 
 Los parámetros deberán calibrarse según:
 
@@ -1781,7 +1782,7 @@ Los parámetros deberán calibrarse según:
 
 ---
 
-# 131. Runtime calibration
+### 131. Runtime calibration
 
 VoltStack podrá incluir un comando de calibración.
 
@@ -1791,7 +1792,7 @@ volt security:password-calibrate
 
 ---
 
-# 132. Calibration goal
+### 132. Calibration goal
 
 La calibración deberá buscar un costo suficientemente alto sin provocar:
 
@@ -1802,13 +1803,13 @@ La calibración deberá buscar un costo suficientemente alto sin provocar:
 
 ---
 
-# 133. Profile versioning
+### 133. Profile versioning
 
 Los perfiles deberán versionarse para permitir evolución gradual.
 
 ---
 
-# 134. Per-environment profiles
+### 134. Per-environment profiles
 
 Podrán existir perfiles distintos para:
 
@@ -1821,25 +1822,25 @@ Los perfiles de desarrollo nunca deberán migrarse accidentalmente a producción
 
 ---
 
-# 135. Salt management
+### 135. Salt management
 
 Cada hash deberá utilizar un salt único generado por el algoritmo.
 
 ---
 
-# 136. Manual salts
+### 136. Manual salts
 
 Los Controllers y la aplicación no deberán proporcionar salts manualmente.
 
 ---
 
-# 137. Pepper architecture
+### 137. Pepper architecture
 
 VoltStack podrá soportar un pepper adicional almacenado fuera de la base de datos.
 
 ---
 
-# 138. PasswordPepperProvider
+### 138. PasswordPepperProvider
 
 ```php
 interface PasswordPepperProviderInterface
@@ -1852,7 +1853,7 @@ interface PasswordPepperProviderInterface
 
 ---
 
-# 139. PasswordPepper
+### 139. PasswordPepper
 
 ```php
 final class PasswordPepper
@@ -1867,7 +1868,7 @@ final class PasswordPepper
 
 ---
 
-# 140. Pepper storage
+### 140. Pepper storage
 
 El pepper deberá almacenarse en:
 
@@ -1881,13 +1882,13 @@ No en la misma base de datos que los hashes.
 
 ---
 
-# 141. Pepper rotation
+### 141. Pepper rotation
 
 La rotación deberá permitir verificar hashes creados con versiones anteriores.
 
 ---
 
-# 142. Pepper compromise
+### 142. Pepper compromise
 
 Ante compromiso deberá evaluarse:
 
@@ -1899,7 +1900,7 @@ Ante compromiso deberá evaluarse:
 
 ---
 
-# 143. Pepper usage modes
+### 143. Pepper usage modes
 
 El pepper podrá aplicarse:
 
@@ -1911,13 +1912,13 @@ La estrategia deberá ser única y versionada.
 
 ---
 
-# 144. Password verification
+### 144. Password verification
 
 La verificación deberá usar funciones resistentes a timing attacks.
 
 ---
 
-# 145. PasswordVerificationResult
+### 145. PasswordVerificationResult
 
 ```php
 final readonly class PasswordVerificationResult
@@ -1934,7 +1935,7 @@ final readonly class PasswordVerificationResult
 
 ---
 
-# 146. Verification flow
+### 146. Verification flow
 
 ```text
 Credential
@@ -1954,7 +1955,7 @@ Return Generic Result
 
 ---
 
-# 147. Rehash on authentication
+### 147. Rehash on authentication
 
 Después de una autenticación válida, el sistema podrá actualizar el hash si:
 
@@ -1965,13 +1966,13 @@ Después de una autenticación válida, el sistema podrá actualizar el hash si:
 
 ---
 
-# 148. Atomic rehash
+### 148. Atomic rehash
 
 El rehash deberá actualizarse atómicamente y evitar sobrescribir cambios concurrentes.
 
 ---
 
-# 149. Rehash failure
+### 149. Rehash failure
 
 Un fallo al rehash no deberá convertir una autenticación válida en una autenticación inválida, salvo política estricta.
 
@@ -1979,13 +1980,13 @@ Deberá registrarse para reintento.
 
 ---
 
-# 150. Legacy hash migration
+### 150. Legacy hash migration
 
 VoltStack podrá reconocer hashes heredados mediante adapters limitados.
 
 ---
 
-# 151. LegacyHashVerifier
+### 151. LegacyHashVerifier
 
 ```php
 interface LegacyHashVerifierInterface
@@ -2003,25 +2004,25 @@ interface LegacyHashVerifierInterface
 
 ---
 
-# 152. Legacy migration policy
+### 152. Legacy migration policy
 
 Todo hash heredado validado deberá migrarse al perfil actual tan pronto como sea posible.
 
 ---
 
-# 153. Plaintext migration prohibition
+### 153. Plaintext migration prohibition
 
 Nunca deberá almacenarse temporalmente una contraseña en texto plano para migración futura.
 
 ---
 
-# 154. Breached Password Detection
+### 154. Breached Password Detection
 
 VoltStack deberá poder rechazar contraseñas conocidas por filtraciones.
 
 ---
 
-# 155. BreachedPasswordChecker
+### 155. BreachedPasswordChecker
 
 ```php
 interface BreachedPasswordCheckerInterface
@@ -2035,7 +2036,7 @@ interface BreachedPasswordCheckerInterface
 
 ---
 
-# 156. BreachCheckPolicy
+### 156. BreachCheckPolicy
 
 ```php
 final readonly class BreachCheckPolicy
@@ -2052,7 +2053,7 @@ final readonly class BreachCheckPolicy
 
 ---
 
-# 157. BreachCheckMode
+### 157. BreachCheckMode
 
 ```php
 enum BreachCheckMode: string
@@ -2065,19 +2066,19 @@ enum BreachCheckMode: string
 
 ---
 
-# 158. Password disclosure prohibition
+### 158. Password disclosure prohibition
 
 La contraseña completa nunca deberá enviarse a un proveedor externo.
 
 ---
 
-# 159. Privacy-preserving lookup
+### 159. Privacy-preserving lookup
 
 Las consultas remotas deberán usar un mecanismo que reduzca la exposición, como prefijos de hash o un protocolo equivalente.
 
 ---
 
-# 160. Breach provider failure
+### 160. Breach provider failure
 
 La política deberá decidir entre:
 
@@ -2088,7 +2089,7 @@ La política deberá decidir entre:
 
 ---
 
-# 161. Breached password result
+### 161. Breached password result
 
 ```php
 final readonly class BreachedPasswordResult
@@ -2104,7 +2105,7 @@ final readonly class BreachedPasswordResult
 
 ---
 
-# 162. Existing breached passwords
+### 162. Existing breached passwords
 
 Cuando una contraseña existente aparezca en una nueva filtración, VoltStack podrá:
 
@@ -2116,13 +2117,13 @@ Cuando una contraseña existente aparezca en una nueva filtración, VoltStack po
 
 ---
 
-# 163. Password history
+### 163. Password history
 
 El sistema podrá impedir reutilización reciente.
 
 ---
 
-# 164. PasswordHistoryEntry
+### 164. PasswordHistoryEntry
 
 ```php
 final readonly class PasswordHistoryEntry
@@ -2137,31 +2138,31 @@ final readonly class PasswordHistoryEntry
 
 ---
 
-# 165. History comparison
+### 165. History comparison
 
 La nueva contraseña deberá verificarse contra hashes históricos usando sus perfiles originales.
 
 ---
 
-# 166. History length
+### 166. History length
 
 La cantidad de hashes retenidos deberá ser configurable y proporcional al riesgo.
 
 ---
 
-# 167. History retention risk
+### 167. History retention risk
 
 Retener demasiados hashes incrementa el material disponible ante una filtración.
 
 ---
 
-# 168. Periodic password expiration
+### 168. Periodic password expiration
 
 VoltStack no deberá forzar cambios periódicos sin evidencia de compromiso, salvo requisito regulatorio.
 
 ---
 
-# 169. Password compromise event
+### 169. Password compromise event
 
 Un cambio deberá exigirse cuando exista:
 
@@ -2173,7 +2174,7 @@ Un cambio deberá exigirse cuando exista:
 
 ---
 
-# 170. Password change workflow
+### 170. Password change workflow
 
 ```text
 Authenticated User
@@ -2199,7 +2200,7 @@ Notification
 
 ---
 
-# 171. PasswordChangeService
+### 171. PasswordChangeService
 
 ```php
 interface PasswordChangeServiceInterface
@@ -2213,7 +2214,7 @@ interface PasswordChangeServiceInterface
 
 ---
 
-# 172. PasswordChangeCommand
+### 172. PasswordChangeCommand
 
 ```php
 final readonly class PasswordChangeCommand
@@ -2229,13 +2230,13 @@ final readonly class PasswordChangeCommand
 
 ---
 
-# 173. Current password verification
+### 173. Current password verification
 
 La contraseña actual podrá requerirse, salvo que exista una autenticación fuerte y reciente equivalente.
 
 ---
 
-# 174. Session handling after change
+### 174. Session handling after change
 
 Después del cambio deberá:
 
@@ -2246,13 +2247,13 @@ Después del cambio deberá:
 
 ---
 
-# 175. Password change notification
+### 175. Password change notification
 
 Se deberá notificar por un canal independiente cuando sea posible.
 
 ---
 
-# 176. Notification content
+### 176. Notification content
 
 La notificación no deberá incluir:
 
@@ -2263,13 +2264,13 @@ La notificación no deberá incluir:
 
 ---
 
-# 177. Administrative password setting
+### 177. Administrative password setting
 
 Los administradores no deberán conocer ni definir contraseñas permanentes de usuarios.
 
 ---
 
-# 178. Temporary administrative credentials
+### 178. Temporary administrative credentials
 
 Cuando sea indispensable, deberán ser:
 
@@ -2281,13 +2282,13 @@ Cuando sea indispensable, deberán ser:
 
 ---
 
-# 179. Password Reset Security
+### 179. Password Reset Security
 
 La recuperación de contraseña es un flujo de autenticación y deberá tratarse como tal.
 
 ---
 
-# 180. Reset flow
+### 180. Reset flow
 
 ```text
 Reset Request
@@ -2313,7 +2314,7 @@ Session Revocation
 
 ---
 
-# 181. PasswordResetService
+### 181. PasswordResetService
 
 ```php
 interface PasswordResetServiceInterface
@@ -2330,13 +2331,13 @@ interface PasswordResetServiceInterface
 
 ---
 
-# 182. Generic reset response
+### 182. Generic reset response
 
 La respuesta al solicitar un reset deberá ser equivalente exista o no la cuenta.
 
 ---
 
-# 183. ResetToken
+### 183. ResetToken
 
 ```php
 final readonly class PasswordResetToken
@@ -2353,7 +2354,7 @@ final readonly class PasswordResetToken
 
 ---
 
-# 184. Reset token storage
+### 184. Reset token storage
 
 El secreto completo no deberá almacenarse.
 
@@ -2361,7 +2362,7 @@ Se persistirá una representación derivada verificable.
 
 ---
 
-# 185. Reset token properties
+### 185. Reset token properties
 
 El token deberá ser:
 
@@ -2375,7 +2376,7 @@ El token deberá ser:
 
 ---
 
-# 186. Reset token binding
+### 186. Reset token binding
 
 Podrá vincularse adicionalmente a:
 
@@ -2388,13 +2389,13 @@ Podrá vincularse adicionalmente a:
 
 ---
 
-# 187. Credential version binding
+### 187. Credential version binding
 
 Si la contraseña cambia después de emitir el token, los tokens anteriores deberán invalidarse.
 
 ---
 
-# 188. Reset token URL
+### 188. Reset token URL
 
 La URL deberá generarse usando:
 
@@ -2406,19 +2407,19 @@ La URL deberá generarse usando:
 
 ---
 
-# 189. Referrer leakage protection
+### 189. Referrer leakage protection
 
 La página de reset deberá aplicar una política de referrer restrictiva.
 
 ---
 
-# 190. Third-party content restriction
+### 190. Third-party content restriction
 
 Las páginas de recuperación no deberán cargar recursos de terceros innecesarios que puedan observar el token.
 
 ---
 
-# 191. Reset completion
+### 191. Reset completion
 
 Antes de aceptar la nueva contraseña deberán validarse:
 
@@ -2432,13 +2433,13 @@ Antes de aceptar la nueva contraseña deberán validarse:
 
 ---
 
-# 192. Reset token consumption
+### 192. Reset token consumption
 
 El consumo deberá ser atómico para evitar uso concurrente.
 
 ---
 
-# 193. Post-reset actions
+### 193. Post-reset actions
 
 Después del reset deberán considerarse:
 
@@ -2451,13 +2452,13 @@ Después del reset deberán considerarse:
 
 ---
 
-# 194. Email Verification
+### 194. Email Verification
 
 La verificación de email no equivale necesariamente a autenticación completa.
 
 ---
 
-# 195. EmailVerificationToken
+### 195. EmailVerificationToken
 
 ```php
 final readonly class EmailVerificationToken
@@ -2474,19 +2475,19 @@ final readonly class EmailVerificationToken
 
 ---
 
-# 196. Email version binding
+### 196. Email version binding
 
 Si cambia el email antes de verificarse, el token anterior deberá quedar inválido.
 
 ---
 
-# 197. Magic Links
+### 197. Magic Links
 
 Un magic link actúa como credencial temporal.
 
 ---
 
-# 198. MagicLinkPolicy
+### 198. MagicLinkPolicy
 
 ```php
 final readonly class MagicLinkPolicy
@@ -2504,7 +2505,7 @@ final readonly class MagicLinkPolicy
 
 ---
 
-# 199. Magic link security
+### 199. Magic link security
 
 Los magic links deberán:
 
@@ -2518,7 +2519,7 @@ Los magic links deberán:
 
 ---
 
-# 200. Resultado de esta entrega
+### 200. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -2566,9 +2567,9 @@ Entrega 3
 - Phishing-resistant authentication
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 3
+
 
 **Documento:** Parte 05
 **Entrega:** 3 de varias
@@ -2577,7 +2578,7 @@ Entrega 3
 
 ---
 
-# 201. One-Time Password Architecture
+### 201. One-Time Password Architecture
 
 Los códigos de un solo uso son credenciales temporales diseñadas para autenticar una operación o identidad durante una ventana limitada.
 
@@ -2592,7 +2593,7 @@ VoltStack distinguirá entre:
 
 ---
 
-# 202. OTP security goals
+### 202. OTP security goals
 
 El subsistema OTP deberá garantizar:
 
@@ -2608,7 +2609,7 @@ El subsistema OTP deberá garantizar:
 
 ---
 
-# 203. OTP threat model
+### 203. OTP threat model
 
 El modelo deberá considerar:
 
@@ -2626,7 +2627,7 @@ El modelo deberá considerar:
 
 ---
 
-# 204. OtpType
+### 204. OtpType
 
 ```php
 enum OtpType: string
@@ -2642,7 +2643,7 @@ enum OtpType: string
 
 ---
 
-# 205. OtpPurpose
+### 205. OtpPurpose
 
 ```php
 enum OtpPurpose: string
@@ -2660,7 +2661,7 @@ enum OtpPurpose: string
 
 ---
 
-# 206. OtpChallenge
+### 206. OtpChallenge
 
 ```php
 final readonly class OtpChallenge
@@ -2681,7 +2682,7 @@ final readonly class OtpChallenge
 
 ---
 
-# 207. OTP challenge binding
+### 207. OTP challenge binding
 
 Todo código deberá vincularse al menos a:
 
@@ -2693,7 +2694,7 @@ Todo código deberá vincularse al menos a:
 
 ---
 
-# 208. Contextual binding
+### 208. Contextual binding
 
 Los perfiles de alto riesgo podrán añadir vinculación a:
 
@@ -2707,13 +2708,13 @@ Los perfiles de alto riesgo podrán añadir vinculación a:
 
 ---
 
-# 209. OTP generation
+### 209. OTP generation
 
 Los códigos deberán generarse mediante un CSPRNG cuando no deriven de un algoritmo estandarizado como TOTP u HOTP.
 
 ---
 
-# 210. Numeric OTP length
+### 210. Numeric OTP length
 
 Los códigos numéricos deberán poseer suficiente longitud según:
 
@@ -2725,7 +2726,7 @@ Los códigos numéricos deberán poseer suficiente longitud según:
 
 ---
 
-# 211. Short code risk
+### 211. Short code risk
 
 Un código corto solo será aceptable cuando se combine con:
 
@@ -2737,13 +2738,13 @@ Un código corto solo será aceptable cuando se combine con:
 
 ---
 
-# 212. Alphanumeric OTP
+### 212. Alphanumeric OTP
 
 Los códigos alfanuméricos podrán utilizarse para aumentar entropía sin incrementar demasiado la longitud.
 
 ---
 
-# 213. Human-readable alphabet
+### 213. Human-readable alphabet
 
 El alfabeto podrá excluir caracteres ambiguos como:
 
@@ -2753,7 +2754,7 @@ El alfabeto podrá excluir caracteres ambiguos como:
 
 ---
 
-# 214. OtpGenerator
+### 214. OtpGenerator
 
 ```php
 interface OtpGeneratorInterface
@@ -2766,7 +2767,7 @@ interface OtpGeneratorInterface
 
 ---
 
-# 215. OtpGenerationPolicy
+### 215. OtpGenerationPolicy
 
 ```php
 final readonly class OtpGenerationPolicy
@@ -2784,7 +2785,7 @@ final readonly class OtpGenerationPolicy
 
 ---
 
-# 216. GeneratedOtp
+### 216. GeneratedOtp
 
 ```php
 final class GeneratedOtp
@@ -2805,13 +2806,13 @@ final class GeneratedOtp
 
 ---
 
-# 217. OTP storage
+### 217. OTP storage
 
 Los códigos enviados por canal no deberán almacenarse en texto plano.
 
 ---
 
-# 218. OTP verifier representation
+### 218. OTP verifier representation
 
 Se almacenará una representación derivada mediante:
 
@@ -2821,7 +2822,7 @@ Se almacenará una representación derivada mediante:
 
 ---
 
-# 219. OtpSecretHasher
+### 219. OtpSecretHasher
 
 ```php
 interface OtpSecretHasherInterface
@@ -2841,13 +2842,13 @@ interface OtpSecretHasherInterface
 
 ---
 
-# 220. OTP comparison
+### 220. OTP comparison
 
 La comparación deberá ser resistente a timing attacks.
 
 ---
 
-# 221. Atomic OTP consumption
+### 221. Atomic OTP consumption
 
 El consumo deberá ser atómico.
 
@@ -2855,7 +2856,7 @@ Dos requests simultáneos no podrán validar exitosamente el mismo código de un
 
 ---
 
-# 222. OtpChallengeStore
+### 222. OtpChallengeStore
 
 ```php
 interface OtpChallengeStoreInterface
@@ -2874,7 +2875,7 @@ interface OtpChallengeStoreInterface
 
 ---
 
-# 223. OtpConsumptionResult
+### 223. OtpConsumptionResult
 
 ```php
 enum OtpConsumptionResult: string
@@ -2891,19 +2892,19 @@ enum OtpConsumptionResult: string
 
 ---
 
-# 224. Attempt counting
+### 224. Attempt counting
 
 Cada intento inválido deberá incrementar un contador atómico asociado al challenge.
 
 ---
 
-# 225. Maximum attempts
+### 225. Maximum attempts
 
 Al alcanzar el máximo permitido, el challenge deberá invalidarse.
 
 ---
 
-# 226. OTP rate limiting
+### 226. OTP rate limiting
 
 Deberán aplicarse límites separados para:
 
@@ -2918,7 +2919,7 @@ Deberán aplicarse límites separados para:
 
 ---
 
-# 227. Resend behavior
+### 227. Resend behavior
 
 Solicitar un nuevo código podrá:
 
@@ -2930,13 +2931,13 @@ La política deberá ser explícita.
 
 ---
 
-# 228. Recommended resend policy
+### 228. Recommended resend policy
 
 Por defecto, emitir un nuevo código deberá invalidar los anteriores para el mismo propósito.
 
 ---
 
-# 229. OTP response privacy
+### 229. OTP response privacy
 
 La respuesta externa no deberá revelar si:
 
@@ -2947,13 +2948,13 @@ La respuesta externa no deberá revelar si:
 
 ---
 
-# 230. Email OTP
+### 230. Email OTP
 
 Los OTP por correo dependen de la seguridad de la cuenta de email del usuario.
 
 ---
 
-# 231. Email OTP assurance
+### 231. Email OTP assurance
 
 Un OTP por email deberá considerarse un factor de posesión de assurance limitado.
 
@@ -2961,7 +2962,7 @@ No deberá clasificarse automáticamente como phishing-resistant.
 
 ---
 
-# 232. Email delivery security
+### 232. Email delivery security
 
 La entrega deberá usar:
 
@@ -2973,7 +2974,7 @@ La entrega deberá usar:
 
 ---
 
-# 233. Email OTP content
+### 233. Email OTP content
 
 El mensaje deberá indicar:
 
@@ -2985,7 +2986,7 @@ El mensaje deberá indicar:
 
 ---
 
-# 234. OTP code in email subject
+### 234. OTP code in email subject
 
 El código no deberá colocarse en el subject por defecto, debido a exposición en:
 
@@ -2996,13 +2997,13 @@ El código no deberá colocarse en el subject por defecto, debido a exposición 
 
 ---
 
-# 235. Email OTP and magic links
+### 235. Email OTP and magic links
 
 Email OTP y magic link deberán tratarse como mecanismos distintos, aunque compartan canal.
 
 ---
 
-# 236. SMS OTP
+### 236. SMS OTP
 
 Los OTP por SMS deberán considerarse vulnerables a:
 
@@ -3014,19 +3015,19 @@ Los OTP por SMS deberán considerarse vulnerables a:
 
 ---
 
-# 237. SMS assurance ceiling
+### 237. SMS assurance ceiling
 
 El assurance resultante deberá limitarse y no considerarse resistente al phishing.
 
 ---
 
-# 238. SMS fallback policy
+### 238. SMS fallback policy
 
 SMS no deberá ser el único mecanismo de recuperación para cuentas de alto valor.
 
 ---
 
-# 239. Phone number change
+### 239. Phone number change
 
 Cambiar el número registrado deberá requerir:
 
@@ -3037,7 +3038,7 @@ Cambiar el número registrado deberá requerir:
 
 ---
 
-# 240. SMS content minimization
+### 240. SMS content minimization
 
 El mensaje no deberá incluir:
 
@@ -3049,7 +3050,7 @@ El mensaje no deberá incluir:
 
 ---
 
-# 241. OTP delivery provider abstraction
+### 241. OTP delivery provider abstraction
 
 ```php
 interface OtpDeliveryProviderInterface
@@ -3066,13 +3067,13 @@ interface OtpDeliveryProviderInterface
 
 ---
 
-# 242. Delivery result confidentiality
+### 242. Delivery result confidentiality
 
 Un error del proveedor no deberá exponer detalles internos al usuario.
 
 ---
 
-# 243. Delivery telemetry
+### 243. Delivery telemetry
 
 Se deberán registrar:
 
@@ -3087,7 +3088,7 @@ Nunca el código completo.
 
 ---
 
-# 244. TOTP Architecture
+### 244. TOTP Architecture
 
 TOTP genera códigos derivados de:
 
@@ -3098,7 +3099,7 @@ TOTP genera códigos derivados de:
 
 ---
 
-# 245. TotpCredential
+### 245. TotpCredential
 
 ```php
 final class TotpCredential
@@ -3115,7 +3116,7 @@ final class TotpCredential
 
 ---
 
-# 246. TotpProfile
+### 246. TotpProfile
 
 ```php
 final readonly class TotpProfile
@@ -3133,7 +3134,7 @@ final readonly class TotpProfile
 
 ---
 
-# 247. TotpAlgorithm
+### 247. TotpAlgorithm
 
 ```php
 enum TotpAlgorithm: string
@@ -3146,19 +3147,19 @@ enum TotpAlgorithm: string
 
 ---
 
-# 248. TOTP interoperability
+### 248. TOTP interoperability
 
 El soporte de algoritmos deberá considerar compatibilidad con autenticadores existentes.
 
 ---
 
-# 249. TOTP secret generation
+### 249. TOTP secret generation
 
 El secreto deberá generarse mediante un CSPRNG y poseer entropía suficiente.
 
 ---
 
-# 250. TOTP secret storage
+### 250. TOTP secret storage
 
 El secreto deberá:
 
@@ -3170,13 +3171,13 @@ El secreto deberá:
 
 ---
 
-# 251. TOTP secret access
+### 251. TOTP secret access
 
 Solo el verificador MFA deberá poder descifrarlo.
 
 ---
 
-# 252. TOTP enrollment
+### 252. TOTP enrollment
 
 El proceso de enrolamiento deberá incluir:
 
@@ -3202,19 +3203,19 @@ Notification
 
 ---
 
-# 253. Provisional enrollment
+### 253. Provisional enrollment
 
 El secreto no deberá activarse hasta que el usuario demuestre que puede generar un código válido.
 
 ---
 
-# 254. Provisioning URI
+### 254. Provisioning URI
 
 La URI de aprovisionamiento deberá construirse mediante un builder estructurado.
 
 ---
 
-# 255. TotpProvisioningUriBuilder
+### 255. TotpProvisioningUriBuilder
 
 ```php
 interface TotpProvisioningUriBuilderInterface
@@ -3227,13 +3228,13 @@ interface TotpProvisioningUriBuilderInterface
 
 ---
 
-# 256. QR code security
+### 256. QR code security
 
 El QR contiene el secreto TOTP y deberá tratarse como material sensible.
 
 ---
 
-# 257. QR exposure restrictions
+### 257. QR exposure restrictions
 
 La pantalla de enrolamiento deberá:
 
@@ -3246,13 +3247,13 @@ La pantalla de enrolamiento deberá:
 
 ---
 
-# 258. Re-display prohibition
+### 258. Re-display prohibition
 
 Después de completar el enrolamiento, el secreto no deberá volver a mostrarse normalmente.
 
 ---
 
-# 259. TOTP verification
+### 259. TOTP verification
 
 ```php
 interface TotpVerifierInterface
@@ -3267,7 +3268,7 @@ interface TotpVerifierInterface
 
 ---
 
-# 260. TOTP clock window
+### 260. TOTP clock window
 
 La ventana permitida deberá ser pequeña.
 
@@ -3275,13 +3276,13 @@ Ventanas amplias aumentan la posibilidad de replay y adivinación.
 
 ---
 
-# 261. TOTP replay protection
+### 261. TOTP replay protection
 
 Un código aceptado no deberá volver a aceptarse dentro de la misma ventana cuando el perfil exija protección fuerte.
 
 ---
 
-# 262. TOTP usage registry
+### 262. TOTP usage registry
 
 ```php
 interface TotpUsageRegistryInterface
@@ -3295,25 +3296,25 @@ interface TotpUsageRegistryInterface
 
 ---
 
-# 263. Distributed TOTP replay protection
+### 263. Distributed TOTP replay protection
 
 En despliegues multinodo, el registro de consumo deberá ser distribuido y atómico.
 
 ---
 
-# 264. Clock synchronization
+### 264. Clock synchronization
 
 Los nodos deberán mantener sincronización horaria confiable.
 
 ---
 
-# 265. Clock drift handling
+### 265. Clock drift handling
 
 La corrección de drift no deberá ampliar permanentemente la ventana de aceptación.
 
 ---
 
-# 266. HOTP Architecture
+### 266. HOTP Architecture
 
 HOTP deriva códigos de:
 
@@ -3323,7 +3324,7 @@ HOTP deriva códigos de:
 
 ---
 
-# 267. HotpCredential
+### 267. HotpCredential
 
 ```php
 final class HotpCredential
@@ -3340,31 +3341,31 @@ final class HotpCredential
 
 ---
 
-# 268. HOTP counter updates
+### 268. HOTP counter updates
 
 El contador deberá actualizarse atómicamente después de una verificación válida.
 
 ---
 
-# 269. HOTP look-ahead window
+### 269. HOTP look-ahead window
 
 La ventana de búsqueda futura deberá mantenerse limitada.
 
 ---
 
-# 270. HOTP resynchronization
+### 270. HOTP resynchronization
 
 La resincronización deberá requerir un flujo específico y auditado.
 
 ---
 
-# 271. Recovery Codes
+### 271. Recovery Codes
 
 Los códigos de recuperación son credenciales de emergencia.
 
 ---
 
-# 272. RecoveryCodeSet
+### 272. RecoveryCodeSet
 
 ```php
 final readonly class RecoveryCodeSet
@@ -3382,7 +3383,7 @@ final readonly class RecoveryCodeSet
 
 ---
 
-# 273. Recovery code generation
+### 273. Recovery code generation
 
 Los códigos deberán:
 
@@ -3394,19 +3395,19 @@ Los códigos deberán:
 
 ---
 
-# 274. Recovery code storage
+### 274. Recovery code storage
 
 Los códigos se almacenarán únicamente como representaciones derivadas verificables.
 
 ---
 
-# 275. Recovery code display
+### 275. Recovery code display
 
 Solo deberán mostrarse una vez, inmediatamente después de generarse.
 
 ---
 
-# 276. Recovery code delivery
+### 276. Recovery code delivery
 
 El usuario deberá poder:
 
@@ -3419,13 +3420,13 @@ La descarga deberá usar un response profile sensible.
 
 ---
 
-# 277. Recovery code regeneration
+### 277. Recovery code regeneration
 
 Generar un nuevo set deberá invalidar todo el set anterior.
 
 ---
 
-# 278. Recovery code use
+### 278. Recovery code use
 
 El uso deberá:
 
@@ -3437,13 +3438,13 @@ El uso deberá:
 
 ---
 
-# 279. Recovery code assurance
+### 279. Recovery code assurance
 
 Un recovery code podrá autenticar, pero deberá marcar la sesión como recuperada mediante un factor de emergencia.
 
 ---
 
-# 280. Post-recovery restrictions
+### 280. Post-recovery restrictions
 
 Después de usar un recovery code, ciertas operaciones podrán requerir:
 
@@ -3455,13 +3456,13 @@ Después de usar un recovery code, ciertas operaciones podrán requerir:
 
 ---
 
-# 281. MFA Enrollment Architecture
+### 281. MFA Enrollment Architecture
 
 MFA enrollment es una operación de seguridad de alto impacto.
 
 ---
 
-# 282. MfaEnrollmentService
+### 282. MfaEnrollmentService
 
 ```php
 interface MfaEnrollmentServiceInterface
@@ -3479,7 +3480,7 @@ interface MfaEnrollmentServiceInterface
 
 ---
 
-# 283. Enrollment prerequisites
+### 283. Enrollment prerequisites
 
 El enrolamiento deberá requerir:
 
@@ -3491,19 +3492,19 @@ El enrolamiento deberá requerir:
 
 ---
 
-# 284. Factor replacement
+### 284. Factor replacement
 
 Reemplazar un factor existente deberá ser más estricto que añadir uno adicional.
 
 ---
 
-# 285. Existing factor confirmation
+### 285. Existing factor confirmation
 
 Cuando sea posible, el usuario deberá confirmar un factor ya registrado antes de eliminarlo o sustituirlo.
 
 ---
 
-# 286. MFA method registry
+### 286. MFA method registry
 
 ```php
 interface MfaMethodRegistryInterface
@@ -3520,7 +3521,7 @@ interface MfaMethodRegistryInterface
 
 ---
 
-# 287. MfaMethodDefinition
+### 287. MfaMethodDefinition
 
 ```php
 final readonly class MfaMethodDefinition
@@ -3538,13 +3539,13 @@ final readonly class MfaMethodDefinition
 
 ---
 
-# 288. Factor independence
+### 288. Factor independence
 
 Dos mecanismos no deberán contarse automáticamente como dos factores si dependen del mismo canal o dispositivo comprometible.
 
 ---
 
-# 289. Non-independent examples
+### 289. Non-independent examples
 
 Podrán no considerarse independientes:
 
@@ -3555,7 +3556,7 @@ Podrán no considerarse independientes:
 
 ---
 
-# 290. MFA policy engine
+### 290. MFA policy engine
 
 ```php
 interface MfaPolicyEngineInterface
@@ -3569,7 +3570,7 @@ interface MfaPolicyEngineInterface
 
 ---
 
-# 291. MFA requirements
+### 291. MFA requirements
 
 La política podrá exigir:
 
@@ -3583,7 +3584,7 @@ La política podrá exigir:
 
 ---
 
-# 292. MfaRequirement
+### 292. MfaRequirement
 
 ```php
 final readonly class MfaRequirement
@@ -3601,7 +3602,7 @@ final readonly class MfaRequirement
 
 ---
 
-# 293. MFA verification flow
+### 293. MFA verification flow
 
 ```text
 Primary Authentication
@@ -3625,19 +3626,19 @@ Rotate Session
 
 ---
 
-# 294. MFA fatigue protection
+### 294. MFA fatigue protection
 
 Los sistemas de aprobación push deberán protegerse contra solicitudes repetidas.
 
 ---
 
-# 295. Push approval limitations
+### 295. Push approval limitations
 
 Una aprobación simple de “Aceptar” podrá ser vulnerable a fatiga y consentimiento accidental.
 
 ---
 
-# 296. Number matching
+### 296. Number matching
 
 Cuando exista push MFA, deberá preferirse:
 
@@ -3649,7 +3650,7 @@ Cuando exista push MFA, deberá preferirse:
 
 ---
 
-# 297. Challenge frequency limits
+### 297. Challenge frequency limits
 
 Se deberán limitar:
 
@@ -3661,7 +3662,7 @@ Se deberán limitar:
 
 ---
 
-# 298. Suspicious MFA denial
+### 298. Suspicious MFA denial
 
 Rechazos repetidos o reportes de “no fui yo” deberán:
 
@@ -3673,7 +3674,7 @@ Rechazos repetidos o reportes de “no fui yo” deberán:
 
 ---
 
-# 299. WebAuthn and Passkey Foundations
+### 299. WebAuthn and Passkey Foundations
 
 WebAuthn y passkeys permiten autenticación basada en criptografía de clave pública.
 
@@ -3681,7 +3682,7 @@ El servidor almacena una clave pública, mientras el autenticador conserva la cl
 
 ---
 
-# 300. Resultado de esta entrega
+### 300. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -3732,9 +3733,9 @@ Entrega 4
 - Phishing-resistant authentication policies
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 4
+
 
 **Documento:** Parte 05
 **Entrega:** 4 de varias
@@ -3743,7 +3744,7 @@ Entrega 4
 
 ---
 
-# 301. WebAuthn Security Architecture
+### 301. WebAuthn Security Architecture
 
 WebAuthn permitirá autenticar usuarios mediante credenciales criptográficas asociadas a un autenticador.
 
@@ -3760,7 +3761,7 @@ La arquitectura deberá separar:
 
 ---
 
-# 302. WebAuthn trust model
+### 302. WebAuthn trust model
 
 ```text
 User
@@ -3780,7 +3781,7 @@ El servidor confiará únicamente en evidencia criptográfica validada.
 
 ---
 
-# 303. WebAuthn security goals
+### 303. WebAuthn security goals
 
 El subsistema deberá garantizar:
 
@@ -3796,7 +3797,7 @@ El subsistema deberá garantizar:
 
 ---
 
-# 304. WebAuthn threat model
+### 304. WebAuthn threat model
 
 El modelo deberá considerar:
 
@@ -3816,7 +3817,7 @@ El modelo deberá considerar:
 
 ---
 
-# 305. WebAuthnRelyingParty
+### 305. WebAuthnRelyingParty
 
 ```php
 final readonly class WebAuthnRelyingParty
@@ -3833,7 +3834,7 @@ final readonly class WebAuthnRelyingParty
 
 ---
 
-# 306. Relying Party ID
+### 306. Relying Party ID
 
 El RP ID deberá ser un dominio registrable válido o un subdominio permitido.
 
@@ -3841,7 +3842,7 @@ No deberá derivarse directamente de un `Host` no validado.
 
 ---
 
-# 307. RP ID resolution
+### 307. RP ID resolution
 
 ```php
 interface RelyingPartyResolverInterface
@@ -3854,7 +3855,7 @@ interface RelyingPartyResolverInterface
 
 ---
 
-# 308. Multi-tenant RP model
+### 308. Multi-tenant RP model
 
 VoltStack deberá soportar al menos dos estrategias:
 
@@ -3865,25 +3866,25 @@ La estrategia deberá configurarse explícitamente.
 
 ---
 
-# 309. Shared RP risk
+### 309. Shared RP risk
 
 Cuando múltiples tenants compartan RP ID, la credencial deberá vincularse además al tenant dentro del modelo interno.
 
 ---
 
-# 310. Per-tenant RP risk
+### 310. Per-tenant RP risk
 
 Los dominios personalizados deberán validarse antes de poder utilizarse como RP ID.
 
 ---
 
-# 311. Allowed origins
+### 311. Allowed origins
 
 Toda ceremonia deberá validar el origen exacto contra un registry confiable.
 
 ---
 
-# 312. Origin registry
+### 312. Origin registry
 
 ```php
 interface WebAuthnOriginRegistryInterface
@@ -3897,7 +3898,7 @@ interface WebAuthnOriginRegistryInterface
 
 ---
 
-# 313. Origin normalization
+### 313. Origin normalization
 
 Los origins deberán normalizarse considerando:
 
@@ -3912,19 +3913,19 @@ Los origins deberán normalizarse considerando:
 
 ---
 
-# 314. HTTPS requirement
+### 314. HTTPS requirement
 
 Las ceremonias WebAuthn deberán ejecutarse sobre HTTPS, salvo excepciones estrictamente limitadas para desarrollo local.
 
 ---
 
-# 315. Local development exception
+### 315. Local development exception
 
 La excepción de localhost no deberá trasladarse a producción.
 
 ---
 
-# 316. WebAuthnPolicyProfile
+### 316. WebAuthnPolicyProfile
 
 ```php
 final readonly class WebAuthnPolicyProfile
@@ -3943,7 +3944,7 @@ final readonly class WebAuthnPolicyProfile
 
 ---
 
-# 317. UserVerificationRequirement
+### 317. UserVerificationRequirement
 
 ```php
 enum UserVerificationRequirement: string
@@ -3956,7 +3957,7 @@ enum UserVerificationRequirement: string
 
 ---
 
-# 318. ResidentKeyRequirement
+### 318. ResidentKeyRequirement
 
 ```php
 enum ResidentKeyRequirement: string
@@ -3969,7 +3970,7 @@ enum ResidentKeyRequirement: string
 
 ---
 
-# 319. AuthenticatorAttachmentPreference
+### 319. AuthenticatorAttachmentPreference
 
 ```php
 enum AuthenticatorAttachmentPreference: string
@@ -3982,7 +3983,7 @@ enum AuthenticatorAttachmentPreference: string
 
 ---
 
-# 320. AttestationConveyancePreference
+### 320. AttestationConveyancePreference
 
 ```php
 enum AttestationConveyancePreference: string
@@ -3996,7 +3997,7 @@ enum AttestationConveyancePreference: string
 
 ---
 
-# 321. Ceremony separation
+### 321. Ceremony separation
 
 VoltStack deberá diferenciar claramente:
 
@@ -4005,19 +4006,19 @@ VoltStack deberá diferenciar claramente:
 
 ---
 
-# 322. Registration ceremony
+### 322. Registration ceremony
 
 La ceremonia de registro crea una nueva credencial pública vinculada a una identidad.
 
 ---
 
-# 323. Authentication ceremony
+### 323. Authentication ceremony
 
 La ceremonia de autenticación demuestra control sobre una credencial previamente registrada.
 
 ---
 
-# 324. WebAuthn challenge
+### 324. WebAuthn challenge
 
 ```php
 final readonly class WebAuthnChallenge
@@ -4037,7 +4038,7 @@ final readonly class WebAuthnChallenge
 
 ---
 
-# 325. WebAuthnCeremonyType
+### 325. WebAuthnCeremonyType
 
 ```php
 enum WebAuthnCeremonyType: string
@@ -4049,7 +4050,7 @@ enum WebAuthnCeremonyType: string
 
 ---
 
-# 326. Challenge generation
+### 326. Challenge generation
 
 El challenge deberá:
 
@@ -4063,19 +4064,19 @@ El challenge deberá:
 
 ---
 
-# 327. Challenge storage
+### 327. Challenge storage
 
 El challenge completo podrá almacenarse cifrado o como estado seguro de corta duración.
 
 ---
 
-# 328. Challenge consumption
+### 328. Challenge consumption
 
 Un challenge válido deberá consumirse atómicamente después de completar la ceremonia.
 
 ---
 
-# 329. Challenge reuse
+### 329. Challenge reuse
 
 Un challenge no podrá reutilizarse en:
 
@@ -4087,7 +4088,7 @@ Un challenge no podrá reutilizarse en:
 
 ---
 
-# 330. WebAuthnCeremonyStore
+### 330. WebAuthnCeremonyStore
 
 ```php
 interface WebAuthnCeremonyStoreInterface
@@ -4105,7 +4106,7 @@ interface WebAuthnCeremonyStoreInterface
 
 ---
 
-# 331. Ceremony state
+### 331. Ceremony state
 
 El estado podrá incluir:
 
@@ -4122,7 +4123,7 @@ El estado podrá incluir:
 
 ---
 
-# 332. Registration options builder
+### 332. Registration options builder
 
 ```php
 interface PublicKeyCreationOptionsBuilderInterface
@@ -4135,7 +4136,7 @@ interface PublicKeyCreationOptionsBuilderInterface
 
 ---
 
-# 333. Registration prerequisites
+### 333. Registration prerequisites
 
 Registrar una credencial deberá requerir:
 
@@ -4147,13 +4148,13 @@ Registrar una credencial deberá requerir:
 
 ---
 
-# 334. Registration step-up
+### 334. Registration step-up
 
 Para añadir una passkey a una cuenta existente deberá exigirse step-up cuando el riesgo lo justifique.
 
 ---
 
-# 335. User entity
+### 335. User entity
 
 ```php
 final readonly class WebAuthnUserEntity
@@ -4169,7 +4170,7 @@ final readonly class WebAuthnUserEntity
 
 ---
 
-# 336. User entity ID
+### 336. User entity ID
 
 El `id` deberá ser:
 
@@ -4182,25 +4183,25 @@ El `id` deberá ser:
 
 ---
 
-# 337. User handle privacy
+### 337. User handle privacy
 
 El user handle no deberá revelar información personal innecesaria.
 
 ---
 
-# 338. User name mutability
+### 338. User name mutability
 
 El username mostrado al autenticador podrá cambiar sin alterar el identificador interno.
 
 ---
 
-# 339. Credential parameters
+### 339. Credential parameters
 
 VoltStack deberá publicar únicamente algoritmos criptográficos permitidos.
 
 ---
 
-# 340. PublicKeyCredentialParametersRegistry
+### 340. PublicKeyCredentialParametersRegistry
 
 ```php
 interface PublicKeyCredentialParametersRegistryInterface
@@ -4213,31 +4214,31 @@ interface PublicKeyCredentialParametersRegistryInterface
 
 ---
 
-# 341. Supported algorithms
+### 341. Supported algorithms
 
 El framework deberá priorizar algoritmos modernos y ampliamente soportados.
 
 ---
 
-# 342. Algorithm downgrade
+### 342. Algorithm downgrade
 
 No deberán aceptarse algoritmos no anunciados durante la ceremonia.
 
 ---
 
-# 343. Exclude credentials
+### 343. Exclude credentials
 
 Durante el registro podrán enviarse credenciales existentes para evitar duplicados.
 
 ---
 
-# 344. Credential exclusion privacy
+### 344. Credential exclusion privacy
 
 La lista de exclusión deberá limitarse a la identidad autenticada y no revelar credenciales de otros usuarios.
 
 ---
 
-# 345. Authenticator selection
+### 345. Authenticator selection
 
 La política podrá solicitar:
 
@@ -4249,13 +4250,13 @@ La política podrá solicitar:
 
 ---
 
-# 346. Timeout
+### 346. Timeout
 
 El timeout del cliente no sustituye la expiración del challenge en el servidor.
 
 ---
 
-# 347. Registration response parser
+### 347. Registration response parser
 
 ```php
 interface WebAuthnRegistrationResponseParserInterface
@@ -4268,7 +4269,7 @@ interface WebAuthnRegistrationResponseParserInterface
 
 ---
 
-# 348. ClientDataJSON validation
+### 348. ClientDataJSON validation
 
 Deberán validarse:
 
@@ -4281,7 +4282,7 @@ Deberán validarse:
 
 ---
 
-# 349. Client data type
+### 349. Client data type
 
 Para registro deberá esperarse:
 
@@ -4291,25 +4292,25 @@ webauthn.create
 
 ---
 
-# 350. Challenge comparison
+### 350. Challenge comparison
 
 La comparación deberá hacerse sobre los bytes decodificados de forma segura.
 
 ---
 
-# 351. Origin validation
+### 351. Origin validation
 
 El origin recibido deberá coincidir exactamente con uno permitido.
 
 ---
 
-# 352. Cross-origin registration
+### 352. Cross-origin registration
 
 El registro cross-origin deberá rechazarse salvo protocolo y política explícitamente soportados.
 
 ---
 
-# 353. AuthenticatorData
+### 353. AuthenticatorData
 
 ```php
 final readonly class AuthenticatorData
@@ -4330,25 +4331,25 @@ final readonly class AuthenticatorData
 
 ---
 
-# 354. RP ID hash validation
+### 354. RP ID hash validation
 
 El hash del RP ID deberá coincidir con el RP esperado.
 
 ---
 
-# 355. User presence
+### 355. User presence
 
 La bandera de presencia deberá validarse cuando la política lo requiera.
 
 ---
 
-# 356. User verification
+### 356. User verification
 
 Cuando la política exija verificación, `userVerified` deberá ser verdadero.
 
 ---
 
-# 357. AttestedCredentialData
+### 357. AttestedCredentialData
 
 ```php
 final readonly class AttestedCredentialData
@@ -4364,19 +4365,19 @@ final readonly class AttestedCredentialData
 
 ---
 
-# 358. Credential ID uniqueness
+### 358. Credential ID uniqueness
 
 El credential ID deberá ser único dentro del registry de credenciales aplicable.
 
 ---
 
-# 359. Credential collision
+### 359. Credential collision
 
 Una colisión deberá considerarse un evento de alta severidad.
 
 ---
 
-# 360. Public key validation
+### 360. Public key validation
 
 La clave pública deberá:
 
@@ -4388,13 +4389,13 @@ La clave pública deberá:
 
 ---
 
-# 361. Attestation Object
+### 361. Attestation Object
 
 El objeto de attestation deberá analizarse mediante parsers estrictos y limitados.
 
 ---
 
-# 362. Attestation verifier
+### 362. Attestation verifier
 
 ```php
 interface AttestationVerifierInterface
@@ -4408,13 +4409,13 @@ interface AttestationVerifierInterface
 
 ---
 
-# 363. Attestation policy
+### 363. Attestation policy
 
 Por defecto, las aplicaciones generales deberán preferir `none` salvo necesidad real.
 
 ---
 
-# 364. Direct attestation
+### 364. Direct attestation
 
 La attestation directa podrá aumentar:
 
@@ -4426,13 +4427,13 @@ La attestation directa podrá aumentar:
 
 ---
 
-# 365. Enterprise attestation
+### 365. Enterprise attestation
 
 Solo deberá habilitarse en entornos administrados y con consentimiento o base legal apropiada.
 
 ---
 
-# 366. AAGUID handling
+### 366. AAGUID handling
 
 El AAGUID podrá utilizarse para:
 
@@ -4445,7 +4446,7 @@ No deberá asumirse como prueba suficiente de seguridad por sí solo.
 
 ---
 
-# 367. Metadata service
+### 367. Metadata service
 
 ```php
 interface AuthenticatorMetadataProviderInterface
@@ -4458,7 +4459,7 @@ interface AuthenticatorMetadataProviderInterface
 
 ---
 
-# 368. Metadata trust
+### 368. Metadata trust
 
 La metadata externa deberá:
 
@@ -4470,19 +4471,19 @@ La metadata externa deberá:
 
 ---
 
-# 369. Attestation trust anchors
+### 369. Attestation trust anchors
 
 Los trust anchors deberán gestionarse mediante un registry controlado.
 
 ---
 
-# 370. Attestation revocation
+### 370. Attestation revocation
 
 El sistema deberá poder rechazar autenticadores revocados o comprometidos.
 
 ---
 
-# 371. Registration verification result
+### 371. Registration verification result
 
 ```php
 final readonly class WebAuthnRegistrationResult
@@ -4499,7 +4500,7 @@ final readonly class WebAuthnRegistrationResult
 
 ---
 
-# 372. WebAuthnCredential
+### 372. WebAuthnCredential
 
 ```php
 final readonly class WebAuthnCredential
@@ -4523,7 +4524,7 @@ final readonly class WebAuthnCredential
 
 ---
 
-# 373. WebAuthnCredentialStatus
+### 373. WebAuthnCredentialStatus
 
 ```php
 enum WebAuthnCredentialStatus: string
@@ -4538,7 +4539,7 @@ enum WebAuthnCredentialStatus: string
 
 ---
 
-# 374. Credential nickname
+### 374. Credential nickname
 
 El usuario podrá asignar un nombre descriptivo como:
 
@@ -4550,13 +4551,13 @@ El nickname no formará parte de la identidad criptográfica.
 
 ---
 
-# 375. Credential registration commit
+### 375. Credential registration commit
 
 La credencial solo deberá persistirse después de completar todas las validaciones.
 
 ---
 
-# 376. Registration transaction
+### 376. Registration transaction
 
 El commit deberá incluir atómicamente:
 
@@ -4569,7 +4570,7 @@ El commit deberá incluir atómicamente:
 
 ---
 
-# 377. Authentication options builder
+### 377. Authentication options builder
 
 ```php
 interface PublicKeyRequestOptionsBuilderInterface
@@ -4582,19 +4583,19 @@ interface PublicKeyRequestOptionsBuilderInterface
 
 ---
 
-# 378. AllowCredentials
+### 378. AllowCredentials
 
 Para autenticación identificada podrá enviarse una lista de credenciales permitidas.
 
 ---
 
-# 379. Discoverable authentication
+### 379. Discoverable authentication
 
 Para passkeys descubribles podrá omitirse `allowCredentials`.
 
 ---
 
-# 380. Username-less authentication
+### 380. Username-less authentication
 
 La autenticación sin username deberá resolver la identidad mediante:
 
@@ -4605,7 +4606,7 @@ La autenticación sin username deberá resolver la identidad mediante:
 
 ---
 
-# 381. Authentication response parser
+### 381. Authentication response parser
 
 ```php
 interface WebAuthnAuthenticationResponseParserInterface
@@ -4618,7 +4619,7 @@ interface WebAuthnAuthenticationResponseParserInterface
 
 ---
 
-# 382. Authentication client data type
+### 382. Authentication client data type
 
 Durante autenticación deberá esperarse:
 
@@ -4628,7 +4629,7 @@ webauthn.get
 
 ---
 
-# 383. Assertion verification
+### 383. Assertion verification
 
 La assertion deberá validar:
 
@@ -4644,7 +4645,7 @@ La assertion deberá validar:
 
 ---
 
-# 384. Assertion verifier
+### 384. Assertion verifier
 
 ```php
 interface WebAuthnAssertionVerifierInterface
@@ -4658,25 +4659,25 @@ interface WebAuthnAssertionVerifierInterface
 
 ---
 
-# 385. Credential lookup
+### 385. Credential lookup
 
 El credential ID deberá resolverse en un registry aislado por RP y tenant.
 
 ---
 
-# 386. Unknown credential
+### 386. Unknown credential
 
 Una credencial desconocida deberá producir una respuesta externa genérica.
 
 ---
 
-# 387. User handle validation
+### 387. User handle validation
 
 Cuando se reciba user handle deberá coincidir con la identidad vinculada a la credencial.
 
 ---
 
-# 388. Signature verification
+### 388. Signature verification
 
 La firma deberá verificarse sobre:
 
@@ -4690,7 +4691,7 @@ usando la clave pública registrada.
 
 ---
 
-# 389. Invalid signature
+### 389. Invalid signature
 
 Una firma inválida deberá:
 
@@ -4701,13 +4702,13 @@ Una firma inválida deberá:
 
 ---
 
-# 390. Signature counter
+### 390. Signature counter
 
 El contador podrá ayudar a detectar clonación, pero no todos los autenticadores lo incrementan.
 
 ---
 
-# 391. Counter evaluation
+### 391. Counter evaluation
 
 VoltStack deberá distinguir:
 
@@ -4719,7 +4720,7 @@ VoltStack deberá distinguir:
 
 ---
 
-# 392. Counter rollback
+### 392. Counter rollback
 
 Un rollback podrá indicar:
 
@@ -4731,7 +4732,7 @@ Un rollback podrá indicar:
 
 ---
 
-# 393. Counter policy
+### 393. Counter policy
 
 El rollback no deberá producir siempre bloqueo inmediato.
 
@@ -4746,31 +4747,31 @@ La decisión dependerá de:
 
 ---
 
-# 394. Passkey synchronization
+### 394. Passkey synchronization
 
 Las passkeys sincronizadas pueden existir en múltiples dispositivos bajo el ecosistema del proveedor.
 
 ---
 
-# 395. Backup eligibility
+### 395. Backup eligibility
 
 La bandera de elegibilidad indicará si la credencial puede respaldarse o sincronizarse.
 
 ---
 
-# 396. Backup state
+### 396. Backup state
 
 La bandera de estado podrá indicar que la credencial fue respaldada.
 
 ---
 
-# 397. Synced passkey assurance
+### 397. Synced passkey assurance
 
 Una passkey sincronizada podrá ser resistente al phishing, aunque no necesariamente hardware-bound a un único dispositivo.
 
 ---
 
-# 398. Credential revocation
+### 398. Credential revocation
 
 El usuario y los administradores autorizados deberán poder:
 
@@ -4782,7 +4783,7 @@ El usuario y los administradores autorizados deberán poder:
 
 ---
 
-# 399. Phishing-resistant authentication policy
+### 399. Phishing-resistant authentication policy
 
 VoltStack deberá permitir declarar:
 
@@ -4800,7 +4801,7 @@ La política deberá aceptar únicamente métodos que cumplan la propiedad reque
 
 ---
 
-# 400. Resultado de esta entrega
+### 400. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -4855,9 +4856,9 @@ Entrega 5
 - Session revocation foundations
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 5
+
 
 **Documento:** Parte 05
 **Entrega:** 5 de varias
@@ -4866,7 +4867,7 @@ Entrega 5
 
 ---
 
-# 401. Passkey Lifecycle Management
+### 401. Passkey Lifecycle Management
 
 Las passkeys deberán administrarse como credenciales completas con:
 
@@ -4884,7 +4885,7 @@ Una credencial WebAuthn no deberá tratarse como un simple registro de clave pú
 
 ---
 
-# 402. Credential lifecycle states
+### 402. Credential lifecycle states
 
 ```php
 enum PasskeyLifecycleState: string
@@ -4901,7 +4902,7 @@ enum PasskeyLifecycleState: string
 
 ---
 
-# 403. Pending credentials
+### 403. Pending credentials
 
 Una credencial permanecerá en estado `Pending` durante la ceremonia de registro.
 
@@ -4914,19 +4915,19 @@ No podrá utilizarse para autenticación hasta que:
 
 ---
 
-# 404. Active credentials
+### 404. Active credentials
 
 Solo una credencial `Active` podrá participar normalmente en autenticación.
 
 ---
 
-# 405. Suspended credentials
+### 405. Suspended credentials
 
 La suspensión permitirá deshabilitar temporalmente una credencial sin eliminar su historial.
 
 ---
 
-# 406. Lost credentials
+### 406. Lost credentials
 
 Una credencial marcada como perdida deberá:
 
@@ -4937,31 +4938,31 @@ Una credencial marcada como perdida deberá:
 
 ---
 
-# 407. Compromised credentials
+### 407. Compromised credentials
 
 Una passkey comprometida deberá considerarse no confiable incluso si su firma sigue siendo criptográficamente válida.
 
 ---
 
-# 408. Revoked credentials
+### 408. Revoked credentials
 
 Una credencial revocada no deberá reactivarse mediante una operación ordinaria.
 
 ---
 
-# 409. Retired credentials
+### 409. Retired credentials
 
 El estado `Retired` podrá utilizarse cuando una credencial sea reemplazada de forma controlada.
 
 ---
 
-# 410. Passkey inventory
+### 410. Passkey inventory
 
 VoltStack deberá exponer un inventario seguro de credenciales por identidad.
 
 ---
 
-# 411. PasskeyInventoryItem
+### 411. PasskeyInventoryItem
 
 ```php
 final readonly class PasskeyInventoryItem
@@ -4984,7 +4985,7 @@ final readonly class PasskeyInventoryItem
 
 ---
 
-# 412. Inventory privacy
+### 412. Inventory privacy
 
 El inventario no deberá exponer:
 
@@ -4996,13 +4997,13 @@ El inventario no deberá exponer:
 
 ---
 
-# 413. Credential naming
+### 413. Credential naming
 
 Los usuarios podrán asignar nombres descriptivos a sus passkeys.
 
 ---
 
-# 414. Default credential names
+### 414. Default credential names
 
 Cuando no exista un nombre explícito, el framework podrá generar uno aproximado a partir de:
 
@@ -5013,7 +5014,7 @@ Cuando no exista un nombre explícito, el framework podrá generar uno aproximad
 
 ---
 
-# 415. Name sanitization
+### 415. Name sanitization
 
 Los nombres de credenciales deberán:
 
@@ -5025,25 +5026,25 @@ Los nombres de credenciales deberán:
 
 ---
 
-# 416. Duplicate names
+### 416. Duplicate names
 
 Se podrán permitir nombres duplicados, pero el UI deberá mostrar información adicional para distinguir credenciales.
 
 ---
 
-# 417. Last-used tracking
+### 417. Last-used tracking
 
 El sistema podrá registrar la última utilización para ayudar al usuario a identificar credenciales activas.
 
 ---
 
-# 418. Usage tracking privacy
+### 418. Usage tracking privacy
 
 El tracking no deberá convertirse en un mecanismo invasivo de seguimiento de dispositivos.
 
 ---
 
-# 419. Credential management authorization
+### 419. Credential management authorization
 
 Administrar passkeys deberá requerir:
 
@@ -5055,7 +5056,7 @@ Administrar passkeys deberá requerir:
 
 ---
 
-# 420. CredentialManagementService
+### 420. CredentialManagementService
 
 ```php
 interface CredentialManagementServiceInterface
@@ -5079,25 +5080,25 @@ interface CredentialManagementServiceInterface
 
 ---
 
-# 421. Deletion semantics
+### 421. Deletion semantics
 
 Eliminar una credencial desde el UI deberá traducirse internamente a una revocación auditable.
 
 ---
 
-# 422. Hard deletion
+### 422. Hard deletion
 
 La eliminación física podrá realizarse después del periodo de retención definido.
 
 ---
 
-# 423. Self-lockout protection
+### 423. Self-lockout protection
 
 Antes de revocar una credencial, el sistema deberá comprobar si quedará al menos un método de recuperación viable.
 
 ---
 
-# 424. Last-factor removal
+### 424. Last-factor removal
 
 Eliminar el último factor fuerte deberá requerir:
 
@@ -5108,7 +5109,7 @@ Eliminar el último factor fuerte deberá requerir:
 
 ---
 
-# 425. Factor replacement
+### 425. Factor replacement
 
 El reemplazo de passkey deberá ejecutarse como:
 
@@ -5130,19 +5131,19 @@ Notify User
 
 ---
 
-# 426. Replace-before-remove
+### 426. Replace-before-remove
 
 VoltStack deberá preferir registrar primero la nueva credencial antes de retirar la anterior.
 
 ---
 
-# 427. Credential replacement transaction
+### 427. Credential replacement transaction
 
 La operación deberá mantener consistencia si falla cualquiera de las etapas.
 
 ---
 
-# 428. Authenticator policy changes
+### 428. Authenticator policy changes
 
 Si una credencial deja de cumplir una nueva política, podrá:
 
@@ -5153,7 +5154,7 @@ Si una credencial deja de cumplir una nueva política, podrá:
 
 ---
 
-# 429. Credential policy evaluator
+### 429. Credential policy evaluator
 
 ```php
 interface WebAuthnCredentialPolicyEvaluatorInterface
@@ -5167,7 +5168,7 @@ interface WebAuthnCredentialPolicyEvaluatorInterface
 
 ---
 
-# 430. Credential inventory events
+### 430. Credential inventory events
 
 Eventos recomendados:
 
@@ -5181,13 +5182,13 @@ Eventos recomendados:
 
 ---
 
-# 431. Recovery after passkey loss
+### 431. Recovery after passkey loss
 
 La pérdida de una passkey deberá activar un flujo separado del login ordinario.
 
 ---
 
-# 432. Recovery options
+### 432. Recovery options
 
 La recuperación podrá apoyarse en:
 
@@ -5200,19 +5201,19 @@ La recuperación podrá apoyarse en:
 
 ---
 
-# 433. Recovery assurance
+### 433. Recovery assurance
 
 El assurance resultante dependerá del método utilizado.
 
 ---
 
-# 434. Low-assurance recovery
+### 434. Low-assurance recovery
 
 Una recuperación de assurance bajo deberá producir una sesión restringida.
 
 ---
 
-# 435. Restricted recovery session
+### 435. Restricted recovery session
 
 ```php
 final readonly class RestrictedRecoverySessionPolicy
@@ -5229,7 +5230,7 @@ final readonly class RestrictedRecoverySessionPolicy
 
 ---
 
-# 436. Post-recovery restrictions
+### 436. Post-recovery restrictions
 
 Una sesión recuperada podrá impedir temporalmente:
 
@@ -5242,13 +5243,13 @@ Una sesión recuperada podrá impedir temporalmente:
 
 ---
 
-# 437. Mandatory credential re-enrollment
+### 437. Mandatory credential re-enrollment
 
 Después de perder todas las passkeys, el sistema podrá exigir enrolar una nueva antes de restaurar acceso completo.
 
 ---
 
-# 438. Recovery notifications
+### 438. Recovery notifications
 
 Se deberá notificar:
 
@@ -5259,7 +5260,7 @@ Se deberá notificar:
 
 ---
 
-# 439. Recovery abuse protection
+### 439. Recovery abuse protection
 
 Los flujos deberán protegerse contra:
 
@@ -5272,13 +5273,13 @@ Los flujos deberán protegerse contra:
 
 ---
 
-# 440. Passwordless Account Bootstrap
+### 440. Passwordless Account Bootstrap
 
 VoltStack deberá soportar creación de cuentas sin contraseña.
 
 ---
 
-# 441. Bootstrap methods
+### 441. Bootstrap methods
 
 El bootstrap podrá realizarse mediante:
 
@@ -5291,13 +5292,13 @@ El bootstrap podrá realizarse mediante:
 
 ---
 
-# 442. Bootstrap identity binding
+### 442. Bootstrap identity binding
 
 La identidad deberá verificarse antes de activar la cuenta.
 
 ---
 
-# 443. Passwordless bootstrap flow
+### 443. Passwordless bootstrap flow
 
 ```text
 Registration Intent
@@ -5319,31 +5320,31 @@ Session Creation
 
 ---
 
-# 444. Incomplete bootstrap
+### 444. Incomplete bootstrap
 
 Una cuenta incompleta deberá permanecer en estado `Pending`.
 
 ---
 
-# 445. Bootstrap timeout
+### 445. Bootstrap timeout
 
 El proceso deberá expirar y limpiar estado provisional.
 
 ---
 
-# 446. Passwordless-only accounts
+### 446. Passwordless-only accounts
 
 Una cuenta podrá operar sin contraseña almacenada.
 
 ---
 
-# 447. Authentication method declaration
+### 447. Authentication method declaration
 
 El perfil de identidad deberá indicar explícitamente si la contraseña existe.
 
 ---
 
-# 448. Credential capability profile
+### 448. Credential capability profile
 
 ```php
 final readonly class IdentityCredentialProfile
@@ -5361,37 +5362,37 @@ final readonly class IdentityCredentialProfile
 
 ---
 
-# 449. Password fallback prohibition
+### 449. Password fallback prohibition
 
 Una cuenta passwordless no deberá crear silenciosamente una contraseña como fallback.
 
 ---
 
-# 450. Password enrollment
+### 450. Password enrollment
 
 Añadir una contraseña a una cuenta passwordless será una operación de seguridad de alto impacto.
 
 ---
 
-# 451. Passwordless recovery
+### 451. Passwordless recovery
 
 El sistema deberá exigir al menos un mecanismo de recuperación compatible con la política.
 
 ---
 
-# 452. Recovery method independence
+### 452. Recovery method independence
 
 El mecanismo de recuperación no deberá depender completamente del mismo dispositivo que contiene la única passkey.
 
 ---
 
-# 453. Method downgrade prevention
+### 453. Method downgrade prevention
 
 VoltStack deberá impedir que un atacante degrade una cuenta desde un método fuerte a uno débil.
 
 ---
 
-# 454. Authentication downgrade examples
+### 454. Authentication downgrade examples
 
 Ataques posibles:
 
@@ -5404,7 +5405,7 @@ Ataques posibles:
 
 ---
 
-# 455. AuthenticationMethodPolicy
+### 455. AuthenticationMethodPolicy
 
 ```php
 final readonly class AuthenticationMethodPolicy
@@ -5421,7 +5422,7 @@ final readonly class AuthenticationMethodPolicy
 
 ---
 
-# 456. Downgrade evaluation
+### 456. Downgrade evaluation
 
 Una transición deberá comparar:
 
@@ -5434,7 +5435,7 @@ Una transición deberá comparar:
 
 ---
 
-# 457. Downgrade authorization
+### 457. Downgrade authorization
 
 Una reducción deliberada deberá requerir:
 
@@ -5446,13 +5447,13 @@ Una reducción deliberada deberá requerir:
 
 ---
 
-# 458. Legacy client restrictions
+### 458. Legacy client restrictions
 
 Clientes antiguos no deberán forzar métodos menos seguros para toda la cuenta.
 
 ---
 
-# 459. Per-client method policy
+### 459. Per-client method policy
 
 La política podrá permitir métodos específicos por:
 
@@ -5464,7 +5465,7 @@ La política podrá permitir métodos específicos por:
 
 ---
 
-# 460. Session Security Architecture
+### 460. Session Security Architecture
 
 Una sesión representa continuidad autenticada entre múltiples requests.
 
@@ -5472,7 +5473,7 @@ No deberá confundirse con la identidad misma.
 
 ---
 
-# 461. Session trust model
+### 461. Session trust model
 
 ```text
 Authentication Result
@@ -5494,7 +5495,7 @@ Identity Context
 
 ---
 
-# 462. Session security goals
+### 462. Session security goals
 
 El sistema deberá proteger contra:
 
@@ -5510,7 +5511,7 @@ El sistema deberá proteger contra:
 
 ---
 
-# 463. Session types
+### 463. Session types
 
 ```php
 enum SessionType: string
@@ -5526,7 +5527,7 @@ enum SessionType: string
 
 ---
 
-# 464. SessionRecord
+### 464. SessionRecord
 
 ```php
 final readonly class SessionRecord
@@ -5551,7 +5552,7 @@ final readonly class SessionRecord
 
 ---
 
-# 465. SessionIdentifier
+### 465. SessionIdentifier
 
 ```php
 final readonly class SessionIdentifier
@@ -5566,7 +5567,7 @@ final readonly class SessionIdentifier
 
 ---
 
-# 466. Session ID generation
+### 466. Session ID generation
 
 El identificador deberá:
 
@@ -5580,7 +5581,7 @@ El identificador deberá:
 
 ---
 
-# 467. Session ID storage
+### 467. Session ID storage
 
 El cliente recibirá el valor opaco.
 
@@ -5588,19 +5589,19 @@ El servidor podrá almacenar únicamente un digest de lookup cuando el diseño l
 
 ---
 
-# 468. Session ID hashing
+### 468. Session ID hashing
 
 El digest deberá usar una función adecuada para búsquedas rápidas y resistencia ante exposición de la base de sesiones.
 
 ---
 
-# 469. Session ID secrecy
+### 469. Session ID secrecy
 
 El session ID deberá tratarse como bearer credential.
 
 ---
 
-# 470. Session identifier exposure
+### 470. Session identifier exposure
 
 No deberá aparecer en:
 
@@ -5614,13 +5615,13 @@ No deberá aparecer en:
 
 ---
 
-# 471. Cookie transport
+### 471. Cookie transport
 
 Las sesiones web deberán transportarse mediante cookies seguras.
 
 ---
 
-# 472. Session cookie profile
+### 472. Session cookie profile
 
 ```php
 final readonly class SessionCookieProfile
@@ -5640,7 +5641,7 @@ final readonly class SessionCookieProfile
 
 ---
 
-# 473. Host-prefixed session cookies
+### 473. Host-prefixed session cookies
 
 Cuando sea posible, la cookie deberá usar prefijo:
 
@@ -5650,19 +5651,19 @@ __Host-
 
 ---
 
-# 474. Domain-scoped session risk
+### 474. Domain-scoped session risk
 
 Las cookies compartidas entre subdominios aumentan la superficie de ataque.
 
 ---
 
-# 475. Session creation
+### 475. Session creation
 
 Una sesión solo deberá crearse después de una autenticación válida.
 
 ---
 
-# 476. SessionIssuer
+### 476. SessionIssuer
 
 ```php
 interface SessionIssuerInterface
@@ -5676,7 +5677,7 @@ interface SessionIssuerInterface
 
 ---
 
-# 477. SessionIssueContext
+### 477. SessionIssueContext
 
 ```php
 final readonly class SessionIssueContext
@@ -5694,19 +5695,19 @@ final readonly class SessionIssueContext
 
 ---
 
-# 478. Session fixation protection
+### 478. Session fixation protection
 
 Toda autenticación exitosa deberá emitir un nuevo session ID.
 
 ---
 
-# 479. Pre-authentication sessions
+### 479. Pre-authentication sessions
 
 Los datos almacenados antes del login deberán migrarse cuidadosamente a la nueva sesión.
 
 ---
 
-# 480. Session data migration
+### 480. Session data migration
 
 Solo deberán transferirse atributos permitidos como:
 
@@ -5717,7 +5718,7 @@ Solo deberán transferirse atributos permitidos como:
 
 ---
 
-# 481. Unsafe pre-auth data
+### 481. Unsafe pre-auth data
 
 No deberán migrarse automáticamente:
 
@@ -5729,13 +5730,13 @@ No deberán migrarse automáticamente:
 
 ---
 
-# 482. Session rotation
+### 482. Session rotation
 
 La sesión deberá rotarse ante eventos relevantes.
 
 ---
 
-# 483. Session rotation triggers
+### 483. Session rotation triggers
 
 Se deberá rotar cuando ocurra:
 
@@ -5751,7 +5752,7 @@ Se deberá rotar cuando ocurra:
 
 ---
 
-# 484. SessionRotator
+### 484. SessionRotator
 
 ```php
 interface SessionRotatorInterface
@@ -5765,7 +5766,7 @@ interface SessionRotatorInterface
 
 ---
 
-# 485. SessionRotationReason
+### 485. SessionRotationReason
 
 ```php
 enum SessionRotationReason: string
@@ -5783,7 +5784,7 @@ enum SessionRotationReason: string
 
 ---
 
-# 486. Rotation transaction
+### 486. Rotation transaction
 
 La rotación deberá:
 
@@ -5795,13 +5796,13 @@ La rotación deberá:
 
 ---
 
-# 487. Rotation grace window
+### 487. Rotation grace window
 
 Una ventana mínima podrá tolerarse para requests concurrentes legítimos.
 
 ---
 
-# 488. Grace window restrictions
+### 488. Grace window restrictions
 
 La ventana deberá:
 
@@ -5812,7 +5813,7 @@ La ventana deberá:
 
 ---
 
-# 489. Session store
+### 489. Session store
 
 ```php
 interface SessionStoreInterface
@@ -5832,7 +5833,7 @@ interface SessionStoreInterface
 
 ---
 
-# 490. Session store security
+### 490. Session store security
 
 El store deberá proporcionar:
 
@@ -5846,7 +5847,7 @@ El store deberá proporcionar:
 
 ---
 
-# 491. Centralized versus stateless sessions
+### 491. Centralized versus stateless sessions
 
 VoltStack podrá soportar:
 
@@ -5856,7 +5857,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 492. Stateful session advantages
+### 492. Stateful session advantages
 
 Ventajas:
 
@@ -5868,7 +5869,7 @@ Ventajas:
 
 ---
 
-# 493. Stateless session risks
+### 493. Stateless session risks
 
 Riesgos:
 
@@ -5880,13 +5881,13 @@ Riesgos:
 
 ---
 
-# 494. Default session model
+### 494. Default session model
 
 Para aplicaciones web interactivas, VoltStack deberá preferir sesiones stateful con identificador opaco.
 
 ---
 
-# 495. SessionPolicy
+### 495. SessionPolicy
 
 ```php
 final readonly class SessionPolicy
@@ -5905,13 +5906,13 @@ final readonly class SessionPolicy
 
 ---
 
-# 496. Idle timeout
+### 496. Idle timeout
 
 La expiración por inactividad deberá basarse en actividad válida y controlada.
 
 ---
 
-# 497. Activity refresh
+### 497. Activity refresh
 
 No todo request deberá renovar la actividad.
 
@@ -5925,13 +5926,13 @@ Podrán excluirse:
 
 ---
 
-# 498. Absolute timeout
+### 498. Absolute timeout
 
 Toda sesión deberá tener una expiración absoluta que no pueda extenderse indefinidamente mediante actividad.
 
 ---
 
-# 499. Concurrent session controls
+### 499. Concurrent session controls
 
 El sistema podrá limitar sesiones por:
 
@@ -5946,7 +5947,7 @@ La política deberá definir si al exceder el límite se rechaza la nueva sesió
 
 ---
 
-# 500. Resultado de esta entrega
+### 500. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -5999,9 +6000,9 @@ Entrega 6
 - Session anomaly detection
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 6
+
 
 **Documento:** Parte 05
 **Entrega:** 6 de varias
@@ -6010,7 +6011,7 @@ Entrega 6
 
 ---
 
-# 501. Session Validation Pipeline
+### 501. Session Validation Pipeline
 
 Toda petición autenticada mediante sesión deberá atravesar una validación completa antes de reconstruir el `IdentityContext`.
 
@@ -6044,13 +6045,13 @@ Identity Context Reconstruction
 
 ---
 
-# 502. Session validation principle
+### 502. Session validation principle
 
 La existencia de un identificador válido no implica que la sesión siga siendo confiable.
 
 ---
 
-# 503. SessionValidator
+### 503. SessionValidator
 
 ```php
 interface SessionValidatorInterface
@@ -6064,7 +6065,7 @@ interface SessionValidatorInterface
 
 ---
 
-# 504. PresentedSessionCredential
+### 504. PresentedSessionCredential
 
 ```php
 final readonly class PresentedSessionCredential
@@ -6080,7 +6081,7 @@ final readonly class PresentedSessionCredential
 
 ---
 
-# 505. SessionTransport
+### 505. SessionTransport
 
 ```php
 enum SessionTransport: string
@@ -6093,7 +6094,7 @@ enum SessionTransport: string
 
 ---
 
-# 506. Query-string sessions prohibition
+### 506. Query-string sessions prohibition
 
 VoltStack no deberá aceptar identificadores de sesión desde:
 
@@ -6106,7 +6107,7 @@ salvo protocolos legacy explícitamente aislados y deshabilitados por defecto.
 
 ---
 
-# 507. SessionValidationContext
+### 507. SessionValidationContext
 
 ```php
 final readonly class SessionValidationContext
@@ -6123,7 +6124,7 @@ final readonly class SessionValidationContext
 
 ---
 
-# 508. SessionValidationResult
+### 508. SessionValidationResult
 
 ```php
 final readonly class SessionValidationResult
@@ -6141,7 +6142,7 @@ final readonly class SessionValidationResult
 
 ---
 
-# 509. SessionValidationStatus
+### 509. SessionValidationStatus
 
 ```php
 enum SessionValidationStatus: string
@@ -6160,7 +6161,7 @@ enum SessionValidationStatus: string
 
 ---
 
-# 510. Generic invalid-session behavior
+### 510. Generic invalid-session behavior
 
 La respuesta externa no deberá revelar si la sesión:
 
@@ -6173,7 +6174,7 @@ La respuesta externa no deberá revelar si la sesión:
 
 ---
 
-# 511. Session lifecycle states
+### 511. Session lifecycle states
 
 ```php
 enum SessionLifecycleState: string
@@ -6190,7 +6191,7 @@ enum SessionLifecycleState: string
 
 ---
 
-# 512. Pending session
+### 512. Pending session
 
 Una sesión `Pending` podrá existir durante:
 
@@ -6202,7 +6203,7 @@ Una sesión `Pending` podrá existir durante:
 
 ---
 
-# 513. Pending session restrictions
+### 513. Pending session restrictions
 
 No deberá acceder a Controllers ordinarios autenticados.
 
@@ -6210,19 +6211,19 @@ Solo podrá acceder a rutas explícitamente autorizadas para completar el flujo.
 
 ---
 
-# 514. Active session
+### 514. Active session
 
 Una sesión `Active` será elegible para reconstruir un contexto autenticado completo.
 
 ---
 
-# 515. Restricted session
+### 515. Restricted session
 
 Una sesión `Restricted` tendrá una lista explícita de capacidades permitidas.
 
 ---
 
-# 516. RestrictedSessionCapabilities
+### 516. RestrictedSessionCapabilities
 
 ```php
 final readonly class RestrictedSessionCapabilities
@@ -6238,7 +6239,7 @@ final readonly class RestrictedSessionCapabilities
 
 ---
 
-# 517. Suspended session
+### 517. Suspended session
 
 Una sesión podrá suspenderse temporalmente por:
 
@@ -6250,25 +6251,25 @@ Una sesión podrá suspenderse temporalmente por:
 
 ---
 
-# 518. Revoked session
+### 518. Revoked session
 
 Una sesión revocada deberá rechazarse permanentemente.
 
 ---
 
-# 519. Expired session
+### 519. Expired session
 
 La expiración deberá establecerse de forma explícita y auditable.
 
 ---
 
-# 520. Replaced session
+### 520. Replaced session
 
 Una sesión rotada podrá conservar un registro `Replaced` para detectar reutilización del identificador anterior.
 
 ---
 
-# 521. Session state transition rules
+### 521. Session state transition rules
 
 ```text
 Pending → Active
@@ -6288,7 +6289,7 @@ Las transiciones deberán ejecutarse mediante servicios controlados.
 
 ---
 
-# 522. Session state machine
+### 522. Session state machine
 
 ```php
 interface SessionStateMachineInterface
@@ -6303,7 +6304,7 @@ interface SessionStateMachineInterface
 
 ---
 
-# 523. Illegal transitions
+### 523. Illegal transitions
 
 No se permitirá:
 
@@ -6314,7 +6315,7 @@ No se permitirá:
 
 ---
 
-# 524. Session expiration validation
+### 524. Session expiration validation
 
 La validación deberá comprobar:
 
@@ -6326,13 +6327,13 @@ La validación deberá comprobar:
 
 ---
 
-# 525. Server-side expiration authority
+### 525. Server-side expiration authority
 
 La fecha almacenada en cliente nunca será fuente de verdad para la expiración.
 
 ---
 
-# 526. Idle activity update
+### 526. Idle activity update
 
 La actualización de `lastActivityAt` deberá ser:
 
@@ -6343,7 +6344,7 @@ La actualización de `lastActivityAt` deberá ser:
 
 ---
 
-# 527. Activity write throttling
+### 527. Activity write throttling
 
 VoltStack podrá actualizar actividad solo cuando haya transcurrido un intervalo mínimo.
 
@@ -6360,19 +6361,19 @@ final readonly class SessionActivityPolicy
 
 ---
 
-# 528. Absolute expiration enforcement
+### 528. Absolute expiration enforcement
 
 La expiración absoluta deberá aplicarse aunque existan requests concurrentes o refreshes.
 
 ---
 
-# 529. Session revocation architecture
+### 529. Session revocation architecture
 
 La revocación deberá ser una operación centralizada, auditable y propagable entre nodos.
 
 ---
 
-# 530. SessionRevocationService
+### 530. SessionRevocationService
 
 ```php
 interface SessionRevocationServiceInterface
@@ -6393,7 +6394,7 @@ interface SessionRevocationServiceInterface
 
 ---
 
-# 531. SessionRevocationReason
+### 531. SessionRevocationReason
 
 ```php
 enum SessionRevocationReason: string
@@ -6414,7 +6415,7 @@ enum SessionRevocationReason: string
 
 ---
 
-# 532. Revocation context
+### 532. Revocation context
 
 ```php
 final readonly class RevocationContext
@@ -6431,7 +6432,7 @@ final readonly class RevocationContext
 
 ---
 
-# 533. Revocation propagation
+### 533. Revocation propagation
 
 En despliegues distribuidos, la revocación deberá propagarse mediante:
 
@@ -6443,25 +6444,25 @@ En despliegues distribuidos, la revocación deberá propagarse mediante:
 
 ---
 
-# 534. Revocation latency
+### 534. Revocation latency
 
 Los perfiles de seguridad deberán definir el máximo retraso aceptable.
 
 ---
 
-# 535. Fail-closed revocation
+### 535. Fail-closed revocation
 
 En operaciones críticas, si no puede confirmarse el estado de revocación, la sesión deberá rechazarse.
 
 ---
 
-# 536. Global logout
+### 536. Global logout
 
 El logout global deberá invalidar todas las sesiones elegibles de una identidad.
 
 ---
 
-# 537. Global logout filters
+### 537. Global logout filters
 
 La política podrá excluir o incluir:
 
@@ -6474,7 +6475,7 @@ La política podrá excluir o incluir:
 
 ---
 
-# 538. SessionRevocationFilter
+### 538. SessionRevocationFilter
 
 ```php
 final readonly class SessionRevocationFilter
@@ -6491,13 +6492,13 @@ final readonly class SessionRevocationFilter
 
 ---
 
-# 539. Logout semantics
+### 539. Logout semantics
 
 Logout deberá significar más que borrar una cookie.
 
 ---
 
-# 540. Logout flow
+### 540. Logout flow
 
 ```text
 Authenticated Request
@@ -6519,7 +6520,7 @@ Return Safe Response
 
 ---
 
-# 541. Cookie deletion
+### 541. Cookie deletion
 
 La cookie deberá eliminarse usando los mismos atributos relevantes con los que fue emitida:
 
@@ -6530,31 +6531,31 @@ La cookie deberá eliminarse usando los mismos atributos relevantes con los que 
 
 ---
 
-# 542. Logout idempotency
+### 542. Logout idempotency
 
 Repetir logout deberá ser seguro y producir una respuesta consistente.
 
 ---
 
-# 543. Logout CSRF protection
+### 543. Logout CSRF protection
 
 El endpoint de logout deberá protegerse contra logout CSRF cuando la aplicación lo requiera.
 
 ---
 
-# 544. GET logout prohibition
+### 544. GET logout prohibition
 
 Logout mediante `GET` deberá evitarse por defecto.
 
 ---
 
-# 545. Post-logout redirect
+### 545. Post-logout redirect
 
 El redirect deberá pasar por la política de redirects seguros.
 
 ---
 
-# 546. Logout event
+### 546. Logout event
 
 ```php
 final readonly class SessionLoggedOut
@@ -6571,13 +6572,13 @@ final readonly class SessionLoggedOut
 
 ---
 
-# 547. Concurrent session management
+### 547. Concurrent session management
 
 El usuario deberá poder revisar y administrar sesiones activas.
 
 ---
 
-# 548. Session inventory
+### 548. Session inventory
 
 ```php
 final readonly class SessionInventoryItem
@@ -6599,7 +6600,7 @@ final readonly class SessionInventoryItem
 
 ---
 
-# 549. Inventory data minimization
+### 549. Inventory data minimization
 
 El inventario no deberá exponer:
 
@@ -6612,19 +6613,19 @@ El inventario no deberá exponer:
 
 ---
 
-# 550. Session display identifier
+### 550. Session display identifier
 
 El `displayId` deberá ser un identificador seguro separado del session ID autenticante.
 
 ---
 
-# 551. Session device inventory
+### 551. Session device inventory
 
 Cada sesión podrá asociarse a un dispositivo reconocido.
 
 ---
 
-# 552. SessionDeviceBinding
+### 552. SessionDeviceBinding
 
 ```php
 final readonly class SessionDeviceBinding
@@ -6641,7 +6642,7 @@ final readonly class SessionDeviceBinding
 
 ---
 
-# 553. DeviceBindingStrength
+### 553. DeviceBindingStrength
 
 ```php
 enum DeviceBindingStrength: string
@@ -6656,13 +6657,13 @@ enum DeviceBindingStrength: string
 
 ---
 
-# 554. Passive binding limitations
+### 554. Passive binding limitations
 
 Un user agent o IP no constituye una vinculación criptográfica.
 
 ---
 
-# 555. IP binding risks
+### 555. IP binding risks
 
 Vincular estrictamente una sesión a IP puede causar problemas por:
 
@@ -6676,13 +6677,13 @@ Vincular estrictamente una sesión a IP puede causar problemas por:
 
 ---
 
-# 556. Recommended IP usage
+### 556. Recommended IP usage
 
 La IP deberá utilizarse como señal de riesgo, no como identidad rígida por defecto.
 
 ---
 
-# 557. User-Agent binding risks
+### 557. User-Agent binding risks
 
 El User-Agent puede:
 
@@ -6693,7 +6694,7 @@ El User-Agent puede:
 
 ---
 
-# 558. Request fingerprint
+### 558. Request fingerprint
 
 ```php
 final readonly class RequestFingerprint
@@ -6711,7 +6712,7 @@ final readonly class RequestFingerprint
 
 ---
 
-# 559. Fingerprint classification
+### 559. Fingerprint classification
 
 Cada señal deberá marcarse como:
 
@@ -6723,7 +6724,7 @@ Cada señal deberá marcarse como:
 
 ---
 
-# 560. Binding mismatch response
+### 560. Binding mismatch response
 
 Un cambio de fingerprint podrá provocar:
 
@@ -6736,13 +6737,13 @@ Un cambio de fingerprint podrá provocar:
 
 ---
 
-# 561. Cryptographic session binding
+### 561. Cryptographic session binding
 
 VoltStack podrá soportar sesiones vinculadas a una clave del cliente.
 
 ---
 
-# 562. Proof-of-possession session
+### 562. Proof-of-possession session
 
 ```php
 final readonly class ProofOfPossessionSessionBinding
@@ -6758,13 +6759,13 @@ final readonly class ProofOfPossessionSessionBinding
 
 ---
 
-# 563. Proof-of-possession benefits
+### 563. Proof-of-possession benefits
 
 Reduce el valor de un session ID robado al requerir prueba adicional de clave.
 
 ---
 
-# 564. Proof-of-possession limitations
+### 564. Proof-of-possession limitations
 
 Puede aumentar:
 
@@ -6776,13 +6777,13 @@ Puede aumentar:
 
 ---
 
-# 565. Credential versioning
+### 565. Credential versioning
 
 La identidad deberá mantener una versión de credenciales.
 
 ---
 
-# 566. CredentialVersion
+### 566. CredentialVersion
 
 ```php
 final readonly class CredentialVersion
@@ -6798,7 +6799,7 @@ final readonly class CredentialVersion
 
 ---
 
-# 567. CredentialVersionReason
+### 567. CredentialVersionReason
 
 ```php
 enum CredentialVersionReason: string
@@ -6814,13 +6815,13 @@ enum CredentialVersionReason: string
 
 ---
 
-# 568. Credential version validation
+### 568. Credential version validation
 
 La versión almacenada en sesión deberá compararse con la versión actual de la identidad.
 
 ---
 
-# 569. Version mismatch
+### 569. Version mismatch
 
 Una discrepancia podrá:
 
@@ -6831,7 +6832,7 @@ Una discrepancia podrá:
 
 ---
 
-# 570. Authorization versioning
+### 570. Authorization versioning
 
 La sesión deberá poder detectar cambios en:
 
@@ -6844,7 +6845,7 @@ La sesión deberá poder detectar cambios en:
 
 ---
 
-# 571. AuthorizationVersion
+### 571. AuthorizationVersion
 
 ```php
 final readonly class AuthorizationVersion
@@ -6859,13 +6860,13 @@ final readonly class AuthorizationVersion
 
 ---
 
-# 572. Authorization cache invalidation
+### 572. Authorization cache invalidation
 
 Los permisos derivados dentro de la sesión deberán invalidarse cuando cambie la versión.
 
 ---
 
-# 573. Stale authorization prevention
+### 573. Stale authorization prevention
 
 Una sesión no deberá conservar privilegios indefinidamente después de:
 
@@ -6876,7 +6877,7 @@ Una sesión no deberá conservar privilegios indefinidamente después de:
 
 ---
 
-# 574. Authorization refresh strategy
+### 574. Authorization refresh strategy
 
 El framework podrá:
 
@@ -6888,13 +6889,13 @@ El framework podrá:
 
 ---
 
-# 575. Session refresh
+### 575. Session refresh
 
 Session refresh significa renovar estado de sesión sin repetir necesariamente la autenticación primaria.
 
 ---
 
-# 576. Refresh eligibility
+### 576. Refresh eligibility
 
 Solo una sesión:
 
@@ -6908,7 +6909,7 @@ podrá renovarse.
 
 ---
 
-# 577. Refresh operation
+### 577. Refresh operation
 
 ```php
 interface SessionRefreshServiceInterface
@@ -6922,25 +6923,25 @@ interface SessionRefreshServiceInterface
 
 ---
 
-# 578. Refresh rotation
+### 578. Refresh rotation
 
 La renovación deberá rotar el identificador cuando el perfil lo requiera.
 
 ---
 
-# 579. Refresh does not reset absolute lifetime
+### 579. Refresh does not reset absolute lifetime
 
 La renovación no deberá extender la expiración absoluta más allá de la política original, salvo reautenticación explícita.
 
 ---
 
-# 580. Remember-Me Architecture
+### 580. Remember-Me Architecture
 
 “Remember me” no deberá significar una sesión ordinaria de duración indefinida.
 
 ---
 
-# 581. Persistent login model
+### 581. Persistent login model
 
 VoltStack deberá separar:
 
@@ -6950,7 +6951,7 @@ VoltStack deberá separar:
 
 ---
 
-# 582. PersistentLoginToken
+### 582. PersistentLoginToken
 
 ```php
 final readonly class PersistentLoginToken
@@ -6972,7 +6973,7 @@ final readonly class PersistentLoginToken
 
 ---
 
-# 583. PersistentTokenState
+### 583. PersistentTokenState
 
 ```php
 enum PersistentTokenState: string
@@ -6987,7 +6988,7 @@ enum PersistentTokenState: string
 
 ---
 
-# 584. Persistent token properties
+### 584. Persistent token properties
 
 El token deberá ser:
 
@@ -7001,7 +7002,7 @@ El token deberá ser:
 
 ---
 
-# 585. Selector-validator split
+### 585. Selector-validator split
 
 El token podrá representarse mediante:
 
@@ -7017,7 +7018,7 @@ Donde:
 
 ---
 
-# 586. Persistent cookie profile
+### 586. Persistent cookie profile
 
 La cookie deberá ser:
 
@@ -7030,31 +7031,31 @@ La cookie deberá ser:
 
 ---
 
-# 587. Remember-me authentication strength
+### 587. Remember-me authentication strength
 
 Una sesión creada desde persistent login deberá iniciar con menor freshness que una autenticación interactiva reciente.
 
 ---
 
-# 588. Sensitive route step-up
+### 588. Sensitive route step-up
 
 Las operaciones sensibles deberán exigir nueva autenticación aunque la sesión provenga de remember-me.
 
 ---
 
-# 589. Persistent token rotation
+### 589. Persistent token rotation
 
 Cada uso válido deberá emitir un nuevo token y retirar el anterior.
 
 ---
 
-# 590. Token family
+### 590. Token family
 
 Una familia representa la cadena de rotaciones derivadas de un mismo enrolamiento persistente.
 
 ---
 
-# 591. PersistentTokenFamily
+### 591. PersistentTokenFamily
 
 ```php
 final readonly class PersistentTokenFamily
@@ -7072,7 +7073,7 @@ final readonly class PersistentTokenFamily
 
 ---
 
-# 592. PersistentTokenFamilyState
+### 592. PersistentTokenFamilyState
 
 ```php
 enum PersistentTokenFamilyState: string
@@ -7085,7 +7086,7 @@ enum PersistentTokenFamilyState: string
 
 ---
 
-# 593. Rotation transaction
+### 593. Rotation transaction
 
 El uso deberá ejecutar atómicamente:
 
@@ -7103,13 +7104,13 @@ Issue New Persistent Cookie
 
 ---
 
-# 594. Refresh token reuse detection
+### 594. Refresh token reuse detection
 
 Si un token marcado como `Rotated` vuelve a utilizarse, deberá considerarse replay.
 
 ---
 
-# 595. Family revocation on replay
+### 595. Family revocation on replay
 
 Ante reuse confirmado deberá:
 
@@ -7122,7 +7123,7 @@ Ante reuse confirmado deberá:
 
 ---
 
-# 596. Concurrent request tolerance
+### 596. Concurrent request tolerance
 
 El diseño deberá diferenciar entre:
 
@@ -7132,7 +7133,7 @@ El diseño deberá diferenciar entre:
 
 ---
 
-# 597. Rotation grace record
+### 597. Rotation grace record
 
 Podrá conservarse una ventana muy corta de idempotencia vinculada al mismo request context.
 
@@ -7140,7 +7141,7 @@ No deberá permitir emitir múltiples descendientes válidos.
 
 ---
 
-# 598. Session anomaly detection
+### 598. Session anomaly detection
 
 El motor deberá evaluar anomalías como:
 
@@ -7155,7 +7156,7 @@ El motor deberá evaluar anomalías como:
 
 ---
 
-# 599. SessionAnomalyEngine
+### 599. SessionAnomalyEngine
 
 ```php
 interface SessionAnomalyEngineInterface
@@ -7179,7 +7180,7 @@ Las acciones posibles incluirán:
 
 ---
 
-# 600. Resultado de esta entrega
+### 600. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -7232,9 +7233,9 @@ Entrega 7
 - Native application security
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 7
+
 
 **Documento:** Parte 05
 **Entrega:** 7 de varias
@@ -7243,7 +7244,7 @@ Entrega 7
 
 ---
 
-# 601. OAuth 2.0 Security Architecture
+### 601. OAuth 2.0 Security Architecture
 
 OAuth 2.0 permitirá que una aplicación obtenga acceso limitado a recursos protegidos en nombre de:
 
@@ -7259,7 +7260,7 @@ Para autenticación federada deberá combinarse con OpenID Connect u otro protoc
 
 ---
 
-# 602. OAuth security goals
+### 602. OAuth security goals
 
 El subsistema deberá garantizar:
 
@@ -7276,7 +7277,7 @@ El subsistema deberá garantizar:
 
 ---
 
-# 603. OAuth threat model
+### 603. OAuth threat model
 
 El modelo deberá considerar:
 
@@ -7299,7 +7300,7 @@ El modelo deberá considerar:
 
 ---
 
-# 604. OAuth actors
+### 604. OAuth actors
 
 ```php
 enum OAuthActorRole: string
@@ -7313,7 +7314,7 @@ enum OAuthActorRole: string
 
 ---
 
-# 605. Authorization server boundary
+### 605. Authorization server boundary
 
 El Authorization Server deberá ser responsable de:
 
@@ -7329,7 +7330,7 @@ El Authorization Server deberá ser responsable de:
 
 ---
 
-# 606. Resource server boundary
+### 606. Resource server boundary
 
 El Resource Server deberá:
 
@@ -7342,7 +7343,7 @@ El Resource Server deberá:
 
 ---
 
-# 607. OAuth client types
+### 607. OAuth client types
 
 ```php
 enum OAuthClientType: string
@@ -7354,7 +7355,7 @@ enum OAuthClientType: string
 
 ---
 
-# 608. Public clients
+### 608. Public clients
 
 Los clientes públicos no podrán mantener un secreto de forma confiable.
 
@@ -7367,7 +7368,7 @@ Ejemplos:
 
 ---
 
-# 609. Confidential clients
+### 609. Confidential clients
 
 Los clientes confidenciales podrán autenticarse mediante:
 
@@ -7378,7 +7379,7 @@ Los clientes confidenciales podrán autenticarse mediante:
 
 ---
 
-# 610. OAuthClient
+### 610. OAuthClient
 
 ```php
 final readonly class OAuthClient
@@ -7400,7 +7401,7 @@ final readonly class OAuthClient
 
 ---
 
-# 611. OAuthClientStatus
+### 611. OAuthClientStatus
 
 ```php
 enum OAuthClientStatus: string
@@ -7414,7 +7415,7 @@ enum OAuthClientStatus: string
 
 ---
 
-# 612. Client registration
+### 612. Client registration
 
 El registro deberá validar:
 
@@ -7429,19 +7430,19 @@ El registro deberá validar:
 
 ---
 
-# 613. Dynamic client registration
+### 613. Dynamic client registration
 
 Solo deberá habilitarse con política explícita y controles estrictos.
 
 ---
 
-# 614. Client metadata immutability
+### 614. Client metadata immutability
 
 Los cambios críticos deberán versionarse y auditarse.
 
 ---
 
-# 615. Authorization grant types
+### 615. Authorization grant types
 
 VoltStack podrá soportar:
 
@@ -7453,7 +7454,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 616. Deprecated grant types
+### 616. Deprecated grant types
 
 Deberán deshabilitarse por defecto:
 
@@ -7462,7 +7463,7 @@ Deberán deshabilitarse por defecto:
 
 ---
 
-# 617. Authorization Code flow
+### 617. Authorization Code flow
 
 El Authorization Code será el flujo principal para aplicaciones interactivas.
 
@@ -7482,7 +7483,7 @@ Token Endpoint
 
 ---
 
-# 618. AuthorizationRequest
+### 618. AuthorizationRequest
 
 ```php
 final readonly class AuthorizationRequest
@@ -7504,7 +7505,7 @@ final readonly class AuthorizationRequest
 
 ---
 
-# 619. Authorization request validation
+### 619. Authorization request validation
 
 Se deberá validar antes de iniciar autenticación:
 
@@ -7521,19 +7522,19 @@ Se deberá validar antes de iniciar autenticación:
 
 ---
 
-# 620. Redirect URI exact matching
+### 620. Redirect URI exact matching
 
 La URI deberá coincidir exactamente con una URI registrada.
 
 ---
 
-# 621. Redirect URI normalization prohibition
+### 621. Redirect URI normalization prohibition
 
 No deberán realizarse normalizaciones permisivas que cambien la semántica.
 
 ---
 
-# 622. Redirect URI restrictions
+### 622. Redirect URI restrictions
 
 No deberán permitirse:
 
@@ -7546,25 +7547,25 @@ No deberán permitirse:
 
 ---
 
-# 623. Localhost redirects
+### 623. Localhost redirects
 
 Para aplicaciones nativas podrán permitirse loopback redirects con reglas específicas.
 
 ---
 
-# 624. Custom URI schemes
+### 624. Custom URI schemes
 
 Los custom schemes deberán seguir políticas estrictas y preferir esquemas reclamados de forma verificable cuando sea posible.
 
 ---
 
-# 625. State parameter
+### 625. State parameter
 
 `state` deberá proteger la correlación del flujo y reducir CSRF.
 
 ---
 
-# 626. State generation
+### 626. State generation
 
 Deberá ser:
 
@@ -7577,7 +7578,7 @@ Deberá ser:
 
 ---
 
-# 627. State storage
+### 627. State storage
 
 El cliente deberá correlacionarlo con el flujo iniciado.
 
@@ -7585,19 +7586,19 @@ El Authorization Server también podrá mantener binding adicional.
 
 ---
 
-# 628. State mismatch
+### 628. State mismatch
 
 Un mismatch deberá cancelar completamente el flujo.
 
 ---
 
-# 629. PKCE
+### 629. PKCE
 
 PKCE deberá ser obligatorio para clientes públicos y recomendado para todos los clientes.
 
 ---
 
-# 630. Code challenge methods
+### 630. Code challenge methods
 
 VoltStack deberá permitir:
 
@@ -7612,7 +7613,7 @@ El método `plain` deberá deshabilitarse por defecto.
 
 ---
 
-# 631. Code verifier
+### 631. Code verifier
 
 El verifier deberá:
 
@@ -7623,13 +7624,13 @@ El verifier deberá:
 
 ---
 
-# 632. Code challenge binding
+### 632. Code challenge binding
 
 El authorization code deberá vincularse al challenge emitido.
 
 ---
 
-# 633. AuthorizationCode
+### 633. AuthorizationCode
 
 ```php
 final readonly class AuthorizationCode
@@ -7653,7 +7654,7 @@ final readonly class AuthorizationCode
 
 ---
 
-# 634. Authorization code properties
+### 634. Authorization code properties
 
 El código deberá ser:
 
@@ -7669,31 +7670,31 @@ El código deberá ser:
 
 ---
 
-# 635. Authorization code storage
+### 635. Authorization code storage
 
 Se deberá almacenar solo una representación derivada cuando sea posible.
 
 ---
 
-# 636. Code consumption
+### 636. Code consumption
 
 El consumo deberá ser atómico.
 
 ---
 
-# 637. Code replay
+### 637. Code replay
 
 Reutilizar un code consumido deberá generar un evento de seguridad.
 
 ---
 
-# 638. Code lifetime
+### 638. Code lifetime
 
 La vida útil deberá ser corta.
 
 ---
 
-# 639. Token endpoint
+### 639. Token endpoint
 
 El endpoint deberá aceptar únicamente:
 
@@ -7705,7 +7706,7 @@ El endpoint deberá aceptar únicamente:
 
 ---
 
-# 640. TokenRequest
+### 640. TokenRequest
 
 ```php
 final readonly class TokenRequest
@@ -7725,7 +7726,7 @@ final readonly class TokenRequest
 
 ---
 
-# 641. OAuthGrantType
+### 641. OAuthGrantType
 
 ```php
 enum OAuthGrantType: string
@@ -7740,19 +7741,19 @@ enum OAuthGrantType: string
 
 ---
 
-# 642. Client authentication
+### 642. Client authentication
 
 Clientes confidenciales deberán autenticarse en el token endpoint.
 
 ---
 
-# 643. ClientSecretBasic
+### 643. ClientSecretBasic
 
 Podrá soportarse para compatibilidad controlada.
 
 ---
 
-# 644. Client secret storage
+### 644. Client secret storage
 
 Los secretos deberán almacenarse:
 
@@ -7764,13 +7765,13 @@ Los secretos deberán almacenarse:
 
 ---
 
-# 645. Private key JWT
+### 645. Private key JWT
 
 Deberá preferirse para clientes confidenciales de alto valor.
 
 ---
 
-# 646. Client assertion validation
+### 646. Client assertion validation
 
 Se deberá validar:
 
@@ -7786,7 +7787,7 @@ Se deberá validar:
 
 ---
 
-# 647. Client assertion replay registry
+### 647. Client assertion replay registry
 
 ```php
 interface ClientAssertionReplayRegistryInterface
@@ -7801,19 +7802,19 @@ interface ClientAssertionReplayRegistryInterface
 
 ---
 
-# 648. mTLS client authentication
+### 648. mTLS client authentication
 
 VoltStack podrá soportar autenticación del cliente mediante certificado TLS.
 
 ---
 
-# 649. Client authentication downgrade
+### 649. Client authentication downgrade
 
 Un cliente registrado con método fuerte no deberá usar silenciosamente uno más débil.
 
 ---
 
-# 650. Access token
+### 650. Access token
 
 ```php
 final readonly class AccessToken
@@ -7836,7 +7837,7 @@ final readonly class AccessToken
 
 ---
 
-# 651. Access token formats
+### 651. Access token formats
 
 VoltStack podrá soportar:
 
@@ -7845,7 +7846,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 652. Opaque token advantages
+### 652. Opaque token advantages
 
 Ventajas:
 
@@ -7857,7 +7858,7 @@ Ventajas:
 
 ---
 
-# 653. JWT access token advantages
+### 653. JWT access token advantages
 
 Ventajas:
 
@@ -7868,7 +7869,7 @@ Ventajas:
 
 ---
 
-# 654. JWT access token risks
+### 654. JWT access token risks
 
 Riesgos:
 
@@ -7880,7 +7881,7 @@ Riesgos:
 
 ---
 
-# 655. Access token type separation
+### 655. Access token type separation
 
 Los access tokens deberán distinguirse claramente de:
 
@@ -7891,37 +7892,37 @@ Los access tokens deberán distinguirse claramente de:
 
 ---
 
-# 656. typ header
+### 656. typ header
 
 Los JWT deberán usar un `typ` explícito cuando el perfil lo requiera.
 
 ---
 
-# 657. Token issuer validation
+### 657. Token issuer validation
 
 El Resource Server deberá validar el issuer exacto esperado.
 
 ---
 
-# 658. Audience validation
+### 658. Audience validation
 
 Un token deberá ser válido únicamente para audiences autorizados.
 
 ---
 
-# 659. Audience confusion prevention
+### 659. Audience confusion prevention
 
 Un servicio no deberá aceptar un token emitido para otro recurso.
 
 ---
 
-# 660. Scope model
+### 660. Scope model
 
 Los scopes deberán representar privilegios delegados de forma clara y limitada.
 
 ---
 
-# 661. Scope naming
+### 661. Scope naming
 
 Ejemplo:
 
@@ -7935,13 +7936,13 @@ tenant.admin
 
 ---
 
-# 662. Scope hierarchy
+### 662. Scope hierarchy
 
 Las jerarquías implícitas deberán evitarse o documentarse claramente.
 
 ---
 
-# 663. ScopeRegistry
+### 663. ScopeRegistry
 
 ```php
 interface OAuthScopeRegistryInterface
@@ -7957,7 +7958,7 @@ interface OAuthScopeRegistryInterface
 
 ---
 
-# 664. OAuthScopeDefinition
+### 664. OAuthScopeDefinition
 
 ```php
 final readonly class OAuthScopeDefinition
@@ -7975,7 +7976,7 @@ final readonly class OAuthScopeDefinition
 
 ---
 
-# 665. Scope minimization
+### 665. Scope minimization
 
 Solo deberán emitirse scopes:
 
@@ -7987,13 +7988,13 @@ Solo deberán emitirse scopes:
 
 ---
 
-# 666. Incremental authorization
+### 666. Incremental authorization
 
 VoltStack podrá solicitar scopes adicionales solo cuando sean necesarios.
 
 ---
 
-# 667. Consent architecture
+### 667. Consent architecture
 
 El consentimiento deberá ser:
 
@@ -8006,7 +8007,7 @@ El consentimiento deberá ser:
 
 ---
 
-# 668. ConsentRecord
+### 668. ConsentRecord
 
 ```php
 final readonly class ConsentRecord
@@ -8027,7 +8028,7 @@ final readonly class ConsentRecord
 
 ---
 
-# 669. ConsentStatus
+### 669. ConsentStatus
 
 ```php
 enum ConsentStatus: string
@@ -8040,19 +8041,19 @@ enum ConsentStatus: string
 
 ---
 
-# 670. First-party clients
+### 670. First-party clients
 
 El consentimiento podrá omitirse solo para clientes first-party explícitamente confiables y gobernados.
 
 ---
 
-# 671. Administrative consent
+### 671. Administrative consent
 
 En entornos empresariales podrá existir consentimiento otorgado por administrador.
 
 ---
 
-# 672. Consent phishing protection
+### 672. Consent phishing protection
 
 La interfaz deberá mostrar claramente:
 
@@ -8065,13 +8066,13 @@ La interfaz deberá mostrar claramente:
 
 ---
 
-# 673. Refresh tokens
+### 673. Refresh tokens
 
 Los refresh tokens deberán tratarse como credenciales de alta sensibilidad.
 
 ---
 
-# 674. RefreshToken
+### 674. RefreshToken
 
 ```php
 final readonly class RefreshToken
@@ -8096,7 +8097,7 @@ final readonly class RefreshToken
 
 ---
 
-# 675. RefreshTokenState
+### 675. RefreshTokenState
 
 ```php
 enum RefreshTokenState: string
@@ -8111,19 +8112,19 @@ enum RefreshTokenState: string
 
 ---
 
-# 676. Refresh token rotation
+### 676. Refresh token rotation
 
 Los refresh tokens deberán rotarse en clientes públicos.
 
 ---
 
-# 677. Refresh token family
+### 677. Refresh token family
 
 Una familia deberá permitir detectar reuse.
 
 ---
 
-# 678. Refresh token replay
+### 678. Refresh token replay
 
 Ante reuse confirmado deberá:
 
@@ -8135,19 +8136,19 @@ Ante reuse confirmado deberá:
 
 ---
 
-# 679. Refresh token scope
+### 679. Refresh token scope
 
 Un refresh no deberá ampliar scopes.
 
 ---
 
-# 680. Refresh token audience
+### 680. Refresh token audience
 
 El refresh no deberá producir tokens para audiences no autorizados originalmente.
 
 ---
 
-# 681. Refresh token expiration
+### 681. Refresh token expiration
 
 Deberán existir:
 
@@ -8158,13 +8159,13 @@ Deberán existir:
 
 ---
 
-# 682. Token introspection
+### 682. Token introspection
 
 Los tokens opacos deberán poder validarse mediante introspection.
 
 ---
 
-# 683. TokenIntrospectionService
+### 683. TokenIntrospectionService
 
 ```php
 interface TokenIntrospectionServiceInterface
@@ -8178,7 +8179,7 @@ interface TokenIntrospectionServiceInterface
 
 ---
 
-# 684. TokenIntrospectionResult
+### 684. TokenIntrospectionResult
 
 ```php
 final readonly class TokenIntrospectionResult
@@ -8199,19 +8200,19 @@ final readonly class TokenIntrospectionResult
 
 ---
 
-# 685. Introspection authorization
+### 685. Introspection authorization
 
 Solo Resource Servers autorizados deberán poder consultar tokens relevantes.
 
 ---
 
-# 686. Introspection minimization
+### 686. Introspection minimization
 
 La respuesta deberá exponer únicamente claims necesarios.
 
 ---
 
-# 687. Token revocation
+### 687. Token revocation
 
 VoltStack deberá ofrecer revocación para:
 
@@ -8223,7 +8224,7 @@ VoltStack deberá ofrecer revocación para:
 
 ---
 
-# 688. TokenRevocationService
+### 688. TokenRevocationService
 
 ```php
 interface TokenRevocationServiceInterface
@@ -8237,19 +8238,19 @@ interface TokenRevocationServiceInterface
 
 ---
 
-# 689. Revocation endpoint privacy
+### 689. Revocation endpoint privacy
 
 El endpoint deberá responder de forma idempotente y evitar revelar si el token existía.
 
 ---
 
-# 690. Sender-constrained tokens
+### 690. Sender-constrained tokens
 
 Un token podrá vincularse criptográficamente al cliente que lo presenta.
 
 ---
 
-# 691. SenderConstraint
+### 691. SenderConstraint
 
 ```php
 final readonly class SenderConstraint
@@ -8264,7 +8265,7 @@ final readonly class SenderConstraint
 
 ---
 
-# 692. SenderConstraintType
+### 692. SenderConstraintType
 
 ```php
 enum SenderConstraintType: string
@@ -8276,13 +8277,13 @@ enum SenderConstraintType: string
 
 ---
 
-# 693. DPoP
+### 693. DPoP
 
 DPoP permitirá vincular el token a una clave pública controlada por el cliente.
 
 ---
 
-# 694. DPoP proof validation
+### 694. DPoP proof validation
 
 Se deberá validar:
 
@@ -8297,7 +8298,7 @@ Se deberá validar:
 
 ---
 
-# 695. DPoP replay registry
+### 695. DPoP replay registry
 
 ```php
 interface DpopReplayRegistryInterface
@@ -8312,13 +8313,13 @@ interface DpopReplayRegistryInterface
 
 ---
 
-# 696. mTLS-bound tokens
+### 696. mTLS-bound tokens
 
 Los tokens vinculados a mTLS deberán verificar el certificado presentado por el cliente.
 
 ---
 
-# 697. OAuth mix-up prevention
+### 697. OAuth mix-up prevention
 
 Se deberá validar estrictamente:
 
@@ -8332,7 +8333,7 @@ Se deberá validar estrictamente:
 
 ---
 
-# 698. Native application security
+### 698. Native application security
 
 Aplicaciones nativas deberán usar:
 
@@ -8345,7 +8346,7 @@ Aplicaciones nativas deberán usar:
 
 ---
 
-# 699. OAuth security events
+### 699. OAuth security events
 
 Eventos recomendados:
 
@@ -8364,7 +8365,7 @@ Eventos recomendados:
 
 ---
 
-# 700. Resultado de esta entrega
+### 700. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -8423,9 +8424,9 @@ Entrega 8
 - Identity provider compromise response
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 8
+
 
 **Documento:** Parte 05
 **Entrega:** 8 de varias
@@ -8434,7 +8435,7 @@ Entrega 8
 
 ---
 
-# 701. OpenID Connect Security Architecture
+### 701. OpenID Connect Security Architecture
 
 OpenID Connect permitirá autenticar identidades sobre OAuth 2.0 mediante un protocolo explícito de identidad.
 
@@ -8452,7 +8453,7 @@ La arquitectura deberá separar:
 
 ---
 
-# 702. OIDC security goals
+### 702. OIDC security goals
 
 El subsistema deberá garantizar:
 
@@ -8469,7 +8470,7 @@ El subsistema deberá garantizar:
 
 ---
 
-# 703. OIDC threat model
+### 703. OIDC threat model
 
 El modelo deberá considerar:
 
@@ -8492,7 +8493,7 @@ El modelo deberá considerar:
 
 ---
 
-# 704. OIDC actors
+### 704. OIDC actors
 
 ```php
 enum OpenIdConnectActorRole: string
@@ -8506,7 +8507,7 @@ enum OpenIdConnectActorRole: string
 
 ---
 
-# 705. OpenID Provider
+### 705. OpenID Provider
 
 El OpenID Provider deberá:
 
@@ -8520,7 +8521,7 @@ El OpenID Provider deberá:
 
 ---
 
-# 706. Relying Party
+### 706. Relying Party
 
 VoltStack, actuando como Relying Party, deberá:
 
@@ -8535,7 +8536,7 @@ VoltStack, actuando como Relying Party, deberá:
 
 ---
 
-# 707. OpenIdProviderDefinition
+### 707. OpenIdProviderDefinition
 
 ```php
 final readonly class OpenIdProviderDefinition
@@ -8559,7 +8560,7 @@ final readonly class OpenIdProviderDefinition
 
 ---
 
-# 708. OpenIdProviderStatus
+### 708. OpenIdProviderStatus
 
 ```php
 enum OpenIdProviderStatus: string
@@ -8573,13 +8574,13 @@ enum OpenIdProviderStatus: string
 
 ---
 
-# 709. Provider registration
+### 709. Provider registration
 
 Un proveedor deberá registrarse mediante configuración confiable o discovery validado.
 
 ---
 
-# 710. Provider trust modes
+### 710. Provider trust modes
 
 ```php
 enum FederationTrustMode: string
@@ -8593,7 +8594,7 @@ enum FederationTrustMode: string
 
 ---
 
-# 711. Static provider configuration
+### 711. Static provider configuration
 
 La configuración estática deberá preferirse cuando:
 
@@ -8604,13 +8605,13 @@ La configuración estática deberá preferirse cuando:
 
 ---
 
-# 712. Discovery architecture
+### 712. Discovery architecture
 
 OIDC Discovery podrá resolver metadata desde el issuer.
 
 ---
 
-# 713. OpenIdProviderDiscoveryService
+### 713. OpenIdProviderDiscoveryService
 
 ```php
 interface OpenIdProviderDiscoveryServiceInterface
@@ -8624,19 +8625,19 @@ interface OpenIdProviderDiscoveryServiceInterface
 
 ---
 
-# 714. Discovery validation
+### 714. Discovery validation
 
 La metadata deberá validarse antes de aceptarse.
 
 ---
 
-# 715. Issuer exact match
+### 715. Issuer exact match
 
 El valor `issuer` del documento descubierto deberá coincidir exactamente con el issuer solicitado.
 
 ---
 
-# 716. Discovery transport security
+### 716. Discovery transport security
 
 La discovery deberá usar:
 
@@ -8649,7 +8650,7 @@ La discovery deberá usar:
 
 ---
 
-# 717. Discovery SSRF protection
+### 717. Discovery SSRF protection
 
 No deberán permitirse issuers que resuelvan hacia:
 
@@ -8662,7 +8663,7 @@ No deberán permitirse issuers que resuelvan hacia:
 
 ---
 
-# 718. Discovery cache
+### 718. Discovery cache
 
 La metadata podrá cachearse con:
 
@@ -8674,7 +8675,7 @@ La metadata podrá cachearse con:
 
 ---
 
-# 719. Metadata change detection
+### 719. Metadata change detection
 
 Cambios en endpoints o algoritmos deberán producir:
 
@@ -8685,7 +8686,7 @@ Cambios en endpoints o algoritmos deberán producir:
 
 ---
 
-# 720. OIDC Authentication Request
+### 720. OIDC Authentication Request
 
 ```php
 final readonly class OpenIdAuthenticationRequest
@@ -8711,7 +8712,7 @@ final readonly class OpenIdAuthenticationRequest
 
 ---
 
-# 721. Required scopes
+### 721. Required scopes
 
 Para autenticación OIDC deberá solicitarse:
 
@@ -8723,7 +8724,7 @@ Sin ese scope, el flujo deberá tratarse como OAuth ordinario.
 
 ---
 
-# 722. Scope minimization
+### 722. Scope minimization
 
 Scopes adicionales deberán solicitarse solo cuando sean necesarios.
 
@@ -8736,7 +8737,7 @@ Ejemplos:
 
 ---
 
-# 723. Response type
+### 723. Response type
 
 El flujo recomendado será:
 
@@ -8748,13 +8749,13 @@ junto con PKCE.
 
 ---
 
-# 724. Hybrid and implicit flows
+### 724. Hybrid and implicit flows
 
 Los flujos hybrid e implicit deberán deshabilitarse por defecto.
 
 ---
 
-# 725. Authorization Code with OIDC
+### 725. Authorization Code with OIDC
 
 El flujo deberá reutilizar todas las protecciones OAuth:
 
@@ -8767,13 +8768,13 @@ El flujo deberá reutilizar todas las protecciones OAuth:
 
 ---
 
-# 726. Nonce
+### 726. Nonce
 
 El nonce vincula el ID Token con la autenticación iniciada.
 
 ---
 
-# 727. Nonce generation
+### 727. Nonce generation
 
 El nonce deberá ser:
 
@@ -8786,25 +8787,25 @@ El nonce deberá ser:
 
 ---
 
-# 728. Nonce storage
+### 728. Nonce storage
 
 Deberá almacenarse en el estado de autenticación local.
 
 ---
 
-# 729. Nonce validation
+### 729. Nonce validation
 
 El nonce del ID Token deberá coincidir exactamente con el emitido.
 
 ---
 
-# 730. Nonce reuse
+### 730. Nonce reuse
 
 La reutilización deberá considerarse replay o corrupción del flujo.
 
 ---
 
-# 731. OIDC flow state
+### 731. OIDC flow state
 
 ```php
 final readonly class OpenIdAuthenticationState
@@ -8825,13 +8826,13 @@ final readonly class OpenIdAuthenticationState
 
 ---
 
-# 732. Flow state consumption
+### 732. Flow state consumption
 
 El estado deberá consumirse atómicamente después del callback.
 
 ---
 
-# 733. Prompt parameter
+### 733. Prompt parameter
 
 VoltStack podrá utilizar:
 
@@ -8844,7 +8845,7 @@ La selección deberá depender de policy.
 
 ---
 
-# 734. Silent authentication
+### 734. Silent authentication
 
 `prompt=none` deberá manejar cuidadosamente errores como:
 
@@ -8854,25 +8855,25 @@ La selección deberá depender de policy.
 
 ---
 
-# 735. max_age
+### 735. max_age
 
 `max_age` permitirá exigir autenticación reciente en el proveedor.
 
 ---
 
-# 736. auth_time validation
+### 736. auth_time validation
 
 Cuando se solicite `max_age`, el ID Token deberá incluir y validar `auth_time`.
 
 ---
 
-# 737. Authentication Context Class Reference
+### 737. Authentication Context Class Reference
 
 `acr` representa el nivel o contexto de autenticación aplicado por el proveedor.
 
 ---
 
-# 738. AcrValue
+### 738. AcrValue
 
 ```php
 final readonly class AcrValue
@@ -8888,19 +8889,19 @@ final readonly class AcrValue
 
 ---
 
-# 739. acr mapping
+### 739. acr mapping
 
 Cada proveedor deberá tener un mapping explícito entre `acr` externo y assurance interno.
 
 ---
 
-# 740. Unknown acr
+### 740. Unknown acr
 
 Un valor desconocido no deberá mapearse automáticamente al nivel más alto.
 
 ---
 
-# 741. Authentication Methods References
+### 741. Authentication Methods References
 
 `amr` describe métodos utilizados durante autenticación.
 
@@ -8915,7 +8916,7 @@ Ejemplos:
 
 ---
 
-# 742. AmrMapper
+### 742. AmrMapper
 
 ```php
 interface AmrMapperInterface
@@ -8929,19 +8930,19 @@ interface AmrMapperInterface
 
 ---
 
-# 743. amr limitations
+### 743. amr limitations
 
 `amr` deberá tratarse como declaración del proveedor, no como evidencia criptográfica directa de cada factor.
 
 ---
 
-# 744. OIDC ID Token
+### 744. OIDC ID Token
 
 El ID Token representa una declaración firmada sobre un evento de autenticación.
 
 ---
 
-# 745. IdTokenClaims
+### 745. IdTokenClaims
 
 ```php
 final readonly class IdTokenClaims
@@ -8965,13 +8966,13 @@ final readonly class IdTokenClaims
 
 ---
 
-# 746. ID Token type separation
+### 746. ID Token type separation
 
 Un ID Token no deberá utilizarse como access token.
 
 ---
 
-# 747. ID Token verifier
+### 747. ID Token verifier
 
 ```php
 interface IdTokenVerifierInterface
@@ -8985,7 +8986,7 @@ interface IdTokenVerifierInterface
 
 ---
 
-# 748. IdTokenVerificationContext
+### 748. IdTokenVerificationContext
 
 ```php
 final readonly class IdTokenVerificationContext
@@ -9003,7 +9004,7 @@ final readonly class IdTokenVerificationContext
 
 ---
 
-# 749. ID Token validation pipeline
+### 749. ID Token validation pipeline
 
 ```text
 Parse Compact JWT
@@ -9039,85 +9040,85 @@ Produce Verified Identity Assertion
 
 ---
 
-# 750. Algorithm allowlist
+### 750. Algorithm allowlist
 
 Solo deberán aceptarse algoritmos registrados para ese proveedor y cliente.
 
 ---
 
-# 751. none algorithm prohibition
+### 751. none algorithm prohibition
 
 `alg=none` deberá rechazarse.
 
 ---
 
-# 752. Symmetric algorithm restrictions
+### 752. Symmetric algorithm restrictions
 
 Los algoritmos simétricos deberán evitarse para proveedores externos salvo configuración explícita y justificada.
 
 ---
 
-# 753. Algorithm confusion prevention
+### 753. Algorithm confusion prevention
 
 La clave y algoritmo deberán validarse como una combinación permitida.
 
 ---
 
-# 754. Issuer validation
+### 754. Issuer validation
 
 El issuer del token deberá coincidir exactamente con el proveedor configurado.
 
 ---
 
-# 755. Audience validation
+### 755. Audience validation
 
 El `aud` deberá contener el client ID de VoltStack.
 
 ---
 
-# 756. Multiple audiences
+### 756. Multiple audiences
 
 Cuando existan múltiples audiences, deberá validarse `azp` cuando el perfil lo requiera.
 
 ---
 
-# 757. Authorized party
+### 757. Authorized party
 
 `azp` deberá coincidir con el cliente autorizado esperado.
 
 ---
 
-# 758. Expiration validation
+### 758. Expiration validation
 
 El ID Token deberá rechazarse después de `exp`.
 
 ---
 
-# 759. Issued-at validation
+### 759. Issued-at validation
 
 `iat` no deberá ubicarse irrazonablemente en el futuro.
 
 ---
 
-# 760. Clock skew
+### 760. Clock skew
 
 La tolerancia deberá ser pequeña, configurable y consistente.
 
 ---
 
-# 761. Token replay registry
+### 761. Token replay registry
 
 Para flujos de alto riesgo podrá registrarse el hash del ID Token o identificador derivado.
 
 ---
 
-# 762. Subject identifier
+### 762. Subject identifier
 
 `sub` será el identificador principal del usuario dentro del issuer.
 
 ---
 
-# 763. External identity key
+### 763. External identity key
 
 Una identidad externa deberá identificarse mediante:
 
@@ -9129,7 +9130,7 @@ Nunca solo mediante email.
 
 ---
 
-# 764. ExternalIdentityIdentifier
+### 764. ExternalIdentityIdentifier
 
 ```php
 final readonly class ExternalIdentityIdentifier
@@ -9144,49 +9145,49 @@ final readonly class ExternalIdentityIdentifier
 
 ---
 
-# 765. Subject stability
+### 765. Subject stability
 
 El subject deberá considerarse opaco y estable según el contrato del proveedor.
 
 ---
 
-# 766. Public subject identifiers
+### 766. Public subject identifiers
 
 Un public subject puede ser igual para múltiples clientes del mismo proveedor.
 
 ---
 
-# 767. Pairwise subject identifiers
+### 767. Pairwise subject identifiers
 
 Un pairwise subject puede variar por sector o cliente para reducir correlación.
 
 ---
 
-# 768. Pairwise subject handling
+### 768. Pairwise subject handling
 
 VoltStack no deberá intentar derivar relaciones entre pairwise subjects sin soporte explícito del proveedor.
 
 ---
 
-# 769. Sector identifier
+### 769. Sector identifier
 
 Cuando aplique, el sector identifier deberá validarse conforme a la configuración registrada.
 
 ---
 
-# 770. UserInfo endpoint
+### 770. UserInfo endpoint
 
 El UserInfo endpoint podrá proporcionar claims adicionales autorizados.
 
 ---
 
-# 771. UserInfo request
+### 771. UserInfo request
 
 La petición deberá usar un access token válido destinado al proveedor correspondiente.
 
 ---
 
-# 772. UserInfo response validation
+### 772. UserInfo response validation
 
 Deberán validarse:
 
@@ -9201,31 +9202,31 @@ Deberán validarse:
 
 ---
 
-# 773. UserInfo subject match
+### 773. UserInfo subject match
 
 El `sub` de UserInfo deberá coincidir con el `sub` del ID Token.
 
 ---
 
-# 774. Subject mismatch
+### 774. Subject mismatch
 
 Una discrepancia deberá considerarse un evento crítico.
 
 ---
 
-# 775. Signed UserInfo
+### 775. Signed UserInfo
 
 Cuando el proveedor soporte respuestas firmadas, la política podrá exigirlas.
 
 ---
 
-# 776. Claims mapping architecture
+### 776. Claims mapping architecture
 
 Los claims externos deberán transformarse mediante un mapper específico por proveedor.
 
 ---
 
-# 777. ExternalClaimsMapper
+### 777. ExternalClaimsMapper
 
 ```php
 interface ExternalClaimsMapperInterface
@@ -9239,7 +9240,7 @@ interface ExternalClaimsMapperInterface
 
 ---
 
-# 778. ExternalIdentityProfile
+### 778. ExternalIdentityProfile
 
 ```php
 final readonly class ExternalIdentityProfile
@@ -9261,7 +9262,7 @@ final readonly class ExternalIdentityProfile
 
 ---
 
-# 779. Claims trust classification
+### 779. Claims trust classification
 
 Cada claim deberá clasificarse como:
 
@@ -9273,25 +9274,25 @@ Cada claim deberá clasificarse como:
 
 ---
 
-# 780. Email claim risk
+### 780. Email claim risk
 
 El email no deberá utilizarse por sí solo para vincular automáticamente una identidad externa con una cuenta existente.
 
 ---
 
-# 781. email_verified limitations
+### 781. email_verified limitations
 
 `email_verified=true` solo indica que el proveedor afirma haber verificado el email bajo su propio proceso.
 
 ---
 
-# 782. Email authority policy
+### 782. Email authority policy
 
 VoltStack deberá definir qué proveedores son autoridades aceptadas para cada dominio o tenant.
 
 ---
 
-# 783. Claim conflict handling
+### 783. Claim conflict handling
 
 Cuando un claim externo contradiga datos locales, la policy deberá decidir si:
 
@@ -9303,13 +9304,13 @@ Cuando un claim externo contradiga datos locales, la policy deberá decidir si:
 
 ---
 
-# 784. Group and role claims
+### 784. Group and role claims
 
 Los grupos externos no deberán convertirse directamente en roles internos sin mapping autorizado.
 
 ---
 
-# 785. ExternalGroupMapper
+### 785. ExternalGroupMapper
 
 ```php
 interface ExternalGroupMapperInterface
@@ -9324,7 +9325,7 @@ interface ExternalGroupMapperInterface
 
 ---
 
-# 786. Authorization mapping restrictions
+### 786. Authorization mapping restrictions
 
 El mapping deberá:
 
@@ -9336,7 +9337,7 @@ El mapping deberá:
 
 ---
 
-# 787. External identity record
+### 787. External identity record
 
 ```php
 final readonly class ExternalIdentityRecord
@@ -9357,7 +9358,7 @@ final readonly class ExternalIdentityRecord
 
 ---
 
-# 788. ExternalIdentityStatus
+### 788. ExternalIdentityStatus
 
 ```php
 enum ExternalIdentityStatus: string
@@ -9372,13 +9373,13 @@ enum ExternalIdentityStatus: string
 
 ---
 
-# 789. Account linking architecture
+### 789. Account linking architecture
 
 Account linking conecta una identidad externa con una identidad local existente.
 
 ---
 
-# 790. Account linking prerequisites
+### 790. Account linking prerequisites
 
 El linking deberá requerir:
 
@@ -9392,7 +9393,7 @@ El linking deberá requerir:
 
 ---
 
-# 791. AccountLinkingService
+### 791. AccountLinkingService
 
 ```php
 interface AccountLinkingServiceInterface
@@ -9411,19 +9412,19 @@ interface AccountLinkingServiceInterface
 
 ---
 
-# 792. Unsafe implicit linking
+### 792. Unsafe implicit linking
 
 No deberá vincularse automáticamente una cuenta únicamente porque ambos perfiles compartan email.
 
 ---
 
-# 793. Existing external identity collision
+### 793. Existing external identity collision
 
 Una identidad externa ya vinculada a otra cuenta deberá provocar rechazo y evento de seguridad.
 
 ---
 
-# 794. Link uniqueness
+### 794. Link uniqueness
 
 La combinación:
 
@@ -9435,7 +9436,7 @@ deberá ser única dentro del ámbito aplicable.
 
 ---
 
-# 795. Account unlinking
+### 795. Account unlinking
 
 Desvincular un proveedor deberá requerir:
 
@@ -9447,13 +9448,13 @@ Desvincular un proveedor deberá requerir:
 
 ---
 
-# 796. Federated login session issuance
+### 796. Federated login session issuance
 
 Una autenticación federada válida deberá convertirse en un `AuthenticationResult` interno antes de emitir sesión.
 
 ---
 
-# 797. FederatedAuthenticationResult
+### 797. FederatedAuthenticationResult
 
 ```php
 final readonly class FederatedAuthenticationResult
@@ -9473,7 +9474,7 @@ final readonly class FederatedAuthenticationResult
 
 ---
 
-# 798. OIDC logout architecture
+### 798. OIDC logout architecture
 
 VoltStack deberá soportar, según capacidades del proveedor:
 
@@ -9485,7 +9486,7 @@ VoltStack deberá soportar, según capacidades del proveedor:
 
 ---
 
-# 799. Provider compromise response
+### 799. Provider compromise response
 
 Si un proveedor se marca como comprometido, VoltStack deberá poder:
 
@@ -9500,7 +9501,7 @@ Si un proveedor se marca como comprometido, VoltStack deberá poder:
 
 ---
 
-# 800. Resultado de esta entrega
+### 800. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -9559,9 +9560,9 @@ Entrega 9
 - SCIM identity lifecycle foundations
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 9
+
 
 **Documento:** Parte 05
 **Entrega:** 9 de varias
@@ -9570,7 +9571,7 @@ Entrega 9
 
 ---
 
-# 801. OIDC Cryptographic Key Architecture
+### 801. OIDC Cryptographic Key Architecture
 
 VoltStack deberá implementar un subsistema independiente para administrar las claves criptográficas utilizadas por OpenID Connect.
 
@@ -9588,7 +9589,7 @@ El subsistema deberá separar:
 
 ---
 
-# 802. OIDC key trust model
+### 802. OIDC key trust model
 
 ```text
 Configured Issuer
@@ -9614,7 +9615,7 @@ Ninguna clave deberá considerarse confiable únicamente porque aparezca referen
 
 ---
 
-# 803. JSON Web Key Set
+### 803. JSON Web Key Set
 
 Un JWKS representa una colección de claves públicas expresadas como objetos JWK.
 
@@ -9622,7 +9623,7 @@ El parámetro `kid` puede utilizarse para seleccionar una clave dentro del conju
 
 ---
 
-# 804. JwkSet
+### 804. JwkSet
 
 ```php
 final readonly class JwkSet
@@ -9641,7 +9642,7 @@ final readonly class JwkSet
 
 ---
 
-# 805. JsonWebKey
+### 805. JsonWebKey
 
 ```php
 final readonly class JsonWebKey
@@ -9662,7 +9663,7 @@ final readonly class JsonWebKey
 
 ---
 
-# 806. Supported key types
+### 806. Supported key types
 
 VoltStack deberá mantener un registry explícito de tipos de clave permitidos.
 
@@ -9675,7 +9676,7 @@ Ejemplos:
 
 ---
 
-# 807. JwkTypeRegistry
+### 807. JwkTypeRegistry
 
 ```php
 interface JwkTypeRegistryInterface
@@ -9690,7 +9691,7 @@ interface JwkTypeRegistryInterface
 
 ---
 
-# 808. Unknown key types
+### 808. Unknown key types
 
 Una clave con tipo desconocido deberá:
 
@@ -9701,7 +9702,7 @@ Una clave con tipo desconocido deberá:
 
 ---
 
-# 809. JWK structural validation
+### 809. JWK structural validation
 
 Cada JWK deberá validarse antes de ser incorporada al key store.
 
@@ -9718,7 +9719,7 @@ La validación deberá comprobar:
 
 ---
 
-# 810. Private key material prohibition
+### 810. Private key material prohibition
 
 Un JWKS remoto utilizado para validación no deberá contener ni aceptar material de clave privada.
 
@@ -9731,7 +9732,7 @@ Si aparece, deberá:
 
 ---
 
-# 811. JWK use validation
+### 811. JWK use validation
 
 Cuando esté presente, `use` deberá ser compatible con:
 
@@ -9743,7 +9744,7 @@ para validación de firmas.
 
 ---
 
-# 812. JWK key operations
+### 812. JWK key operations
 
 Cuando exista `key_ops`, deberá incluir una operación compatible con verificación.
 
@@ -9755,7 +9756,7 @@ verify
 
 ---
 
-# 813. Conflicting key metadata
+### 813. Conflicting key metadata
 
 Una clave deberá rechazarse cuando:
 
@@ -9766,7 +9767,7 @@ Una clave deberá rechazarse cuando:
 
 ---
 
-# 814. Algorithm-to-key compatibility
+### 814. Algorithm-to-key compatibility
 
 ```php
 interface JwkAlgorithmCompatibilityCheckerInterface
@@ -9780,7 +9781,7 @@ interface JwkAlgorithmCompatibilityCheckerInterface
 
 ---
 
-# 815. Algorithm confusion prevention
+### 815. Algorithm confusion prevention
 
 VoltStack no deberá seleccionar una clave únicamente porque su `kid` coincida.
 
@@ -9796,7 +9797,7 @@ También deberá validar:
 
 ---
 
-# 816. JWK Set retrieval
+### 816. JWK Set retrieval
 
 ```php
 interface JwkSetProviderInterface
@@ -9810,7 +9811,7 @@ interface JwkSetProviderInterface
 
 ---
 
-# 817. JwkSetRetrievalPolicy
+### 817. JwkSetRetrievalPolicy
 
 ```php
 final readonly class JwkSetRetrievalPolicy
@@ -9830,7 +9831,7 @@ final readonly class JwkSetRetrievalPolicy
 
 ---
 
-# 818. JWKS URI trust
+### 818. JWKS URI trust
 
 El `jwks_uri` deberá obtenerse de:
 
@@ -9842,13 +9843,13 @@ Nunca deberá aceptarse directamente desde un parámetro de token.
 
 ---
 
-# 819. Embedded JWK headers
+### 819. Embedded JWK headers
 
 Headers como `jwk`, `jku` o referencias equivalentes no deberán habilitar selección arbitraria de claves.
 
 ---
 
-# 820. Remote key URL restrictions
+### 820. Remote key URL restrictions
 
 VoltStack deberá rechazar URLs de claves dirigidas hacia:
 
@@ -9862,7 +9863,7 @@ VoltStack deberá rechazar URLs de claves dirigidas hacia:
 
 ---
 
-# 821. JWKS SSRF protection
+### 821. JWKS SSRF protection
 
 La descarga deberá reutilizar la política SSRF del framework.
 
@@ -9878,7 +9879,7 @@ interface SecureRemoteResourceFetcherInterface
 
 ---
 
-# 822. Redirect validation
+### 822. Redirect validation
 
 Cada redirect deberá volver a validar:
 
@@ -9891,7 +9892,7 @@ Cada redirect deberá volver a validar:
 
 ---
 
-# 823. DNS rebinding protection
+### 823. DNS rebinding protection
 
 La resolución deberá proteger contra cambios entre:
 
@@ -9902,7 +9903,7 @@ La resolución deberá proteger contra cambios entre:
 
 ---
 
-# 824. JWKS response validation
+### 824. JWKS response validation
 
 La respuesta deberá comprobar:
 
@@ -9916,7 +9917,7 @@ La respuesta deberá comprobar:
 
 ---
 
-# 825. Maximum key count
+### 825. Maximum key count
 
 El límite de claves evitará:
 
@@ -9927,13 +9928,13 @@ El límite de claves evitará:
 
 ---
 
-# 826. Duplicate kid handling
+### 826. Duplicate kid handling
 
 Dos claves con el mismo `kid` no deberán provocar selección arbitraria.
 
 ---
 
-# 827. Duplicate key selection policy
+### 827. Duplicate key selection policy
 
 Ante múltiples coincidencias, VoltStack deberá filtrar por:
 
@@ -9949,13 +9950,13 @@ Si persiste la ambigüedad, la validación deberá fallar.
 
 ---
 
-# 828. Key identifier semantics
+### 828. Key identifier semantics
 
 `kid` deberá considerarse un selector, no un identificador criptográfico único global.
 
 ---
 
-# 829. JWK thumbprint
+### 829. JWK thumbprint
 
 VoltStack podrá calcular un thumbprint canónico para identificar material criptográfico independientemente del `kid`.
 
@@ -9963,7 +9964,7 @@ El procedimiento deberá seguir un algoritmo estable de canonicalización y hash
 
 ---
 
-# 830. JwkThumbprint
+### 830. JwkThumbprint
 
 ```php
 final readonly class JwkThumbprint
@@ -9978,7 +9979,7 @@ final readonly class JwkThumbprint
 
 ---
 
-# 831. JwkThumbprintCalculator
+### 831. JwkThumbprintCalculator
 
 ```php
 interface JwkThumbprintCalculatorInterface
@@ -9991,7 +9992,7 @@ interface JwkThumbprintCalculatorInterface
 
 ---
 
-# 832. Key selection input
+### 832. Key selection input
 
 ```php
 final readonly class JwkSelectionContext
@@ -10009,7 +10010,7 @@ final readonly class JwkSelectionContext
 
 ---
 
-# 833. JwkSelector
+### 833. JwkSelector
 
 ```php
 interface JwkSelectorInterface
@@ -10023,7 +10024,7 @@ interface JwkSelectorInterface
 
 ---
 
-# 834. JwkSelectionResult
+### 834. JwkSelectionResult
 
 ```php
 final readonly class JwkSelectionResult
@@ -10040,7 +10041,7 @@ final readonly class JwkSelectionResult
 
 ---
 
-# 835. JwkSelectionStatus
+### 835. JwkSelectionStatus
 
 ```php
 enum JwkSelectionStatus: string
@@ -10055,7 +10056,7 @@ enum JwkSelectionStatus: string
 
 ---
 
-# 836. Unknown kid handling
+### 836. Unknown kid handling
 
 Cuando el token incluya un `kid` desconocido, VoltStack podrá:
 
@@ -10066,13 +10067,13 @@ Cuando el token incluya un `kid` desconocido, VoltStack podrá:
 
 ---
 
-# 837. Refresh amplification protection
+### 837. Refresh amplification protection
 
 Un atacante no deberá poder provocar una descarga de JWKS por cada token con `kid` aleatorio.
 
 ---
 
-# 838. Unknown key rate limiting
+### 838. Unknown key rate limiting
 
 El refresh deberá limitarse por:
 
@@ -10085,13 +10086,13 @@ El refresh deberá limitarse por:
 
 ---
 
-# 839. Negative key cache
+### 839. Negative key cache
 
 VoltStack podrá mantener temporalmente un registro de `kid` desconocidos para evitar consultas repetidas.
 
 ---
 
-# 840. JwksCache
+### 840. JwksCache
 
 ```php
 interface JwksCacheInterface
@@ -10112,7 +10113,7 @@ interface JwksCacheInterface
 
 ---
 
-# 841. JWKS cache lifetime
+### 841. JWKS cache lifetime
 
 El cache deberá considerar:
 
@@ -10125,13 +10126,13 @@ El cache deberá considerar:
 
 ---
 
-# 842. Stale key policy
+### 842. Stale key policy
 
 Una clave cacheada vencida no deberá utilizarse indefinidamente.
 
 ---
 
-# 843. Stale-while-revalidate
+### 843. Stale-while-revalidate
 
 Podrá permitirse una ventana corta cuando:
 
@@ -10143,7 +10144,7 @@ Podrá permitirse una ventana corta cuando:
 
 ---
 
-# 844. Fail-open prohibition
+### 844. Fail-open prohibition
 
 Un error al descargar JWKS no deberá provocar:
 
@@ -10154,7 +10155,7 @@ Un error al descargar JWKS no deberá provocar:
 
 ---
 
-# 845. Key rotation architecture
+### 845. Key rotation architecture
 
 Los proveedores podrán mantener simultáneamente:
 
@@ -10165,7 +10166,7 @@ Los proveedores podrán mantener simultáneamente:
 
 ---
 
-# 846. Key lifecycle states
+### 846. Key lifecycle states
 
 ```php
 enum FederatedSigningKeyState: string
@@ -10181,25 +10182,25 @@ enum FederatedSigningKeyState: string
 
 ---
 
-# 847. Pre-published keys
+### 847. Pre-published keys
 
 Una clave futura podrá publicarse antes de utilizarse para permitir propagación de cache.
 
 ---
 
-# 848. Overlapping rotation window
+### 848. Overlapping rotation window
 
 Durante una rotación ordinaria podrán coexistir claves anteriores y nuevas.
 
 ---
 
-# 849. Retiring keys
+### 849. Retiring keys
 
 Una clave retirada podrá seguir siendo necesaria para validar tokens no expirados emitidos previamente.
 
 ---
 
-# 850. Key retention calculation
+### 850. Key retention calculation
 
 La retención deberá considerar:
 
@@ -10212,7 +10213,7 @@ La retención deberá considerar:
 
 ---
 
-# 851. KeyRotationTracker
+### 851. KeyRotationTracker
 
 ```php
 interface KeyRotationTrackerInterface
@@ -10227,7 +10228,7 @@ interface KeyRotationTrackerInterface
 
 ---
 
-# 852. Key rotation assessment
+### 852. Key rotation assessment
 
 Deberá detectar:
 
@@ -10241,13 +10242,13 @@ Deberá detectar:
 
 ---
 
-# 853. Same kid with different key material
+### 853. Same kid with different key material
 
 El reemplazo de material criptográfico manteniendo el mismo `kid` deberá generar una alerta de alta severidad.
 
 ---
 
-# 854. Emergency key rollover
+### 854. Emergency key rollover
 
 Una rotación de emergencia podrá ocurrir por:
 
@@ -10259,7 +10260,7 @@ Una rotación de emergencia podrá ocurrir por:
 
 ---
 
-# 855. Emergency rollover response
+### 855. Emergency rollover response
 
 VoltStack deberá poder:
 
@@ -10273,7 +10274,7 @@ VoltStack deberá poder:
 
 ---
 
-# 856. Key compromise registry
+### 856. Key compromise registry
 
 ```php
 interface CompromisedKeyRegistryInterface
@@ -10293,7 +10294,7 @@ interface CompromisedKeyRegistryInterface
 
 ---
 
-# 857. Session provenance
+### 857. Session provenance
 
 Las sesiones federadas deberán conservar:
 
@@ -10307,7 +10308,7 @@ Las sesiones federadas deberán conservar:
 
 ---
 
-# 858. Federated session registry
+### 858. Federated session registry
 
 ```php
 interface FederatedSessionRegistryInterface
@@ -10330,7 +10331,7 @@ interface FederatedSessionRegistryInterface
 
 ---
 
-# 859. FederatedSessionBinding
+### 859. FederatedSessionBinding
 
 ```php
 final readonly class FederatedSessionBinding
@@ -10350,7 +10351,7 @@ final readonly class FederatedSessionBinding
 
 ---
 
-# 860. OIDC sid claim
+### 860. OIDC sid claim
 
 El claim `sid` podrá representar una sesión del usuario en el proveedor.
 
@@ -10358,7 +10359,7 @@ Deberá tratarse como un identificador opaco dentro del contexto del issuer y cl
 
 ---
 
-# 861. sid uniqueness
+### 861. sid uniqueness
 
 `sid` no deberá asumirse globalmente único.
 
@@ -10370,7 +10371,7 @@ issuer + client + sid
 
 ---
 
-# 862. Local-to-federated session mapping
+### 862. Local-to-federated session mapping
 
 Una sesión del proveedor podrá corresponder a:
 
@@ -10383,7 +10384,7 @@ La política de revocación deberá definir el alcance.
 
 ---
 
-# 863. RP-Initiated Logout
+### 863. RP-Initiated Logout
 
 VoltStack podrá solicitar al proveedor que finalice la sesión del usuario mediante el endpoint de terminación registrado.
 
@@ -10391,7 +10392,7 @@ Este perfil permite que un Relying Party solicite explícitamente al OpenID Prov
 
 ---
 
-# 864. RpInitiatedLogoutRequest
+### 864. RpInitiatedLogoutRequest
 
 ```php
 final readonly class RpInitiatedLogoutRequest
@@ -10410,7 +10411,7 @@ final readonly class RpInitiatedLogoutRequest
 
 ---
 
-# 865. id_token_hint handling
+### 865. id_token_hint handling
 
 Cuando se utilice, deberá corresponder a:
 
@@ -10421,13 +10422,13 @@ Cuando se utilice, deberá corresponder a:
 
 ---
 
-# 866. Post-logout redirect URI
+### 866. Post-logout redirect URI
 
 La URI deberá estar registrada y validarse mediante coincidencia exacta.
 
 ---
 
-# 867. Logout state
+### 867. Logout state
 
 El parámetro `state` deberá:
 
@@ -10439,7 +10440,7 @@ El parámetro `state` deberá:
 
 ---
 
-# 868. Local-first logout
+### 868. Local-first logout
 
 VoltStack deberá definir si:
 
@@ -10451,13 +10452,13 @@ Por defecto, la sesión local deberá revocarse incluso si el proveedor no respo
 
 ---
 
-# 869. Front-Channel Logout
+### 869. Front-Channel Logout
 
 El front-channel utiliza el navegador del usuario para transmitir la solicitud de logout entre el proveedor y los Relying Parties.
 
 ---
 
-# 870. Front-channel risks
+### 870. Front-channel risks
 
 Este mecanismo depende de:
 
@@ -10470,7 +10471,7 @@ Este mecanismo depende de:
 
 ---
 
-# 871. FrontChannelLogoutRequest
+### 871. FrontChannelLogoutRequest
 
 ```php
 final readonly class FrontChannelLogoutRequest
@@ -10487,7 +10488,7 @@ final readonly class FrontChannelLogoutRequest
 
 ---
 
-# 872. Front-channel validation
+### 872. Front-channel validation
 
 VoltStack deberá validar:
 
@@ -10500,7 +10501,7 @@ VoltStack deberá validar:
 
 ---
 
-# 873. Front-channel idempotency
+### 873. Front-channel idempotency
 
 El logout deberá ser idempotente.
 
@@ -10508,13 +10509,13 @@ Una sesión ya revocada deberá producir una respuesta segura sin error sensible
 
 ---
 
-# 874. Third-party cookie limitations
+### 874. Third-party cookie limitations
 
 VoltStack no deberá asumir que los navegadores siempre enviarán cookies en contextos cross-site.
 
 ---
 
-# 875. Front-channel fallback
+### 875. Front-channel fallback
 
 Cuando el front-channel no pueda resolver la sesión local, podrá:
 
@@ -10525,7 +10526,7 @@ Cuando el front-channel no pueda resolver la sesión local, podrá:
 
 ---
 
-# 876. Back-Channel Logout
+### 876. Back-Channel Logout
 
 El back-channel utiliza comunicación directa entre el proveedor y el RP, sin depender del navegador.
 
@@ -10533,7 +10534,7 @@ Después de validar un Logout Token, el RP debe localizar y limpiar las sesiones
 
 ---
 
-# 877. BackChannelLogoutEndpoint
+### 877. BackChannelLogoutEndpoint
 
 ```php
 interface BackChannelLogoutEndpointInterface
@@ -10546,7 +10547,7 @@ interface BackChannelLogoutEndpointInterface
 
 ---
 
-# 878. Logout Token
+### 878. Logout Token
 
 ```php
 final readonly class LogoutTokenClaims
@@ -10566,7 +10567,7 @@ final readonly class LogoutTokenClaims
 
 ---
 
-# 879. Logout Token validation
+### 879. Logout Token validation
 
 El pipeline deberá validar:
 
@@ -10586,7 +10587,7 @@ El perfil de back-channel exige identificar la sesión mediante `sub`, `sid` o a
 
 ---
 
-# 880. Logout Token replay registry
+### 880. Logout Token replay registry
 
 ```php
 interface LogoutTokenReplayRegistryInterface
@@ -10601,7 +10602,7 @@ interface LogoutTokenReplayRegistryInterface
 
 ---
 
-# 881. Back-channel logout scope
+### 881. Back-channel logout scope
 
 Cuando exista `sid`, deberán revocarse las sesiones vinculadas a esa sesión del proveedor.
 
@@ -10609,7 +10610,7 @@ Cuando solo exista `sub`, la política podrá revocar todas las sesiones federad
 
 ---
 
-# 882. Back-channel endpoint security
+### 882. Back-channel endpoint security
 
 El endpoint deberá:
 
@@ -10622,13 +10623,13 @@ El endpoint deberá:
 
 ---
 
-# 883. Logout delivery failure
+### 883. Logout delivery failure
 
 Los fallos de logout federado deberán registrarse sin restaurar una sesión local ya revocada.
 
 ---
 
-# 884. SAML 2.0 Security Foundations
+### 884. SAML 2.0 Security Foundations
 
 VoltStack podrá soportar SAML 2.0 como protocolo empresarial de federación.
 
@@ -10636,7 +10637,7 @@ SAML utiliza assertions XML y define perfiles para Single Sign-On y Single Logou
 
 ---
 
-# 885. SAML actors
+### 885. SAML actors
 
 ```php
 enum SamlActorRole: string
@@ -10649,7 +10650,7 @@ enum SamlActorRole: string
 
 ---
 
-# 886. SamlIdentityProviderDefinition
+### 886. SamlIdentityProviderDefinition
 
 ```php
 final readonly class SamlIdentityProviderDefinition
@@ -10670,7 +10671,7 @@ final readonly class SamlIdentityProviderDefinition
 
 ---
 
-# 887. SAML metadata trust
+### 887. SAML metadata trust
 
 La metadata deberá obtenerse mediante:
 
@@ -10681,7 +10682,7 @@ La metadata deberá obtenerse mediante:
 
 ---
 
-# 888. SAML metadata validation
+### 888. SAML metadata validation
 
 Deberá comprobarse:
 
@@ -10697,7 +10698,7 @@ Deberá comprobarse:
 
 ---
 
-# 889. XML parser security
+### 889. XML parser security
 
 El parser deberá deshabilitar:
 
@@ -10710,7 +10711,7 @@ El parser deberá deshabilitar:
 
 ---
 
-# 890. SAML assertion validation
+### 890. SAML assertion validation
 
 La validación deberá incluir:
 
@@ -10729,7 +10730,7 @@ La validación deberá incluir:
 
 ---
 
-# 891. XML Signature Wrapping protection
+### 891. XML Signature Wrapping protection
 
 VoltStack deberá:
 
@@ -10741,7 +10742,7 @@ VoltStack deberá:
 
 ---
 
-# 892. SAML replay registry
+### 892. SAML replay registry
 
 ```php
 interface SamlReplayRegistryInterface
@@ -10762,7 +10763,7 @@ interface SamlReplayRegistryInterface
 
 ---
 
-# 893. SAML account binding
+### 893. SAML account binding
 
 La identidad externa deberá resolverse mediante:
 
@@ -10774,19 +10775,19 @@ o mediante un atributo estable explícitamente gobernado.
 
 ---
 
-# 894. Email-based SAML linking prohibition
+### 894. Email-based SAML linking prohibition
 
 El email no deberá utilizarse automáticamente como identificador único de federación.
 
 ---
 
-# 895. Just-In-Time Provisioning
+### 895. Just-In-Time Provisioning
 
 JIT provisioning permitirá crear o actualizar una identidad local durante una autenticación federada válida.
 
 ---
 
-# 896. JitProvisioningService
+### 896. JitProvisioningService
 
 ```php
 interface JitProvisioningServiceInterface
@@ -10800,7 +10801,7 @@ interface JitProvisioningServiceInterface
 
 ---
 
-# 897. JIT provisioning policy
+### 897. JIT provisioning policy
 
 La política deberá definir:
 
@@ -10815,7 +10816,7 @@ La política deberá definir:
 
 ---
 
-# 898. JIT least privilege
+### 898. JIT least privilege
 
 Una identidad creada mediante JIT deberá recibir el mínimo privilegio inicial.
 
@@ -10823,7 +10824,7 @@ Los grupos o atributos externos no deberán transformarse en privilegios adminis
 
 ---
 
-# 899. SCIM Identity Lifecycle Foundations
+### 899. SCIM Identity Lifecycle Foundations
 
 SCIM permitirá aprovisionar y administrar recursos de identidad mediante un protocolo HTTP estandarizado.
 
@@ -10843,7 +10844,7 @@ VoltStack deberá preparar abstracciones para:
 
 ---
 
-# 900. Resultado de esta entrega
+### 900. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -10904,9 +10905,9 @@ Entrega 10
 - SCIM audit events
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 10
+
 
 **Documento:** Parte 05
 **Entrega:** 10 de varias
@@ -10915,7 +10916,7 @@ Entrega 10
 
 ---
 
-# 901. SCIM Service Provider Architecture
+### 901. SCIM Service Provider Architecture
 
 VoltStack podrá actuar como SCIM Service Provider para recibir operaciones de aprovisionamiento desde:
 
@@ -10936,7 +10937,7 @@ El subsistema SCIM deberá mantenerse separado de:
 
 ---
 
-# 902. SCIM security goals
+### 902. SCIM security goals
 
 La implementación deberá garantizar:
 
@@ -10953,7 +10954,7 @@ La implementación deberá garantizar:
 
 ---
 
-# 903. SCIM threat model
+### 903. SCIM threat model
 
 El modelo deberá considerar:
 
@@ -10974,7 +10975,7 @@ El modelo deberá considerar:
 
 ---
 
-# 904. SCIM architectural components
+### 904. SCIM architectural components
 
 ```text
 SCIM Client
@@ -11006,7 +11007,7 @@ Audit Response
 
 ---
 
-# 905. ScimServiceProvider
+### 905. ScimServiceProvider
 
 ```php
 interface ScimServiceProviderInterface
@@ -11020,7 +11021,7 @@ interface ScimServiceProviderInterface
 
 ---
 
-# 906. ScimRequest
+### 906. ScimRequest
 
 ```php
 final readonly class ScimRequest
@@ -11040,7 +11041,7 @@ final readonly class ScimRequest
 
 ---
 
-# 907. ScimHttpMethod
+### 907. ScimHttpMethod
 
 ```php
 enum ScimHttpMethod: string
@@ -11055,7 +11056,7 @@ enum ScimHttpMethod: string
 
 ---
 
-# 908. SCIM endpoint structure
+### 908. SCIM endpoint structure
 
 VoltStack podrá exponer endpoints como:
 
@@ -11070,7 +11071,7 @@ VoltStack podrá exponer endpoints como:
 
 ---
 
-# 909. Endpoint tenant isolation
+### 909. Endpoint tenant isolation
 
 Cada request deberá resolverse dentro de un tenant explícito.
 
@@ -11084,13 +11085,13 @@ La resolución podrá basarse en:
 
 ---
 
-# 910. Cross-tenant prohibition
+### 910. Cross-tenant prohibition
 
 Un cliente SCIM no deberá poder seleccionar libremente otro tenant mediante parámetros manipulables.
 
 ---
 
-# 911. ScimClient
+### 911. ScimClient
 
 ```php
 final readonly class ScimClient
@@ -11111,7 +11112,7 @@ final readonly class ScimClient
 
 ---
 
-# 912. ScimClientStatus
+### 912. ScimClientStatus
 
 ```php
 enum ScimClientStatus: string
@@ -11125,7 +11126,7 @@ enum ScimClientStatus: string
 
 ---
 
-# 913. SCIM authentication methods
+### 913. SCIM authentication methods
 
 VoltStack podrá soportar:
 
@@ -11137,7 +11138,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 914. Static bearer token restrictions
+### 914. Static bearer token restrictions
 
 Los tokens estáticos deberán:
 
@@ -11151,7 +11152,7 @@ Los tokens estáticos deberán:
 
 ---
 
-# 915. ScimClientCredential
+### 915. ScimClientCredential
 
 ```php
 final readonly class ScimClientCredential
@@ -11171,7 +11172,7 @@ final readonly class ScimClientCredential
 
 ---
 
-# 916. ScimCredentialStatus
+### 916. ScimCredentialStatus
 
 ```php
 enum ScimCredentialStatus: string
@@ -11186,7 +11187,7 @@ enum ScimCredentialStatus: string
 
 ---
 
-# 917. Credential rotation overlap
+### 917. Credential rotation overlap
 
 Durante una rotación podrá permitirse una ventana corta en la que dos credentials sean válidas.
 
@@ -11199,13 +11200,13 @@ La ventana deberá:
 
 ---
 
-# 918. SCIM authorization
+### 918. SCIM authorization
 
 La autenticación del cliente no implica autorización completa.
 
 ---
 
-# 919. SCIM scopes
+### 919. SCIM scopes
 
 Ejemplos:
 
@@ -11220,7 +11221,7 @@ scim.schemas.read
 
 ---
 
-# 920. ScimAuthorizationPolicy
+### 920. ScimAuthorizationPolicy
 
 ```php
 interface ScimAuthorizationPolicyInterface
@@ -11235,7 +11236,7 @@ interface ScimAuthorizationPolicyInterface
 
 ---
 
-# 921. Operation-level authorization
+### 921. Operation-level authorization
 
 La política deberá distinguir:
 
@@ -11250,7 +11251,7 @@ La política deberá distinguir:
 
 ---
 
-# 922. Attribute-level authorization
+### 922. Attribute-level authorization
 
 Algunos clientes podrán editar solo atributos específicos.
 
@@ -11264,7 +11265,7 @@ Ejemplos:
 
 ---
 
-# 923. Protected attributes
+### 923. Protected attributes
 
 No deberán ser modificables directamente mediante SCIM sin política explícita:
 
@@ -11279,7 +11280,7 @@ No deberán ser modificables directamente mediante SCIM sin política explícita
 
 ---
 
-# 924. ScimAttributePolicy
+### 924. ScimAttributePolicy
 
 ```php
 final readonly class ScimAttributePolicy
@@ -11296,13 +11297,13 @@ final readonly class ScimAttributePolicy
 
 ---
 
-# 925. SCIM schema architecture
+### 925. SCIM schema architecture
 
 VoltStack deberá mantener un registry de schemas soportados.
 
 ---
 
-# 926. ScimSchemaRegistry
+### 926. ScimSchemaRegistry
 
 ```php
 interface ScimSchemaRegistryInterface
@@ -11317,7 +11318,7 @@ interface ScimSchemaRegistryInterface
 
 ---
 
-# 927. ScimSchemaDefinition
+### 927. ScimSchemaDefinition
 
 ```php
 final readonly class ScimSchemaDefinition
@@ -11335,7 +11336,7 @@ final readonly class ScimSchemaDefinition
 
 ---
 
-# 928. ScimAttributeDefinition
+### 928. ScimAttributeDefinition
 
 ```php
 final readonly class ScimAttributeDefinition
@@ -11357,7 +11358,7 @@ final readonly class ScimAttributeDefinition
 
 ---
 
-# 929. ScimAttributeType
+### 929. ScimAttributeType
 
 ```php
 enum ScimAttributeType: string
@@ -11375,7 +11376,7 @@ enum ScimAttributeType: string
 
 ---
 
-# 930. ScimMutability
+### 930. ScimMutability
 
 ```php
 enum ScimMutability: string
@@ -11389,7 +11390,7 @@ enum ScimMutability: string
 
 ---
 
-# 931. ScimReturnedBehavior
+### 931. ScimReturnedBehavior
 
 ```php
 enum ScimReturnedBehavior: string
@@ -11403,7 +11404,7 @@ enum ScimReturnedBehavior: string
 
 ---
 
-# 932. ScimUniqueness
+### 932. ScimUniqueness
 
 ```php
 enum ScimUniqueness: string
@@ -11416,7 +11417,7 @@ enum ScimUniqueness: string
 
 ---
 
-# 933. Schema validation pipeline
+### 933. Schema validation pipeline
 
 ```text
 Parse JSON
@@ -11442,7 +11443,7 @@ Produce Resource Command
 
 ---
 
-# 934. Unknown attributes
+### 934. Unknown attributes
 
 La política podrá:
 
@@ -11455,7 +11456,7 @@ No deberán incorporarse arbitrariamente al modelo interno.
 
 ---
 
-# 935. Extension schemas
+### 935. Extension schemas
 
 VoltStack podrá soportar extensiones:
 
@@ -11466,7 +11467,7 @@ VoltStack podrá soportar extensiones:
 
 ---
 
-# 936. Extension governance
+### 936. Extension governance
 
 Toda extensión deberá:
 
@@ -11478,13 +11479,13 @@ Toda extensión deberá:
 
 ---
 
-# 937. Resource types
+### 937. Resource types
 
 VoltStack deberá publicar los tipos de recurso disponibles.
 
 ---
 
-# 938. ScimResourceTypeDefinition
+### 938. ScimResourceTypeDefinition
 
 ```php
 final readonly class ScimResourceTypeDefinition
@@ -11502,7 +11503,7 @@ final readonly class ScimResourceTypeDefinition
 
 ---
 
-# 939. Core resource types
+### 939. Core resource types
 
 La primera implementación deberá soportar:
 
@@ -11511,13 +11512,13 @@ La primera implementación deberá soportar:
 
 ---
 
-# 940. ServiceProviderConfig
+### 940. ServiceProviderConfig
 
 El endpoint deberá declarar capacidades reales del servidor.
 
 ---
 
-# 941. ScimServiceProviderConfig
+### 941. ScimServiceProviderConfig
 
 ```php
 final readonly class ScimServiceProviderConfig
@@ -11538,13 +11539,13 @@ final readonly class ScimServiceProviderConfig
 
 ---
 
-# 942. Capability honesty
+### 942. Capability honesty
 
 VoltStack no deberá anunciar capacidades que no implemente completamente.
 
 ---
 
-# 943. SCIM User resource
+### 943. SCIM User resource
 
 ```php
 final readonly class ScimUserResource
@@ -11570,7 +11571,7 @@ final readonly class ScimUserResource
 
 ---
 
-# 944. userName semantics
+### 944. userName semantics
 
 `userName` deberá:
 
@@ -11581,13 +11582,13 @@ final readonly class ScimUserResource
 
 ---
 
-# 945. externalId
+### 945. externalId
 
 `externalId` representa el identificador del recurso en el sistema del cliente SCIM.
 
 ---
 
-# 946. External identifier scope
+### 946. External identifier scope
 
 `externalId` deberá considerarse único dentro de:
 
@@ -11599,7 +11600,7 @@ No deberá asumirse único globalmente.
 
 ---
 
-# 947. ProvisioningCorrelationKey
+### 947. ProvisioningCorrelationKey
 
 ```php
 final readonly class ProvisioningCorrelationKey
@@ -11616,7 +11617,7 @@ final readonly class ProvisioningCorrelationKey
 
 ---
 
-# 948. Resource correlation order
+### 948. Resource correlation order
 
 La resolución de un usuario podrá considerar:
 
@@ -11628,13 +11629,13 @@ La resolución de un usuario podrá considerar:
 
 ---
 
-# 949. Unsafe email correlation
+### 949. Unsafe email correlation
 
 No deberá fusionarse automáticamente una cuenta local por coincidencia de email.
 
 ---
 
-# 950. Correlation conflicts
+### 950. Correlation conflicts
 
 Cuando varias identidades coincidan, la operación deberá:
 
@@ -11646,7 +11647,7 @@ Cuando varias identidades coincidan, la operación deberá:
 
 ---
 
-# 951. ProvisioningConflict
+### 951. ProvisioningConflict
 
 ```php
 final readonly class ProvisioningConflict
@@ -11664,7 +11665,7 @@ final readonly class ProvisioningConflict
 
 ---
 
-# 952. ProvisioningConflictReason
+### 952. ProvisioningConflictReason
 
 ```php
 enum ProvisioningConflictReason: string
@@ -11680,7 +11681,7 @@ enum ProvisioningConflictReason: string
 
 ---
 
-# 953. User creation workflow
+### 953. User creation workflow
 
 ```text
 Authenticate SCIM Client
@@ -11710,7 +11711,7 @@ Return SCIM Resource
 
 ---
 
-# 954. Initial account state
+### 954. Initial account state
 
 Una cuenta aprovisionada podrá iniciar como:
 
@@ -11722,7 +11723,7 @@ Una cuenta aprovisionada podrá iniciar como:
 
 ---
 
-# 955. ProvisionedIdentityState
+### 955. ProvisionedIdentityState
 
 ```php
 enum ProvisionedIdentityState: string
@@ -11737,13 +11738,13 @@ enum ProvisionedIdentityState: string
 
 ---
 
-# 956. Credential creation prohibition
+### 956. Credential creation prohibition
 
 SCIM no deberá crear contraseñas, passkeys ni recovery codes directamente salvo un perfil separado y explícitamente autorizado.
 
 ---
 
-# 957. Invitation workflow
+### 957. Invitation workflow
 
 Una identidad creada mediante SCIM podrá recibir una invitación segura para:
 
@@ -11755,13 +11756,13 @@ Una identidad creada mediante SCIM podrá recibir una invitación segura para:
 
 ---
 
-# 958. User replacement with PUT
+### 958. User replacement with PUT
 
 `PUT` deberá interpretarse como reemplazo completo del recurso editable.
 
 ---
 
-# 959. PUT preservation rules
+### 959. PUT preservation rules
 
 Los atributos:
 
@@ -11774,7 +11775,7 @@ no deberán eliminarse accidentalmente.
 
 ---
 
-# 960. Lost attribute prevention
+### 960. Lost attribute prevention
 
 La transformación de `PUT` deberá diferenciar:
 
@@ -11786,13 +11787,13 @@ La transformación de `PUT` deberá diferenciar:
 
 ---
 
-# 961. SCIM PATCH architecture
+### 961. SCIM PATCH architecture
 
 PATCH deberá ejecutarse mediante operaciones estructuradas.
 
 ---
 
-# 962. ScimPatchOperation
+### 962. ScimPatchOperation
 
 ```php
 final readonly class ScimPatchOperation
@@ -11808,7 +11809,7 @@ final readonly class ScimPatchOperation
 
 ---
 
-# 963. ScimPatchOperationType
+### 963. ScimPatchOperationType
 
 ```php
 enum ScimPatchOperationType: string
@@ -11821,7 +11822,7 @@ enum ScimPatchOperationType: string
 
 ---
 
-# 964. PATCH validation
+### 964. PATCH validation
 
 Cada operación deberá validar:
 
@@ -11837,7 +11838,7 @@ Cada operación deberá validar:
 
 ---
 
-# 965. SCIM path parser
+### 965. SCIM path parser
 
 ```php
 interface ScimPathParserInterface
@@ -11848,7 +11849,7 @@ interface ScimPathParserInterface
 
 ---
 
-# 966. SCIM path safety
+### 966. SCIM path safety
 
 El parser deberá impedir:
 
@@ -11860,13 +11861,13 @@ El parser deberá impedir:
 
 ---
 
-# 967. PATCH atomicity
+### 967. PATCH atomicity
 
 Todas las operaciones de un PATCH deberán aplicarse atómicamente.
 
 ---
 
-# 968. PATCH rollback
+### 968. PATCH rollback
 
 Si una operación falla:
 
@@ -11876,7 +11877,7 @@ Si una operación falla:
 
 ---
 
-# 969. Multi-valued attributes
+### 969. Multi-valued attributes
 
 La modificación de colecciones deberá preservar:
 
@@ -11888,19 +11889,19 @@ La modificación de colecciones deberá preservar:
 
 ---
 
-# 970. Primary attribute enforcement
+### 970. Primary attribute enforcement
 
 Solo un elemento podrá marcarse como `primary=true` dentro de una colección aplicable.
 
 ---
 
-# 971. SCIM filtering
+### 971. SCIM filtering
 
 VoltStack podrá soportar búsqueda mediante filtros SCIM.
 
 ---
 
-# 972. ScimFilterParser
+### 972. ScimFilterParser
 
 ```php
 interface ScimFilterParserInterface
@@ -11913,13 +11914,13 @@ interface ScimFilterParserInterface
 
 ---
 
-# 973. Filter allowlist
+### 973. Filter allowlist
 
 Solo podrán filtrarse atributos declarados como filtrables.
 
 ---
 
-# 974. Filter query compilation
+### 974. Filter query compilation
 
 Los filtros deberán compilarse mediante expresiones parametrizadas.
 
@@ -11927,7 +11928,7 @@ Nunca deberán concatenarse directamente en SQL.
 
 ---
 
-# 975. Filter complexity limits
+### 975. Filter complexity limits
 
 La política deberá limitar:
 
@@ -11940,7 +11941,7 @@ La política deberá limitar:
 
 ---
 
-# 976. Pagination
+### 976. Pagination
 
 Las respuestas de colección deberán soportar:
 
@@ -11950,25 +11951,25 @@ Las respuestas de colección deberán soportar:
 
 ---
 
-# 977. Pagination limits
+### 977. Pagination limits
 
 El servidor deberá imponer un máximo de resultados por página.
 
 ---
 
-# 978. Sorting
+### 978. Sorting
 
 Si se habilita, solo deberá permitirse sobre atributos autorizados e indexados.
 
 ---
 
-# 979. ETag architecture
+### 979. ETag architecture
 
 VoltStack podrá utilizar ETags para control de concurrencia.
 
 ---
 
-# 980. Resource version
+### 980. Resource version
 
 ```php
 final readonly class ScimResourceVersion
@@ -11984,13 +11985,13 @@ final readonly class ScimResourceVersion
 
 ---
 
-# 981. Conditional updates
+### 981. Conditional updates
 
 La política podrá exigir `If-Match` para prevenir lost updates.
 
 ---
 
-# 982. Group resource
+### 982. Group resource
 
 ```php
 final readonly class ScimGroupResource
@@ -12009,13 +12010,13 @@ final readonly class ScimGroupResource
 
 ---
 
-# 983. Group member references
+### 983. Group member references
 
 Cada miembro deberá referenciar un recurso válido y permitido.
 
 ---
 
-# 984. Group membership synchronization
+### 984. Group membership synchronization
 
 La sincronización deberá distinguir:
 
@@ -12027,7 +12028,7 @@ La sincronización deberá distinguir:
 
 ---
 
-# 985. Membership source tracking
+### 985. Membership source tracking
 
 ```php
 final readonly class GroupMembershipRecord
@@ -12045,7 +12046,7 @@ final readonly class GroupMembershipRecord
 
 ---
 
-# 986. GroupMembershipSource
+### 986. GroupMembershipSource
 
 ```php
 enum GroupMembershipSource: string
@@ -12060,19 +12061,19 @@ enum GroupMembershipSource: string
 
 ---
 
-# 987. Membership ownership
+### 987. Membership ownership
 
 Un cliente SCIM solo deberá poder retirar membresías que administra, salvo policy explícita.
 
 ---
 
-# 988. Group-to-role mapping
+### 988. Group-to-role mapping
 
 Los grupos SCIM no deberán convertirse automáticamente en roles privilegiados.
 
 ---
 
-# 989. Provisioning role mapper
+### 989. Provisioning role mapper
 
 ```php
 interface ProvisioningRoleMapperInterface
@@ -12087,13 +12088,13 @@ interface ProvisioningRoleMapperInterface
 
 ---
 
-# 990. Bulk operations
+### 990. Bulk operations
 
 VoltStack podrá soportar operaciones masivas controladas.
 
 ---
 
-# 991. ScimBulkRequest
+### 991. ScimBulkRequest
 
 ```php
 final readonly class ScimBulkRequest
@@ -12108,7 +12109,7 @@ final readonly class ScimBulkRequest
 
 ---
 
-# 992. Bulk limits
+### 992. Bulk limits
 
 La política deberá limitar:
 
@@ -12121,7 +12122,7 @@ La política deberá limitar:
 
 ---
 
-# 993. Bulk authorization
+### 993. Bulk authorization
 
 Cada operación deberá autorizarse individualmente.
 
@@ -12129,7 +12130,7 @@ La autorización del endpoint Bulk no implica autorización sobre todos los recu
 
 ---
 
-# 994. Bulk transaction strategy
+### 994. Bulk transaction strategy
 
 El sistema deberá declarar si el bulk es:
 
@@ -12140,7 +12141,7 @@ El sistema deberá declarar si el bulk es:
 
 ---
 
-# 995. Bulk reference resolution
+### 995. Bulk reference resolution
 
 Las referencias internas entre operaciones deberán:
 
@@ -12151,13 +12152,13 @@ Las referencias internas entre operaciones deberán:
 
 ---
 
-# 996. User activation and deactivation
+### 996. User activation and deactivation
 
 El atributo `active` deberá mapearse a una transición controlada del ciclo de vida.
 
 ---
 
-# 997. Deactivation semantics
+### 997. Deactivation semantics
 
 Establecer:
 
@@ -12178,7 +12179,7 @@ deberá poder provocar:
 
 ---
 
-# 998. Deprovisioning workflow
+### 998. Deprovisioning workflow
 
 ```text
 Validated SCIM Deactivation
@@ -12208,7 +12209,7 @@ Return Updated SCIM Resource
 
 ---
 
-# 999. SCIM audit events
+### 999. SCIM audit events
 
 Eventos recomendados:
 
@@ -12231,7 +12232,7 @@ Eventos recomendados:
 
 ---
 
-# 1000. Resultado de esta entrega
+### 1000. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -12296,9 +12297,9 @@ Entrega 11
 - Disaster recovery for identity provisioning
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 11
+
 
 **Documento:** Parte 05
 **Entrega:** 11 de varias
@@ -12307,7 +12308,7 @@ Entrega 11
 
 ---
 
-# 1001. Directory Synchronization Architecture
+### 1001. Directory Synchronization Architecture
 
 VoltStack deberá soportar sincronización de directorios externos para mantener consistencia entre:
 
@@ -12324,7 +12325,7 @@ La sincronización deberá considerarse un subsistema de identidad independiente
 
 ---
 
-# 1002. Synchronization security goals
+### 1002. Synchronization security goals
 
 El subsistema deberá garantizar:
 
@@ -12341,7 +12342,7 @@ El subsistema deberá garantizar:
 
 ---
 
-# 1003. Directory synchronization threat model
+### 1003. Directory synchronization threat model
 
 El modelo deberá considerar:
 
@@ -12362,7 +12363,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1004. Synchronization architectural components
+### 1004. Synchronization architectural components
 
 ```text
 External Directory
@@ -12394,7 +12395,7 @@ Audit and Health Metrics
 
 ---
 
-# 1005. DirectoryConnector
+### 1005. DirectoryConnector
 
 ```php
 interface DirectoryConnectorInterface
@@ -12414,7 +12415,7 @@ interface DirectoryConnectorInterface
 
 ---
 
-# 1006. DirectoryConnectorCapabilities
+### 1006. DirectoryConnectorCapabilities
 
 ```php
 final readonly class DirectoryConnectorCapabilities
@@ -12434,7 +12435,7 @@ final readonly class DirectoryConnectorCapabilities
 
 ---
 
-# 1007. Directory source definition
+### 1007. Directory source definition
 
 ```php
 final readonly class DirectorySourceDefinition
@@ -12454,7 +12455,7 @@ final readonly class DirectorySourceDefinition
 
 ---
 
-# 1008. DirectorySourceType
+### 1008. DirectorySourceType
 
 ```php
 enum DirectorySourceType: string
@@ -12470,7 +12471,7 @@ enum DirectorySourceType: string
 
 ---
 
-# 1009. DirectorySourceStatus
+### 1009. DirectorySourceStatus
 
 ```php
 enum DirectorySourceStatus: string
@@ -12485,7 +12486,7 @@ enum DirectorySourceStatus: string
 
 ---
 
-# 1010. DirectoryTrustLevel
+### 1010. DirectoryTrustLevel
 
 ```php
 enum DirectoryTrustLevel: string
@@ -12499,13 +12500,13 @@ enum DirectoryTrustLevel: string
 
 ---
 
-# 1011. Full synchronization
+### 1011. Full synchronization
 
 Una sincronización completa deberá enumerar el estado total conocido de una fuente.
 
 ---
 
-# 1012. Full sync use cases
+### 1012. Full sync use cases
 
 Deberá utilizarse para:
 
@@ -12519,7 +12520,7 @@ Deberá utilizarse para:
 
 ---
 
-# 1013. Full sync safeguards
+### 1013. Full sync safeguards
 
 Una sincronización completa deberá aplicar:
 
@@ -12533,13 +12534,13 @@ Una sincronización completa deberá aplicar:
 
 ---
 
-# 1014. Incremental synchronization
+### 1014. Incremental synchronization
 
 La sincronización incremental deberá procesar únicamente cambios desde un checkpoint confiable.
 
 ---
 
-# 1015. Incremental change types
+### 1015. Incremental change types
 
 ```php
 enum DirectoryChangeType: string
@@ -12557,7 +12558,7 @@ enum DirectoryChangeType: string
 
 ---
 
-# 1016. DirectoryChange
+### 1016. DirectoryChange
 
 ```php
 final readonly class DirectoryChange
@@ -12577,13 +12578,13 @@ final readonly class DirectoryChange
 
 ---
 
-# 1017. Change ordering
+### 1017. Change ordering
 
 Cuando la fuente proporcione orden causal, VoltStack deberá preservarlo.
 
 ---
 
-# 1018. Out-of-order changes
+### 1018. Out-of-order changes
 
 El sistema deberá detectar cambios:
 
@@ -12595,7 +12596,7 @@ El sistema deberá detectar cambios:
 
 ---
 
-# 1019. DirectorySyncCursor
+### 1019. DirectorySyncCursor
 
 ```php
 final readonly class DirectorySyncCursor
@@ -12614,7 +12615,7 @@ final readonly class DirectorySyncCursor
 
 ---
 
-# 1020. Cursor integrity
+### 1020. Cursor integrity
 
 Los cursores deberán:
 
@@ -12626,7 +12627,7 @@ Los cursores deberán:
 
 ---
 
-# 1021. Cursor loss
+### 1021. Cursor loss
 
 Si el cursor se pierde o invalida, VoltStack deberá:
 
@@ -12638,7 +12639,7 @@ Si el cursor se pierde o invalida, VoltStack deberá:
 
 ---
 
-# 1022. Change tokens
+### 1022. Change tokens
 
 Una fuente podrá emitir change tokens opacos.
 
@@ -12646,7 +12647,7 @@ VoltStack no deberá interpretar su estructura interna.
 
 ---
 
-# 1023. DirectorySyncCheckpoint
+### 1023. DirectorySyncCheckpoint
 
 ```php
 final readonly class DirectorySyncCheckpoint
@@ -12668,7 +12669,7 @@ final readonly class DirectorySyncCheckpoint
 
 ---
 
-# 1024. DirectorySyncCheckpointState
+### 1024. DirectorySyncCheckpointState
 
 ```php
 enum DirectorySyncCheckpointState: string
@@ -12684,19 +12685,19 @@ enum DirectorySyncCheckpointState: string
 
 ---
 
-# 1025. Checkpoint commit rule
+### 1025. Checkpoint commit rule
 
 El cursor nuevo no deberá persistirse como definitivo hasta que el batch haya sido aplicado correctamente.
 
 ---
 
-# 1026. At-least-once delivery
+### 1026. At-least-once delivery
 
 VoltStack deberá diseñarse para tolerar que un cambio sea recibido más de una vez.
 
 ---
 
-# 1027. Change idempotency
+### 1027. Change idempotency
 
 ```php
 interface DirectoryChangeLedgerInterface
@@ -12716,7 +12717,7 @@ interface DirectoryChangeLedgerInterface
 
 ---
 
-# 1028. Batch processing
+### 1028. Batch processing
 
 ```php
 final readonly class DirectoryChangeBatch
@@ -12733,7 +12734,7 @@ final readonly class DirectoryChangeBatch
 
 ---
 
-# 1029. Batch atomicity
+### 1029. Batch atomicity
 
 La estrategia deberá declararse como:
 
@@ -12744,13 +12745,13 @@ La estrategia deberá declararse como:
 
 ---
 
-# 1030. Partial batch failure
+### 1030. Partial batch failure
 
 Ante fallo parcial, el sistema deberá evitar avanzar el checkpoint sobre cambios no aplicados.
 
 ---
 
-# 1031. Retry policy
+### 1031. Retry policy
 
 ```php
 final readonly class DirectorySyncRetryPolicy
@@ -12768,7 +12769,7 @@ final readonly class DirectorySyncRetryPolicy
 
 ---
 
-# 1032. Poison change handling
+### 1032. Poison change handling
 
 Un cambio que falla repetidamente deberá:
 
@@ -12780,13 +12781,13 @@ Un cambio que falla repetidamente deberá:
 
 ---
 
-# 1033. Identity reconciliation
+### 1033. Identity reconciliation
 
 La reconciliación determinará qué identidad local corresponde a un recurso externo.
 
 ---
 
-# 1034. IdentityReconciliationService
+### 1034. IdentityReconciliationService
 
 ```php
 interface IdentityReconciliationServiceInterface
@@ -12800,7 +12801,7 @@ interface IdentityReconciliationServiceInterface
 
 ---
 
-# 1035. Correlation priorities
+### 1035. Correlation priorities
 
 La correlación deberá priorizar:
 
@@ -12813,13 +12814,13 @@ La correlación deberá priorizar:
 
 ---
 
-# 1036. Email correlation restrictions
+### 1036. Email correlation restrictions
 
 El email no deberá ser un criterio automático suficiente para fusionar identidades.
 
 ---
 
-# 1037. IdentityReconciliationResult
+### 1037. IdentityReconciliationResult
 
 ```php
 final readonly class IdentityReconciliationResult
@@ -12836,7 +12837,7 @@ final readonly class IdentityReconciliationResult
 
 ---
 
-# 1038. IdentityReconciliationStatus
+### 1038. IdentityReconciliationStatus
 
 ```php
 enum IdentityReconciliationStatus: string
@@ -12851,13 +12852,13 @@ enum IdentityReconciliationStatus: string
 
 ---
 
-# 1039. Source-of-truth policies
+### 1039. Source-of-truth policies
 
 VoltStack deberá definir qué sistema es autoridad para cada tipo de dato.
 
 ---
 
-# 1040. AttributeAuthority
+### 1040. AttributeAuthority
 
 ```php
 final readonly class AttributeAuthority
@@ -12874,7 +12875,7 @@ final readonly class AttributeAuthority
 
 ---
 
-# 1041. AttributeAuthorityMode
+### 1041. AttributeAuthorityMode
 
 ```php
 enum AttributeAuthorityMode: string
@@ -12889,7 +12890,7 @@ enum AttributeAuthorityMode: string
 
 ---
 
-# 1042. Attribute ownership
+### 1042. Attribute ownership
 
 Cada atributo deberá registrar:
 
@@ -12902,7 +12903,7 @@ Cada atributo deberá registrar:
 
 ---
 
-# 1043. AttributeOwnershipRecord
+### 1043. AttributeOwnershipRecord
 
 ```php
 final readonly class AttributeOwnershipRecord
@@ -12921,7 +12922,7 @@ final readonly class AttributeOwnershipRecord
 
 ---
 
-# 1044. Protected local fields
+### 1044. Protected local fields
 
 Los siguientes datos no deberán sobrescribirse sin política explícita:
 
@@ -12936,7 +12937,7 @@ Los siguientes datos no deberán sobrescribirse sin política explícita:
 
 ---
 
-# 1045. Field-level conflict resolution
+### 1045. Field-level conflict resolution
 
 ```php
 interface AttributeConflictResolverInterface
@@ -12950,7 +12951,7 @@ interface AttributeConflictResolverInterface
 
 ---
 
-# 1046. AttributeConflict
+### 1046. AttributeConflict
 
 ```php
 final readonly class AttributeConflict
@@ -12969,7 +12970,7 @@ final readonly class AttributeConflict
 
 ---
 
-# 1047. Conflict resolution strategies
+### 1047. Conflict resolution strategies
 
 ```php
 enum AttributeConflictStrategy: string
@@ -12986,13 +12987,13 @@ enum AttributeConflictStrategy: string
 
 ---
 
-# 1048. Latest-write limitations
+### 1048. Latest-write limitations
 
 “Última escritura gana” no deberá usarse para atributos críticos sin versionado y autoridad explícita.
 
 ---
 
-# 1049. Merge policies
+### 1049. Merge policies
 
 La combinación deberá ser semántica y específica por tipo de atributo.
 
@@ -13006,7 +13007,7 @@ Ejemplos:
 
 ---
 
-# 1050. Conflict auditability
+### 1050. Conflict auditability
 
 Toda resolución automática deberá registrar:
 
@@ -13018,13 +13019,13 @@ Toda resolución automática deberá registrar:
 
 ---
 
-# 1051. Tombstones
+### 1051. Tombstones
 
 Un tombstone representa la desaparición lógica de un recurso externo.
 
 ---
 
-# 1052. DirectoryTombstone
+### 1052. DirectoryTombstone
 
 ```php
 final readonly class DirectoryTombstone
@@ -13043,7 +13044,7 @@ final readonly class DirectoryTombstone
 
 ---
 
-# 1053. TombstoneState
+### 1053. TombstoneState
 
 ```php
 enum TombstoneState: string
@@ -13057,7 +13058,7 @@ enum TombstoneState: string
 
 ---
 
-# 1054. Tombstone retention
+### 1054. Tombstone retention
 
 Los tombstones deberán conservarse durante un periodo suficiente para:
 
@@ -13069,13 +13070,13 @@ Los tombstones deberán conservarse durante un periodo suficiente para:
 
 ---
 
-# 1055. Soft delete
+### 1055. Soft delete
 
 El soft delete deberá preservar el registro local y bloquear acceso.
 
 ---
 
-# 1056. Hard delete
+### 1056. Hard delete
 
 El hard delete deberá quedar reservado para:
 
@@ -13087,19 +13088,19 @@ El hard delete deberá quedar reservado para:
 
 ---
 
-# 1057. Delete mapping policy
+### 1057. Delete mapping policy
 
 Una eliminación externa no deberá traducirse automáticamente en hard delete local.
 
 ---
 
-# 1058. Deletion safety threshold
+### 1058. Deletion safety threshold
 
 VoltStack deberá detectar un volumen de eliminaciones superior al patrón esperado.
 
 ---
 
-# 1059. Mass deletion protection
+### 1059. Mass deletion protection
 
 ```php
 final readonly class MassDeletionProtectionPolicy
@@ -13116,7 +13117,7 @@ final readonly class MassDeletionProtectionPolicy
 
 ---
 
-# 1060. Destructive sync pause
+### 1060. Destructive sync pause
 
 Al superar el umbral, el sync deberá:
 
@@ -13128,13 +13129,13 @@ Al superar el umbral, el sync deberá:
 
 ---
 
-# 1061. Reprovisioning
+### 1061. Reprovisioning
 
 Una identidad previamente desactivada podrá reaparecer en la fuente.
 
 ---
 
-# 1062. Reprovisioning policy
+### 1062. Reprovisioning policy
 
 La política deberá decidir si:
 
@@ -13147,13 +13148,13 @@ La política deberá decidir si:
 
 ---
 
-# 1063. Identity continuity
+### 1063. Identity continuity
 
 Cuando el identificador externo estable sea el mismo, deberá preferirse continuidad controlada sobre crear identidades duplicadas.
 
 ---
 
-# 1064. Reprovisioning security review
+### 1064. Reprovisioning security review
 
 Deberá requerirse revisión adicional si la identidad previa fue marcada como:
 
@@ -13165,13 +13166,13 @@ Deberá requerirse revisión adicional si la identidad previa fue marcada como:
 
 ---
 
-# 1065. Orphan identity detection
+### 1065. Orphan identity detection
 
 Una identidad huérfana existe cuando conserva estado local pero ya no está respaldada por una fuente esperada.
 
 ---
 
-# 1066. OrphanIdentityDetector
+### 1066. OrphanIdentityDetector
 
 ```php
 interface OrphanIdentityDetectorInterface
@@ -13186,7 +13187,7 @@ interface OrphanIdentityDetectorInterface
 
 ---
 
-# 1067. Orphan classifications
+### 1067. Orphan classifications
 
 ```php
 enum OrphanIdentityStatus: string
@@ -13200,7 +13201,7 @@ enum OrphanIdentityStatus: string
 
 ---
 
-# 1068. Orphan grace period
+### 1068. Orphan grace period
 
 Una identidad no deberá desactivarse por una única ausencia temporal sin considerar:
 
@@ -13213,7 +13214,7 @@ Una identidad no deberá desactivarse por una única ausencia temporal sin consi
 
 ---
 
-# 1069. Stale account detection
+### 1069. Stale account detection
 
 Una cuenta stale podrá identificarse por:
 
@@ -13226,7 +13227,7 @@ Una cuenta stale podrá identificarse por:
 
 ---
 
-# 1070. StaleAccountAssessment
+### 1070. StaleAccountAssessment
 
 ```php
 final readonly class StaleAccountAssessment
@@ -13243,7 +13244,7 @@ final readonly class StaleAccountAssessment
 
 ---
 
-# 1071. Stale account remediation
+### 1071. Stale account remediation
 
 Las acciones podrán incluir:
 
@@ -13257,13 +13258,13 @@ Las acciones podrán incluir:
 
 ---
 
-# 1072. Manager hierarchy synchronization
+### 1072. Manager hierarchy synchronization
 
 VoltStack podrá sincronizar relaciones de manager-subordinate.
 
 ---
 
-# 1073. ManagerRelationship
+### 1073. ManagerRelationship
 
 ```php
 final readonly class ManagerRelationship
@@ -13280,7 +13281,7 @@ final readonly class ManagerRelationship
 
 ---
 
-# 1074. Manager hierarchy validation
+### 1074. Manager hierarchy validation
 
 Deberá impedirse:
 
@@ -13293,13 +13294,13 @@ Deberá impedirse:
 
 ---
 
-# 1075. Manager hierarchy security use
+### 1075. Manager hierarchy security use
 
 Una relación de manager no deberá otorgar automáticamente privilegios sensibles.
 
 ---
 
-# 1076. Approval chain derivation
+### 1076. Approval chain derivation
 
 Cuando se use para aprobaciones, la jerarquía deberá:
 
@@ -13311,13 +13312,13 @@ Cuando se use para aprobaciones, la jerarquía deberá:
 
 ---
 
-# 1077. Nested group synchronization
+### 1077. Nested group synchronization
 
 VoltStack podrá sincronizar grupos que contienen otros grupos.
 
 ---
 
-# 1078. Group graph model
+### 1078. Group graph model
 
 ```php
 final readonly class DirectoryGroupEdge
@@ -13333,13 +13334,13 @@ final readonly class DirectoryGroupEdge
 
 ---
 
-# 1079. Cyclic group protection
+### 1079. Cyclic group protection
 
 El sistema deberá detectar ciclos antes de persistir relaciones.
 
 ---
 
-# 1080. Group cycle detection
+### 1080. Group cycle detection
 
 ```php
 interface GroupCycleDetectorInterface
@@ -13354,13 +13355,13 @@ interface GroupCycleDetectorInterface
 
 ---
 
-# 1081. Nested group depth limit
+### 1081. Nested group depth limit
 
 La política deberá limitar la profundidad de expansión.
 
 ---
 
-# 1082. Membership explosion protection
+### 1082. Membership explosion protection
 
 Deberán establecerse límites para:
 
@@ -13373,7 +13374,7 @@ Deberán establecerse límites para:
 
 ---
 
-# 1083. Effective membership
+### 1083. Effective membership
 
 La membresía efectiva deberá distinguir:
 
@@ -13386,19 +13387,19 @@ La membresía efectiva deberá distinguir:
 
 ---
 
-# 1084. Authorization cache invalidation
+### 1084. Authorization cache invalidation
 
 Los cambios en membresía efectiva deberán incrementar la versión de autorización correspondiente.
 
 ---
 
-# 1085. Sync drift
+### 1085. Sync drift
 
 Drift es la diferencia no esperada entre el estado externo y el estado local.
 
 ---
 
-# 1086. DirectoryDriftDetector
+### 1086. DirectoryDriftDetector
 
 ```php
 interface DirectoryDriftDetectorInterface
@@ -13412,7 +13413,7 @@ interface DirectoryDriftDetectorInterface
 
 ---
 
-# 1087. Drift categories
+### 1087. Drift categories
 
 ```php
 enum DirectoryDriftCategory: string
@@ -13429,7 +13430,7 @@ enum DirectoryDriftCategory: string
 
 ---
 
-# 1088. DirectoryDriftReport
+### 1088. DirectoryDriftReport
 
 ```php
 final readonly class DirectoryDriftReport
@@ -13447,7 +13448,7 @@ final readonly class DirectoryDriftReport
 
 ---
 
-# 1089. Drift remediation modes
+### 1089. Drift remediation modes
 
 ```php
 enum DriftRemediationMode: string
@@ -13461,7 +13462,7 @@ enum DriftRemediationMode: string
 
 ---
 
-# 1090. Safe auto-repair
+### 1090. Safe auto-repair
 
 Solo deberán repararse automáticamente diferencias:
 
@@ -13473,13 +13474,13 @@ Solo deberán repararse automáticamente diferencias:
 
 ---
 
-# 1091. Provisioning health monitoring
+### 1091. Provisioning health monitoring
 
 VoltStack deberá medir la salud operacional del subsistema.
 
 ---
 
-# 1092. DirectorySyncHealthMetrics
+### 1092. DirectorySyncHealthMetrics
 
 Métricas recomendadas:
 
@@ -13499,7 +13500,7 @@ Métricas recomendadas:
 
 ---
 
-# 1093. DirectorySyncHealthStatus
+### 1093. DirectorySyncHealthStatus
 
 ```php
 enum DirectorySyncHealthStatus: string
@@ -13514,7 +13515,7 @@ enum DirectorySyncHealthStatus: string
 
 ---
 
-# 1094. Health threshold policies
+### 1094. Health threshold policies
 
 Cada tenant podrá definir tolerancias según:
 
@@ -13526,7 +13527,7 @@ Cada tenant podrá definir tolerancias según:
 
 ---
 
-# 1095. Provisioning alerts
+### 1095. Provisioning alerts
 
 VoltStack deberá alertar ante:
 
@@ -13541,7 +13542,7 @@ VoltStack deberá alertar ante:
 
 ---
 
-# 1096. Disaster recovery foundations
+### 1096. Disaster recovery foundations
 
 La recuperación deberá contemplar:
 
@@ -13556,7 +13557,7 @@ La recuperación deberá contemplar:
 
 ---
 
-# 1097. DirectorySyncRecoveryService
+### 1097. DirectorySyncRecoveryService
 
 ```php
 interface DirectorySyncRecoveryServiceInterface
@@ -13571,7 +13572,7 @@ interface DirectorySyncRecoveryServiceInterface
 
 ---
 
-# 1098. Recovery strategies
+### 1098. Recovery strategies
 
 VoltStack podrá ejecutar:
 
@@ -13584,7 +13585,7 @@ VoltStack podrá ejecutar:
 
 ---
 
-# 1099. Directory synchronization audit events
+### 1099. Directory synchronization audit events
 
 Eventos recomendados:
 
@@ -13606,7 +13607,7 @@ Eventos recomendados:
 
 ---
 
-# 1100. Resultado de esta entrega
+### 1100. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -13666,9 +13667,9 @@ Entrega 12
 - Compliance reporting
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 12
+
 
 **Documento:** Parte 05
 **Entrega:** 12 de varias
@@ -13677,7 +13678,7 @@ Entrega 12
 
 ---
 
-# 1101. Identity Governance Architecture
+### 1101. Identity Governance Architecture
 
 VoltStack deberá incorporar un subsistema de Identity Governance and Administration para gobernar:
 
@@ -13696,7 +13697,7 @@ Este subsistema deberá operar por encima de autenticación, autorización y apr
 
 ---
 
-# 1102. Governance security goals
+### 1102. Governance security goals
 
 La arquitectura deberá garantizar:
 
@@ -13713,7 +13714,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1103. Governance threat model
+### 1103. Governance threat model
 
 El modelo deberá considerar:
 
@@ -13733,7 +13734,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1104. Governance architectural components
+### 1104. Governance architectural components
 
 ```text
 Identity Sources
@@ -13759,7 +13760,7 @@ Evidence and Compliance Reporting
 
 ---
 
-# 1105. IdentityGovernanceService
+### 1105. IdentityGovernanceService
 
 ```php
 interface IdentityGovernanceServiceInterface
@@ -13777,7 +13778,7 @@ interface IdentityGovernanceServiceInterface
 
 ---
 
-# 1106. GovernanceSubject
+### 1106. GovernanceSubject
 
 ```php
 final readonly class GovernanceSubject
@@ -13796,7 +13797,7 @@ final readonly class GovernanceSubject
 
 ---
 
-# 1107. GovernanceAssessment
+### 1107. GovernanceAssessment
 
 ```php
 final readonly class GovernanceAssessment
@@ -13813,7 +13814,7 @@ final readonly class GovernanceAssessment
 
 ---
 
-# 1108. GovernanceRiskLevel
+### 1108. GovernanceRiskLevel
 
 ```php
 enum GovernanceRiskLevel: string
@@ -13827,7 +13828,7 @@ enum GovernanceRiskLevel: string
 
 ---
 
-# 1109. Entitlement catalog
+### 1109. Entitlement catalog
 
 VoltStack deberá mantener un catálogo central de derechos de acceso.
 
@@ -13845,7 +13846,7 @@ Un entitlement podrá representar:
 
 ---
 
-# 1110. EntitlementDefinition
+### 1110. EntitlementDefinition
 
 ```php
 final readonly class EntitlementDefinition
@@ -13870,7 +13871,7 @@ final readonly class EntitlementDefinition
 
 ---
 
-# 1111. EntitlementType
+### 1111. EntitlementType
 
 ```php
 enum EntitlementType: string
@@ -13888,7 +13889,7 @@ enum EntitlementType: string
 
 ---
 
-# 1112. EntitlementRiskLevel
+### 1112. EntitlementRiskLevel
 
 ```php
 enum EntitlementRiskLevel: string
@@ -13902,7 +13903,7 @@ enum EntitlementRiskLevel: string
 
 ---
 
-# 1113. Entitlement ownership
+### 1113. Entitlement ownership
 
 Cada entitlement deberá tener un propietario responsable de:
 
@@ -13916,7 +13917,7 @@ Cada entitlement deberá tener un propietario responsable de:
 
 ---
 
-# 1114. Entitlement lifecycle
+### 1114. Entitlement lifecycle
 
 ```php
 enum EntitlementLifecycleState: string
@@ -13931,7 +13932,7 @@ enum EntitlementLifecycleState: string
 
 ---
 
-# 1115. EntitlementCatalog
+### 1115. EntitlementCatalog
 
 ```php
 interface EntitlementCatalogInterface
@@ -13948,7 +13949,7 @@ interface EntitlementCatalogInterface
 
 ---
 
-# 1116. Requestable entitlements
+### 1116. Requestable entitlements
 
 Un entitlement requestable deberá declarar:
 
@@ -13963,7 +13964,7 @@ Un entitlement requestable deberá declarar:
 
 ---
 
-# 1117. Entitlement metadata integrity
+### 1117. Entitlement metadata integrity
 
 La metadata crítica deberá:
 
@@ -13974,13 +13975,13 @@ La metadata crítica deberá:
 
 ---
 
-# 1118. Role architecture
+### 1118. Role architecture
 
 Los roles deberán representar agrupaciones gobernadas de acceso.
 
 ---
 
-# 1119. Role types
+### 1119. Role types
 
 ```php
 enum GovernanceRoleType: string
@@ -13996,7 +13997,7 @@ enum GovernanceRoleType: string
 
 ---
 
-# 1120. GovernanceRole
+### 1120. GovernanceRole
 
 ```php
 final readonly class GovernanceRole
@@ -14016,7 +14017,7 @@ final readonly class GovernanceRole
 
 ---
 
-# 1121. GovernanceRoleState
+### 1121. GovernanceRoleState
 
 ```php
 enum GovernanceRoleState: string
@@ -14031,7 +14032,7 @@ enum GovernanceRoleState: string
 
 ---
 
-# 1122. Role explosion prevention
+### 1122. Role explosion prevention
 
 VoltStack deberá detectar:
 
@@ -14044,13 +14045,13 @@ VoltStack deberá detectar:
 
 ---
 
-# 1123. Role mining
+### 1123. Role mining
 
 Role mining deberá analizar patrones de acceso existentes para proponer roles.
 
 ---
 
-# 1124. RoleMiningService
+### 1124. RoleMiningService
 
 ```php
 interface RoleMiningServiceInterface
@@ -14064,13 +14065,13 @@ interface RoleMiningServiceInterface
 
 ---
 
-# 1125. Role mining limitations
+### 1125. Role mining limitations
 
 Las recomendaciones no deberán aplicarse automáticamente a roles privilegiados.
 
 ---
 
-# 1126. RoleMiningReport
+### 1126. RoleMiningReport
 
 ```php
 final readonly class RoleMiningReport
@@ -14087,13 +14088,13 @@ final readonly class RoleMiningReport
 
 ---
 
-# 1127. Access request architecture
+### 1127. Access request architecture
 
 VoltStack deberá ofrecer un flujo gobernado para solicitar acceso.
 
 ---
 
-# 1128. AccessRequest
+### 1128. AccessRequest
 
 ```php
 final readonly class AccessRequest
@@ -14115,7 +14116,7 @@ final readonly class AccessRequest
 
 ---
 
-# 1129. AccessRequestState
+### 1129. AccessRequestState
 
 ```php
 enum AccessRequestState: string
@@ -14136,7 +14137,7 @@ enum AccessRequestState: string
 
 ---
 
-# 1130. Access request validation
+### 1130. Access request validation
 
 El request deberá validar:
 
@@ -14153,13 +14154,13 @@ El request deberá validar:
 
 ---
 
-# 1131. Self-request restrictions
+### 1131. Self-request restrictions
 
 Un usuario podrá solicitar acceso para sí mismo, pero no deberá autoaprobarlo cuando el entitlement sea sensible.
 
 ---
 
-# 1132. Request-on-behalf-of
+### 1132. Request-on-behalf-of
 
 Solicitar acceso para otra persona deberá requerir:
 
@@ -14170,7 +14171,7 @@ Solicitar acceso para otra persona deberá requerir:
 
 ---
 
-# 1133. Access justification
+### 1133. Access justification
 
 La justificación deberá:
 
@@ -14182,13 +14183,13 @@ La justificación deberá:
 
 ---
 
-# 1134. Access duration
+### 1134. Access duration
 
 Todo acceso temporal deberá declarar una expiración.
 
 ---
 
-# 1135. Maximum access duration
+### 1135. Maximum access duration
 
 La duración máxima deberá depender de:
 
@@ -14202,7 +14203,7 @@ La duración máxima deberá depender de:
 
 ---
 
-# 1136. Approval policy architecture
+### 1136. Approval policy architecture
 
 ```php
 interface AccessApprovalPolicyInterface
@@ -14216,7 +14217,7 @@ interface AccessApprovalPolicyInterface
 
 ---
 
-# 1137. AccessApprovalPlan
+### 1137. AccessApprovalPlan
 
 ```php
 final readonly class AccessApprovalPlan
@@ -14233,7 +14234,7 @@ final readonly class AccessApprovalPlan
 
 ---
 
-# 1138. Approval stages
+### 1138. Approval stages
 
 Una aprobación podrá requerir:
 
@@ -14248,7 +14249,7 @@ Una aprobación podrá requerir:
 
 ---
 
-# 1139. ApprovalStage
+### 1139. ApprovalStage
 
 ```php
 final readonly class ApprovalStage
@@ -14266,7 +14267,7 @@ final readonly class ApprovalStage
 
 ---
 
-# 1140. ApprovalStageType
+### 1140. ApprovalStageType
 
 ```php
 enum ApprovalStageType: string
@@ -14283,13 +14284,13 @@ enum ApprovalStageType: string
 
 ---
 
-# 1141. Self-approval prohibition
+### 1141. Self-approval prohibition
 
 El solicitante, beneficiario o actor con conflicto directo no deberá aprobar el request.
 
 ---
 
-# 1142. Approval delegation
+### 1142. Approval delegation
 
 Una delegación de aprobación deberá ser:
 
@@ -14301,7 +14302,7 @@ Una delegación de aprobación deberá ser:
 
 ---
 
-# 1143. ApprovalDecision
+### 1143. ApprovalDecision
 
 ```php
 final readonly class ApprovalDecision
@@ -14321,7 +14322,7 @@ final readonly class ApprovalDecision
 
 ---
 
-# 1144. ApprovalDecisionType
+### 1144. ApprovalDecisionType
 
 ```php
 enum ApprovalDecisionType: string
@@ -14336,13 +14337,13 @@ enum ApprovalDecisionType: string
 
 ---
 
-# 1145. Approval timeout
+### 1145. Approval timeout
 
 Las aprobaciones pendientes deberán expirar.
 
 ---
 
-# 1146. Approval escalation
+### 1146. Approval escalation
 
 La policy podrá:
 
@@ -14354,7 +14355,7 @@ La policy podrá:
 
 ---
 
-# 1147. Approval evidence
+### 1147. Approval evidence
 
 Toda aprobación deberá conservar:
 
@@ -14369,13 +14370,13 @@ Toda aprobación deberá conservar:
 
 ---
 
-# 1148. Separation of Duties
+### 1148. Separation of Duties
 
 SoD deberá impedir combinaciones de acceso que creen riesgo operativo o fraude.
 
 ---
 
-# 1149. SoD rule types
+### 1149. SoD rule types
 
 ```php
 enum SeparationOfDutiesRuleType: string
@@ -14390,7 +14391,7 @@ enum SeparationOfDutiesRuleType: string
 
 ---
 
-# 1150. Static SoD
+### 1150. Static SoD
 
 Una regla estática impide poseer simultáneamente determinados accesos.
 
@@ -14402,25 +14403,25 @@ vendor.create + payment.approve
 
 ---
 
-# 1151. Dynamic SoD
+### 1151. Dynamic SoD
 
 Una regla dinámica podrá permitir ambos accesos, pero no utilizarlos dentro de una misma transacción o proceso.
 
 ---
 
-# 1152. Transactional SoD
+### 1152. Transactional SoD
 
 La separación deberá aplicarse al momento de ejecutar acciones relacionadas.
 
 ---
 
-# 1153. Temporal SoD
+### 1153. Temporal SoD
 
 Una identidad no deberá realizar dos acciones incompatibles dentro de una ventana temporal definida.
 
 ---
 
-# 1154. Contextual SoD
+### 1154. Contextual SoD
 
 La regla podrá depender de:
 
@@ -14434,7 +14435,7 @@ La regla podrá depender de:
 
 ---
 
-# 1155. SeparationOfDutiesRule
+### 1155. SeparationOfDutiesRule
 
 ```php
 final readonly class SeparationOfDutiesRule
@@ -14453,7 +14454,7 @@ final readonly class SeparationOfDutiesRule
 
 ---
 
-# 1156. SoD evaluator
+### 1156. SoD evaluator
 
 ```php
 interface SeparationOfDutiesEvaluatorInterface
@@ -14468,13 +14469,13 @@ interface SeparationOfDutiesEvaluatorInterface
 
 ---
 
-# 1157. Toxic access combinations
+### 1157. Toxic access combinations
 
 Una toxic combination representa una combinación de acceso con riesgo elevado.
 
 ---
 
-# 1158. ToxicCombination
+### 1158. ToxicCombination
 
 ```php
 final readonly class ToxicCombination
@@ -14492,7 +14493,7 @@ final readonly class ToxicCombination
 
 ---
 
-# 1159. Toxic access detection
+### 1159. Toxic access detection
 
 La detección deberá ejecutarse:
 
@@ -14505,7 +14506,7 @@ La detección deberá ejecutarse:
 
 ---
 
-# 1160. Compensating controls
+### 1160. Compensating controls
 
 Una excepción SoD podrá requerir:
 
@@ -14520,7 +14521,7 @@ Una excepción SoD podrá requerir:
 
 ---
 
-# 1161. SoD exception
+### 1161. SoD exception
 
 ```php
 final readonly class SeparationOfDutiesException
@@ -14540,19 +14541,19 @@ final readonly class SeparationOfDutiesException
 
 ---
 
-# 1162. SoD exception expiry
+### 1162. SoD exception expiry
 
 Toda excepción deberá expirar y no renovarse automáticamente.
 
 ---
 
-# 1163. Access review architecture
+### 1163. Access review architecture
 
 VoltStack deberá permitir revisiones periódicas y event-driven.
 
 ---
 
-# 1164. AccessReviewCampaign
+### 1164. AccessReviewCampaign
 
 ```php
 final readonly class AccessReviewCampaign
@@ -14573,7 +14574,7 @@ final readonly class AccessReviewCampaign
 
 ---
 
-# 1165. AccessReviewCampaignState
+### 1165. AccessReviewCampaignState
 
 ```php
 enum AccessReviewCampaignState: string
@@ -14589,7 +14590,7 @@ enum AccessReviewCampaignState: string
 
 ---
 
-# 1166. AccessReviewScope
+### 1166. AccessReviewScope
 
 La campaña podrá revisar:
 
@@ -14606,7 +14607,7 @@ La campaña podrá revisar:
 
 ---
 
-# 1167. Review item
+### 1167. Review item
 
 ```php
 final readonly class AccessReviewItem
@@ -14626,7 +14627,7 @@ final readonly class AccessReviewItem
 
 ---
 
-# 1168. AccessReviewItemState
+### 1168. AccessReviewItemState
 
 ```php
 enum AccessReviewItemState: string
@@ -14643,7 +14644,7 @@ enum AccessReviewItemState: string
 
 ---
 
-# 1169. Reviewer selection
+### 1169. Reviewer selection
 
 El reviewer podrá ser:
 
@@ -14658,13 +14659,13 @@ El reviewer podrá ser:
 
 ---
 
-# 1170. Reviewer conflict prevention
+### 1170. Reviewer conflict prevention
 
 No deberá permitirse que una identidad certifique su propio acceso sensible.
 
 ---
 
-# 1171. Review evidence
+### 1171. Review evidence
 
 La interfaz deberá mostrar:
 
@@ -14681,13 +14682,13 @@ La interfaz deberá mostrar:
 
 ---
 
-# 1172. Usage-aware review
+### 1172. Usage-aware review
 
 El sistema podrá incorporar señales de uso, pero ausencia de uso no deberá ser la única base para revocar automáticamente acceso crítico.
 
 ---
 
-# 1173. AccessReviewDecision
+### 1173. AccessReviewDecision
 
 ```php
 final readonly class AccessReviewDecision
@@ -14705,7 +14706,7 @@ final readonly class AccessReviewDecision
 
 ---
 
-# 1174. AccessReviewDecisionType
+### 1174. AccessReviewDecisionType
 
 ```php
 enum AccessReviewDecisionType: string
@@ -14720,7 +14721,7 @@ enum AccessReviewDecisionType: string
 
 ---
 
-# 1175. Access recertification
+### 1175. Access recertification
 
 La recertificación deberá exigir una decisión explícita.
 
@@ -14728,19 +14729,19 @@ La ausencia de respuesta no deberá equivaler automáticamente a aprobación.
 
 ---
 
-# 1176. Default-deny review policy
+### 1176. Default-deny review policy
 
 Para accesos privilegiados, la política podrá revocar por falta de certificación.
 
 ---
 
-# 1177. Review reminders
+### 1177. Review reminders
 
 El sistema deberá emitir recordatorios antes de la fecha límite.
 
 ---
 
-# 1178. Review escalation
+### 1178. Review escalation
 
 Los items no revisados podrán escalar a:
 
@@ -14752,13 +14753,13 @@ Los items no revisados podrán escalar a:
 
 ---
 
-# 1179. Review remediation
+### 1179. Review remediation
 
 Una decisión de revocación deberá generar una acción verificable.
 
 ---
 
-# 1180. Remediation tracking
+### 1180. Remediation tracking
 
 ```php
 final readonly class GovernanceRemediationTask
@@ -14778,7 +14779,7 @@ final readonly class GovernanceRemediationTask
 
 ---
 
-# 1181. GovernanceRemediationState
+### 1181. GovernanceRemediationState
 
 ```php
 enum GovernanceRemediationState: string
@@ -14793,19 +14794,19 @@ enum GovernanceRemediationState: string
 
 ---
 
-# 1182. Remediation verification
+### 1182. Remediation verification
 
 Una tarea no deberá marcarse como completada hasta confirmar el estado real en el sistema objetivo.
 
 ---
 
-# 1183. Joiner workflow
+### 1183. Joiner workflow
 
 El flujo Joiner deberá gobernar la incorporación de una nueva identidad.
 
 ---
 
-# 1184. Joiner workflow stages
+### 1184. Joiner workflow stages
 
 ```text
 Authoritative Identity Created
@@ -14831,13 +14832,13 @@ Activation
 
 ---
 
-# 1185. Birthright access
+### 1185. Birthright access
 
 El acceso base deberá derivarse de reglas claras y mínimas.
 
 ---
 
-# 1186. BirthrightAccessPolicy
+### 1186. BirthrightAccessPolicy
 
 ```php
 interface BirthrightAccessPolicyInterface
@@ -14850,13 +14851,13 @@ interface BirthrightAccessPolicyInterface
 
 ---
 
-# 1187. Birthright restrictions
+### 1187. Birthright restrictions
 
 El acceso base no deberá incluir privilegios administrativos salvo excepción documentada.
 
 ---
 
-# 1188. Mover workflow
+### 1188. Mover workflow
 
 El flujo Mover deberá gestionar cambios como:
 
@@ -14871,7 +14872,7 @@ El flujo Mover deberá gestionar cambios como:
 
 ---
 
-# 1189. Mover access recomputation
+### 1189. Mover access recomputation
 
 Un cambio organizacional deberá recalcular:
 
@@ -14885,7 +14886,7 @@ Un cambio organizacional deberá recalcular:
 
 ---
 
-# 1190. Add-before-remove risk
+### 1190. Add-before-remove risk
 
 Agregar acceso nuevo antes de retirar acceso anterior podrá crear toxic combinations temporales.
 
@@ -14893,7 +14894,7 @@ La secuencia deberá planificarse según riesgo.
 
 ---
 
-# 1191. Mover transition plan
+### 1191. Mover transition plan
 
 ```php
 final readonly class MoverTransitionPlan
@@ -14912,13 +14913,13 @@ final readonly class MoverTransitionPlan
 
 ---
 
-# 1192. Leaver workflow
+### 1192. Leaver workflow
 
 El flujo Leaver deberá retirar acceso de forma oportuna y verificable.
 
 ---
 
-# 1193. Leaver trigger types
+### 1193. Leaver trigger types
 
 ```php
 enum LeaverTriggerType: string
@@ -14933,7 +14934,7 @@ enum LeaverTriggerType: string
 
 ---
 
-# 1194. Leaver actions
+### 1194. Leaver actions
 
 El workflow deberá poder:
 
@@ -14951,7 +14952,7 @@ El workflow deberá poder:
 
 ---
 
-# 1195. Immediate termination
+### 1195. Immediate termination
 
 Una salida inmediata deberá priorizar:
 
@@ -14964,7 +14965,7 @@ Una salida inmediata deberá priorizar:
 
 ---
 
-# 1196. Access expiration engine
+### 1196. Access expiration engine
 
 ```php
 interface AccessExpirationServiceInterface
@@ -14977,7 +14978,7 @@ interface AccessExpirationServiceInterface
 
 ---
 
-# 1197. Expiration sources
+### 1197. Expiration sources
 
 La expiración podrá provenir de:
 
@@ -14993,7 +14994,7 @@ La expiración podrá provenir de:
 
 ---
 
-# 1198. Just-in-time privileged access
+### 1198. Just-in-time privileged access
 
 El acceso privilegiado JIT deberá:
 
@@ -15008,7 +15009,7 @@ El acceso privilegiado JIT deberá:
 
 ---
 
-# 1199. Break-glass identity governance
+### 1199. Break-glass identity governance
 
 Las identidades break-glass deberán:
 
@@ -15023,7 +15024,7 @@ Las identidades break-glass deberán:
 
 ---
 
-# 1200. Resultado de esta entrega
+### 1200. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -15084,9 +15085,9 @@ Entrega 13
 - Privileged access analytics
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 13
+
 
 **Documento:** Parte 05
 **Entrega:** 13 de varias
@@ -15095,7 +15096,7 @@ Entrega 13
 
 ---
 
-# 1201. Privileged Access Management Architecture
+### 1201. Privileged Access Management Architecture
 
 VoltStack deberá incorporar un subsistema de Privileged Access Management para gobernar:
 
@@ -15113,7 +15114,7 @@ El subsistema deberá mantenerse separado de la autorización ordinaria de aplic
 
 ---
 
-# 1202. PAM security goals
+### 1202. PAM security goals
 
 La arquitectura deberá garantizar:
 
@@ -15130,7 +15131,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1203. PAM threat model
+### 1203. PAM threat model
 
 El modelo deberá considerar:
 
@@ -15150,7 +15151,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1204. PAM architectural components
+### 1204. PAM architectural components
 
 ```text
 Privileged Access Request
@@ -15176,7 +15177,7 @@ Review and Evidence
 
 ---
 
-# 1205. Privileged identity
+### 1205. Privileged identity
 
 Una identidad privilegiada es cualquier identidad capaz de:
 
@@ -15191,7 +15192,7 @@ Una identidad privilegiada es cualquier identidad capaz de:
 
 ---
 
-# 1206. PrivilegedIdentityProfile
+### 1206. PrivilegedIdentityProfile
 
 ```php
 final readonly class PrivilegedIdentityProfile
@@ -15211,7 +15212,7 @@ final readonly class PrivilegedIdentityProfile
 
 ---
 
-# 1207. PrivilegedIdentityState
+### 1207. PrivilegedIdentityState
 
 ```php
 enum PrivilegedIdentityState: string
@@ -15226,7 +15227,7 @@ enum PrivilegedIdentityState: string
 
 ---
 
-# 1208. PrivilegedRiskLevel
+### 1208. PrivilegedRiskLevel
 
 ```php
 enum PrivilegedRiskLevel: string
@@ -15240,7 +15241,7 @@ enum PrivilegedRiskLevel: string
 
 ---
 
-# 1209. Personal and administrative identity separation
+### 1209. Personal and administrative identity separation
 
 VoltStack deberá permitir separar:
 
@@ -15253,7 +15254,7 @@ Una identidad administrativa no deberá utilizarse para tareas ordinarias.
 
 ---
 
-# 1210. Linked privileged identities
+### 1210. Linked privileged identities
 
 ```php
 final readonly class PrivilegedIdentityLink
@@ -15270,7 +15271,7 @@ final readonly class PrivilegedIdentityLink
 
 ---
 
-# 1211. Standing privilege reduction
+### 1211. Standing privilege reduction
 
 Los privilegios permanentes deberán minimizarse.
 
@@ -15282,13 +15283,13 @@ eligible but inactive
 
 ---
 
-# 1212. Privileged eligibility
+### 1212. Privileged eligibility
 
 Una identidad eligible puede solicitar activación, pero no posee privilegios efectivos hasta completar el workflow.
 
 ---
 
-# 1213. Privileged access request
+### 1213. Privileged access request
 
 ```php
 final readonly class PrivilegedAccessRequest
@@ -15310,7 +15311,7 @@ final readonly class PrivilegedAccessRequest
 
 ---
 
-# 1214. PrivilegedAccessRequestState
+### 1214. PrivilegedAccessRequestState
 
 ```php
 enum PrivilegedAccessRequestState: string
@@ -15330,7 +15331,7 @@ enum PrivilegedAccessRequestState: string
 
 ---
 
-# 1215. Privileged request requirements
+### 1215. Privileged request requirements
 
 Una solicitud deberá incluir:
 
@@ -15345,7 +15346,7 @@ Una solicitud deberá incluir:
 
 ---
 
-# 1216. Strong authentication requirement
+### 1216. Strong authentication requirement
 
 Toda elevación privilegiada deberá requerir:
 
@@ -15357,7 +15358,7 @@ Toda elevación privilegiada deberá requerir:
 
 ---
 
-# 1217. Privileged device policy
+### 1217. Privileged device policy
 
 El acceso podrá limitarse a:
 
@@ -15370,7 +15371,7 @@ El acceso podrá limitarse a:
 
 ---
 
-# 1218. PrivilegedAccessPolicy
+### 1218. PrivilegedAccessPolicy
 
 ```php
 interface PrivilegedAccessPolicyInterface
@@ -15384,7 +15385,7 @@ interface PrivilegedAccessPolicyInterface
 
 ---
 
-# 1219. PrivilegedAccessDecision
+### 1219. PrivilegedAccessDecision
 
 ```php
 final readonly class PrivilegedAccessDecision
@@ -15403,13 +15404,13 @@ final readonly class PrivilegedAccessDecision
 
 ---
 
-# 1220. Just-in-time elevation
+### 1220. Just-in-time elevation
 
 La elevación JIT deberá activar privilegios solo durante una ventana corta y explícita.
 
 ---
 
-# 1221. Privilege elevation grant
+### 1221. Privilege elevation grant
 
 ```php
 final readonly class PrivilegeElevationGrant
@@ -15431,7 +15432,7 @@ final readonly class PrivilegeElevationGrant
 
 ---
 
-# 1222. PrivilegeElevationGrantState
+### 1222. PrivilegeElevationGrantState
 
 ```php
 enum PrivilegeElevationGrantState: string
@@ -15446,13 +15447,13 @@ enum PrivilegeElevationGrantState: string
 
 ---
 
-# 1223. Automatic expiration
+### 1223. Automatic expiration
 
 Toda elevación deberá expirar automáticamente sin depender de logout o acción manual.
 
 ---
 
-# 1224. Maximum elevation duration
+### 1224. Maximum elevation duration
 
 La duración máxima deberá depender de:
 
@@ -15467,7 +15468,7 @@ La duración máxima deberá depender de:
 
 ---
 
-# 1225. Renewal restrictions
+### 1225. Renewal restrictions
 
 Una elevación no deberá renovarse silenciosamente.
 
@@ -15481,13 +15482,13 @@ Toda extensión deberá volver a evaluar:
 
 ---
 
-# 1226. Just-enough administration
+### 1226. Just-enough administration
 
 JEA deberá otorgar únicamente las acciones necesarias para completar una tarea.
 
 ---
 
-# 1227. Action-level privilege model
+### 1227. Action-level privilege model
 
 ```php
 final readonly class PrivilegedActionDefinition
@@ -15505,7 +15506,7 @@ final readonly class PrivilegedActionDefinition
 
 ---
 
-# 1228. Resource-scoped elevation
+### 1228. Resource-scoped elevation
 
 Un grant deberá limitarse a recursos concretos.
 
@@ -15521,7 +15522,7 @@ Ejemplos:
 
 ---
 
-# 1229. Command-scoped elevation
+### 1229. Command-scoped elevation
 
 Cuando sea técnicamente posible, VoltStack deberá restringir:
 
@@ -15534,7 +15535,7 @@ Cuando sea técnicamente posible, VoltStack deberá restringir:
 
 ---
 
-# 1230. Privileged command policy
+### 1230. Privileged command policy
 
 ```php
 interface PrivilegedCommandPolicyInterface
@@ -15549,7 +15550,7 @@ interface PrivilegedCommandPolicyInterface
 
 ---
 
-# 1231. PrivilegedCommand
+### 1231. PrivilegedCommand
 
 ```php
 final readonly class PrivilegedCommand
@@ -15566,7 +15567,7 @@ final readonly class PrivilegedCommand
 
 ---
 
-# 1232. Dangerous command restrictions
+### 1232. Dangerous command restrictions
 
 Operaciones destructivas podrán requerir:
 
@@ -15579,13 +15580,13 @@ Operaciones destructivas podrán requerir:
 
 ---
 
-# 1233. Dual control
+### 1233. Dual control
 
 Dual control exige participación de al menos dos actores independientes.
 
 ---
 
-# 1234. DualControlPolicy
+### 1234. DualControlPolicy
 
 ```php
 final readonly class DualControlPolicy
@@ -15602,7 +15603,7 @@ final readonly class DualControlPolicy
 
 ---
 
-# 1235. Four-eyes principle
+### 1235. Four-eyes principle
 
 Para operaciones críticas deberá impedirse que una sola persona:
 
@@ -15615,13 +15616,13 @@ la misma acción completa.
 
 ---
 
-# 1236. Privileged session architecture
+### 1236. Privileged session architecture
 
 Una sesión privilegiada deberá ser distinta de la sesión ordinaria.
 
 ---
 
-# 1237. PrivilegedSession
+### 1237. PrivilegedSession
 
 ```php
 final readonly class PrivilegedSession
@@ -15642,7 +15643,7 @@ final readonly class PrivilegedSession
 
 ---
 
-# 1238. PrivilegedSessionState
+### 1238. PrivilegedSessionState
 
 ```php
 enum PrivilegedSessionState: string
@@ -15658,7 +15659,7 @@ enum PrivilegedSessionState: string
 
 ---
 
-# 1239. Session isolation
+### 1239. Session isolation
 
 Una sesión privilegiada deberá:
 
@@ -15671,7 +15672,7 @@ Una sesión privilegiada deberá:
 
 ---
 
-# 1240. Privileged session broker
+### 1240. Privileged session broker
 
 ```php
 interface PrivilegedSessionBrokerInterface
@@ -15690,7 +15691,7 @@ interface PrivilegedSessionBrokerInterface
 
 ---
 
-# 1241. Session proxying
+### 1241. Session proxying
 
 VoltStack podrá intermediar acceso hacia:
 
@@ -15704,13 +15705,13 @@ VoltStack podrá intermediar acceso hacia:
 
 ---
 
-# 1242. Direct credential exposure reduction
+### 1242. Direct credential exposure reduction
 
 Siempre que sea posible, el usuario no deberá recibir directamente la credencial privilegiada.
 
 ---
 
-# 1243. Session recording
+### 1243. Session recording
 
 Las sesiones de alto riesgo podrán registrar:
 
@@ -15725,7 +15726,7 @@ Las sesiones de alto riesgo podrán registrar:
 
 ---
 
-# 1244. PrivilegedSessionRecorder
+### 1244. PrivilegedSessionRecorder
 
 ```php
 interface PrivilegedSessionRecorderInterface
@@ -15747,7 +15748,7 @@ interface PrivilegedSessionRecorderInterface
 
 ---
 
-# 1245. Recording integrity
+### 1245. Recording integrity
 
 Las grabaciones deberán:
 
@@ -15760,7 +15761,7 @@ Las grabaciones deberán:
 
 ---
 
-# 1246. Recording privacy
+### 1246. Recording privacy
 
 La grabación deberá minimizar exposición de:
 
@@ -15772,19 +15773,19 @@ La grabación deberá minimizar exposición de:
 
 ---
 
-# 1247. Sensitive output redaction
+### 1247. Sensitive output redaction
 
 VoltStack deberá redactar valores sensibles cuando sea posible sin destruir la evidencia operacional.
 
 ---
 
-# 1248. Live session monitoring
+### 1248. Live session monitoring
 
 Sesiones críticas podrán ser supervisadas en tiempo real por seguridad o un aprobador autorizado.
 
 ---
 
-# 1249. Session intervention
+### 1249. Session intervention
 
 El supervisor autorizado podrá:
 
@@ -15796,13 +15797,13 @@ El supervisor autorizado podrá:
 
 ---
 
-# 1250. Privileged credential vault
+### 1250. Privileged credential vault
 
 VoltStack deberá abstraer almacenamiento seguro de credenciales privilegiadas.
 
 ---
 
-# 1251. PrivilegedCredentialVault
+### 1251. PrivilegedCredentialVault
 
 ```php
 interface PrivilegedCredentialVaultInterface
@@ -15825,7 +15826,7 @@ interface PrivilegedCredentialVaultInterface
 
 ---
 
-# 1252. Vault storage requirements
+### 1252. Vault storage requirements
 
 El vault deberá utilizar:
 
@@ -15839,7 +15840,7 @@ El vault deberá utilizar:
 
 ---
 
-# 1253. PrivilegedCredential
+### 1253. PrivilegedCredential
 
 ```php
 final readonly class PrivilegedCredential
@@ -15859,7 +15860,7 @@ final readonly class PrivilegedCredential
 
 ---
 
-# 1254. PrivilegedCredentialType
+### 1254. PrivilegedCredentialType
 
 ```php
 enum PrivilegedCredentialType: string
@@ -15876,7 +15877,7 @@ enum PrivilegedCredentialType: string
 
 ---
 
-# 1255. PrivilegedCredentialState
+### 1255. PrivilegedCredentialState
 
 ```php
 enum PrivilegedCredentialState: string
@@ -15892,7 +15893,7 @@ enum PrivilegedCredentialState: string
 
 ---
 
-# 1256. Credential checkout
+### 1256. Credential checkout
 
 El checkout deberá:
 
@@ -15905,7 +15906,7 @@ El checkout deberá:
 
 ---
 
-# 1257. CredentialCheckoutLease
+### 1257. CredentialCheckoutLease
 
 ```php
 final readonly class CredentialCheckoutLease
@@ -15924,7 +15925,7 @@ final readonly class CredentialCheckoutLease
 
 ---
 
-# 1258. CredentialCheckoutLeaseState
+### 1258. CredentialCheckoutLeaseState
 
 ```php
 enum CredentialCheckoutLeaseState: string
@@ -15938,7 +15939,7 @@ enum CredentialCheckoutLeaseState: string
 
 ---
 
-# 1259. Post-checkout rotation
+### 1259. Post-checkout rotation
 
 Las credenciales compartidas deberán rotarse después de:
 
@@ -15951,7 +15952,7 @@ Las credenciales compartidas deberán rotarse después de:
 
 ---
 
-# 1260. Secret exposure minimization
+### 1260. Secret exposure minimization
 
 El sistema deberá preferir:
 
@@ -15965,13 +15966,13 @@ sobre revelar secretos estáticos.
 
 ---
 
-# 1261. Emergency access
+### 1261. Emergency access
 
 El acceso de emergencia deberá estar disponible para incidentes donde el flujo normal sea insuficiente.
 
 ---
 
-# 1262. EmergencyAccessRequest
+### 1262. EmergencyAccessRequest
 
 ```php
 final readonly class EmergencyAccessRequest
@@ -15990,7 +15991,7 @@ final readonly class EmergencyAccessRequest
 
 ---
 
-# 1263. Emergency access controls
+### 1263. Emergency access controls
 
 El flujo deberá:
 
@@ -16003,13 +16004,13 @@ El flujo deberá:
 
 ---
 
-# 1264. Break-glass execution
+### 1264. Break-glass execution
 
 El uso de una identidad break-glass deberá considerarse un evento de seguridad crítico.
 
 ---
 
-# 1265. BreakGlassExecutionRecord
+### 1265. BreakGlassExecutionRecord
 
 ```php
 final readonly class BreakGlassExecutionRecord
@@ -16029,7 +16030,7 @@ final readonly class BreakGlassExecutionRecord
 
 ---
 
-# 1266. Break-glass post-use actions
+### 1266. Break-glass post-use actions
 
 Después del uso deberá:
 
@@ -16043,13 +16044,13 @@ Después del uso deberá:
 
 ---
 
-# 1267. Dormant privileged accounts
+### 1267. Dormant privileged accounts
 
 Una cuenta privilegiada dormida representa alto riesgo aunque no tenga uso reciente.
 
 ---
 
-# 1268. DormantPrivilegedAccountPolicy
+### 1268. DormantPrivilegedAccountPolicy
 
 ```php
 final readonly class DormantPrivilegedAccountPolicy
@@ -16066,7 +16067,7 @@ final readonly class DormantPrivilegedAccountPolicy
 
 ---
 
-# 1269. Dormant account detection
+### 1269. Dormant account detection
 
 Deberá considerar:
 
@@ -16080,7 +16081,7 @@ Deberá considerar:
 
 ---
 
-# 1270. Dormant account remediation
+### 1270. Dormant account remediation
 
 Las acciones podrán incluir:
 
@@ -16093,13 +16094,13 @@ Las acciones podrán incluir:
 
 ---
 
-# 1271. Service accounts
+### 1271. Service accounts
 
 Una service account es una identidad no humana utilizada por aplicaciones o procesos.
 
 ---
 
-# 1272. ServiceAccountProfile
+### 1272. ServiceAccountProfile
 
 ```php
 final readonly class ServiceAccountProfile
@@ -16120,7 +16121,7 @@ final readonly class ServiceAccountProfile
 
 ---
 
-# 1273. ServiceAccountState
+### 1273. ServiceAccountState
 
 ```php
 enum ServiceAccountState: string
@@ -16136,7 +16137,7 @@ enum ServiceAccountState: string
 
 ---
 
-# 1274. Service account requirements
+### 1274. Service account requirements
 
 Toda service account deberá tener:
 
@@ -16151,19 +16152,19 @@ Toda service account deberá tener:
 
 ---
 
-# 1275. Shared service account restrictions
+### 1275. Shared service account restrictions
 
 Las service accounts no deberán utilizarse como cuentas humanas compartidas.
 
 ---
 
-# 1276. Interactive login prohibition
+### 1276. Interactive login prohibition
 
 Por defecto, una service account no deberá permitir login interactivo.
 
 ---
 
-# 1277. Service account owner lifecycle
+### 1277. Service account owner lifecycle
 
 Si el owner deja la organización o cambia de función, deberá iniciarse:
 
@@ -16174,13 +16175,13 @@ Si el owner deja la organización o cambia de función, deberá iniciarse:
 
 ---
 
-# 1278. Orphan service accounts
+### 1278. Orphan service accounts
 
 Una service account sin owner válido deberá marcarse como huérfana.
 
 ---
 
-# 1279. Machine identities
+### 1279. Machine identities
 
 VoltStack deberá tratar como identidades de máquina a:
 
@@ -16194,7 +16195,7 @@ VoltStack deberá tratar como identidades de máquina a:
 
 ---
 
-# 1280. MachineIdentityProfile
+### 1280. MachineIdentityProfile
 
 ```php
 final readonly class MachineIdentityProfile
@@ -16213,7 +16214,7 @@ final readonly class MachineIdentityProfile
 
 ---
 
-# 1281. MachineIdentityState
+### 1281. MachineIdentityState
 
 ```php
 enum MachineIdentityState: string
@@ -16228,13 +16229,13 @@ enum MachineIdentityState: string
 
 ---
 
-# 1282. Workload identity
+### 1282. Workload identity
 
 Una workload identity deberá representar una carga de trabajo concreta, no una infraestructura compartida genérica.
 
 ---
 
-# 1283. WorkloadIdentityProfile
+### 1283. WorkloadIdentityProfile
 
 ```php
 final readonly class WorkloadIdentityProfile
@@ -16255,7 +16256,7 @@ final readonly class WorkloadIdentityProfile
 
 ---
 
-# 1284. WorkloadIdentityState
+### 1284. WorkloadIdentityState
 
 ```php
 enum WorkloadIdentityState: string
@@ -16270,13 +16271,13 @@ enum WorkloadIdentityState: string
 
 ---
 
-# 1285. Workload identity federation
+### 1285. Workload identity federation
 
 VoltStack deberá preferir federación de identidad sobre secretos estáticos cuando la plataforma lo permita.
 
 ---
 
-# 1286. Workload assertion validation
+### 1286. Workload assertion validation
 
 Las assertions deberán validar:
 
@@ -16293,13 +16294,13 @@ Las assertions deberán validar:
 
 ---
 
-# 1287. Short-lived workload credentials
+### 1287. Short-lived workload credentials
 
 Las credenciales emitidas a workloads deberán tener vida corta y scope mínimo.
 
 ---
 
-# 1288. Non-human identity governance
+### 1288. Non-human identity governance
 
 Toda identidad no humana deberá someterse a:
 
@@ -16314,7 +16315,7 @@ Toda identidad no humana deberá someterse a:
 
 ---
 
-# 1289. NonHumanIdentityRecord
+### 1289. NonHumanIdentityRecord
 
 ```php
 final readonly class NonHumanIdentityRecord
@@ -16335,7 +16336,7 @@ final readonly class NonHumanIdentityRecord
 
 ---
 
-# 1290. NonHumanIdentityType
+### 1290. NonHumanIdentityType
 
 ```php
 enum NonHumanIdentityType: string
@@ -16351,7 +16352,7 @@ enum NonHumanIdentityType: string
 
 ---
 
-# 1291. Secret rotation architecture
+### 1291. Secret rotation architecture
 
 ```php
 interface SecretRotationServiceInterface
@@ -16366,7 +16367,7 @@ interface SecretRotationServiceInterface
 
 ---
 
-# 1292. Rotation triggers
+### 1292. Rotation triggers
 
 La rotación deberá activarse por:
 
@@ -16382,7 +16383,7 @@ La rotación deberá activarse por:
 
 ---
 
-# 1293. Zero-downtime rotation
+### 1293. Zero-downtime rotation
 
 Cuando sea posible, la rotación deberá soportar:
 
@@ -16395,7 +16396,7 @@ Cuando sea posible, la rotación deberá soportar:
 
 ---
 
-# 1294. Secret versioning
+### 1294. Secret versioning
 
 ```php
 final readonly class SecretVersion
@@ -16413,7 +16414,7 @@ final readonly class SecretVersion
 
 ---
 
-# 1295. SecretVersionState
+### 1295. SecretVersionState
 
 ```php
 enum SecretVersionState: string
@@ -16429,7 +16430,7 @@ enum SecretVersionState: string
 
 ---
 
-# 1296. Privileged access analytics
+### 1296. Privileged access analytics
 
 VoltStack deberá analizar:
 
@@ -16447,7 +16448,7 @@ VoltStack deberá analizar:
 
 ---
 
-# 1297. PrivilegedAccessAnalyticsEngine
+### 1297. PrivilegedAccessAnalyticsEngine
 
 ```php
 interface PrivilegedAccessAnalyticsEngineInterface
@@ -16461,7 +16462,7 @@ interface PrivilegedAccessAnalyticsEngineInterface
 
 ---
 
-# 1298. Privileged anomaly signals
+### 1298. Privileged anomaly signals
 
 Señales recomendadas:
 
@@ -16478,7 +16479,7 @@ Señales recomendadas:
 
 ---
 
-# 1299. PAM audit events
+### 1299. PAM audit events
 
 Eventos recomendados:
 
@@ -16503,7 +16504,7 @@ Eventos recomendados:
 
 ---
 
-# 1300. Resultado de esta entrega
+### 1300. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -16569,9 +16570,9 @@ Entrega 14
 - Identity security metrics
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 14
+
 
 **Documento:** Parte 05
 **Entrega:** 14 de varias
@@ -16580,7 +16581,7 @@ Entrega 14
 
 ---
 
-# 1301. Identity Threat Detection and Response (ITDR) Architecture
+### 1301. Identity Threat Detection and Response (ITDR) Architecture
 
 VoltStack deberá incorporar un subsistema de **Identity Threat Detection and Response (ITDR)** encargado de detectar, correlacionar y responder a amenazas relacionadas con identidades humanas y no humanas.
 
@@ -16594,7 +16595,7 @@ El objetivo será reducir el tiempo entre:
 
 ---
 
-# 1302. ITDR security goals
+### 1302. ITDR security goals
 
 La arquitectura deberá garantizar:
 
@@ -16609,7 +16610,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1303. ITDR threat model
+### 1303. ITDR threat model
 
 El modelo deberá contemplar, entre otros:
 
@@ -16629,7 +16630,7 @@ El modelo deberá contemplar, entre otros:
 
 ---
 
-# 1304. ITDR architecture
+### 1304. ITDR architecture
 
 ```text
 Identity Signals
@@ -16655,7 +16656,7 @@ SOC / SIEM / SOAR
 
 ---
 
-# 1305. IdentityThreatDetectionService
+### 1305. IdentityThreatDetectionService
 
 ```php
 interface IdentityThreatDetectionServiceInterface
@@ -16668,7 +16669,7 @@ interface IdentityThreatDetectionServiceInterface
 
 ---
 
-# 1306. IdentitySecuritySignal
+### 1306. IdentitySecuritySignal
 
 ```php
 final readonly class IdentitySecuritySignal
@@ -16687,7 +16688,7 @@ final readonly class IdentitySecuritySignal
 
 ---
 
-# 1307. IdentitySignalType
+### 1307. IdentitySignalType
 
 ```php
 enum IdentitySignalType: string
@@ -16706,19 +16707,19 @@ enum IdentitySignalType: string
 
 ---
 
-# 1308. Signal confidence
+### 1308. Signal confidence
 
 Cada señal deberá indicar un nivel de confianza que refleje la calidad de la evidencia y permita ponderar adecuadamente el riesgo.
 
 ---
 
-# 1309. Signal normalization
+### 1309. Signal normalization
 
 Todas las señales deberán convertirse a un formato interno común antes de iniciar la correlación.
 
 ---
 
-# 1310. ThreatAssessment
+### 1310. ThreatAssessment
 
 ```php
 final readonly class ThreatAssessment
@@ -16736,7 +16737,7 @@ final readonly class ThreatAssessment
 
 ---
 
-# 1311. Authentication anomaly correlation
+### 1311. Authentication anomaly correlation
 
 VoltStack deberá correlacionar:
 
@@ -16750,7 +16751,7 @@ VoltStack deberá correlacionar:
 
 ---
 
-# 1312. Multi-signal correlation
+### 1312. Multi-signal correlation
 
 Una única señal de bajo riesgo no deberá provocar automáticamente una respuesta severa.
 
@@ -16758,7 +16759,7 @@ La decisión deberá basarse en múltiples evidencias consistentes.
 
 ---
 
-# 1313. Correlation engine
+### 1313. Correlation engine
 
 ```php
 interface IdentityCorrelationEngineInterface
@@ -16771,7 +16772,7 @@ interface IdentityCorrelationEngineInterface
 
 ---
 
-# 1314. Correlation windows
+### 1314. Correlation windows
 
 La correlación podrá utilizar ventanas:
 
@@ -16784,19 +16785,19 @@ según el tipo de amenaza.
 
 ---
 
-# 1315. Risk accumulation
+### 1315. Risk accumulation
 
 El riesgo podrá acumularse mediante múltiples eventos pequeños en lugar de depender únicamente de un evento crítico.
 
 ---
 
-# 1316. Session risk scoring
+### 1316. Session risk scoring
 
 Cada sesión activa deberá mantener un puntaje dinámico de riesgo.
 
 ---
 
-# 1317. SessionRiskScore
+### 1317. SessionRiskScore
 
 ```php
 final readonly class SessionRiskScore
@@ -16814,7 +16815,7 @@ final readonly class SessionRiskScore
 
 ---
 
-# 1318. Risk contributors
+### 1318. Risk contributors
 
 Factores recomendados:
 
@@ -16830,13 +16831,13 @@ Factores recomendados:
 
 ---
 
-# 1319. Continuous risk recomputation
+### 1319. Continuous risk recomputation
 
 El riesgo no deberá calcularse únicamente durante el login.
 
 ---
 
-# 1320. Continuous evaluation triggers
+### 1320. Continuous evaluation triggers
 
 Reevaluar cuando ocurra:
 
@@ -16850,13 +16851,13 @@ Reevaluar cuando ocurra:
 
 ---
 
-# 1321. Impossible travel detection
+### 1321. Impossible travel detection
 
 VoltStack podrá detectar desplazamientos físicamente improbables entre autenticaciones.
 
 ---
 
-# 1322. ImpossibleTravelAssessment
+### 1322. ImpossibleTravelAssessment
 
 ```php
 final readonly class ImpossibleTravelAssessment
@@ -16873,7 +16874,7 @@ final readonly class ImpossibleTravelAssessment
 
 ---
 
-# 1323. Impossible travel limitations
+### 1323. Impossible travel limitations
 
 La detección deberá considerar:
 
@@ -16885,13 +16886,13 @@ La detección deberá considerar:
 
 ---
 
-# 1324. Token replay detection
+### 1324. Token replay detection
 
 Los tokens reutilizados fuera de su patrón esperado deberán generar alertas.
 
 ---
 
-# 1325. Replay registry correlation
+### 1325. Replay registry correlation
 
 La detección deberá apoyarse en:
 
@@ -16904,7 +16905,7 @@ La detección deberá apoyarse en:
 
 ---
 
-# 1326. Credential compromise detection
+### 1326. Credential compromise detection
 
 El sistema deberá identificar indicios como:
 
@@ -16916,19 +16917,19 @@ El sistema deberá identificar indicios como:
 
 ---
 
-# 1327. Password spray detection
+### 1327. Password spray detection
 
 VoltStack deberá correlacionar intentos distribuidos contra múltiples usuarios utilizando la misma contraseña o patrón.
 
 ---
 
-# 1328. Credential stuffing detection
+### 1328. Credential stuffing detection
 
 El sistema deberá detectar autenticaciones derivadas de listas masivas de credenciales comprometidas.
 
 ---
 
-# 1329. MFA fatigue detection
+### 1329. MFA fatigue detection
 
 Se deberán identificar patrones de:
 
@@ -16939,13 +16940,13 @@ Se deberán identificar patrones de:
 
 ---
 
-# 1330. Push approval abuse
+### 1330. Push approval abuse
 
 Una aprobación MFA no deberá interpretarse automáticamente como ausencia de compromiso.
 
 ---
 
-# 1331. Device compromise signals
+### 1331. Device compromise signals
 
 Señales recomendadas:
 
@@ -16959,7 +16960,7 @@ Señales recomendadas:
 
 ---
 
-# 1332. DeviceRiskAssessment
+### 1332. DeviceRiskAssessment
 
 ```php
 final readonly class DeviceRiskAssessment
@@ -16976,13 +16977,13 @@ final readonly class DeviceRiskAssessment
 
 ---
 
-# 1333. Identity Behavior Analytics (IBA)
+### 1333. Identity Behavior Analytics (IBA)
 
 VoltStack podrá mantener perfiles de comportamiento normal por identidad.
 
 ---
 
-# 1334. Behavioral baseline
+### 1334. Behavioral baseline
 
 El perfil podrá considerar:
 
@@ -16996,7 +16997,7 @@ El perfil podrá considerar:
 
 ---
 
-# 1335. Behavior profile
+### 1335. Behavior profile
 
 ```php
 final readonly class IdentityBehaviorProfile
@@ -17012,7 +17013,7 @@ final readonly class IdentityBehaviorProfile
 
 ---
 
-# 1336. UEBA foundations
+### 1336. UEBA foundations
 
 El motor de User and Entity Behavior Analytics deberá analizar:
 
@@ -17024,19 +17025,19 @@ El motor de User and Entity Behavior Analytics deberá analizar:
 
 ---
 
-# 1337. UEBA risk enrichment
+### 1337. UEBA risk enrichment
 
 Las anomalías de comportamiento deberán enriquecer, no reemplazar, el motor principal de riesgo.
 
 ---
 
-# 1338. Risk-based access decisions
+### 1338. Risk-based access decisions
 
 Las decisiones de acceso podrán adaptarse dinámicamente al riesgo.
 
 ---
 
-# 1339. Adaptive responses
+### 1339. Adaptive responses
 
 Ejemplos:
 
@@ -17049,7 +17050,7 @@ Ejemplos:
 
 ---
 
-# 1340. Risk decision engine
+### 1340. Risk decision engine
 
 ```php
 interface RiskBasedAccessDecisionEngineInterface
@@ -17062,7 +17063,7 @@ interface RiskBasedAccessDecisionEngineInterface
 
 ---
 
-# 1341. AdaptiveAccessDecision
+### 1341. AdaptiveAccessDecision
 
 ```php
 final readonly class AdaptiveAccessDecision
@@ -17078,13 +17079,13 @@ final readonly class AdaptiveAccessDecision
 
 ---
 
-# 1342. Continuous Access Evaluation
+### 1342. Continuous Access Evaluation
 
 VoltStack deberá reevaluar sesiones activas durante toda su vida útil.
 
 ---
 
-# 1343. Continuous evaluation events
+### 1343. Continuous evaluation events
 
 Eventos relevantes:
 
@@ -17097,13 +17098,13 @@ Eventos relevantes:
 
 ---
 
-# 1344. Session restriction
+### 1344. Session restriction
 
 Una sesión podrá pasar dinámicamente a estado restringido.
 
 ---
 
-# 1345. Restriction actions
+### 1345. Restriction actions
 
 Una sesión restringida podrá:
 
@@ -17116,7 +17117,7 @@ Una sesión restringida podrá:
 
 ---
 
-# 1346. Session quarantine
+### 1346. Session quarantine
 
 ```php
 interface SessionQuarantineServiceInterface
@@ -17130,7 +17131,7 @@ interface SessionQuarantineServiceInterface
 
 ---
 
-# 1347. Automated identity containment
+### 1347. Automated identity containment
 
 Las respuestas automáticas podrán incluir:
 
@@ -17143,13 +17144,13 @@ Las respuestas automáticas podrán incluir:
 
 ---
 
-# 1348. Containment proportionality
+### 1348. Containment proportionality
 
 La respuesta deberá ser proporcional al nivel de confianza y severidad.
 
 ---
 
-# 1349. Automated playbooks
+### 1349. Automated playbooks
 
 ```php
 interface IdentityIncidentPlaybookInterface
@@ -17162,7 +17163,7 @@ interface IdentityIncidentPlaybookInterface
 
 ---
 
-# 1350. Playbook examples
+### 1350. Playbook examples
 
 Ejemplos:
 
@@ -17175,7 +17176,7 @@ Ejemplos:
 
 ---
 
-# 1351. Identity incident
+### 1351. Identity incident
 
 ```php
 final readonly class IdentityIncident
@@ -17194,7 +17195,7 @@ final readonly class IdentityIncident
 
 ---
 
-# 1352. Evidence preservation
+### 1352. Evidence preservation
 
 Toda respuesta deberá preservar:
 
@@ -17208,7 +17209,7 @@ Toda respuesta deberá preservar:
 
 ---
 
-# 1353. Chain of custody
+### 1353. Chain of custody
 
 La evidencia deberá mantener:
 
@@ -17220,7 +17221,7 @@ La evidencia deberá mantener:
 
 ---
 
-# 1354. Identity forensic package
+### 1354. Identity forensic package
 
 ```php
 final readonly class IdentityForensicPackage
@@ -17239,19 +17240,19 @@ final readonly class IdentityForensicPackage
 
 ---
 
-# 1355. SIEM integration
+### 1355. SIEM integration
 
 VoltStack deberá exportar eventos mediante formatos estructurados compatibles con plataformas SIEM.
 
 ---
 
-# 1356. SOAR integration
+### 1356. SOAR integration
 
 Las respuestas automáticas podrán iniciarse desde plataformas SOAR autorizadas.
 
 ---
 
-# 1357. Threat intelligence enrichment
+### 1357. Threat intelligence enrichment
 
 El motor podrá enriquecer señales utilizando:
 
@@ -17262,13 +17263,13 @@ El motor podrá enriquecer señales utilizando:
 
 ---
 
-# 1358. Threat intelligence trust
+### 1358. Threat intelligence trust
 
 La inteligencia externa deberá clasificarse según nivel de confianza y antigüedad.
 
 ---
 
-# 1359. Identity security metrics
+### 1359. Identity security metrics
 
 Métricas recomendadas:
 
@@ -17282,7 +17283,7 @@ Métricas recomendadas:
 
 ---
 
-# 1360. Security KPI dashboard
+### 1360. Security KPI dashboard
 
 El dashboard podrá mostrar:
 
@@ -17296,7 +17297,7 @@ El dashboard podrá mostrar:
 
 ---
 
-# 1361. ThreatSeverity
+### 1361. ThreatSeverity
 
 ```php
 enum ThreatSeverity: string
@@ -17310,7 +17311,7 @@ enum ThreatSeverity: string
 
 ---
 
-# 1362. ThreatConfidence
+### 1362. ThreatConfidence
 
 ```php
 enum ThreatConfidence: string
@@ -17323,7 +17324,7 @@ enum ThreatConfidence: string
 
 ---
 
-# 1363. IdentityIncidentSeverity
+### 1363. IdentityIncidentSeverity
 
 ```php
 enum IdentityIncidentSeverity: string
@@ -17338,7 +17339,7 @@ enum IdentityIncidentSeverity: string
 
 ---
 
-# 1364. SessionRiskLevel
+### 1364. SessionRiskLevel
 
 ```php
 enum SessionRiskLevel: string
@@ -17352,7 +17353,7 @@ enum SessionRiskLevel: string
 
 ---
 
-# 1365. DeviceRiskLevel
+### 1365. DeviceRiskLevel
 
 ```php
 enum DeviceRiskLevel: string
@@ -17366,7 +17367,7 @@ enum DeviceRiskLevel: string
 
 ---
 
-# 1366. SignalConfidence
+### 1366. SignalConfidence
 
 ```php
 enum SignalConfidence: string
@@ -17379,7 +17380,7 @@ enum SignalConfidence: string
 
 ---
 
-# 1367. AdaptiveDecisionType
+### 1367. AdaptiveDecisionType
 
 ```php
 enum AdaptiveDecisionType: string
@@ -17394,7 +17395,7 @@ enum AdaptiveDecisionType: string
 
 ---
 
-# 1368. SessionRestrictionLevel
+### 1368. SessionRestrictionLevel
 
 ```php
 enum SessionRestrictionLevel: string
@@ -17408,7 +17409,7 @@ enum SessionRestrictionLevel: string
 
 ---
 
-# 1369. QuarantineReason
+### 1369. QuarantineReason
 
 ```php
 enum QuarantineReason: string
@@ -17423,7 +17424,7 @@ enum QuarantineReason: string
 
 ---
 
-# 1370. Identity incident lifecycle
+### 1370. Identity incident lifecycle
 
 Estados recomendados:
 
@@ -17435,37 +17436,37 @@ Estados recomendados:
 
 ---
 
-# 1371. False positive handling
+### 1371. False positive handling
 
 Toda alerta deberá poder clasificarse como falso positivo sin perder la trazabilidad histórica.
 
 ---
 
-# 1372. Analyst feedback loop
+### 1372. Analyst feedback loop
 
 Las decisiones de analistas podrán retroalimentar el motor de correlación para mejorar futuras evaluaciones.
 
 ---
 
-# 1373. Multi-tenant isolation
+### 1373. Multi-tenant isolation
 
 Las señales de un tenant nunca deberán influir directamente en el riesgo calculado para otro tenant.
 
 ---
 
-# 1374. Privacy-aware analytics
+### 1374. Privacy-aware analytics
 
 Los modelos analíticos deberán minimizar el tratamiento de datos personales cuando no sean necesarios.
 
 ---
 
-# 1375. Retention policy
+### 1375. Retention policy
 
 Las señales deberán conservarse únicamente durante el período definido por la política de seguridad y regulación aplicable.
 
 ---
 
-# 1376. Secure signal storage
+### 1376. Secure signal storage
 
 Las señales deberán almacenarse con:
 
@@ -17476,43 +17477,43 @@ Las señales deberán almacenarse con:
 
 ---
 
-# 1377. Replay-resistant telemetry
+### 1377. Replay-resistant telemetry
 
 La telemetría utilizada por el motor ITDR deberá protegerse contra inyección y replay.
 
 ---
 
-# 1378. Threat model updates
+### 1378. Threat model updates
 
 El catálogo de amenazas deberá revisarse periódicamente para incorporar nuevas técnicas de ataque.
 
 ---
 
-# 1379. Detection testing
+### 1379. Detection testing
 
 VoltStack deberá permitir pruebas controladas de reglas de detección sin afectar producción.
 
 ---
 
-# 1380. Simulation mode
+### 1380. Simulation mode
 
 Las políticas podrán ejecutarse en modo simulación para medir impacto antes de activarse.
 
 ---
 
-# 1381. Explainable decisions
+### 1381. Explainable decisions
 
 Las decisiones automáticas deberán incluir una explicación auditable de los factores que las motivaron.
 
 ---
 
-# 1382. Response override
+### 1382. Response override
 
 Un operador autorizado podrá cancelar una respuesta automática cuando exista justificación documentada.
 
 ---
 
-# 1383. Override audit
+### 1383. Override audit
 
 Toda anulación manual deberá quedar registrada con:
 
@@ -17523,7 +17524,7 @@ Toda anulación manual deberá quedar registrada con:
 
 ---
 
-# 1384. Identity security reporting
+### 1384. Identity security reporting
 
 Los reportes deberán poder agrupar incidentes por:
 
@@ -17536,25 +17537,25 @@ Los reportes deberán poder agrupar incidentes por:
 
 ---
 
-# 1385. Operational resilience
+### 1385. Operational resilience
 
 El fallo del motor analítico no deberá impedir la aplicación de controles de autenticación básicos.
 
 ---
 
-# 1386. Graceful degradation
+### 1386. Graceful degradation
 
 Si un componente analítico deja de estar disponible, VoltStack deberá degradar funcionalidades no esenciales sin comprometer la seguridad mínima.
 
 ---
 
-# 1387. ITDR extensibility
+### 1387. ITDR extensibility
 
 El motor deberá permitir incorporar nuevos detectores sin modificar el núcleo del framework.
 
 ---
 
-# 1388. Detector plugin model
+### 1388. Detector plugin model
 
 ```php
 interface IdentityThreatDetectorInterface
@@ -17567,31 +17568,31 @@ interface IdentityThreatDetectorInterface
 
 ---
 
-# 1389. Detector isolation
+### 1389. Detector isolation
 
 Un detector defectuoso no deberá impedir la ejecución del resto de detectores.
 
 ---
 
-# 1390. Detector prioritization
+### 1390. Detector prioritization
 
 Los detectores podrán ejecutarse según prioridad y costo computacional.
 
 ---
 
-# 1391. Threat response policy
+### 1391. Threat response policy
 
 Las respuestas deberán gobernarse mediante políticas configurables por tenant.
 
 ---
 
-# 1392. Tenant risk profile
+### 1392. Tenant risk profile
 
 Cada tenant podrá definir umbrales de riesgo acordes con sus requisitos regulatorios y operativos.
 
 ---
 
-# 1393. Incident notification
+### 1393. Incident notification
 
 Las alertas críticas podrán notificarse a:
 
@@ -17602,37 +17603,37 @@ Las alertas críticas podrán notificarse a:
 
 ---
 
-# 1394. Notification throttling
+### 1394. Notification throttling
 
 Las notificaciones deberán limitarse para evitar tormentas de alertas.
 
 ---
 
-# 1395. Security evidence export
+### 1395. Security evidence export
 
 La evidencia deberá poder exportarse preservando integridad y metadatos.
 
 ---
 
-# 1396. Compliance support
+### 1396. Compliance support
 
 El subsistema deberá facilitar evidencia para auditorías de seguridad y cumplimiento.
 
 ---
 
-# 1397. Identity resilience
+### 1397. Identity resilience
 
 La arquitectura deberá asumir que una identidad puede verse comprometida en cualquier momento y reaccionar en consecuencia.
 
 ---
 
-# 1398. Zero Trust alignment
+### 1398. Zero Trust alignment
 
 Todas las decisiones deberán alinearse con el principio de **"never trust, always verify"**.
 
 ---
 
-# 1399. Security events
+### 1399. Security events
 
 Eventos recomendados:
 
@@ -17649,7 +17650,7 @@ Eventos recomendados:
 
 ---
 
-# 1400. Resultado de esta entrega
+### 1400. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -17703,9 +17704,9 @@ Entrega 15
 - Cryptographic Governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 15
+
 
 **Documento:** Parte 05
 **Entrega:** 15 de varias
@@ -17714,7 +17715,7 @@ Entrega 15
 
 ---
 
-# 1401. Cryptographic Architecture
+### 1401. Cryptographic Architecture
 
 VoltStack deberá incorporar una arquitectura criptográfica centralizada para proteger:
 
@@ -17733,7 +17734,7 @@ La criptografía no deberá implementarse de forma dispersa dentro de Controller
 
 ---
 
-# 1402. Cryptographic security goals
+### 1402. Cryptographic security goals
 
 La arquitectura deberá garantizar:
 
@@ -17750,7 +17751,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1403. Cryptographic threat model
+### 1403. Cryptographic threat model
 
 El modelo deberá considerar:
 
@@ -17772,7 +17773,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1404. Cryptographic architectural components
+### 1404. Cryptographic architectural components
 
 ```text id="zdl2tw"
 Application Security Operation
@@ -17796,7 +17797,7 @@ Audit and Telemetry
 
 ---
 
-# 1405. CryptographicService
+### 1405. CryptographicService
 
 ```php id="u0rrha"
 interface CryptographicServiceInterface
@@ -17826,7 +17827,7 @@ interface CryptographicServiceInterface
 
 ---
 
-# 1406. Cryptographic operation purposes
+### 1406. Cryptographic operation purposes
 
 Toda operación deberá declarar un propósito explícito.
 
@@ -17843,7 +17844,7 @@ Ejemplos:
 
 ---
 
-# 1407. CryptographicPurpose
+### 1407. CryptographicPurpose
 
 ```php id="pqkt3b"
 enum CryptographicPurpose: string
@@ -17861,7 +17862,7 @@ enum CryptographicPurpose: string
 
 ---
 
-# 1408. Purpose separation
+### 1408. Purpose separation
 
 Una misma clave no deberá reutilizarse para propósitos criptográficos distintos.
 
@@ -17875,7 +17876,7 @@ No deberá utilizarse una clave de:
 
 ---
 
-# 1409. Cryptographic policy engine
+### 1409. Cryptographic policy engine
 
 ```php id="zfxl8i"
 interface CryptographicPolicyEngineInterface
@@ -17888,7 +17889,7 @@ interface CryptographicPolicyEngineInterface
 
 ---
 
-# 1410. CryptographicPolicyDecision
+### 1410. CryptographicPolicyDecision
 
 ```php id="5j1m9c"
 final readonly class CryptographicPolicyDecision
@@ -17907,13 +17908,13 @@ final readonly class CryptographicPolicyDecision
 
 ---
 
-# 1411. Cryptographic agility
+### 1411. Cryptographic agility
 
 VoltStack deberá poder sustituir algoritmos, proveedores y formatos sin reescribir el dominio.
 
 ---
 
-# 1412. Algorithm registry
+### 1412. Algorithm registry
 
 ```php id="gzp2j3"
 interface CryptographicAlgorithmRegistryInterface
@@ -17931,7 +17932,7 @@ interface CryptographicAlgorithmRegistryInterface
 
 ---
 
-# 1413. CryptographicAlgorithmDefinition
+### 1413. CryptographicAlgorithmDefinition
 
 ```php id="yk2o0d"
 final readonly class CryptographicAlgorithmDefinition
@@ -17949,7 +17950,7 @@ final readonly class CryptographicAlgorithmDefinition
 
 ---
 
-# 1414. CryptographicAlgorithmType
+### 1414. CryptographicAlgorithmType
 
 ```php id="gwdrng"
 enum CryptographicAlgorithmType: string
@@ -17966,7 +17967,7 @@ enum CryptographicAlgorithmType: string
 
 ---
 
-# 1415. CryptographicAlgorithmState
+### 1415. CryptographicAlgorithmState
 
 ```php id="cjmhk7"
 enum CryptographicAlgorithmState: string
@@ -17981,7 +17982,7 @@ enum CryptographicAlgorithmState: string
 
 ---
 
-# 1416. Algorithm allowlists
+### 1416. Algorithm allowlists
 
 VoltStack deberá utilizar allowlists explícitas.
 
@@ -17989,13 +17990,13 @@ Nunca deberá aceptar automáticamente cualquier algoritmo declarado por input e
 
 ---
 
-# 1417. Algorithm downgrade prevention
+### 1417. Algorithm downgrade prevention
 
 Cuando un artefacto declare un algoritmo inferior al requerido, la operación deberá rechazarse aunque el algoritmo todavía exista en el runtime.
 
 ---
 
-# 1418. Legacy verification mode
+### 1418. Legacy verification mode
 
 Algoritmos antiguos podrán conservarse únicamente para:
 
@@ -18008,7 +18009,7 @@ No deberán utilizarse para nuevas operaciones.
 
 ---
 
-# 1419. Cryptographic provider abstraction
+### 1419. Cryptographic provider abstraction
 
 ```php id="32nuv8"
 interface CryptographicProviderInterface
@@ -18025,7 +18026,7 @@ interface CryptographicProviderInterface
 
 ---
 
-# 1420. Provider types
+### 1420. Provider types
 
 VoltStack podrá integrar:
 
@@ -18039,7 +18040,7 @@ VoltStack podrá integrar:
 
 ---
 
-# 1421. Provider selection policy
+### 1421. Provider selection policy
 
 La selección deberá considerar:
 
@@ -18054,13 +18055,13 @@ La selección deberá considerar:
 
 ---
 
-# 1422. Key management architecture
+### 1422. Key management architecture
 
 Todas las claves deberán gestionarse mediante un subsistema central.
 
 ---
 
-# 1423. KeyManagementService
+### 1423. KeyManagementService
 
 ```php id="sau45d"
 interface KeyManagementServiceInterface
@@ -18088,7 +18089,7 @@ interface KeyManagementServiceInterface
 
 ---
 
-# 1424. ManagedKey
+### 1424. ManagedKey
 
 ```php id="xg5czx"
 final readonly class ManagedKey
@@ -18109,7 +18110,7 @@ final readonly class ManagedKey
 
 ---
 
-# 1425. ManagedKeyState
+### 1425. ManagedKeyState
 
 ```php id="mr3c8h"
 enum ManagedKeyState: string
@@ -18127,7 +18128,7 @@ enum ManagedKeyState: string
 
 ---
 
-# 1426. KeyProtectionLevel
+### 1426. KeyProtectionLevel
 
 ```php id="6ugklx"
 enum KeyProtectionLevel: string
@@ -18141,13 +18142,13 @@ enum KeyProtectionLevel: string
 
 ---
 
-# 1427. Key references
+### 1427. Key references
 
 El dominio deberá trabajar con referencias opacas, no con material de clave directamente.
 
 ---
 
-# 1428. KeyReference
+### 1428. KeyReference
 
 ```php id="2zjo8l"
 final readonly class KeyReference
@@ -18164,7 +18165,7 @@ final readonly class KeyReference
 
 ---
 
-# 1429. Key material isolation
+### 1429. Key material isolation
 
 El material de clave no deberá:
 
@@ -18177,13 +18178,13 @@ El material de clave no deberá:
 
 ---
 
-# 1430. Key hierarchy
+### 1430. Key hierarchy
 
 VoltStack deberá utilizar jerarquías de claves para evitar cifrar todo directamente con una clave raíz.
 
 ---
 
-# 1431. Recommended key hierarchy
+### 1431. Recommended key hierarchy
 
 ```text id="b8ih3l"
 Root Key
@@ -18199,7 +18200,7 @@ Protected Data
 
 ---
 
-# 1432. Root key
+### 1432. Root key
 
 La root key deberá:
 
@@ -18210,7 +18211,7 @@ La root key deberá:
 
 ---
 
-# 1433. Key Encryption Key
+### 1433. Key Encryption Key
 
 Una KEK deberá proteger:
 
@@ -18221,19 +18222,19 @@ Una KEK deberá proteger:
 
 ---
 
-# 1434. Tenant master keys
+### 1434. Tenant master keys
 
 Cada tenant podrá poseer una o más claves maestras separadas.
 
 ---
 
-# 1435. Tenant cryptographic isolation
+### 1435. Tenant cryptographic isolation
 
 Nunca deberá utilizarse la misma DEK para cifrar datos de tenants diferentes.
 
 ---
 
-# 1436. Data Encryption Key
+### 1436. Data Encryption Key
 
 ```php id="4o7kss"
 final readonly class DataEncryptionKey
@@ -18252,13 +18253,13 @@ final readonly class DataEncryptionKey
 
 ---
 
-# 1437. Envelope encryption
+### 1437. Envelope encryption
 
 VoltStack deberá utilizar envelope encryption para datos sensibles de alto volumen.
 
 ---
 
-# 1438. Envelope encryption flow
+### 1438. Envelope encryption flow
 
 ```text id="v0f2d6"
 Generate DEK
@@ -18276,7 +18277,7 @@ Store Algorithm and Version Metadata
 
 ---
 
-# 1439. EncryptedPayload
+### 1439. EncryptedPayload
 
 ```php id="d8zgpt"
 final readonly class EncryptedPayload
@@ -18297,7 +18298,7 @@ final readonly class EncryptedPayload
 
 ---
 
-# 1440. Authenticated encryption
+### 1440. Authenticated encryption
 
 Para nuevo cifrado simétrico deberá preferirse AEAD.
 
@@ -18309,7 +18310,7 @@ Ejemplos de familias permitidas según policy:
 
 ---
 
-# 1441. AEAD associated data
+### 1441. AEAD associated data
 
 El associated data podrá incluir:
 
@@ -18322,7 +18323,7 @@ El associated data podrá incluir:
 
 ---
 
-# 1442. Ciphertext swapping prevention
+### 1442. Ciphertext swapping prevention
 
 Los metadatos autenticados deberán impedir mover ciphertext válidos entre:
 
@@ -18334,7 +18335,7 @@ Los metadatos autenticados deberán impedir mover ciphertext válidos entre:
 
 ---
 
-# 1443. Nonce generation
+### 1443. Nonce generation
 
 Los nonces deberán:
 
@@ -18345,7 +18346,7 @@ Los nonces deberán:
 
 ---
 
-# 1444. Nonce reuse protection
+### 1444. Nonce reuse protection
 
 Para algoritmos sensibles a nonce reuse, VoltStack deberá:
 
@@ -18356,7 +18357,7 @@ Para algoritmos sensibles a nonce reuse, VoltStack deberá:
 
 ---
 
-# 1445. Data encryption policy
+### 1445. Data encryption policy
 
 ```php id="spm8jw"
 final readonly class DataEncryptionPolicy
@@ -18375,7 +18376,7 @@ final readonly class DataEncryptionPolicy
 
 ---
 
-# 1446. Data classification
+### 1446. Data classification
 
 ```php id="79yiax"
 enum DataClassification: string
@@ -18390,7 +18391,7 @@ enum DataClassification: string
 
 ---
 
-# 1447. Encryption at rest
+### 1447. Encryption at rest
 
 VoltStack deberá considerar múltiples capas:
 
@@ -18404,13 +18405,13 @@ Una capa no deberá asumirse sustituto automático de las demás.
 
 ---
 
-# 1448. Field-level encryption
+### 1448. Field-level encryption
 
 Los campos especialmente sensibles deberán cifrarse antes de llegar al storage.
 
 ---
 
-# 1449. FieldEncryptionService
+### 1449. FieldEncryptionService
 
 ```php id="eh7ry5"
 interface FieldEncryptionServiceInterface
@@ -18431,7 +18432,7 @@ interface FieldEncryptionServiceInterface
 
 ---
 
-# 1450. EncryptedFieldValue
+### 1450. EncryptedFieldValue
 
 ```php id="b3vo48"
 final readonly class EncryptedFieldValue
@@ -18451,7 +18452,7 @@ final readonly class EncryptedFieldValue
 
 ---
 
-# 1451. Field encryption candidates
+### 1451. Field encryption candidates
 
 Ejemplos:
 
@@ -18465,19 +18466,19 @@ Ejemplos:
 
 ---
 
-# 1452. Search limitations
+### 1452. Search limitations
 
 Los campos cifrados no deberán hacerse buscables mediante cifrado determinista sin una evaluación explícita del riesgo de pattern leakage.
 
 ---
 
-# 1453. Blind indexing
+### 1453. Blind indexing
 
 Cuando sea indispensable buscar datos protegidos, VoltStack podrá utilizar blind indexes separados.
 
 ---
 
-# 1454. BlindIndexService
+### 1454. BlindIndexService
 
 ```php id="2o6l8d"
 interface BlindIndexServiceInterface
@@ -18491,7 +18492,7 @@ interface BlindIndexServiceInterface
 
 ---
 
-# 1455. Blind index restrictions
+### 1455. Blind index restrictions
 
 Los blind indexes deberán:
 
@@ -18504,7 +18505,7 @@ Los blind indexes deberán:
 
 ---
 
-# 1456. Deterministic encryption restrictions
+### 1456. Deterministic encryption restrictions
 
 El cifrado determinista deberá estar deshabilitado por defecto y solo habilitarse con:
 
@@ -18515,13 +18516,13 @@ El cifrado determinista deberá estar deshabilitado por defecto y solo habilitar
 
 ---
 
-# 1457. HSM integration
+### 1457. HSM integration
 
 VoltStack deberá poder integrar Hardware Security Modules para operaciones de alta sensibilidad.
 
 ---
 
-# 1458. HSM use cases
+### 1458. HSM use cases
 
 El HSM podrá utilizarse para:
 
@@ -18535,7 +18536,7 @@ El HSM podrá utilizarse para:
 
 ---
 
-# 1459. HsmProvider
+### 1459. HsmProvider
 
 ```php id="v2feg1"
 interface HsmProviderInterface
@@ -18559,19 +18560,19 @@ interface HsmProviderInterface
 
 ---
 
-# 1460. HSM extraction prohibition
+### 1460. HSM extraction prohibition
 
 Las claves marcadas como non-exportable nunca deberán salir del HSM en plaintext.
 
 ---
 
-# 1461. KMS integration
+### 1461. KMS integration
 
 VoltStack deberá abstraer servicios de gestión de claves cloud y privados.
 
 ---
 
-# 1462. KmsProvider
+### 1462. KmsProvider
 
 ```php id="fa0ie6"
 interface KmsProviderInterface
@@ -18596,7 +18597,7 @@ interface KmsProviderInterface
 
 ---
 
-# 1463. KMS encryption context
+### 1463. KMS encryption context
 
 El encryption context deberá vincular la operación a:
 
@@ -18608,7 +18609,7 @@ El encryption context deberá vincular la operación a:
 
 ---
 
-# 1464. KMS provider compromise
+### 1464. KMS provider compromise
 
 La arquitectura deberá asumir que un proveedor KMS puede sufrir:
 
@@ -18620,7 +18621,7 @@ La arquitectura deberá asumir que un proveedor KMS puede sufrir:
 
 ---
 
-# 1465. Multi-provider key strategy
+### 1465. Multi-provider key strategy
 
 Para cargas críticas, VoltStack podrá permitir:
 
@@ -18633,13 +18634,13 @@ La recuperación no deberá debilitar el control ordinario.
 
 ---
 
-# 1466. Key derivation
+### 1466. Key derivation
 
 La derivación de claves deberá utilizar algoritmos diseñados para ese propósito.
 
 ---
 
-# 1467. KeyDerivationService
+### 1467. KeyDerivationService
 
 ```php id="dc9cbm"
 interface KeyDerivationServiceInterface
@@ -18653,7 +18654,7 @@ interface KeyDerivationServiceInterface
 
 ---
 
-# 1468. Key derivation use cases
+### 1468. Key derivation use cases
 
 Ejemplos:
 
@@ -18666,13 +18667,13 @@ Ejemplos:
 
 ---
 
-# 1469. HKDF policy
+### 1469. HKDF policy
 
 HKDF podrá utilizarse para derivar subkeys cuando el input key material posea entropía suficiente.
 
 ---
 
-# 1470. Password-derived keys
+### 1470. Password-derived keys
 
 Las claves derivadas de contraseñas deberán utilizar KDFs específicas como:
 
@@ -18682,7 +18683,7 @@ Las claves derivadas de contraseñas deberán utilizar KDFs específicas como:
 
 ---
 
-# 1471. Salt requirements
+### 1471. Salt requirements
 
 Los salts deberán:
 
@@ -18693,7 +18694,7 @@ Los salts deberán:
 
 ---
 
-# 1472. Pepper requirements
+### 1472. Pepper requirements
 
 Los peppers deberán:
 
@@ -18704,13 +18705,13 @@ Los peppers deberán:
 
 ---
 
-# 1473. Secure random generation
+### 1473. Secure random generation
 
 Toda entropía criptográfica deberá provenir de un CSPRNG confiable.
 
 ---
 
-# 1474. SecureRandomGenerator
+### 1474. SecureRandomGenerator
 
 ```php id="6sfcn6"
 interface SecureRandomGeneratorInterface
@@ -18725,7 +18726,7 @@ interface SecureRandomGeneratorInterface
 
 ---
 
-# 1475. Randomness use cases
+### 1475. Randomness use cases
 
 Se utilizará para:
 
@@ -18741,7 +18742,7 @@ Se utilizará para:
 
 ---
 
-# 1476. Predictable randomness prohibition
+### 1476. Predictable randomness prohibition
 
 No deberán utilizarse para seguridad:
 
@@ -18753,19 +18754,19 @@ No deberán utilizarse para seguridad:
 
 ---
 
-# 1477. Entropy health
+### 1477. Entropy health
 
 El runtime deberá detectar y fallar de forma segura si el sistema no puede proporcionar entropía confiable.
 
 ---
 
-# 1478. Digital signatures
+### 1478. Digital signatures
 
 VoltStack deberá centralizar las operaciones de firma y verificación.
 
 ---
 
-# 1479. DigitalSignature
+### 1479. DigitalSignature
 
 ```php id="2xsod1"
 final readonly class DigitalSignature
@@ -18783,7 +18784,7 @@ final readonly class DigitalSignature
 
 ---
 
-# 1480. Signature use cases
+### 1480. Signature use cases
 
 Ejemplos:
 
@@ -18798,7 +18799,7 @@ Ejemplos:
 
 ---
 
-# 1481. Signature algorithm policy
+### 1481. Signature algorithm policy
 
 La política deberá definir:
 
@@ -18812,7 +18813,7 @@ La política deberá definir:
 
 ---
 
-# 1482. Signature verification pipeline
+### 1482. Signature verification pipeline
 
 ```text id="b9g5n2"
 Parse Signature Metadata
@@ -18834,7 +18835,7 @@ Validate Replay or Freshness
 
 ---
 
-# 1483. Key confusion prevention
+### 1483. Key confusion prevention
 
 Una clave deberá validarse contra:
 
@@ -18847,7 +18848,7 @@ Una clave deberá validarse contra:
 
 ---
 
-# 1484. Signature context binding
+### 1484. Signature context binding
 
 Una firma válida criptográficamente no deberá aceptarse si pertenece a otro:
 
@@ -18860,13 +18861,13 @@ Una firma válida criptográficamente no deberá aceptarse si pertenece a otro:
 
 ---
 
-# 1485. Message authentication codes
+### 1485. Message authentication codes
 
 VoltStack deberá utilizar MAC cuando ambas partes compartan un secreto y no sea necesaria verificación pública.
 
 ---
 
-# 1486. MacService
+### 1486. MacService
 
 ```php id="5y3jvi"
 interface MacServiceInterface
@@ -18886,13 +18887,13 @@ interface MacServiceInterface
 
 ---
 
-# 1487. MAC key separation
+### 1487. MAC key separation
 
 Cada integración deberá tener una clave MAC distinta y separada de las claves de cifrado.
 
 ---
 
-# 1488. Constant-time comparison
+### 1488. Constant-time comparison
 
 La comparación de:
 
@@ -18905,7 +18906,7 @@ deberá utilizar operaciones constant-time cuando corresponda.
 
 ---
 
-# 1489. Hashing policies
+### 1489. Hashing policies
 
 VoltStack deberá distinguir claramente entre:
 
@@ -18917,7 +18918,7 @@ VoltStack deberá distinguir claramente entre:
 
 ---
 
-# 1490. HashPolicy
+### 1490. HashPolicy
 
 ```php id="jdjnvl"
 final readonly class HashPolicy
@@ -18934,7 +18935,7 @@ final readonly class HashPolicy
 
 ---
 
-# 1491. General-purpose hash usage
+### 1491. General-purpose hash usage
 
 Los hashes generales podrán utilizarse para:
 
@@ -18948,13 +18949,13 @@ No deberán usarse directamente para almacenar contraseñas.
 
 ---
 
-# 1492. Cryptographic key rotation
+### 1492. Cryptographic key rotation
 
 Toda clase de clave deberá tener una política de rotación.
 
 ---
 
-# 1493. KeyRotationPolicy
+### 1493. KeyRotationPolicy
 
 ```php id="b2cu7g"
 final readonly class KeyRotationPolicy
@@ -18972,7 +18973,7 @@ final readonly class KeyRotationPolicy
 
 ---
 
-# 1494. Rotation stages
+### 1494. Rotation stages
 
 ```text id="1c1g80"
 Create New Key Version
@@ -18992,7 +18993,7 @@ Destroy When Retention Allows
 
 ---
 
-# 1495. Emergency key rotation
+### 1495. Emergency key rotation
 
 Ante sospecha de compromiso deberá:
 
@@ -19007,7 +19008,7 @@ Ante sospecha de compromiso deberá:
 
 ---
 
-# 1496. Cryptographic audit events
+### 1496. Cryptographic audit events
 
 Eventos recomendados:
 
@@ -19029,7 +19030,7 @@ Eventos recomendados:
 
 ---
 
-# 1497. Cryptographic governance
+### 1497. Cryptographic governance
 
 VoltStack deberá mantener un inventario de:
 
@@ -19045,7 +19046,7 @@ VoltStack deberá mantener un inventario de:
 
 ---
 
-# 1498. Compliance and FIPS mode
+### 1498. Compliance and FIPS mode
 
 VoltStack podrá ofrecer perfiles criptográficos orientados a entornos regulados.
 
@@ -19059,7 +19060,7 @@ Un perfil FIPS deberá:
 
 ---
 
-# 1499. Post-quantum readiness
+### 1499. Post-quantum readiness
 
 VoltStack deberá prepararse para migraciones post-cuánticas mediante:
 
@@ -19075,7 +19076,7 @@ No deberán adoptarse algoritmos experimentales en producción sin estandarizaci
 
 ---
 
-# 1500. Resultado de esta entrega
+### 1500. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -19147,9 +19148,9 @@ Entrega 16
 - PKI audit and governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 16
+
 
 **Documento:** Parte 05
 **Entrega:** 16 de varias
@@ -19158,7 +19159,7 @@ Entrega 16
 
 ---
 
-# 1501. Public Key Infrastructure Architecture
+### 1501. Public Key Infrastructure Architecture
 
 VoltStack deberá incorporar una arquitectura central de Public Key Infrastructure para gestionar:
 
@@ -19178,7 +19179,7 @@ La infraestructura PKI deberá mantenerse separada del código de aplicación y 
 
 ---
 
-# 1502. PKI security goals
+### 1502. PKI security goals
 
 La arquitectura deberá garantizar:
 
@@ -19195,7 +19196,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1503. PKI threat model
+### 1503. PKI threat model
 
 El modelo deberá considerar:
 
@@ -19217,7 +19218,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1504. PKI architectural components
+### 1504. PKI architectural components
 
 ```text
 Certificate Request
@@ -19243,7 +19244,7 @@ Revocation and Audit
 
 ---
 
-# 1505. PublicKeyInfrastructureService
+### 1505. PublicKeyInfrastructureService
 
 ```php
 interface PublicKeyInfrastructureServiceInterface
@@ -19270,7 +19271,7 @@ interface PublicKeyInfrastructureServiceInterface
 
 ---
 
-# 1506. Certificate authority hierarchy
+### 1506. Certificate authority hierarchy
 
 VoltStack deberá soportar jerarquías compuestas por:
 
@@ -19284,7 +19285,7 @@ VoltStack deberá soportar jerarquías compuestas por:
 
 ---
 
-# 1507. Root certificate authority
+### 1507. Root certificate authority
 
 La root CA deberá:
 
@@ -19297,7 +19298,7 @@ La root CA deberá:
 
 ---
 
-# 1508. Intermediate certificate authority
+### 1508. Intermediate certificate authority
 
 Una intermediate CA deberá separar dominios de confianza como:
 
@@ -19311,13 +19312,13 @@ Una intermediate CA deberá separar dominios de confianza como:
 
 ---
 
-# 1509. Issuing certificate authority
+### 1509. Issuing certificate authority
 
 Una issuing CA deberá emitir certificados finales bajo políticas limitadas y perfiles explícitos.
 
 ---
 
-# 1510. CertificateAuthorityDefinition
+### 1510. CertificateAuthorityDefinition
 
 ```php
 final readonly class CertificateAuthorityDefinition
@@ -19339,7 +19340,7 @@ final readonly class CertificateAuthorityDefinition
 
 ---
 
-# 1511. CertificateAuthorityType
+### 1511. CertificateAuthorityType
 
 ```php
 enum CertificateAuthorityType: string
@@ -19356,7 +19357,7 @@ enum CertificateAuthorityType: string
 
 ---
 
-# 1512. CertificateAuthorityState
+### 1512. CertificateAuthorityState
 
 ```php
 enum CertificateAuthorityState: string
@@ -19374,7 +19375,7 @@ enum CertificateAuthorityState: string
 
 ---
 
-# 1513. CA purpose separation
+### 1513. CA purpose separation
 
 Una CA no deberá emitir certificados para propósitos no incluidos expresamente en su política.
 
@@ -19388,7 +19389,7 @@ Una CA de workloads no deberá emitir certificados para:
 
 ---
 
-# 1514. CA private key protection
+### 1514. CA private key protection
 
 Las claves privadas de CA deberán:
 
@@ -19401,13 +19402,13 @@ Las claves privadas de CA deberán:
 
 ---
 
-# 1515. Certificate profile architecture
+### 1515. Certificate profile architecture
 
 Todo certificado deberá emitirse a partir de un perfil versionado.
 
 ---
 
-# 1516. CertificateProfile
+### 1516. CertificateProfile
 
 ```php
 final readonly class CertificateProfile
@@ -19430,7 +19431,7 @@ final readonly class CertificateProfile
 
 ---
 
-# 1517. CertificatePurpose
+### 1517. CertificatePurpose
 
 ```php
 enum CertificatePurpose: string
@@ -19449,7 +19450,7 @@ enum CertificatePurpose: string
 
 ---
 
-# 1518. Certificate profile controls
+### 1518. Certificate profile controls
 
 Un perfil deberá definir:
 
@@ -19466,7 +19467,7 @@ Un perfil deberá definir:
 
 ---
 
-# 1519. Extended Key Usage restrictions
+### 1519. Extended Key Usage restrictions
 
 VoltStack deberá validar que el certificado posea el EKU correcto para la operación solicitada.
 
@@ -19474,7 +19475,7 @@ Un certificado de server authentication no deberá aceptarse automáticamente co
 
 ---
 
-# 1520. Key Usage restrictions
+### 1520. Key Usage restrictions
 
 La validación deberá comprobar usos como:
 
@@ -19487,13 +19488,13 @@ La validación deberá comprobar usos como:
 
 ---
 
-# 1521. Certificate signing request
+### 1521. Certificate signing request
 
 La emisión podrá iniciarse mediante un Certificate Signing Request.
 
 ---
 
-# 1522. CertificateSigningRequest
+### 1522. CertificateSigningRequest
 
 ```php
 final readonly class CertificateSigningRequest
@@ -19511,7 +19512,7 @@ final readonly class CertificateSigningRequest
 
 ---
 
-# 1523. CSR validation
+### 1523. CSR validation
 
 La validación deberá comprobar:
 
@@ -19527,7 +19528,7 @@ La validación deberá comprobar:
 
 ---
 
-# 1524. CSR extension filtering
+### 1524. CSR extension filtering
 
 Las extensiones solicitadas no deberán copiarse directamente al certificado.
 
@@ -19535,13 +19536,13 @@ La CA deberá reconstruirlas desde la policy.
 
 ---
 
-# 1525. Subject validation
+### 1525. Subject validation
 
 Los datos del Subject deberán derivarse de fuentes confiables y no únicamente de input del solicitante.
 
 ---
 
-# 1526. Subject Alternative Name
+### 1526. Subject Alternative Name
 
 SAN deberá utilizarse para representar identidades modernas como:
 
@@ -19554,13 +19555,13 @@ SAN deberá utilizarse para representar identidades modernas como:
 
 ---
 
-# 1527. Common Name limitations
+### 1527. Common Name limitations
 
 El Common Name no deberá utilizarse como sustituto de SAN para validación de identidad de red.
 
 ---
 
-# 1528. Certificate issuance request
+### 1528. Certificate issuance request
 
 ```php
 final readonly class CertificateIssuanceRequest
@@ -19581,7 +19582,7 @@ final readonly class CertificateIssuanceRequest
 
 ---
 
-# 1529. Certificate issuance policy
+### 1529. Certificate issuance policy
 
 ```php
 interface CertificateIssuancePolicyInterface
@@ -19594,7 +19595,7 @@ interface CertificateIssuancePolicyInterface
 
 ---
 
-# 1530. CertificateIssuanceDecision
+### 1530. CertificateIssuanceDecision
 
 ```php
 final readonly class CertificateIssuanceDecision
@@ -19614,13 +19615,13 @@ final readonly class CertificateIssuanceDecision
 
 ---
 
-# 1531. Proof of possession
+### 1531. Proof of possession
 
 La CA deberá verificar que el solicitante controla la clave privada correspondiente a la clave pública del CSR.
 
 ---
 
-# 1532. IssuedCertificate
+### 1532. IssuedCertificate
 
 ```php
 final readonly class IssuedCertificate
@@ -19641,7 +19642,7 @@ final readonly class IssuedCertificate
 
 ---
 
-# 1533. CertificateReference
+### 1533. CertificateReference
 
 ```php
 final readonly class CertificateReference
@@ -19658,7 +19659,7 @@ final readonly class CertificateReference
 
 ---
 
-# 1534. Certificate serial numbers
+### 1534. Certificate serial numbers
 
 Los serial numbers deberán:
 
@@ -19670,7 +19671,7 @@ Los serial numbers deberán:
 
 ---
 
-# 1535. Certificate lifetime policy
+### 1535. Certificate lifetime policy
 
 La validez deberá reducirse conforme aumente:
 
@@ -19684,13 +19685,13 @@ Los certificados de workload deberán tener vidas significativamente menores que
 
 ---
 
-# 1536. Backdating restrictions
+### 1536. Backdating restrictions
 
 La fecha `notBefore` podrá incluir una tolerancia mínima para clock skew, pero no deberá utilizar backdating amplio.
 
 ---
 
-# 1537. Certificate distribution
+### 1537. Certificate distribution
 
 La distribución deberá:
 
@@ -19702,7 +19703,7 @@ La distribución deberá:
 
 ---
 
-# 1538. Private key generation models
+### 1538. Private key generation models
 
 VoltStack deberá soportar:
 
@@ -19714,13 +19715,13 @@ VoltStack deberá soportar:
 
 ---
 
-# 1539. Preferred private key model
+### 1539. Preferred private key model
 
 Siempre que sea posible, la clave privada deberá generarse y permanecer en el componente que la utilizará.
 
 ---
 
-# 1540. Certificate lifecycle
+### 1540. Certificate lifecycle
 
 ```php
 enum CertificateLifecycleState: string
@@ -19739,7 +19740,7 @@ enum CertificateLifecycleState: string
 
 ---
 
-# 1541. Certificate inventory
+### 1541. Certificate inventory
 
 VoltStack deberá mantener inventario de:
 
@@ -19758,7 +19759,7 @@ VoltStack deberá mantener inventario de:
 
 ---
 
-# 1542. Certificate discovery
+### 1542. Certificate discovery
 
 El sistema podrá descubrir certificados en:
 
@@ -19774,13 +19775,13 @@ El sistema podrá descubrir certificados en:
 
 ---
 
-# 1543. Unknown certificate detection
+### 1543. Unknown certificate detection
 
 Todo certificado no registrado pero encontrado en infraestructura administrada deberá generar una finding.
 
 ---
 
-# 1544. Certificate ownership
+### 1544. Certificate ownership
 
 Cada certificado deberá tener:
 
@@ -19792,13 +19793,13 @@ Cada certificado deberá tener:
 
 ---
 
-# 1545. Certificate renewal
+### 1545. Certificate renewal
 
 La renovación deberá iniciarse antes de la expiración mediante una ventana definida por policy.
 
 ---
 
-# 1546. CertificateRenewalRequest
+### 1546. CertificateRenewalRequest
 
 ```php
 final readonly class CertificateRenewalRequest
@@ -19815,7 +19816,7 @@ final readonly class CertificateRenewalRequest
 
 ---
 
-# 1547. CertificateRenewalReason
+### 1547. CertificateRenewalReason
 
 ```php
 enum CertificateRenewalReason: string
@@ -19831,7 +19832,7 @@ enum CertificateRenewalReason: string
 
 ---
 
-# 1548. Renewal authorization
+### 1548. Renewal authorization
 
 Renovar un certificado no deberá omitir:
 
@@ -19844,7 +19845,7 @@ Renovar un certificado no deberá omitir:
 
 ---
 
-# 1549. Certificate key rotation
+### 1549. Certificate key rotation
 
 La renovación deberá preferir una nueva key pair cuando:
 
@@ -19856,7 +19857,7 @@ La renovación deberá preferir una nueva key pair cuando:
 
 ---
 
-# 1550. Overlapping certificate rotation
+### 1550. Overlapping certificate rotation
 
 VoltStack deberá permitir una ventana de coexistencia para:
 
@@ -19869,7 +19870,7 @@ VoltStack deberá permitir una ventana de coexistencia para:
 
 ---
 
-# 1551. Zero-downtime certificate rotation
+### 1551. Zero-downtime certificate rotation
 
 La rotación automatizada deberá evitar interrupciones mediante:
 
@@ -19881,7 +19882,7 @@ La rotación automatizada deberá evitar interrupciones mediante:
 
 ---
 
-# 1552. Certificate revocation
+### 1552. Certificate revocation
 
 Un certificado deberá revocarse cuando:
 
@@ -19895,7 +19896,7 @@ Un certificado deberá revocarse cuando:
 
 ---
 
-# 1553. CertificateRevocationReason
+### 1553. CertificateRevocationReason
 
 ```php
 enum CertificateRevocationReason: string
@@ -19914,7 +19915,7 @@ enum CertificateRevocationReason: string
 
 ---
 
-# 1554. CertificateRevocationRecord
+### 1554. CertificateRevocationRecord
 
 ```php
 final readonly class CertificateRevocationRecord
@@ -19932,7 +19933,7 @@ final readonly class CertificateRevocationRecord
 
 ---
 
-# 1555. Revocation publication
+### 1555. Revocation publication
 
 La revocación deberá publicarse mediante mecanismos compatibles con el perfil, como:
 
@@ -19943,7 +19944,7 @@ La revocación deberá publicarse mediante mecanismos compatibles con el perfil,
 
 ---
 
-# 1556. Certificate Revocation List
+### 1556. Certificate Revocation List
 
 ```php
 final readonly class CertificateRevocationList
@@ -19962,7 +19963,7 @@ final readonly class CertificateRevocationList
 
 ---
 
-# 1557. CRL generation
+### 1557. CRL generation
 
 Las CRLs deberán:
 
@@ -19975,13 +19976,13 @@ Las CRLs deberán:
 
 ---
 
-# 1558. Delta CRLs
+### 1558. Delta CRLs
 
 VoltStack podrá soportar delta CRLs para reducir el tamaño de actualizaciones frecuentes.
 
 ---
 
-# 1559. OCSP architecture
+### 1559. OCSP architecture
 
 ```php
 interface OcspResponderInterface
@@ -19994,7 +19995,7 @@ interface OcspResponderInterface
 
 ---
 
-# 1560. OCSP response states
+### 1560. OCSP response states
 
 ```php
 enum OcspCertificateStatus: string
@@ -20007,7 +20008,7 @@ enum OcspCertificateStatus: string
 
 ---
 
-# 1561. OCSP responder security
+### 1561. OCSP responder security
 
 El responder deberá:
 
@@ -20020,13 +20021,13 @@ El responder deberá:
 
 ---
 
-# 1562. OCSP stapling
+### 1562. OCSP stapling
 
 Para servicios TLS, VoltStack deberá favorecer OCSP stapling cuando el entorno y los clientes lo soporten.
 
 ---
 
-# 1563. Revocation checking policy
+### 1563. Revocation checking policy
 
 ```php
 enum RevocationCheckingMode: string
@@ -20040,13 +20041,13 @@ enum RevocationCheckingMode: string
 
 ---
 
-# 1564. Revocation fail behavior
+### 1564. Revocation fail behavior
 
 Para certificados privilegiados o internos de alto riesgo, la indisponibilidad del mecanismo de revocación deberá tender a fail-closed.
 
 ---
 
-# 1565. Certificate validation pipeline
+### 1565. Certificate validation pipeline
 
 ```text
 Parse Certificate
@@ -20074,7 +20075,7 @@ Bind to Runtime Identity
 
 ---
 
-# 1566. CertificateValidationContext
+### 1566. CertificateValidationContext
 
 ```php
 final readonly class CertificateValidationContext
@@ -20093,7 +20094,7 @@ final readonly class CertificateValidationContext
 
 ---
 
-# 1567. CertificateValidationResult
+### 1567. CertificateValidationResult
 
 ```php
 final readonly class CertificateValidationResult
@@ -20111,7 +20112,7 @@ final readonly class CertificateValidationResult
 
 ---
 
-# 1568. CertificateValidationStatus
+### 1568. CertificateValidationStatus
 
 ```php
 enum CertificateValidationStatus: string
@@ -20128,13 +20129,13 @@ enum CertificateValidationStatus: string
 
 ---
 
-# 1569. Trust store architecture
+### 1569. Trust store architecture
 
 VoltStack deberá administrar trust stores como recursos versionados y gobernados.
 
 ---
 
-# 1570. TrustStore
+### 1570. TrustStore
 
 ```php
 final readonly class TrustStore
@@ -20154,7 +20155,7 @@ final readonly class TrustStore
 
 ---
 
-# 1571. TrustStoreState
+### 1571. TrustStoreState
 
 ```php
 enum TrustStoreState: string
@@ -20169,7 +20170,7 @@ enum TrustStoreState: string
 
 ---
 
-# 1572. Trust anchor governance
+### 1572. Trust anchor governance
 
 Agregar o retirar un trust anchor deberá requerir:
 
@@ -20182,13 +20183,13 @@ Agregar o retirar un trust anchor deberá requerir:
 
 ---
 
-# 1573. Trust anchor pinning
+### 1573. Trust anchor pinning
 
 Los trust anchors críticos deberán identificarse mediante fingerprints esperados y metadata protegida.
 
 ---
 
-# 1574. Trust store isolation
+### 1574. Trust store isolation
 
 Deberán existir trust stores separados para:
 
@@ -20202,13 +20203,13 @@ Deberán existir trust stores separados para:
 
 ---
 
-# 1575. Cross-environment trust prohibition
+### 1575. Cross-environment trust prohibition
 
 Producción no deberá confiar automáticamente en CAs de desarrollo o testing.
 
 ---
 
-# 1576. Trust anchor rotation
+### 1576. Trust anchor rotation
 
 La rotación deberá permitir coexistencia temporal entre:
 
@@ -20218,7 +20219,7 @@ La rotación deberá permitir coexistencia temporal entre:
 
 ---
 
-# 1577. Trust rotation stages
+### 1577. Trust rotation stages
 
 ```text
 Create New Trust Anchor
@@ -20238,19 +20239,19 @@ Monitor Validation Failures
 
 ---
 
-# 1578. Trust store rollback
+### 1578. Trust store rollback
 
 Toda actualización deberá conservar capacidad de rollback mientras no exista evidencia de compromiso del anchor anterior.
 
 ---
 
-# 1579. Mutual TLS architecture
+### 1579. Mutual TLS architecture
 
 VoltStack deberá soportar mTLS para autenticar ambos extremos de una conexión.
 
 ---
 
-# 1580. MutualTlsIdentity
+### 1580. MutualTlsIdentity
 
 ```php
 final readonly class MutualTlsIdentity
@@ -20269,7 +20270,7 @@ final readonly class MutualTlsIdentity
 
 ---
 
-# 1581. mTLS authentication flow
+### 1581. mTLS authentication flow
 
 ```text
 TLS Handshake
@@ -20291,13 +20292,13 @@ Secure Channel Established
 
 ---
 
-# 1582. Client certificate authentication
+### 1582. Client certificate authentication
 
 Un certificado cliente deberá mapearse a una identidad mediante datos estables y gobernados.
 
 ---
 
-# 1583. ClientCertificateIdentityMapper
+### 1583. ClientCertificateIdentityMapper
 
 ```php
 interface ClientCertificateIdentityMapperInterface
@@ -20311,7 +20312,7 @@ interface ClientCertificateIdentityMapperInterface
 
 ---
 
-# 1584. Unsafe certificate mapping prohibition
+### 1584. Unsafe certificate mapping prohibition
 
 No deberá mapearse una identidad únicamente mediante:
 
@@ -20323,7 +20324,7 @@ No deberá mapearse una identidad únicamente mediante:
 
 ---
 
-# 1585. Certificate-to-identity binding
+### 1585. Certificate-to-identity binding
 
 El binding deberá considerar:
 
@@ -20337,13 +20338,13 @@ El binding deberá considerar:
 
 ---
 
-# 1586. Service-to-service authentication
+### 1586. Service-to-service authentication
 
 Los servicios internos deberán autenticarse mediante identidades propias y no compartir credenciales humanas.
 
 ---
 
-# 1587. ServiceIdentity
+### 1587. ServiceIdentity
 
 ```php
 final readonly class ServiceIdentity
@@ -20362,7 +20363,7 @@ final readonly class ServiceIdentity
 
 ---
 
-# 1588. Service identity authorization
+### 1588. Service identity authorization
 
 La validación del certificado deberá completarse con autorización basada en:
 
@@ -20376,7 +20377,7 @@ La validación del certificado deberá completarse con autorización basada en:
 
 ---
 
-# 1589. SPIFFE foundations
+### 1589. SPIFFE foundations
 
 VoltStack podrá soportar SPIFFE para representar identidades de workloads mediante URI SAN.
 
@@ -20388,7 +20389,7 @@ spiffe://trust-domain/path/to/workload
 
 ---
 
-# 1590. SpiffeIdentity
+### 1590. SpiffeIdentity
 
 ```php
 final readonly class SpiffeIdentity
@@ -20406,7 +20407,7 @@ final readonly class SpiffeIdentity
 
 ---
 
-# 1591. SPIFFE ID validation
+### 1591. SPIFFE ID validation
 
 Un SPIFFE ID deberá validar:
 
@@ -20419,7 +20420,7 @@ Un SPIFFE ID deberá validar:
 
 ---
 
-# 1592. SPIRE integration foundations
+### 1592. SPIRE integration foundations
 
 VoltStack podrá integrarse con SPIRE para:
 
@@ -20432,7 +20433,7 @@ VoltStack podrá integrarse con SPIRE para:
 
 ---
 
-# 1593. Workload attestation
+### 1593. Workload attestation
 
 Antes de emitir identidad, el sistema deberá validar atributos como:
 
@@ -20447,7 +20448,7 @@ Antes de emitir identidad, el sistema deberá validar atributos como:
 
 ---
 
-# 1594. Workload certificate
+### 1594. Workload certificate
 
 ```php
 final readonly class WorkloadCertificate
@@ -20465,7 +20466,7 @@ final readonly class WorkloadCertificate
 
 ---
 
-# 1595. Short-lived workload certificates
+### 1595. Short-lived workload certificates
 
 Los certificados de workload deberán:
 
@@ -20477,7 +20478,7 @@ Los certificados de workload deberán:
 
 ---
 
-# 1596. Certificate pinning
+### 1596. Certificate pinning
 
 El pinning podrá emplearse en contextos controlados, pero deberá diseñarse con:
 
@@ -20492,7 +20493,7 @@ El pinning rígido sin plan de rotación deberá evitarse.
 
 ---
 
-# 1597. Code signing certificates
+### 1597. Code signing certificates
 
 Los certificados de firma de código deberán:
 
@@ -20505,7 +20506,7 @@ Los certificados de firma de código deberán:
 
 ---
 
-# 1598. Timestamping authority
+### 1598. Timestamping authority
 
 Una Timestamping Authority deberá permitir demostrar que una firma existía durante la validez del certificado firmante.
 
@@ -20521,7 +20522,7 @@ interface TimestampingAuthorityInterface
 
 ---
 
-# 1599. PKI audit events
+### 1599. PKI audit events
 
 Eventos recomendados:
 
@@ -20548,7 +20549,7 @@ Eventos recomendados:
 
 ---
 
-# 1600. Resultado de esta entrega
+### 1600. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -20619,9 +20620,9 @@ Entrega 17
 - Secret governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 17
+
 
 **Documento:** Parte 05
 **Entrega:** 17 de varias
@@ -20630,7 +20631,7 @@ Entrega 17
 
 ---
 
-# 1601. Secrets Management Architecture
+### 1601. Secrets Management Architecture
 
 VoltStack deberá incorporar una arquitectura centralizada de gestión de secretos para proteger:
 
@@ -20649,7 +20650,7 @@ Los secretos no deberán administrarse como configuración ordinaria.
 
 ---
 
-# 1602. Secrets management security goals
+### 1602. Secrets management security goals
 
 La arquitectura deberá garantizar:
 
@@ -20666,7 +20667,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1603. Secrets threat model
+### 1603. Secrets threat model
 
 El modelo deberá considerar:
 
@@ -20687,7 +20688,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1604. Secrets architecture components
+### 1604. Secrets architecture components
 
 ```text
 Secret Producer
@@ -20711,7 +20712,7 @@ Audit and Exposure Detection
 
 ---
 
-# 1605. SecretsManagementService
+### 1605. SecretsManagementService
 
 ```php
 interface SecretsManagementServiceInterface
@@ -20740,7 +20741,7 @@ interface SecretsManagementServiceInterface
 
 ---
 
-# 1606. SecretMaterial
+### 1606. SecretMaterial
 
 ```php
 final readonly class SecretMaterial
@@ -20757,7 +20758,7 @@ final readonly class SecretMaterial
 
 ---
 
-# 1607. SecretType
+### 1607. SecretType
 
 ```php
 enum SecretType: string
@@ -20778,13 +20779,13 @@ enum SecretType: string
 
 ---
 
-# 1608. Secret classification
+### 1608. Secret classification
 
 Toda entrada deberá clasificarse antes de almacenarse.
 
 ---
 
-# 1609. SecretClassification
+### 1609. SecretClassification
 
 ```php
 enum SecretClassification: string
@@ -20799,7 +20800,7 @@ enum SecretClassification: string
 
 ---
 
-# 1610. Classification factors
+### 1610. Classification factors
 
 La clasificación deberá considerar:
 
@@ -20815,7 +20816,7 @@ La clasificación deberá considerar:
 
 ---
 
-# 1611. Secret ownership
+### 1611. Secret ownership
 
 Todo secreto deberá tener:
 
@@ -20830,7 +20831,7 @@ Todo secreto deberá tener:
 
 ---
 
-# 1612. SecretRecord
+### 1612. SecretRecord
 
 ```php
 final readonly class SecretRecord
@@ -20852,7 +20853,7 @@ final readonly class SecretRecord
 
 ---
 
-# 1613. SecretLifecycleState
+### 1613. SecretLifecycleState
 
 ```php
 enum SecretLifecycleState: string
@@ -20870,13 +20871,13 @@ enum SecretLifecycleState: string
 
 ---
 
-# 1614. Secret store abstraction
+### 1614. Secret store abstraction
 
 VoltStack deberá soportar múltiples proveedores sin acoplar el dominio a uno específico.
 
 ---
 
-# 1615. SecretStore
+### 1615. SecretStore
 
 ```php
 interface SecretStoreInterface
@@ -20899,7 +20900,7 @@ interface SecretStoreInterface
 
 ---
 
-# 1616. Supported secret stores
+### 1616. Supported secret stores
 
 La arquitectura podrá integrar:
 
@@ -20913,7 +20914,7 @@ La arquitectura podrá integrar:
 
 ---
 
-# 1617. Secret store selection policy
+### 1617. Secret store selection policy
 
 La selección deberá considerar:
 
@@ -20929,7 +20930,7 @@ La selección deberá considerar:
 
 ---
 
-# 1618. SecretReference
+### 1618. SecretReference
 
 ```php
 final readonly class SecretReference
@@ -20947,7 +20948,7 @@ final readonly class SecretReference
 
 ---
 
-# 1619. Opaque secret references
+### 1619. Opaque secret references
 
 La referencia no deberá contener:
 
@@ -20959,13 +20960,13 @@ La referencia no deberá contener:
 
 ---
 
-# 1620. Reference-only domain model
+### 1620. Reference-only domain model
 
 Controllers, Commands y Services deberán transportar referencias y no secretos cuando no sea indispensable resolverlos.
 
 ---
 
-# 1621. Secret access policy
+### 1621. Secret access policy
 
 ```php
 interface SecretAccessPolicyInterface
@@ -20979,7 +20980,7 @@ interface SecretAccessPolicyInterface
 
 ---
 
-# 1622. SecretAccessDecision
+### 1622. SecretAccessDecision
 
 ```php
 final readonly class SecretAccessDecision
@@ -20999,7 +21000,7 @@ final readonly class SecretAccessDecision
 
 ---
 
-# 1623. Secret access context
+### 1623. Secret access context
 
 La evaluación deberá considerar:
 
@@ -21018,7 +21019,7 @@ La evaluación deberá considerar:
 
 ---
 
-# 1624. Least privilege secret access
+### 1624. Least privilege secret access
 
 El acceso deberá limitarse por:
 
@@ -21033,13 +21034,13 @@ El acceso deberá limitarse por:
 
 ---
 
-# 1625. Secret leasing
+### 1625. Secret leasing
 
 La entrega preferida será mediante leases de corta duración.
 
 ---
 
-# 1626. SecretLease
+### 1626. SecretLease
 
 ```php
 final readonly class SecretLease
@@ -21059,7 +21060,7 @@ final readonly class SecretLease
 
 ---
 
-# 1627. SecretLeaseState
+### 1627. SecretLeaseState
 
 ```php
 enum SecretLeaseState: string
@@ -21074,13 +21075,13 @@ enum SecretLeaseState: string
 
 ---
 
-# 1628. Lease duration
+### 1628. Lease duration
 
 La duración deberá ser la mínima compatible con el caso de uso.
 
 ---
 
-# 1629. Lease renewal
+### 1629. Lease renewal
 
 La renovación deberá reevaluar:
 
@@ -21095,13 +21096,13 @@ La renovación deberá reevaluar:
 
 ---
 
-# 1630. Lease revocation
+### 1630. Lease revocation
 
 VoltStack deberá poder revocar un lease sin esperar su expiración natural.
 
 ---
 
-# 1631. Dynamic secrets
+### 1631. Dynamic secrets
 
 El framework deberá favorecer secretos generados bajo demanda.
 
@@ -21115,7 +21116,7 @@ Ejemplos:
 
 ---
 
-# 1632. DynamicSecretProvider
+### 1632. DynamicSecretProvider
 
 ```php
 interface DynamicSecretProviderInterface
@@ -21132,7 +21133,7 @@ interface DynamicSecretProviderInterface
 
 ---
 
-# 1633. DynamicSecretRequest
+### 1633. DynamicSecretRequest
 
 ```php
 final readonly class DynamicSecretRequest
@@ -21151,7 +21152,7 @@ final readonly class DynamicSecretRequest
 
 ---
 
-# 1634. Dynamic secret advantages
+### 1634. Dynamic secret advantages
 
 Los secretos dinámicos reducen:
 
@@ -21163,7 +21164,7 @@ Los secretos dinámicos reducen:
 
 ---
 
-# 1635. Dynamic database credentials
+### 1635. Dynamic database credentials
 
 Las credenciales de base de datos dinámicas deberán:
 
@@ -21176,7 +21177,7 @@ Las credenciales de base de datos dinámicas deberán:
 
 ---
 
-# 1636. Dynamic cloud credentials
+### 1636. Dynamic cloud credentials
 
 Las credenciales cloud temporales deberán limitar:
 
@@ -21190,13 +21191,13 @@ Las credenciales cloud temporales deberán limitar:
 
 ---
 
-# 1637. Secret injection architecture
+### 1637. Secret injection architecture
 
 VoltStack deberá permitir inyectar secretos sin persistirlos innecesariamente.
 
 ---
 
-# 1638. SecretInjectionService
+### 1638. SecretInjectionService
 
 ```php
 interface SecretInjectionServiceInterface
@@ -21211,7 +21212,7 @@ interface SecretInjectionServiceInterface
 
 ---
 
-# 1639. Secret injection targets
+### 1639. Secret injection targets
 
 Se podrá inyectar en:
 
@@ -21227,7 +21228,7 @@ Se podrá inyectar en:
 
 ---
 
-# 1640. Preferred injection models
+### 1640. Preferred injection models
 
 Orden recomendado:
 
@@ -21238,13 +21239,13 @@ Orden recomendado:
 
 ---
 
-# 1641. Brokered secret usage
+### 1641. Brokered secret usage
 
 Cuando sea posible, el consumidor deberá pedir la operación y no recibir directamente el secreto.
 
 ---
 
-# 1642. Environment variable risks
+### 1642. Environment variable risks
 
 Las variables de entorno pueden exponerse mediante:
 
@@ -21258,7 +21259,7 @@ Las variables de entorno pueden exponerse mediante:
 
 ---
 
-# 1643. Environment variable policy
+### 1643. Environment variable policy
 
 Su uso deberá:
 
@@ -21271,7 +21272,7 @@ Su uso deberá:
 
 ---
 
-# 1644. Ephemeral secret files
+### 1644. Ephemeral secret files
 
 Los archivos temporales deberán:
 
@@ -21284,13 +21285,13 @@ Los archivos temporales deberán:
 
 ---
 
-# 1645. Secret zeroization
+### 1645. Secret zeroization
 
 VoltStack deberá minimizar el tiempo durante el cual un secreto permanece en memoria.
 
 ---
 
-# 1646. SecretZeroizer
+### 1646. SecretZeroizer
 
 ```php
 interface SecretZeroizerInterface
@@ -21303,7 +21304,7 @@ interface SecretZeroizerInterface
 
 ---
 
-# 1647. Zeroization limitations
+### 1647. Zeroization limitations
 
 PHP no garantiza control absoluto sobre copias internas, garbage collection o optimizaciones del runtime.
 
@@ -21318,7 +21319,7 @@ Por ello, VoltStack deberá complementar zeroization con:
 
 ---
 
-# 1648. SensitiveValue restrictions
+### 1648. SensitiveValue restrictions
 
 `SensitiveValue` deberá:
 
@@ -21331,7 +21332,7 @@ Por ello, VoltStack deberá complementar zeroization con:
 
 ---
 
-# 1649. Secret redaction
+### 1649. Secret redaction
 
 VoltStack deberá registrar patrones conocidos para redactar secretos en:
 
@@ -21345,7 +21346,7 @@ VoltStack deberá registrar patrones conocidos para redactar secretos en:
 
 ---
 
-# 1650. SecretRedactionService
+### 1650. SecretRedactionService
 
 ```php
 interface SecretRedactionServiceInterface
@@ -21359,7 +21360,7 @@ interface SecretRedactionServiceInterface
 
 ---
 
-# 1651. Redaction strategies
+### 1651. Redaction strategies
 
 Se podrán utilizar:
 
@@ -21372,13 +21373,13 @@ Se podrán utilizar:
 
 ---
 
-# 1652. Redaction false confidence
+### 1652. Redaction false confidence
 
 La redacción no deberá considerarse sustituto de evitar que el secreto llegue al sistema de logging.
 
 ---
 
-# 1653. Configuration and secret separation
+### 1653. Configuration and secret separation
 
 La configuración deberá referenciar secretos, no contenerlos.
 
@@ -21394,7 +21395,7 @@ return [
 
 ---
 
-# 1654. Secret configuration resolver
+### 1654. Secret configuration resolver
 
 ```php
 interface SecretConfigurationResolverInterface
@@ -21408,7 +21409,7 @@ interface SecretConfigurationResolverInterface
 
 ---
 
-# 1655. Configuration cache restrictions
+### 1655. Configuration cache restrictions
 
 Un secreto resuelto no deberá persistirse en:
 
@@ -21420,7 +21421,7 @@ Un secreto resuelto no deberá persistirse en:
 
 ---
 
-# 1656. Build-time versus runtime secrets
+### 1656. Build-time versus runtime secrets
 
 VoltStack deberá distinguir:
 
@@ -21430,7 +21431,7 @@ VoltStack deberá distinguir:
 
 ---
 
-# 1657. Build secret policy
+### 1657. Build secret policy
 
 Un secreto de build deberá:
 
@@ -21442,7 +21443,7 @@ Un secreto de build deberá:
 
 ---
 
-# 1658. Container image protection
+### 1658. Container image protection
 
 No deberán incluirse secretos en:
 
@@ -21455,7 +21456,7 @@ No deberán incluirse secretos en:
 
 ---
 
-# 1659. CI/CD secret security
+### 1659. CI/CD secret security
 
 Los pipelines deberán:
 
@@ -21469,7 +21470,7 @@ Los pipelines deberán:
 
 ---
 
-# 1660. CiCdSecretPolicy
+### 1660. CiCdSecretPolicy
 
 ```php
 final readonly class CiCdSecretPolicy
@@ -21488,13 +21489,13 @@ final readonly class CiCdSecretPolicy
 
 ---
 
-# 1661. Pull request secret protection
+### 1661. Pull request secret protection
 
 Pipelines originados desde código no confiable no deberán recibir secretos privilegiados.
 
 ---
 
-# 1662. Environment separation
+### 1662. Environment separation
 
 Los secretos de producción deberán estar aislados de:
 
@@ -21506,13 +21507,13 @@ Los secretos de producción deberán estar aislados de:
 
 ---
 
-# 1663. Repository secret protection
+### 1663. Repository secret protection
 
 VoltStack deberá incluir controles para impedir secretos en repositorios.
 
 ---
 
-# 1664. RepositorySecretScanner
+### 1664. RepositorySecretScanner
 
 ```php
 interface RepositorySecretScannerInterface
@@ -21526,7 +21527,7 @@ interface RepositorySecretScannerInterface
 
 ---
 
-# 1665. Secret scanning scopes
+### 1665. Secret scanning scopes
 
 El scanner deberá analizar:
 
@@ -21542,7 +21543,7 @@ El scanner deberá analizar:
 
 ---
 
-# 1666. Secret detection techniques
+### 1666. Secret detection techniques
 
 Se deberán combinar:
 
@@ -21556,7 +21557,7 @@ Se deberán combinar:
 
 ---
 
-# 1667. SecretScanningFinding
+### 1667. SecretScanningFinding
 
 ```php
 final readonly class SecretScanningFinding
@@ -21576,7 +21577,7 @@ final readonly class SecretScanningFinding
 
 ---
 
-# 1668. SecretFindingSeverity
+### 1668. SecretFindingSeverity
 
 ```php
 enum SecretFindingSeverity: string
@@ -21591,7 +21592,7 @@ enum SecretFindingSeverity: string
 
 ---
 
-# 1669. Validated secret detection
+### 1669. Validated secret detection
 
 Cuando sea seguro, el sistema podrá validar con el proveedor si una credencial sigue activa.
 
@@ -21599,25 +21600,25 @@ La validación no deberá aumentar la exposición.
 
 ---
 
-# 1670. Pre-commit scanning
+### 1670. Pre-commit scanning
 
 VoltStack deberá ofrecer integración para bloquear commits que contengan secretos.
 
 ---
 
-# 1671. Server-side repository scanning
+### 1671. Server-side repository scanning
 
 La protección no deberá depender únicamente del desarrollador local.
 
 ---
 
-# 1672. Historical secret exposure
+### 1672. Historical secret exposure
 
 Eliminar un secreto del commit más reciente no elimina su exposición histórica.
 
 ---
 
-# 1673. Repository exposure response
+### 1673. Repository exposure response
 
 Ante una filtración deberán ejecutarse:
 
@@ -21631,7 +21632,7 @@ Ante una filtración deberán ejecutarse:
 
 ---
 
-# 1674. Secret exposure detection
+### 1674. Secret exposure detection
 
 VoltStack deberá detectar exposición en:
 
@@ -21648,7 +21649,7 @@ VoltStack deberá detectar exposición en:
 
 ---
 
-# 1675. SecretExposureDetector
+### 1675. SecretExposureDetector
 
 ```php
 interface SecretExposureDetectorInterface
@@ -21662,19 +21663,19 @@ interface SecretExposureDetectorInterface
 
 ---
 
-# 1676. Secret fingerprinting
+### 1676. Secret fingerprinting
 
 El sistema podrá mantener fingerprints no reversibles para identificar secretos expuestos sin conservar el plaintext.
 
 ---
 
-# 1677. Fingerprint key separation
+### 1677. Fingerprint key separation
 
 Los fingerprints keyed deberán utilizar una clave dedicada, separada de cifrado y MAC de aplicaciones.
 
 ---
 
-# 1678. Secret exposure event
+### 1678. Secret exposure event
 
 ```php
 final readonly class SecretExposureEvent
@@ -21693,7 +21694,7 @@ final readonly class SecretExposureEvent
 
 ---
 
-# 1679. Exposure severity
+### 1679. Exposure severity
 
 La severidad deberá considerar:
 
@@ -21708,7 +21709,7 @@ La severidad deberá considerar:
 
 ---
 
-# 1680. Automated secret containment
+### 1680. Automated secret containment
 
 Para findings de alta confianza, el sistema podrá:
 
@@ -21722,13 +21723,13 @@ Para findings de alta confianza, el sistema podrá:
 
 ---
 
-# 1681. Secret rotation orchestration
+### 1681. Secret rotation orchestration
 
 La rotación deberá coordinar productor, store y consumidores.
 
 ---
 
-# 1682. SecretRotationOrchestrator
+### 1682. SecretRotationOrchestrator
 
 ```php
 interface SecretRotationOrchestratorInterface
@@ -21746,7 +21747,7 @@ interface SecretRotationOrchestratorInterface
 
 ---
 
-# 1683. SecretRotationPlan
+### 1683. SecretRotationPlan
 
 ```php
 final readonly class SecretRotationPlan
@@ -21765,7 +21766,7 @@ final readonly class SecretRotationPlan
 
 ---
 
-# 1684. SecretRotationStrategy
+### 1684. SecretRotationStrategy
 
 ```php
 enum SecretRotationStrategy: string
@@ -21780,7 +21781,7 @@ enum SecretRotationStrategy: string
 
 ---
 
-# 1685. Dual-secret rotation
+### 1685. Dual-secret rotation
 
 Cuando el sistema lo permita:
 
@@ -21793,13 +21794,13 @@ Cuando el sistema lo permita:
 
 ---
 
-# 1686. Rotation dependency graph
+### 1686. Rotation dependency graph
 
 VoltStack deberá conocer qué consumidores dependen de cada secreto.
 
 ---
 
-# 1687. SecretConsumerBinding
+### 1687. SecretConsumerBinding
 
 ```php
 final readonly class SecretConsumerBinding
@@ -21818,7 +21819,7 @@ final readonly class SecretConsumerBinding
 
 ---
 
-# 1688. SecretConsumptionMode
+### 1688. SecretConsumptionMode
 
 ```php
 enum SecretConsumptionMode: string
@@ -21833,7 +21834,7 @@ enum SecretConsumptionMode: string
 
 ---
 
-# 1689. Rotation verification
+### 1689. Rotation verification
 
 Una rotación no deberá marcarse como completa hasta validar:
 
@@ -21845,7 +21846,7 @@ Una rotación no deberá marcarse como completa hasta validar:
 
 ---
 
-# 1690. Secret revocation
+### 1690. Secret revocation
 
 La revocación deberá:
 
@@ -21858,7 +21859,7 @@ La revocación deberá:
 
 ---
 
-# 1691. SecretRevocationReason
+### 1691. SecretRevocationReason
 
 ```php
 enum SecretRevocationReason: string
@@ -21875,13 +21876,13 @@ enum SecretRevocationReason: string
 
 ---
 
-# 1692. Secret recovery
+### 1692. Secret recovery
 
 La recuperación deberá diseñarse para evitar que el mecanismo de contingencia se convierta en una puerta trasera.
 
 ---
 
-# 1693. SecretRecoveryPolicy
+### 1693. SecretRecoveryPolicy
 
 ```php
 final readonly class SecretRecoveryPolicy
@@ -21899,7 +21900,7 @@ final readonly class SecretRecoveryPolicy
 
 ---
 
-# 1694. Recovery controls
+### 1694. Recovery controls
 
 La recuperación podrá requerir:
 
@@ -21914,7 +21915,7 @@ La recuperación podrá requerir:
 
 ---
 
-# 1695. Backup secret protection
+### 1695. Backup secret protection
 
 Los backups deberán proteger:
 
@@ -21927,7 +21928,7 @@ Los backups deberán proteger:
 
 ---
 
-# 1696. Backup isolation
+### 1696. Backup isolation
 
 Los backups de secretos deberán:
 
@@ -21940,7 +21941,7 @@ Los backups de secretos deberán:
 
 ---
 
-# 1697. Secret access auditing
+### 1697. Secret access auditing
 
 Toda lectura o uso deberá registrar:
 
@@ -21959,7 +21960,7 @@ El valor secreto nunca deberá incluirse en el evento.
 
 ---
 
-# 1698. Secret governance
+### 1698. Secret governance
 
 VoltStack deberá mantener inventario y métricas de:
 
@@ -21976,7 +21977,7 @@ VoltStack deberá mantener inventario y métricas de:
 
 ---
 
-# 1699. Secrets audit events
+### 1699. Secrets audit events
 
 Eventos recomendados:
 
@@ -22003,7 +22004,7 @@ Eventos recomendados:
 
 ---
 
-# 1700. Resultado de esta entrega
+### 1700. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -22078,9 +22079,9 @@ Entrega 18
 - Token audit and governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 18
+
 
 **Documento:** Parte 05
 **Entrega:** 18 de varias
@@ -22089,7 +22090,7 @@ Entrega 18
 
 ---
 
-# 1701. Security Token Architecture
+### 1701. Security Token Architecture
 
 VoltStack deberá incorporar una arquitectura centralizada para emisión, validación, intercambio, restricción, revocación y auditoría de tokens de seguridad.
 
@@ -22111,7 +22112,7 @@ Los Controllers no deberán construir ni validar tokens directamente.
 
 ---
 
-# 1702. Token security goals
+### 1702. Token security goals
 
 La arquitectura deberá garantizar:
 
@@ -22130,7 +22131,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1703. Token threat model
+### 1703. Token threat model
 
 El modelo deberá considerar:
 
@@ -22154,7 +22155,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1704. Token architecture components
+### 1704. Token architecture components
 
 ```text
 Token Request
@@ -22180,7 +22181,7 @@ Audit and Analytics
 
 ---
 
-# 1705. SecurityTokenService
+### 1705. SecurityTokenService
 
 ```php
 interface SecurityTokenServiceInterface
@@ -22207,7 +22208,7 @@ interface SecurityTokenServiceInterface
 
 ---
 
-# 1706. Token classification
+### 1706. Token classification
 
 Todo token deberá clasificarse por:
 
@@ -22223,7 +22224,7 @@ Todo token deberá clasificarse por:
 
 ---
 
-# 1707. SecurityTokenType
+### 1707. SecurityTokenType
 
 ```php
 enum SecurityTokenType: string
@@ -22243,7 +22244,7 @@ enum SecurityTokenType: string
 
 ---
 
-# 1708. TokenFormat
+### 1708. TokenFormat
 
 ```php
 enum TokenFormat: string
@@ -22258,7 +22259,7 @@ enum TokenFormat: string
 
 ---
 
-# 1709. TokenBearerModel
+### 1709. TokenBearerModel
 
 ```php
 enum TokenBearerModel: string
@@ -22272,7 +22273,7 @@ enum TokenBearerModel: string
 
 ---
 
-# 1710. Token format selection policy
+### 1710. Token format selection policy
 
 La selección de formato deberá depender de:
 
@@ -22288,13 +22289,13 @@ La selección de formato deberá depender de:
 
 ---
 
-# 1711. Opaque tokens
+### 1711. Opaque tokens
 
 Los tokens opacos deberán contener únicamente un identificador aleatorio sin significado interpretable por el cliente.
 
 ---
 
-# 1712. OpaqueTokenRecord
+### 1712. OpaqueTokenRecord
 
 ```php
 final readonly class OpaqueTokenRecord
@@ -22317,7 +22318,7 @@ final readonly class OpaqueTokenRecord
 
 ---
 
-# 1713. Opaque token storage
+### 1713. Opaque token storage
 
 El valor del token opaco no deberá almacenarse en plaintext.
 
@@ -22332,7 +22333,7 @@ El registro deberá conservar:
 
 ---
 
-# 1714. Opaque token advantages
+### 1714. Opaque token advantages
 
 Los tokens opacos facilitan:
 
@@ -22345,7 +22346,7 @@ Los tokens opacos facilitan:
 
 ---
 
-# 1715. Opaque token limitations
+### 1715. Opaque token limitations
 
 Sus desventajas incluyen:
 
@@ -22356,13 +22357,13 @@ Sus desventajas incluyen:
 
 ---
 
-# 1716. Structured tokens
+### 1716. Structured tokens
 
 Los tokens estructurados deberán utilizar formatos estandarizados y políticas estrictas.
 
 ---
 
-# 1717. Structured token restrictions
+### 1717. Structured token restrictions
 
 Nunca deberá confiarse en claims antes de:
 
@@ -22377,13 +22378,13 @@ Nunca deberá confiarse en claims antes de:
 
 ---
 
-# 1718. JWT governance
+### 1718. JWT governance
 
 VoltStack deberá tratar JWT como un contenedor firmado, no como un mecanismo completo de autorización.
 
 ---
 
-# 1719. JwtTokenProfile
+### 1719. JwtTokenProfile
 
 ```php
 final readonly class JwtTokenProfile
@@ -22404,13 +22405,13 @@ final readonly class JwtTokenProfile
 
 ---
 
-# 1720. JWT algorithm allowlist
+### 1720. JWT algorithm allowlist
 
 El algoritmo deberá resolverse desde policy y nunca aceptarse únicamente desde el header del token.
 
 ---
 
-# 1721. JWT unsecured mode prohibition
+### 1721. JWT unsecured mode prohibition
 
 Los JWT con:
 
@@ -22422,13 +22423,13 @@ deberán rechazarse siempre.
 
 ---
 
-# 1722. Symmetric and asymmetric separation
+### 1722. Symmetric and asymmetric separation
 
 VoltStack deberá evitar utilizar una clave pública como secreto HMAC o mezclar claves simétricas y asimétricas dentro del mismo perfil.
 
 ---
 
-# 1723. JWT header policy
+### 1723. JWT header policy
 
 Los headers permitidos deberán limitarse y validarse.
 
@@ -22442,13 +22443,13 @@ Ejemplos:
 
 ---
 
-# 1724. Critical header validation
+### 1724. Critical header validation
 
 Los headers declarados en `crit` deberán ser comprendidos y procesados explícitamente o el token deberá rechazarse.
 
 ---
 
-# 1725. Token type header
+### 1725. Token type header
 
 `typ` deberá utilizarse para reducir token confusion entre:
 
@@ -22460,7 +22461,7 @@ Los headers declarados en `crit` deberán ser comprendidos y procesados explíci
 
 ---
 
-# 1726. Nested tokens
+### 1726. Nested tokens
 
 Los tokens anidados deberán declarar explícitamente:
 
@@ -22472,7 +22473,7 @@ Los tokens anidados deberán declarar explícitamente:
 
 ---
 
-# 1727. Sign-then-encrypt policy
+### 1727. Sign-then-encrypt policy
 
 Para tokens confidenciales, VoltStack podrá aplicar:
 
@@ -22488,7 +22489,7 @@ Esto protege integridad interna y confidencialidad externa.
 
 ---
 
-# 1728. Token encryption
+### 1728. Token encryption
 
 La firma no oculta claims.
 
@@ -22501,7 +22502,7 @@ Los tokens con información sensible deberán:
 
 ---
 
-# 1729. Token claims policy
+### 1729. Token claims policy
 
 ```php
 interface TokenClaimsPolicyInterface
@@ -22514,7 +22515,7 @@ interface TokenClaimsPolicyInterface
 
 ---
 
-# 1730. TokenClaimsDecision
+### 1730. TokenClaimsDecision
 
 ```php
 final readonly class TokenClaimsDecision
@@ -22532,13 +22533,13 @@ final readonly class TokenClaimsDecision
 
 ---
 
-# 1731. Claim minimization
+### 1731. Claim minimization
 
 Los tokens deberán incluir únicamente los claims necesarios para el consumidor.
 
 ---
 
-# 1732. Registered claims
+### 1732. Registered claims
 
 Claims comunes:
 
@@ -22554,25 +22555,25 @@ Cada uno deberá validarse según el perfil.
 
 ---
 
-# 1733. Issuer validation
+### 1733. Issuer validation
 
 El issuer deberá compararse mediante coincidencia exacta contra una configuración confiable.
 
 ---
 
-# 1734. Issuer confusion prevention
+### 1734. Issuer confusion prevention
 
 No deberá seleccionarse automáticamente una configuración de validación basada únicamente en el `iss` recibido sin antes aplicar una allowlist segura.
 
 ---
 
-# 1735. Audience restriction
+### 1735. Audience restriction
 
 Todo access token deberá tener una audiencia concreta.
 
 ---
 
-# 1736. Audience validation
+### 1736. Audience validation
 
 El recurso deberá verificar que su identificador esté incluido explícitamente en `aud`.
 
@@ -22580,19 +22581,19 @@ No deberá aceptar tokens destinados a otro servicio.
 
 ---
 
-# 1737. Multi-audience token restrictions
+### 1737. Multi-audience token restrictions
 
 Los tokens con múltiples audiencias deberán utilizarse solo cuando exista una necesidad documentada.
 
 ---
 
-# 1738. Authorized party
+### 1738. Authorized party
 
 Cuando existan múltiples audiencias, deberá validarse `azp` o un mecanismo equivalente cuando el protocolo lo requiera.
 
 ---
 
-# 1739. Subject claim
+### 1739. Subject claim
 
 `sub` deberá ser:
 
@@ -22603,7 +22604,7 @@ Cuando existan múltiples audiencias, deberá validarse `azp` o un mecanismo equ
 
 ---
 
-# 1740. Tenant claim
+### 1740. Tenant claim
 
 Si el token incluye tenant, dicho claim deberá validarse contra:
 
@@ -22615,13 +22616,13 @@ Si el token incluye tenant, dicho claim deberá validarse contra:
 
 ---
 
-# 1741. Cross-tenant token prohibition
+### 1741. Cross-tenant token prohibition
 
 Un token emitido para un tenant no deberá utilizarse en otro, aunque el subject comparta un identificador externo.
 
 ---
 
-# 1742. Token lifetime policy
+### 1742. Token lifetime policy
 
 ```php
 final readonly class TokenLifetimePolicy
@@ -22639,19 +22640,19 @@ final readonly class TokenLifetimePolicy
 
 ---
 
-# 1743. Short-lived access tokens
+### 1743. Short-lived access tokens
 
 Los access tokens deberán tener vidas cortas, especialmente cuando sean bearer tokens.
 
 ---
 
-# 1744. Refresh token separation
+### 1744. Refresh token separation
 
 Un refresh token no deberá aceptarse como access token ni presentarse a resource servers.
 
 ---
 
-# 1745. One-time token lifetime
+### 1745. One-time token lifetime
 
 Los tokens de:
 
@@ -22664,7 +22665,7 @@ deberán tener expiración corta y consumo único.
 
 ---
 
-# 1746. Clock skew
+### 1746. Clock skew
 
 La tolerancia de reloj deberá:
 
@@ -22675,7 +22676,7 @@ La tolerancia de reloj deberá:
 
 ---
 
-# 1747. TokenLifecycleState
+### 1747. TokenLifecycleState
 
 ```php
 enum TokenLifecycleState: string
@@ -22692,13 +22693,13 @@ enum TokenLifecycleState: string
 
 ---
 
-# 1748. Token identifier
+### 1748. Token identifier
 
 Todo token revocable o replay-sensitive deberá poseer un identificador único.
 
 ---
 
-# 1749. TokenReference
+### 1749. TokenReference
 
 ```php
 final readonly class TokenReference
@@ -22715,7 +22716,7 @@ final readonly class TokenReference
 
 ---
 
-# 1750. Token binding
+### 1750. Token binding
 
 VoltStack deberá poder vincular tokens a:
 
@@ -22729,7 +22730,7 @@ VoltStack deberá poder vincular tokens a:
 
 ---
 
-# 1751. TokenBinding
+### 1751. TokenBinding
 
 ```php
 final readonly class TokenBinding
@@ -22746,7 +22747,7 @@ final readonly class TokenBinding
 
 ---
 
-# 1752. TokenBindingType
+### 1752. TokenBindingType
 
 ```php
 enum TokenBindingType: string
@@ -22762,13 +22763,13 @@ enum TokenBindingType: string
 
 ---
 
-# 1753. Proof-of-possession tokens
+### 1753. Proof-of-possession tokens
 
 Un proof-of-possession token deberá exigir evidencia de control de una clave adicional.
 
 ---
 
-# 1754. PoP validation
+### 1754. PoP validation
 
 La validación deberá comprobar:
 
@@ -22783,7 +22784,7 @@ La validación deberá comprobar:
 
 ---
 
-# 1755. DPoP proof
+### 1755. DPoP proof
 
 ```php
 final readonly class DpopProof
@@ -22802,13 +22803,13 @@ final readonly class DpopProof
 
 ---
 
-# 1756. DPoP URI normalization
+### 1756. DPoP URI normalization
 
 La comparación del target URI deberá seguir una canonicalización estricta para evitar mismatches y bypasses.
 
 ---
 
-# 1757. DPoP replay registry
+### 1757. DPoP replay registry
 
 ```php
 interface DpopReplayRegistryInterface
@@ -22823,31 +22824,31 @@ interface DpopReplayRegistryInterface
 
 ---
 
-# 1758. mTLS-bound access tokens
+### 1758. mTLS-bound access tokens
 
 Un token ligado a mTLS deberá incluir o referenciar el thumbprint del certificado cliente.
 
 ---
 
-# 1759. Certificate rotation and bound tokens
+### 1759. Certificate rotation and bound tokens
 
 La rotación del certificado deberá contemplar cómo se renuevan o invalidan tokens ligados a la clave anterior.
 
 ---
 
-# 1760. Sender constraint enforcement
+### 1760. Sender constraint enforcement
 
 El resource server deberá verificar el sender constraint; no basta con que el authorization server lo haya emitido.
 
 ---
 
-# 1761. Token exchange architecture
+### 1761. Token exchange architecture
 
 VoltStack deberá soportar intercambio controlado de tokens entre dominios o servicios.
 
 ---
 
-# 1762. TokenExchangeRequest
+### 1762. TokenExchangeRequest
 
 ```php
 final readonly class TokenExchangeRequest
@@ -22866,7 +22867,7 @@ final readonly class TokenExchangeRequest
 
 ---
 
-# 1763. Token exchange policy
+### 1763. Token exchange policy
 
 ```php
 interface TokenExchangePolicyInterface
@@ -22879,7 +22880,7 @@ interface TokenExchangePolicyInterface
 
 ---
 
-# 1764. TokenExchangeDecision
+### 1764. TokenExchangeDecision
 
 ```php
 final readonly class TokenExchangeDecision
@@ -22898,7 +22899,7 @@ final readonly class TokenExchangeDecision
 
 ---
 
-# 1765. No privilege amplification
+### 1765. No privilege amplification
 
 El token resultante no deberá tener más privilegios que:
 
@@ -22910,7 +22911,7 @@ El token resultante no deberá tener más privilegios que:
 
 ---
 
-# 1766. Token downscoping
+### 1766. Token downscoping
 
 Todo intercambio deberá preferir reducción de:
 
@@ -22922,7 +22923,7 @@ Todo intercambio deberá preferir reducción de:
 
 ---
 
-# 1767. DownscopedTokenRequest
+### 1767. DownscopedTokenRequest
 
 ```php
 final readonly class DownscopedTokenRequest
@@ -22939,13 +22940,13 @@ final readonly class DownscopedTokenRequest
 
 ---
 
-# 1768. Delegation tokens
+### 1768. Delegation tokens
 
 Un delegation token representa autoridad delegada por un subject a otro actor o servicio.
 
 ---
 
-# 1769. DelegationTokenClaims
+### 1769. DelegationTokenClaims
 
 ```php
 final readonly class DelegationTokenClaims
@@ -22964,7 +22965,7 @@ final readonly class DelegationTokenClaims
 
 ---
 
-# 1770. Delegation semantics
+### 1770. Delegation semantics
 
 La delegación deberá distinguir:
 
@@ -22976,37 +22977,37 @@ La delegación deberá distinguir:
 
 ---
 
-# 1771. Delegation chain
+### 1771. Delegation chain
 
 Toda delegación encadenada deberá conservar provenance completo.
 
 ---
 
-# 1772. Delegation depth
+### 1772. Delegation depth
 
 VoltStack deberá limitar la profundidad de delegación para evitar cadenas incontrolables.
 
 ---
 
-# 1773. Delegation cycle prevention
+### 1773. Delegation cycle prevention
 
 No deberá permitirse una cadena de delegación que regrese a una identidad previa o genere ciclos.
 
 ---
 
-# 1774. Delegation revocation
+### 1774. Delegation revocation
 
 Revocar una delegación superior deberá invalidar delegaciones descendientes derivadas de ella.
 
 ---
 
-# 1775. Impersonation tokens
+### 1775. Impersonation tokens
 
 Un impersonation token permite que un actor opere temporalmente como otro subject bajo controles reforzados.
 
 ---
 
-# 1776. ImpersonationTokenClaims
+### 1776. ImpersonationTokenClaims
 
 ```php
 final readonly class ImpersonationTokenClaims
@@ -23026,7 +23027,7 @@ final readonly class ImpersonationTokenClaims
 
 ---
 
-# 1777. Impersonation requirements
+### 1777. Impersonation requirements
 
 Toda impersonación deberá requerir:
 
@@ -23041,7 +23042,7 @@ Toda impersonación deberá requerir:
 
 ---
 
-# 1778. Actor and subject preservation
+### 1778. Actor and subject preservation
 
 Durante impersonación, los logs y decisiones deberán conservar tanto:
 
@@ -23052,7 +23053,7 @@ Nunca deberá sustituirse uno por otro.
 
 ---
 
-# 1779. Impersonation restrictions
+### 1779. Impersonation restrictions
 
 La impersonación podrá bloquear:
 
@@ -23066,7 +23067,7 @@ La impersonación podrá bloquear:
 
 ---
 
-# 1780. Support impersonation
+### 1780. Support impersonation
 
 Para soporte técnico deberá preferirse:
 
@@ -23078,7 +23079,7 @@ Para soporte técnico deberá preferirse:
 
 ---
 
-# 1781. Token chaining
+### 1781. Token chaining
 
 Cuando un servicio llama a otro utilizando tokens derivados, VoltStack deberá conservar:
 
@@ -23090,13 +23091,13 @@ Cuando un servicio llama a otro utilizando tokens derivados, VoltStack deberá c
 
 ---
 
-# 1782. Actor token
+### 1782. Actor token
 
 Un actor token deberá representar la identidad del componente que ejecuta la operación, no sustituir al subject token.
 
 ---
 
-# 1783. Service-to-service token policy
+### 1783. Service-to-service token policy
 
 Los tokens de servicio deberán:
 
@@ -23109,7 +23110,7 @@ Los tokens de servicio deberán:
 
 ---
 
-# 1784. Workload token issuance
+### 1784. Workload token issuance
 
 Los tokens de workload deberán emitirse a partir de:
 
@@ -23121,13 +23122,13 @@ Los tokens de workload deberán emitirse a partir de:
 
 ---
 
-# 1785. User token reuse prohibition
+### 1785. User token reuse prohibition
 
 Un servicio no deberá reutilizar directamente un token frontend para múltiples servicios internos sin token exchange o audience restriction adecuada.
 
 ---
 
-# 1786. Token revocation
+### 1786. Token revocation
 
 VoltStack deberá admitir revocación por:
 
@@ -23144,7 +23145,7 @@ VoltStack deberá admitir revocación por:
 
 ---
 
-# 1787. TokenRevocationReason
+### 1787. TokenRevocationReason
 
 ```php
 enum TokenRevocationReason: string
@@ -23164,7 +23165,7 @@ enum TokenRevocationReason: string
 
 ---
 
-# 1788. Token revocation registry
+### 1788. Token revocation registry
 
 ```php
 interface TokenRevocationRegistryInterface
@@ -23183,7 +23184,7 @@ interface TokenRevocationRegistryInterface
 
 ---
 
-# 1789. Revocation propagation
+### 1789. Revocation propagation
 
 La revocación deberá propagarse a:
 
@@ -23197,7 +23198,7 @@ La revocación deberá propagarse a:
 
 ---
 
-# 1790. Revocation latency
+### 1790. Revocation latency
 
 Las políticas deberán definir cuánto tiempo máximo puede tardar una revocación en ser efectiva.
 
@@ -23205,7 +23206,7 @@ Para operaciones críticas, la propagación deberá ser casi inmediata.
 
 ---
 
-# 1791. Token replay protection
+### 1791. Token replay protection
 
 La protección deberá considerar:
 
@@ -23219,7 +23220,7 @@ La protección deberá considerar:
 
 ---
 
-# 1792. OneTimeTokenRegistry
+### 1792. OneTimeTokenRegistry
 
 ```php
 interface OneTimeTokenRegistryInterface
@@ -23233,19 +23234,19 @@ interface OneTimeTokenRegistryInterface
 
 ---
 
-# 1793. Refresh token reuse detection
+### 1793. Refresh token reuse detection
 
 Cuando un refresh token rotado vuelva a utilizarse, deberá asumirse posible compromiso de toda la familia.
 
 ---
 
-# 1794. Token introspection
+### 1794. Token introspection
 
 Los resource servers podrán consultar el estado de tokens opacos o revocables.
 
 ---
 
-# 1795. TokenIntrospectionService
+### 1795. TokenIntrospectionService
 
 ```php
 interface TokenIntrospectionServiceInterface
@@ -23259,7 +23260,7 @@ interface TokenIntrospectionServiceInterface
 
 ---
 
-# 1796. TokenIntrospectionResult
+### 1796. TokenIntrospectionResult
 
 ```php
 final readonly class TokenIntrospectionResult
@@ -23281,7 +23282,7 @@ final readonly class TokenIntrospectionResult
 
 ---
 
-# 1797. Introspection authorization
+### 1797. Introspection authorization
 
 No cualquier cliente deberá poder introspectar cualquier token.
 
@@ -23296,7 +23297,7 @@ La respuesta deberá limitarse según:
 
 ---
 
-# 1798. Introspection caching
+### 1798. Introspection caching
 
 El cache deberá considerar:
 
@@ -23311,7 +23312,7 @@ Las respuestas inactivas críticas deberán evitar caches prolongados.
 
 ---
 
-# 1799. Token audit events
+### 1799. Token audit events
 
 Eventos recomendados:
 
@@ -23339,7 +23340,7 @@ Eventos recomendados:
 
 ---
 
-# 1800. Resultado de esta entrega
+### 1800. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -23411,9 +23412,9 @@ Entrega 19
 - API authentication audit
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 19
+
 
 **Documento:** Parte 05
 **Entrega:** 19 de varias
@@ -23422,7 +23423,7 @@ Entrega 19
 
 ---
 
-# 1801. API Authentication Architecture
+### 1801. API Authentication Architecture
 
 VoltStack deberá incorporar una arquitectura centralizada de autenticación para APIs públicas, privadas, internas y machine-to-machine.
 
@@ -23442,7 +23443,7 @@ Los Controllers no deberán validar credenciales de API directamente.
 
 ---
 
-# 1802. API authentication security goals
+### 1802. API authentication security goals
 
 La arquitectura deberá garantizar:
 
@@ -23460,7 +23461,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1803. API authentication threat model
+### 1803. API authentication threat model
 
 El modelo deberá considerar:
 
@@ -23484,7 +23485,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1804. API authentication pipeline
+### 1804. API authentication pipeline
 
 ```text
 Incoming API Request
@@ -23510,7 +23511,7 @@ Controller Dispatch
 
 ---
 
-# 1805. ApiAuthenticationService
+### 1805. ApiAuthenticationService
 
 ```php
 interface ApiAuthenticationServiceInterface
@@ -23523,7 +23524,7 @@ interface ApiAuthenticationServiceInterface
 
 ---
 
-# 1806. ApiAuthenticationRequest
+### 1806. ApiAuthenticationRequest
 
 ```php
 final readonly class ApiAuthenticationRequest
@@ -23543,7 +23544,7 @@ final readonly class ApiAuthenticationRequest
 
 ---
 
-# 1807. ApiAuthenticationResult
+### 1807. ApiAuthenticationResult
 
 ```php
 final readonly class ApiAuthenticationResult
@@ -23564,7 +23565,7 @@ final readonly class ApiAuthenticationResult
 
 ---
 
-# 1808. ApiAuthenticationStatus
+### 1808. ApiAuthenticationStatus
 
 ```php
 enum ApiAuthenticationStatus: string
@@ -23581,13 +23582,13 @@ enum ApiAuthenticationStatus: string
 
 ---
 
-# 1809. API authentication scheme registry
+### 1809. API authentication scheme registry
 
 VoltStack deberá registrar explícitamente los mecanismos soportados.
 
 ---
 
-# 1810. ApiAuthenticationScheme
+### 1810. ApiAuthenticationScheme
 
 ```php
 enum ApiAuthenticationScheme: string
@@ -23604,7 +23605,7 @@ enum ApiAuthenticationScheme: string
 
 ---
 
-# 1811. Scheme resolution
+### 1811. Scheme resolution
 
 La selección del esquema deberá considerar:
 
@@ -23619,7 +23620,7 @@ La selección del esquema deberá considerar:
 
 ---
 
-# 1812. Route authentication metadata
+### 1812. Route authentication metadata
 
 ```php
 #[ApiAuthentication(
@@ -23634,7 +23635,7 @@ La selección del esquema deberá considerar:
 
 ---
 
-# 1813. Multiple authentication schemes
+### 1813. Multiple authentication schemes
 
 Una ruta podrá:
 
@@ -23645,19 +23646,19 @@ Una ruta podrá:
 
 ---
 
-# 1814. Downgrade prevention
+### 1814. Downgrade prevention
 
 Un cliente configurado para mTLS o proof-of-possession no deberá degradarse silenciosamente a una API key bearer.
 
 ---
 
-# 1815. API client identities
+### 1815. API client identities
 
 Todo consumidor deberá representarse mediante una identidad de cliente explícita.
 
 ---
 
-# 1816. ApiClientIdentity
+### 1816. ApiClientIdentity
 
 ```php
 final readonly class ApiClientIdentity
@@ -23679,7 +23680,7 @@ final readonly class ApiClientIdentity
 
 ---
 
-# 1817. ApiClientType
+### 1817. ApiClientType
 
 ```php
 enum ApiClientType: string
@@ -23697,7 +23698,7 @@ enum ApiClientType: string
 
 ---
 
-# 1818. ApiClientState
+### 1818. ApiClientState
 
 ```php
 enum ApiClientState: string
@@ -23713,7 +23714,7 @@ enum ApiClientState: string
 
 ---
 
-# 1819. Client ownership
+### 1819. Client ownership
 
 Cada cliente deberá poseer:
 
@@ -23729,7 +23730,7 @@ Cada cliente deberá poseer:
 
 ---
 
-# 1820. Client registration
+### 1820. Client registration
 
 El registro de clientes deberá validar:
 
@@ -23745,13 +23746,13 @@ El registro de clientes deberá validar:
 
 ---
 
-# 1821. API key architecture
+### 1821. API key architecture
 
 Las API keys deberán utilizarse únicamente cuando mecanismos más fuertes no sean viables o cuando el riesgo sea aceptable.
 
 ---
 
-# 1822. ApiKeyCredential
+### 1822. ApiKeyCredential
 
 ```php
 final readonly class ApiKeyCredential
@@ -23775,7 +23776,7 @@ final readonly class ApiKeyCredential
 
 ---
 
-# 1823. ApiKeyState
+### 1823. ApiKeyState
 
 ```php
 enum ApiKeyState: string
@@ -23793,7 +23794,7 @@ enum ApiKeyState: string
 
 ---
 
-# 1824. API key format
+### 1824. API key format
 
 Una API key podrá estructurarse conceptualmente como:
 
@@ -23812,7 +23813,7 @@ sin exponer material sensible.
 
 ---
 
-# 1825. API key prefixes
+### 1825. API key prefixes
 
 El prefix deberá:
 
@@ -23825,25 +23826,25 @@ El prefix deberá:
 
 ---
 
-# 1826. API key secret generation
+### 1826. API key secret generation
 
 La parte secreta deberá generarse mediante CSPRNG y contener entropía suficiente para resistir ataques de guessing.
 
 ---
 
-# 1827. API key one-time display
+### 1827. API key one-time display
 
 El valor completo deberá mostrarse una sola vez durante creación o rotación.
 
 ---
 
-# 1828. API key hashing
+### 1828. API key hashing
 
 VoltStack no deberá almacenar API keys completas en plaintext.
 
 ---
 
-# 1829. ApiKeyHasher
+### 1829. ApiKeyHasher
 
 ```php
 interface ApiKeyHasherInterface
@@ -23861,7 +23862,7 @@ interface ApiKeyHasherInterface
 
 ---
 
-# 1830. API key hash strategy
+### 1830. API key hash strategy
 
 Podrá utilizarse:
 
@@ -23873,13 +23874,13 @@ La selección deberá considerar volumen, latencia y riesgo de enumeración.
 
 ---
 
-# 1831. API key lookup
+### 1831. API key lookup
 
 El prefix podrá localizar un conjunto reducido de candidatos y la parte secreta deberá verificarse mediante comparación segura.
 
 ---
 
-# 1832. API key enumeration protection
+### 1832. API key enumeration protection
 
 Las respuestas no deberán revelar si:
 
@@ -23890,13 +23891,13 @@ Las respuestas no deberán revelar si:
 
 ---
 
-# 1833. API key scopes
+### 1833. API key scopes
 
 Toda API key deberá poseer scopes explícitos.
 
 ---
 
-# 1834. API key resource restrictions
+### 1834. API key resource restrictions
 
 Además de scopes, una key podrá restringirse a:
 
@@ -23911,19 +23912,19 @@ Además de scopes, una key podrá restringirse a:
 
 ---
 
-# 1835. API key wildcard restrictions
+### 1835. API key wildcard restrictions
 
 Los scopes globales o wildcards deberán requerir aprobación reforzada.
 
 ---
 
-# 1836. API key expiration
+### 1836. API key expiration
 
 Las API keys deberán expirar salvo excepciones documentadas.
 
 ---
 
-# 1837. API key inactivity policy
+### 1837. API key inactivity policy
 
 Las claves sin uso durante un período definido deberán:
 
@@ -23934,13 +23935,13 @@ Las claves sin uso durante un período definido deberán:
 
 ---
 
-# 1838. API key rotation
+### 1838. API key rotation
 
 La rotación deberá admitir coexistencia controlada entre versión antigua y nueva.
 
 ---
 
-# 1839. ApiKeyRotationService
+### 1839. ApiKeyRotationService
 
 ```php
 interface ApiKeyRotationServiceInterface
@@ -23958,7 +23959,7 @@ interface ApiKeyRotationServiceInterface
 
 ---
 
-# 1840. API key rotation stages
+### 1840. API key rotation stages
 
 ```text
 Generate Replacement Key
@@ -23976,7 +23977,7 @@ Revoke Previous Key
 
 ---
 
-# 1841. API key usage telemetry
+### 1841. API key usage telemetry
 
 VoltStack deberá registrar:
 
@@ -23991,13 +23992,13 @@ VoltStack deberá registrar:
 
 ---
 
-# 1842. HMAC request authentication
+### 1842. HMAC request authentication
 
 VoltStack deberá soportar autenticación de requests mediante firma HMAC.
 
 ---
 
-# 1843. HmacApiCredential
+### 1843. HmacApiCredential
 
 ```php
 final readonly class HmacApiCredential
@@ -24017,7 +24018,7 @@ final readonly class HmacApiCredential
 
 ---
 
-# 1844. HmacCredentialState
+### 1844. HmacCredentialState
 
 ```php
 enum HmacCredentialState: string
@@ -24032,7 +24033,7 @@ enum HmacCredentialState: string
 
 ---
 
-# 1845. Signed request components
+### 1845. Signed request components
 
 La firma deberá cubrir, según policy:
 
@@ -24048,7 +24049,7 @@ La firma deberá cubrir, según policy:
 
 ---
 
-# 1846. Canonical request
+### 1846. Canonical request
 
 ```php
 final readonly class CanonicalApiRequest
@@ -24069,7 +24070,7 @@ final readonly class CanonicalApiRequest
 
 ---
 
-# 1847. Canonicalization service
+### 1847. Canonicalization service
 
 ```php
 interface ApiRequestCanonicalizerInterface
@@ -24083,13 +24084,13 @@ interface ApiRequestCanonicalizerInterface
 
 ---
 
-# 1848. Canonicalization determinism
+### 1848. Canonicalization determinism
 
 Cliente y servidor deberán producir exactamente la misma representación para un request equivalente.
 
 ---
 
-# 1849. URI canonicalization
+### 1849. URI canonicalization
 
 La canonicalización deberá definir:
 
@@ -24103,7 +24104,7 @@ La canonicalización deberá definir:
 
 ---
 
-# 1850. Query canonicalization
+### 1850. Query canonicalization
 
 La policy deberá definir:
 
@@ -24116,7 +24117,7 @@ La policy deberá definir:
 
 ---
 
-# 1851. Header canonicalization
+### 1851. Header canonicalization
 
 Deberá especificarse:
 
@@ -24130,19 +24131,19 @@ Deberá especificarse:
 
 ---
 
-# 1852. Request body digest
+### 1852. Request body digest
 
 El body deberá resumirse mediante un hash criptográfico permitido.
 
 ---
 
-# 1853. Streaming body verification
+### 1853. Streaming body verification
 
 Para payloads grandes, VoltStack deberá permitir cálculo incremental sin cargar todo el contenido en memoria.
 
 ---
 
-# 1854. SignedRequestProfile
+### 1854. SignedRequestProfile
 
 ```php
 final readonly class SignedRequestProfile
@@ -24162,7 +24163,7 @@ final readonly class SignedRequestProfile
 
 ---
 
-# 1855. HMAC signature creation
+### 1855. HMAC signature creation
 
 ```php
 interface ApiRequestSignerInterface
@@ -24177,7 +24178,7 @@ interface ApiRequestSignerInterface
 
 ---
 
-# 1856. ApiRequestSignature
+### 1856. ApiRequestSignature
 
 ```php
 final readonly class ApiRequestSignature
@@ -24196,7 +24197,7 @@ final readonly class ApiRequestSignature
 
 ---
 
-# 1857. Signature verification
+### 1857. Signature verification
 
 La verificación deberá:
 
@@ -24211,31 +24212,31 @@ La verificación deberá:
 
 ---
 
-# 1858. Timestamp validation
+### 1858. Timestamp validation
 
 El timestamp deberá estar dentro de una ventana pequeña definida por policy.
 
 ---
 
-# 1859. Timestamp source
+### 1859. Timestamp source
 
 El servidor deberá utilizar su propio reloj confiable para validar freshness.
 
 ---
 
-# 1860. Clock synchronization
+### 1860. Clock synchronization
 
 Los componentes críticos deberán mantener sincronización de reloj y alertar ante drift excesivo.
 
 ---
 
-# 1861. Nonce validation
+### 1861. Nonce validation
 
 Cada request firmado deberá incluir un nonce único cuando la policy lo requiera.
 
 ---
 
-# 1862. ApiRequestNonceRegistry
+### 1862. ApiRequestNonceRegistry
 
 ```php
 interface ApiRequestNonceRegistryInterface
@@ -24250,37 +24251,37 @@ interface ApiRequestNonceRegistryInterface
 
 ---
 
-# 1863. Nonce replay prevention
+### 1863. Nonce replay prevention
 
 Un nonce reutilizado dentro de la ventana de validez deberá provocar rechazo.
 
 ---
 
-# 1864. Replay registry availability
+### 1864. Replay registry availability
 
 Para operaciones críticas, la indisponibilidad del registry deberá producir fail-closed.
 
 ---
 
-# 1865. Signature comparison
+### 1865. Signature comparison
 
 La firma deberá compararse mediante una operación constant-time.
 
 ---
 
-# 1866. Key rotation for signed requests
+### 1866. Key rotation for signed requests
 
 Durante rotación, el cliente podrá indicar key version o credential ID, pero el servidor deberá limitar las versiones aceptadas.
 
 ---
 
-# 1867. Asymmetric request signing
+### 1867. Asymmetric request signing
 
 VoltStack podrá soportar firmas asimétricas para clientes que necesiten evitar secretos compartidos.
 
 ---
 
-# 1868. AsymmetricApiCredential
+### 1868. AsymmetricApiCredential
 
 ```php
 final readonly class AsymmetricApiCredential
@@ -24298,19 +24299,19 @@ final readonly class AsymmetricApiCredential
 
 ---
 
-# 1869. Asymmetric request proof
+### 1869. Asymmetric request proof
 
 El cliente deberá demostrar control de la clave privada sin enviarla al servidor.
 
 ---
 
-# 1870. Webhook authentication architecture
+### 1870. Webhook authentication architecture
 
 Todo webhook entrante deberá autenticarse.
 
 ---
 
-# 1871. WebhookEndpointDefinition
+### 1871. WebhookEndpointDefinition
 
 ```php
 final readonly class WebhookEndpointDefinition
@@ -24330,7 +24331,7 @@ final readonly class WebhookEndpointDefinition
 
 ---
 
-# 1872. WebhookAuthenticationScheme
+### 1872. WebhookAuthenticationScheme
 
 ```php
 enum WebhookAuthenticationScheme: string
@@ -24345,7 +24346,7 @@ enum WebhookAuthenticationScheme: string
 
 ---
 
-# 1873. WebhookEndpointState
+### 1873. WebhookEndpointState
 
 ```php
 enum WebhookEndpointState: string
@@ -24359,7 +24360,7 @@ enum WebhookEndpointState: string
 
 ---
 
-# 1874. Webhook signature verification
+### 1874. Webhook signature verification
 
 La verificación deberá realizarse sobre el body original recibido antes de:
 
@@ -24371,7 +24372,7 @@ La verificación deberá realizarse sobre el body original recibido antes de:
 
 ---
 
-# 1875. WebhookSignatureVerifier
+### 1875. WebhookSignatureVerifier
 
 ```php
 interface WebhookSignatureVerifierInterface
@@ -24385,7 +24386,7 @@ interface WebhookSignatureVerifierInterface
 
 ---
 
-# 1876. IncomingWebhookRequest
+### 1876. IncomingWebhookRequest
 
 ```php
 final readonly class IncomingWebhookRequest
@@ -24402,7 +24403,7 @@ final readonly class IncomingWebhookRequest
 
 ---
 
-# 1877. Webhook freshness
+### 1877. Webhook freshness
 
 La firma deberá incorporar:
 
@@ -24414,7 +24415,7 @@ cuando el proveedor lo soporte.
 
 ---
 
-# 1878. Webhook replay registry
+### 1878. Webhook replay registry
 
 ```php
 interface WebhookReplayRegistryInterface
@@ -24429,19 +24430,19 @@ interface WebhookReplayRegistryInterface
 
 ---
 
-# 1879. Duplicate webhook delivery
+### 1879. Duplicate webhook delivery
 
 La entrega duplicada legítima deberá diferenciarse de replay malicioso mediante procesamiento idempotente.
 
 ---
 
-# 1880. Webhook idempotency
+### 1880. Webhook idempotency
 
 El event ID deberá utilizarse para impedir efectos de negocio duplicados.
 
 ---
 
-# 1881. Webhook secret rotation
+### 1881. Webhook secret rotation
 
 La rotación deberá permitir verificar temporalmente con:
 
@@ -24451,19 +24452,19 @@ La rotación deberá permitir verificar temporalmente con:
 
 ---
 
-# 1882. Webhook source IP restrictions
+### 1882. Webhook source IP restrictions
 
 Las allowlists de IP podrán usarse como señal adicional, pero no deberán sustituir la verificación criptográfica.
 
 ---
 
-# 1883. Outgoing webhook signing
+### 1883. Outgoing webhook signing
 
 VoltStack deberá firmar sus propios webhooks emitidos a terceros.
 
 ---
 
-# 1884. OutgoingWebhookSigner
+### 1884. OutgoingWebhookSigner
 
 ```php
 interface OutgoingWebhookSignerInterface
@@ -24477,7 +24478,7 @@ interface OutgoingWebhookSignerInterface
 
 ---
 
-# 1885. Outgoing webhook metadata
+### 1885. Outgoing webhook metadata
 
 Un webhook emitido deberá incluir:
 
@@ -24491,13 +24492,13 @@ Un webhook emitido deberá incluir:
 
 ---
 
-# 1886. mTLS API authentication
+### 1886. mTLS API authentication
 
 Las APIs de alta sensibilidad deberán poder exigir certificados cliente.
 
 ---
 
-# 1887. mTLS API validation
+### 1887. mTLS API validation
 
 La autenticación deberá validar:
 
@@ -24512,7 +24513,7 @@ La autenticación deberá validar:
 
 ---
 
-# 1888. OAuth-protected APIs
+### 1888. OAuth-protected APIs
 
 Las APIs protegidas por OAuth deberán validar:
 
@@ -24528,7 +24529,7 @@ Las APIs protegidas por OAuth deberán validar:
 
 ---
 
-# 1889. Scope-to-route mapping
+### 1889. Scope-to-route mapping
 
 ```php
 #[RequiresScopes(
@@ -24539,7 +24540,7 @@ Las APIs protegidas por OAuth deberán validar:
 
 ---
 
-# 1890. Scope authorization limitations
+### 1890. Scope authorization limitations
 
 Poseer un scope no deberá sustituir:
 
@@ -24551,13 +24552,13 @@ Poseer un scope no deberá sustituir:
 
 ---
 
-# 1891. Internal API trust
+### 1891. Internal API trust
 
 VoltStack no deberá considerar confiable una request únicamente porque proviene de una red interna.
 
 ---
 
-# 1892. Internal service authentication
+### 1892. Internal service authentication
 
 Los servicios internos deberán usar:
 
@@ -24569,13 +24570,13 @@ Los servicios internos deberán usar:
 
 ---
 
-# 1893. API gateway authentication
+### 1893. API gateway authentication
 
 El gateway podrá realizar autenticación inicial, pero el backend deberá recibir evidencia verificable.
 
 ---
 
-# 1894. Gateway authentication evidence
+### 1894. Gateway authentication evidence
 
 ```php
 final readonly class GatewayAuthenticationEvidence
@@ -24595,7 +24596,7 @@ final readonly class GatewayAuthenticationEvidence
 
 ---
 
-# 1895. Gateway bypass prevention
+### 1895. Gateway bypass prevention
 
 Los servicios protegidos por gateway deberán impedir acceso directo no autenticado mediante:
 
@@ -24607,7 +24608,7 @@ Los servicios protegidos por gateway deberán impedir acceso directo no autentic
 
 ---
 
-# 1896. Service mesh authentication
+### 1896. Service mesh authentication
 
 VoltStack podrá consumir identidades proporcionadas por un service mesh, siempre que:
 
@@ -24619,7 +24620,7 @@ VoltStack podrá consumir identidades proporcionadas por un service mesh, siempr
 
 ---
 
-# 1897. API abuse detection
+### 1897. API abuse detection
 
 El framework deberá detectar:
 
@@ -24636,7 +24637,7 @@ El framework deberá detectar:
 
 ---
 
-# 1898. API credential governance
+### 1898. API credential governance
 
 VoltStack deberá mantener inventario de:
 
@@ -24654,7 +24655,7 @@ VoltStack deberá mantener inventario de:
 
 ---
 
-# 1899. API authentication audit events
+### 1899. API authentication audit events
 
 Eventos recomendados:
 
@@ -24681,7 +24682,7 @@ Eventos recomendados:
 
 ---
 
-# 1900. Resultado de esta entrega
+### 1900. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -24754,9 +24755,9 @@ Entrega 20
 - Security context governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 20
+
 
 **Documento:** Parte 05
 **Entrega:** 20 de varias
@@ -24765,7 +24766,7 @@ Entrega 20
 
 ---
 
-# 1901. Security Context Architecture
+### 1901. Security Context Architecture
 
 VoltStack deberá incorporar una arquitectura formal para construir, proteger, propagar, atenuar y validar contextos de seguridad.
 
@@ -24789,7 +24790,7 @@ El contexto de seguridad deberá representar, como mínimo:
 
 ---
 
-# 1902. Security context security goals
+### 1902. Security context security goals
 
 La arquitectura deberá garantizar:
 
@@ -24807,7 +24808,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 1903. Security context threat model
+### 1903. Security context threat model
 
 El modelo deberá considerar:
 
@@ -24829,7 +24830,7 @@ El modelo deberá considerar:
 
 ---
 
-# 1904. Security context pipeline
+### 1904. Security context pipeline
 
 ```text
 Authentication Evidence
@@ -24853,7 +24854,7 @@ Audit and Trace Correlation
 
 ---
 
-# 1905. SecurityContext
+### 1905. SecurityContext
 
 ```php
 final readonly class SecurityContext
@@ -24881,7 +24882,7 @@ final readonly class SecurityContext
 
 ---
 
-# 1906. SecurityContextProvenance
+### 1906. SecurityContextProvenance
 
 ```php
 final readonly class SecurityContextProvenance
@@ -24900,7 +24901,7 @@ final readonly class SecurityContextProvenance
 
 ---
 
-# 1907. SecurityContextSource
+### 1907. SecurityContextSource
 
 ```php
 enum SecurityContextSource: string
@@ -24920,7 +24921,7 @@ enum SecurityContextSource: string
 
 ---
 
-# 1908. Context immutability
+### 1908. Context immutability
 
 Una vez creado, el contexto deberá ser inmutable.
 
@@ -24928,7 +24929,7 @@ Cualquier reducción, transformación o delegación deberá producir una nueva i
 
 ---
 
-# 1909. Context identity separation
+### 1909. Context identity separation
 
 El contexto deberá distinguir siempre:
 
@@ -24942,7 +24943,7 @@ Estos valores no deberán colapsarse en un único identificador genérico.
 
 ---
 
-# 1910. Actor identity
+### 1910. Actor identity
 
 El actor representa quién ejecuta realmente la acción.
 
@@ -24957,7 +24958,7 @@ Ejemplos:
 
 ---
 
-# 1911. Subject identity
+### 1911. Subject identity
 
 El subject representa la identidad o recurso en cuyo nombre se actúa.
 
@@ -24965,19 +24966,19 @@ En una operación ordinaria, actor y subject pueden ser iguales.
 
 ---
 
-# 1912. Actor-subject preservation
+### 1912. Actor-subject preservation
 
 En delegación o impersonación, ambos deberán mantenerse durante toda la cadena.
 
 ---
 
-# 1913. Effective identity
+### 1913. Effective identity
 
 VoltStack podrá calcular una identidad efectiva para simplificar policies, pero no deberá eliminar actor ni subject originales.
 
 ---
 
-# 1914. SecurityContextFactory
+### 1914. SecurityContextFactory
 
 ```php
 interface SecurityContextFactoryInterface
@@ -24991,7 +24992,7 @@ interface SecurityContextFactoryInterface
 
 ---
 
-# 1915. Security context creation policy
+### 1915. Security context creation policy
 
 La creación deberá resolver:
 
@@ -25009,7 +25010,7 @@ La creación deberá resolver:
 
 ---
 
-# 1916. Context creation from sessions
+### 1916. Context creation from sessions
 
 Un contexto derivado de sesión deberá validar:
 
@@ -25023,7 +25024,7 @@ Un contexto derivado de sesión deberá validar:
 
 ---
 
-# 1917. Context creation from access tokens
+### 1917. Context creation from access tokens
 
 Un contexto derivado de token deberá validar:
 
@@ -25039,7 +25040,7 @@ Un contexto derivado de token deberá validar:
 
 ---
 
-# 1918. Context creation from mTLS
+### 1918. Context creation from mTLS
 
 El certificado cliente deberá mapearse a:
 
@@ -25052,7 +25053,7 @@ El certificado cliente deberá mapearse a:
 
 ---
 
-# 1919. AuthorizationContext
+### 1919. AuthorizationContext
 
 ```php
 final readonly class AuthorizationContext
@@ -25071,13 +25072,13 @@ final readonly class AuthorizationContext
 
 ---
 
-# 1920. Authorization context integrity
+### 1920. Authorization context integrity
 
 El contexto utilizado por el motor de autorización deberá derivarse de fuentes validadas y no de parámetros libres del Controller.
 
 ---
 
-# 1921. Route-derived authorization metadata
+### 1921. Route-derived authorization metadata
 
 La acción y el tipo de recurso podrán resolverse desde metadata compilada de ruta.
 
@@ -25090,7 +25091,7 @@ La acción y el tipo de recurso podrán resolverse desde metadata compilada de r
 
 ---
 
-# 1922. Request-derived resource identifiers
+### 1922. Request-derived resource identifiers
 
 Los IDs de recursos podrán originarse en parámetros de ruta, pero deberán validarse contra:
 
@@ -25102,7 +25103,7 @@ Los IDs de recursos podrán originarse en parámetros de ruta, pero deberán val
 
 ---
 
-# 1923. RequestIdentityEnvelope
+### 1923. RequestIdentityEnvelope
 
 ```php
 final readonly class RequestIdentityEnvelope
@@ -25124,19 +25125,19 @@ final readonly class RequestIdentityEnvelope
 
 ---
 
-# 1924. Identity envelope purpose
+### 1924. Identity envelope purpose
 
 El envelope deberá proteger la identidad cuando atraviese una frontera donde headers ordinarios no sean confiables.
 
 ---
 
-# 1925. Signed security contexts
+### 1925. Signed security contexts
 
 Los contextos propagados deberán firmarse o autenticarse criptográficamente cuando no viajen dentro de un canal que proporcione identidad end-to-end suficiente.
 
 ---
 
-# 1926. SecurityContextSigner
+### 1926. SecurityContextSigner
 
 ```php
 interface SecurityContextSignerInterface
@@ -25155,7 +25156,7 @@ interface SecurityContextSignerInterface
 
 ---
 
-# 1927. SignedSecurityContext
+### 1927. SignedSecurityContext
 
 ```php
 final readonly class SignedSecurityContext
@@ -25178,7 +25179,7 @@ final readonly class SignedSecurityContext
 
 ---
 
-# 1928. Context serialization format
+### 1928. Context serialization format
 
 El formato deberá:
 
@@ -25192,19 +25193,19 @@ El formato deberá:
 
 ---
 
-# 1929. Context format versioning
+### 1929. Context format versioning
 
 Toda representación propagada deberá incluir versión de esquema.
 
 ---
 
-# 1930. Context claim allowlist
+### 1930. Context claim allowlist
 
 Solo deberán propagarse campos incluidos en una allowlist para la frontera específica.
 
 ---
 
-# 1931. Sensitive context data
+### 1931. Sensitive context data
 
 No deberán propagarse salvo necesidad:
 
@@ -25218,7 +25219,7 @@ No deberán propagarse salvo necesidad:
 
 ---
 
-# 1932. SecurityContextPropagationPolicy
+### 1932. SecurityContextPropagationPolicy
 
 ```php
 interface SecurityContextPropagationPolicyInterface
@@ -25232,7 +25233,7 @@ interface SecurityContextPropagationPolicyInterface
 
 ---
 
-# 1933. SecurityContextPropagationDecision
+### 1933. SecurityContextPropagationDecision
 
 ```php
 final readonly class SecurityContextPropagationDecision
@@ -25253,7 +25254,7 @@ final readonly class SecurityContextPropagationDecision
 
 ---
 
-# 1934. SecurityBoundary
+### 1934. SecurityBoundary
 
 ```php
 final readonly class SecurityBoundary
@@ -25273,7 +25274,7 @@ final readonly class SecurityBoundary
 
 ---
 
-# 1935. SecurityBoundaryType
+### 1935. SecurityBoundaryType
 
 ```php
 enum SecurityBoundaryType: string
@@ -25292,19 +25293,19 @@ enum SecurityBoundaryType: string
 
 ---
 
-# 1936. Boundary-specific validation
+### 1936. Boundary-specific validation
 
 Cada receptor deberá reevaluar el contexto según su propia frontera y no asumir que la validación previa es suficiente.
 
 ---
 
-# 1937. Context attenuation
+### 1937. Context attenuation
 
 Propagar un contexto deberá reducir privilegios por defecto.
 
 ---
 
-# 1938. SecurityContextAttenuator
+### 1938. SecurityContextAttenuator
 
 ```php
 interface SecurityContextAttenuatorInterface
@@ -25318,7 +25319,7 @@ interface SecurityContextAttenuatorInterface
 
 ---
 
-# 1939. ContextAttenuationPolicy
+### 1939. ContextAttenuationPolicy
 
 ```php
 final readonly class ContextAttenuationPolicy
@@ -25337,7 +25338,7 @@ final readonly class ContextAttenuationPolicy
 
 ---
 
-# 1940. Attenuation invariants
+### 1940. Attenuation invariants
 
 La atenuación no deberá:
 
@@ -25350,19 +25351,19 @@ La atenuación no deberá:
 
 ---
 
-# 1941. No privilege amplification
+### 1941. No privilege amplification
 
 Un servicio downstream no deberá recibir más autoridad que la poseída por el contexto upstream y la permitida por su policy local.
 
 ---
 
-# 1942. Context audience restriction
+### 1942. Context audience restriction
 
 Todo contexto propagado deberá declarar destinatario específico.
 
 ---
 
-# 1943. Context target binding
+### 1943. Context target binding
 
 El envelope podrá ligarse a:
 
@@ -25376,13 +25377,13 @@ El envelope podrá ligarse a:
 
 ---
 
-# 1944. Context freshness
+### 1944. Context freshness
 
 Los contextos propagados deberán tener vida corta.
 
 ---
 
-# 1945. SecurityContextLifetimePolicy
+### 1945. SecurityContextLifetimePolicy
 
 ```php
 final readonly class SecurityContextLifetimePolicy
@@ -25399,13 +25400,13 @@ final readonly class SecurityContextLifetimePolicy
 
 ---
 
-# 1946. Context renewal
+### 1946. Context renewal
 
 La renovación deberá reconstruir el contexto desde evidencia vigente y no limitarse a cambiar la fecha de expiración.
 
 ---
 
-# 1947. Stale authorization prevention
+### 1947. Stale authorization prevention
 
 Un contexto deberá invalidarse cuando cambien:
 
@@ -25419,13 +25420,13 @@ Un contexto deberá invalidarse cuando cambien:
 
 ---
 
-# 1948. Authorization version binding
+### 1948. Authorization version binding
 
 El contexto podrá incluir la versión de autorización utilizada al crearse.
 
 ---
 
-# 1949. Context replay protection
+### 1949. Context replay protection
 
 Los contextos sensibles deberán incluir:
 
@@ -25438,7 +25439,7 @@ Los contextos sensibles deberán incluir:
 
 ---
 
-# 1950. SecurityContextReplayRegistry
+### 1950. SecurityContextReplayRegistry
 
 ```php
 interface SecurityContextReplayRegistryInterface
@@ -25454,7 +25455,7 @@ interface SecurityContextReplayRegistryInterface
 
 ---
 
-# 1951. Single-use contexts
+### 1951. Single-use contexts
 
 Deberán considerarse para:
 
@@ -25467,7 +25468,7 @@ Deberán considerarse para:
 
 ---
 
-# 1952. Context reuse policy
+### 1952. Context reuse policy
 
 Los contextos reutilizables deberán limitarse por:
 
@@ -25481,13 +25482,13 @@ Los contextos reutilizables deberán limitarse por:
 
 ---
 
-# 1953. Trusted proxy identity
+### 1953. Trusted proxy identity
 
 VoltStack no deberá confiar automáticamente en headers de identidad añadidos por proxies.
 
 ---
 
-# 1954. TrustedProxyDefinition
+### 1954. TrustedProxyDefinition
 
 ```php
 final readonly class TrustedProxyDefinition
@@ -25506,7 +25507,7 @@ final readonly class TrustedProxyDefinition
 
 ---
 
-# 1955. TrustedProxyState
+### 1955. TrustedProxyState
 
 ```php
 enum TrustedProxyState: string
@@ -25521,25 +25522,25 @@ enum TrustedProxyState: string
 
 ---
 
-# 1956. Proxy identity header sanitation
+### 1956. Proxy identity header sanitation
 
 Antes de aceptar una request desde un proxy confiable, el proxy deberá eliminar cualquier header de identidad enviado por el cliente.
 
 ---
 
-# 1957. Direct access protection
+### 1957. Direct access protection
 
 El servicio deberá rechazar headers de identidad cuando la request no provenga del proxy autorizado.
 
 ---
 
-# 1958. Gateway identity assertions
+### 1958. Gateway identity assertions
 
 Los gateways deberán emitir assertions firmadas y ligadas al request.
 
 ---
 
-# 1959. GatewayIdentityAssertion
+### 1959. GatewayIdentityAssertion
 
 ```php
 final readonly class GatewayIdentityAssertion
@@ -25562,7 +25563,7 @@ final readonly class GatewayIdentityAssertion
 
 ---
 
-# 1960. Gateway assertion verification
+### 1960. Gateway assertion verification
 
 El backend deberá validar:
 
@@ -25580,19 +25581,19 @@ El backend deberá validar:
 
 ---
 
-# 1961. Header-based identity limitations
+### 1961. Header-based identity limitations
 
 Los headers podrán transportar assertions, pero su seguridad dependerá de la firma y del canal, no del nombre del header.
 
 ---
 
-# 1962. Service-to-service context propagation
+### 1962. Service-to-service context propagation
 
 Entre servicios deberá propagarse únicamente la información necesaria para la operación downstream.
 
 ---
 
-# 1963. Service actor preservation
+### 1963. Service actor preservation
 
 Cuando un servicio actúe en nombre de un usuario, el contexto deberá conservar:
 
@@ -25603,13 +25604,13 @@ Cuando un servicio actúe en nombre de un usuario, el contexto deberá conservar
 
 ---
 
-# 1964. Service identity addition
+### 1964. Service identity addition
 
 Cada salto deberá añadir su propia identidad como actor actual o elemento de la cadena, sin eliminar actores previos.
 
 ---
 
-# 1965. DelegationChainEntry
+### 1965. DelegationChainEntry
 
 ```php
 final readonly class DelegationChainEntry
@@ -25629,7 +25630,7 @@ final readonly class DelegationChainEntry
 
 ---
 
-# 1966. Delegation chain integrity
+### 1966. Delegation chain integrity
 
 La cadena deberá protegerse criptográficamente para impedir:
 
@@ -25641,13 +25642,13 @@ La cadena deberá protegerse criptográficamente para impedir:
 
 ---
 
-# 1967. Delegation depth enforcement
+### 1967. Delegation depth enforcement
 
 Cada servicio deberá validar la profundidad antes de aceptar o continuar una delegación.
 
 ---
 
-# 1968. Delegation provenance
+### 1968. Delegation provenance
 
 La cadena deberá permitir determinar:
 
@@ -25659,7 +25660,7 @@ La cadena deberá permitir determinar:
 
 ---
 
-# 1969. Context propagation over HTTP
+### 1969. Context propagation over HTTP
 
 La propagación HTTP podrá usar:
 
@@ -25671,19 +25672,19 @@ La propagación HTTP podrá usar:
 
 ---
 
-# 1970. Context propagation over RPC
+### 1970. Context propagation over RPC
 
 Los protocolos RPC deberán utilizar metadata protegida y contracts tipados.
 
 ---
 
-# 1971. Context propagation over message brokers
+### 1971. Context propagation over message brokers
 
 Los mensajes asíncronos deberán incluir un envelope de seguridad independiente del envelope de negocio.
 
 ---
 
-# 1972. AsyncSecurityEnvelope
+### 1972. AsyncSecurityEnvelope
 
 ```php
 final readonly class AsyncSecurityEnvelope
@@ -25705,7 +25706,7 @@ final readonly class AsyncSecurityEnvelope
 
 ---
 
-# 1973. Async context lifetime
+### 1973. Async context lifetime
 
 La expiración deberá considerar:
 
@@ -25719,7 +25720,7 @@ No deberá asignarse una vida ilimitada por conveniencia.
 
 ---
 
-# 1974. Expired async contexts
+### 1974. Expired async contexts
 
 Cuando un mensaje llegue con contexto expirado, el consumidor deberá:
 
@@ -25732,19 +25733,19 @@ según la policy.
 
 ---
 
-# 1975. Async authorization reevaluation
+### 1975. Async authorization reevaluation
 
 Para operaciones sensibles, el consumidor deberá reevaluar permisos en el momento de ejecución.
 
 ---
 
-# 1976. Queue identity architecture
+### 1976. Queue identity architecture
 
 Cada job deberá tener identidad de ejecución explícita.
 
 ---
 
-# 1977. JobExecutionIdentity
+### 1977. JobExecutionIdentity
 
 ```php
 final readonly class JobExecutionIdentity
@@ -25764,7 +25765,7 @@ final readonly class JobExecutionIdentity
 
 ---
 
-# 1978. JobIdentityType
+### 1978. JobIdentityType
 
 ```php
 enum JobIdentityType: string
@@ -25780,7 +25781,7 @@ enum JobIdentityType: string
 
 ---
 
-# 1979. Job initiator and executor
+### 1979. Job initiator and executor
 
 El job deberá distinguir:
 
@@ -25792,13 +25793,13 @@ El job deberá distinguir:
 
 ---
 
-# 1980. Job identity attenuation
+### 1980. Job identity attenuation
 
 Un job no deberá heredar automáticamente todos los permisos interactivos del usuario iniciador.
 
 ---
 
-# 1981. JobAuthorizationPolicy
+### 1981. JobAuthorizationPolicy
 
 ```php
 interface JobAuthorizationPolicyInterface
@@ -25813,7 +25814,7 @@ interface JobAuthorizationPolicyInterface
 
 ---
 
-# 1982. Delayed job authorization
+### 1982. Delayed job authorization
 
 Cuando exista un retraso significativo, deberán reevaluarse:
 
@@ -25826,19 +25827,19 @@ Cuando exista un retraso significativo, deberán reevaluarse:
 
 ---
 
-# 1983. Job payload identity protection
+### 1983. Job payload identity protection
 
 El contexto de identidad no deberá almacenarse como array PHP libre ni mezclarse sin firma con el payload.
 
 ---
 
-# 1984. Job retry identity
+### 1984. Job retry identity
 
 Cada retry deberá conservar el contexto original y registrar el intento actual.
 
 ---
 
-# 1985. Dead-letter queue security
+### 1985. Dead-letter queue security
 
 Los mensajes enviados a DLQ deberán conservar:
 
@@ -25852,13 +25853,13 @@ El acceso a la DLQ deberá estar restringido.
 
 ---
 
-# 1986. Scheduled task identities
+### 1986. Scheduled task identities
 
 Las tareas programadas deberán ejecutar bajo identidades de sistema específicas y no bajo una identidad global omnipotente.
 
 ---
 
-# 1987. ScheduledTaskIdentity
+### 1987. ScheduledTaskIdentity
 
 ```php
 final readonly class ScheduledTaskIdentity
@@ -25877,7 +25878,7 @@ final readonly class ScheduledTaskIdentity
 
 ---
 
-# 1988. ScheduledTaskState
+### 1988. ScheduledTaskState
 
 ```php
 enum ScheduledTaskState: string
@@ -25892,7 +25893,7 @@ enum ScheduledTaskState: string
 
 ---
 
-# 1989. Scheduled task tenant scope
+### 1989. Scheduled task tenant scope
 
 Una tarea podrá ser:
 
@@ -25906,13 +25907,13 @@ El alcance deberá declararse explícitamente.
 
 ---
 
-# 1990. Event consumer identities
+### 1990. Event consumer identities
 
 Cada consumidor de eventos deberá poseer identidad propia y autorización por topic y event type.
 
 ---
 
-# 1991. EventConsumerIdentity
+### 1991. EventConsumerIdentity
 
 ```php
 final readonly class EventConsumerIdentity
@@ -25931,7 +25932,7 @@ final readonly class EventConsumerIdentity
 
 ---
 
-# 1992. Event authenticity
+### 1992. Event authenticity
 
 El consumidor deberá validar:
 
@@ -25947,13 +25948,13 @@ El consumidor deberá validar:
 
 ---
 
-# 1993. Event actor propagation
+### 1993. Event actor propagation
 
 Los eventos derivados de una acción de usuario deberán conservar actor y subject cuando sean relevantes para auditoría o autorización.
 
 ---
 
-# 1994. Event context minimization
+### 1994. Event context minimization
 
 Los eventos de dominio no deberán transformarse en contenedores completos de identidad.
 
@@ -25961,13 +25962,13 @@ Solo deberá propagarse la información necesaria.
 
 ---
 
-# 1995. Distributed tracing security
+### 1995. Distributed tracing security
 
 Las trazas distribuidas deberán correlacionar operaciones sin exponer secretos ni claims sensibles.
 
 ---
 
-# 1996. SecurityTraceContext
+### 1996. SecurityTraceContext
 
 ```php
 final readonly class SecurityTraceContext
@@ -25987,13 +25988,13 @@ final readonly class SecurityTraceContext
 
 ---
 
-# 1997. Trace identity minimization
+### 1997. Trace identity minimization
 
 Las trazas deberán utilizar identificadores opacos o pseudónimos cuando no sea necesario incluir identidades directas.
 
 ---
 
-# 1998. Security context governance
+### 1998. Security context governance
 
 VoltStack deberá mantener políticas e inventario sobre:
 
@@ -26012,7 +26013,7 @@ VoltStack deberá mantener políticas e inventario sobre:
 
 ---
 
-# 1999. Security context audit events
+### 1999. Security context audit events
 
 Eventos recomendados:
 
@@ -26039,7 +26040,7 @@ Eventos recomendados:
 
 ---
 
-# 2000. Resultado de esta entrega
+### 2000. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -26109,9 +26110,9 @@ Entrega 21
 - Messaging security governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_05.md
 
-## Authentication, Session & Identity Security
+## Entrega 21
+
 
 **Documento:** Parte 05
 **Entrega:** 21 de varias
@@ -26120,7 +26121,7 @@ Entrega 21
 
 ---
 
-# 2001. Identity-Aware Messaging Architecture
+### 2001. Identity-Aware Messaging Architecture
 
 VoltStack deberá incorporar una arquitectura de mensajería consciente de identidad para commands, events, jobs, notifications y mensajes de integración.
 
@@ -26140,7 +26141,7 @@ La arquitectura deberá asegurar que cada mensaje pueda asociarse con:
 
 ---
 
-# 2002. Messaging security goals
+### 2002. Messaging security goals
 
 La arquitectura deberá garantizar:
 
@@ -26158,7 +26159,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2003. Messaging threat model
+### 2003. Messaging threat model
 
 El modelo deberá considerar:
 
@@ -26182,7 +26183,7 @@ El modelo deberá considerar:
 
 ---
 
-# 2004. Messaging security pipeline
+### 2004. Messaging security pipeline
 
 ```text
 Business Operation
@@ -26212,7 +26213,7 @@ Business Handler
 
 ---
 
-# 2005. SecureMessagingService
+### 2005. SecureMessagingService
 
 ```php
 interface SecureMessagingServiceInterface
@@ -26231,7 +26232,7 @@ interface SecureMessagingServiceInterface
 
 ---
 
-# 2006. SecureMessage
+### 2006. SecureMessage
 
 ```php
 final readonly class SecureMessage
@@ -26252,7 +26253,7 @@ final readonly class SecureMessage
 
 ---
 
-# 2007. MessagePayload
+### 2007. MessagePayload
 
 ```php
 final readonly class MessagePayload
@@ -26271,7 +26272,7 @@ final readonly class MessagePayload
 
 ---
 
-# 2008. MessageClassification
+### 2008. MessageClassification
 
 ```php
 enum MessageClassification: string
@@ -26286,7 +26287,7 @@ enum MessageClassification: string
 
 ---
 
-# 2009. Message category separation
+### 2009. Message category separation
 
 VoltStack deberá distinguir al menos:
 
@@ -26302,7 +26303,7 @@ Cada categoría deberá tener políticas propias.
 
 ---
 
-# 2010. MessageCategory
+### 2010. MessageCategory
 
 ```php
 enum MessageCategory: string
@@ -26319,7 +26320,7 @@ enum MessageCategory: string
 
 ---
 
-# 2011. Command versus event semantics
+### 2011. Command versus event semantics
 
 Un command representa una intención dirigida.
 
@@ -26329,13 +26330,13 @@ La arquitectura de seguridad deberá impedir tratar events como commands implíc
 
 ---
 
-# 2012. Secure command envelopes
+### 2012. Secure command envelopes
 
 Todo command sensible deberá incluir un envelope de seguridad verificable.
 
 ---
 
-# 2013. SecureCommandEnvelope
+### 2013. SecureCommandEnvelope
 
 ```php
 final readonly class SecureCommandEnvelope
@@ -26358,7 +26359,7 @@ final readonly class SecureCommandEnvelope
 
 ---
 
-# 2014. Command authorization
+### 2014. Command authorization
 
 Antes de publicar un command deberá validarse:
 
@@ -26374,7 +26375,7 @@ Antes de publicar un command deberá validarse:
 
 ---
 
-# 2015. CommandPublicationPolicy
+### 2015. CommandPublicationPolicy
 
 ```php
 interface CommandPublicationPolicyInterface
@@ -26388,7 +26389,7 @@ interface CommandPublicationPolicyInterface
 
 ---
 
-# 2016. CommandPublicationDecision
+### 2016. CommandPublicationDecision
 
 ```php
 final readonly class CommandPublicationDecision
@@ -26408,7 +26409,7 @@ final readonly class CommandPublicationDecision
 
 ---
 
-# 2017. Command target binding
+### 2017. Command target binding
 
 Un command deberá ligarse explícitamente a:
 
@@ -26421,13 +26422,13 @@ Un command deberá ligarse explícitamente a:
 
 ---
 
-# 2018. Command replay protection
+### 2018. Command replay protection
 
 Los commands sensibles deberán ser single-use o utilizar controles equivalentes.
 
 ---
 
-# 2019. CommandReplayRegistry
+### 2019. CommandReplayRegistry
 
 ```php
 interface CommandReplayRegistryInterface
@@ -26442,19 +26443,19 @@ interface CommandReplayRegistryInterface
 
 ---
 
-# 2020. Command expiration
+### 2020. Command expiration
 
 Un command expirado no deberá ejecutarse salvo que una policy explícita permita reautorización.
 
 ---
 
-# 2021. Secure event envelopes
+### 2021. Secure event envelopes
 
 Los events deberán incluir metadata de autenticidad y provenance.
 
 ---
 
-# 2022. SecureEventEnvelope
+### 2022. SecureEventEnvelope
 
 ```php
 final readonly class SecureEventEnvelope
@@ -26477,7 +26478,7 @@ final readonly class SecureEventEnvelope
 
 ---
 
-# 2023. EventProvenance
+### 2023. EventProvenance
 
 ```php
 final readonly class EventProvenance
@@ -26497,19 +26498,19 @@ final readonly class EventProvenance
 
 ---
 
-# 2024. Event origin integrity
+### 2024. Event origin integrity
 
 El origin de un event deberá derivarse de credenciales del productor y no de un campo de payload controlado por la aplicación.
 
 ---
 
-# 2025. Message producer identity
+### 2025. Message producer identity
 
 Todo productor deberá poseer identidad registrada.
 
 ---
 
-# 2026. MessageProducerIdentity
+### 2026. MessageProducerIdentity
 
 ```php
 final readonly class MessageProducerIdentity
@@ -26528,7 +26529,7 @@ final readonly class MessageProducerIdentity
 
 ---
 
-# 2027. MessageProducerState
+### 2027. MessageProducerState
 
 ```php
 enum MessageProducerState: string
@@ -26543,7 +26544,7 @@ enum MessageProducerState: string
 
 ---
 
-# 2028. Producer authentication
+### 2028. Producer authentication
 
 El broker o gateway de mensajería deberá autenticar productores mediante:
 
@@ -26555,13 +26556,13 @@ El broker o gateway de mensajería deberá autenticar productores mediante:
 
 ---
 
-# 2029. Producer authorization
+### 2029. Producer authorization
 
 Un productor no deberá publicar libremente en cualquier destination.
 
 ---
 
-# 2030. ProducerAuthorizationPolicy
+### 2030. ProducerAuthorizationPolicy
 
 ```php
 interface ProducerAuthorizationPolicyInterface
@@ -26575,7 +26576,7 @@ interface ProducerAuthorizationPolicyInterface
 
 ---
 
-# 2031. Producer destination restrictions
+### 2031. Producer destination restrictions
 
 La policy deberá limitar:
 
@@ -26589,19 +26590,19 @@ La policy deberá limitar:
 
 ---
 
-# 2032. Producer spoofing prevention
+### 2032. Producer spoofing prevention
 
 El valor `producerId` deberá ser establecido o validado por infraestructura confiable.
 
 ---
 
-# 2033. Message consumer identity
+### 2033. Message consumer identity
 
 Todo consumidor deberá poseer identidad propia.
 
 ---
 
-# 2034. MessageConsumerIdentity
+### 2034. MessageConsumerIdentity
 
 ```php
 final readonly class MessageConsumerIdentity
@@ -26620,7 +26621,7 @@ final readonly class MessageConsumerIdentity
 
 ---
 
-# 2035. MessageConsumerState
+### 2035. MessageConsumerState
 
 ```php
 enum MessageConsumerState: string
@@ -26636,7 +26637,7 @@ enum MessageConsumerState: string
 
 ---
 
-# 2036. Consumer authentication
+### 2036. Consumer authentication
 
 El broker deberá autenticar al consumidor antes de permitir:
 
@@ -26649,7 +26650,7 @@ El broker deberá autenticar al consumidor antes de permitir:
 
 ---
 
-# 2037. Consumer authorization
+### 2037. Consumer authorization
 
 Un consumidor deberá autorizarse por:
 
@@ -26662,7 +26663,7 @@ Un consumidor deberá autorizarse por:
 
 ---
 
-# 2038. ConsumerAuthorizationPolicy
+### 2038. ConsumerAuthorizationPolicy
 
 ```php
 interface ConsumerAuthorizationPolicyInterface
@@ -26676,19 +26677,19 @@ interface ConsumerAuthorizationPolicyInterface
 
 ---
 
-# 2039. Consumer least privilege
+### 2039. Consumer least privilege
 
 El consumidor deberá recibir únicamente mensajes necesarios para su función.
 
 ---
 
-# 2040. Topic and queue authorization
+### 2040. Topic and queue authorization
 
 VoltStack deberá modelar autorización por recursos de mensajería.
 
 ---
 
-# 2041. MessagingDestination
+### 2041. MessagingDestination
 
 ```php
 final readonly class MessagingDestination
@@ -26708,7 +26709,7 @@ final readonly class MessagingDestination
 
 ---
 
-# 2042. MessagingDestinationType
+### 2042. MessagingDestinationType
 
 ```php
 enum MessagingDestinationType: string
@@ -26724,7 +26725,7 @@ enum MessagingDestinationType: string
 
 ---
 
-# 2043. MessagingDestinationState
+### 2043. MessagingDestinationState
 
 ```php
 enum MessagingDestinationState: string
@@ -26739,7 +26740,7 @@ enum MessagingDestinationState: string
 
 ---
 
-# 2044. Destination naming
+### 2044. Destination naming
 
 Los nombres deberán:
 
@@ -26752,13 +26753,13 @@ Los nombres deberán:
 
 ---
 
-# 2045. Dynamic destination creation
+### 2045. Dynamic destination creation
 
 La creación dinámica de queues o topics deberá requerir policy y límites explícitos.
 
 ---
 
-# 2046. Wildcard subscription restrictions
+### 2046. Wildcard subscription restrictions
 
 Las subscriptions con wildcards deberán:
 
@@ -26769,25 +26770,25 @@ Las subscriptions con wildcards deberán:
 
 ---
 
-# 2047. Cross-tenant subscription prohibition
+### 2047. Cross-tenant subscription prohibition
 
 Un consumidor single-tenant no deberá suscribirse a destinos de otros tenants.
 
 ---
 
-# 2048. Message integrity
+### 2048. Message integrity
 
 Cada mensaje deberá protegerse contra modificación.
 
 ---
 
-# 2049. Payload digest
+### 2049. Payload digest
 
 El digest deberá calcularse sobre una representación canónica o sobre bytes exactos claramente definidos.
 
 ---
 
-# 2050. MessageDigestService
+### 2050. MessageDigestService
 
 ```php
 interface MessageDigestServiceInterface
@@ -26807,7 +26808,7 @@ interface MessageDigestServiceInterface
 
 ---
 
-# 2051. Metadata integrity
+### 2051. Metadata integrity
 
 La protección deberá cubrir también metadata crítica:
 
@@ -26823,13 +26824,13 @@ La protección deberá cubrir también metadata crítica:
 
 ---
 
-# 2052. Message signatures
+### 2052. Message signatures
 
 Los mensajes que atraviesen trust boundaries deberán firmarse.
 
 ---
 
-# 2053. MessageSigner
+### 2053. MessageSigner
 
 ```php
 interface MessageSignerInterface
@@ -26849,7 +26850,7 @@ interface MessageSignerInterface
 
 ---
 
-# 2054. MessageSigningInput
+### 2054. MessageSigningInput
 
 ```php
 final readonly class MessageSigningInput
@@ -26869,7 +26870,7 @@ final readonly class MessageSigningInput
 
 ---
 
-# 2055. MessageSignature
+### 2055. MessageSignature
 
 ```php
 final readonly class MessageSignature
@@ -26887,7 +26888,7 @@ final readonly class MessageSignature
 
 ---
 
-# 2056. Signature key resolution
+### 2056. Signature key resolution
 
 El consumidor deberá resolver claves desde una fuente confiable y validar:
 
@@ -26900,19 +26901,19 @@ El consumidor deberá resolver claves desde una fuente confiable y validar:
 
 ---
 
-# 2057. Signature downgrade prevention
+### 2057. Signature downgrade prevention
 
 Un destination configurado para mensajes firmados no deberá aceptar mensajes unsigned.
 
 ---
 
-# 2058. Message confidentiality
+### 2058. Message confidentiality
 
 Los mensajes sensibles deberán cifrarse cuando el broker o la infraestructura no proporcionen protección end-to-end suficiente.
 
 ---
 
-# 2059. MessageEncryptionService
+### 2059. MessageEncryptionService
 
 ```php
 interface MessageEncryptionServiceInterface
@@ -26931,7 +26932,7 @@ interface MessageEncryptionServiceInterface
 
 ---
 
-# 2060. EncryptedMessagePayload
+### 2060. EncryptedMessagePayload
 
 ```php
 final readonly class EncryptedMessagePayload
@@ -26950,19 +26951,19 @@ final readonly class EncryptedMessagePayload
 
 ---
 
-# 2061. Associated data
+### 2061. Associated data
 
 El cifrado deberá autenticar metadata crítica mediante associated data.
 
 ---
 
-# 2062. Per-message data keys
+### 2062. Per-message data keys
 
 Para mensajes de alta sensibilidad podrá utilizarse un DEK único por mensaje protegido mediante envelope encryption.
 
 ---
 
-# 2063. Broker confidentiality limitations
+### 2063. Broker confidentiality limitations
 
 TLS entre cliente y broker no protege necesariamente el mensaje:
 
@@ -26974,25 +26975,25 @@ TLS entre cliente y broker no protege necesariamente el mensaje:
 
 ---
 
-# 2064. End-to-end encryption
+### 2064. End-to-end encryption
 
 Cuando sea requerido, solo productores y consumidores autorizados deberán poder descifrar el payload.
 
 ---
 
-# 2065. Consumer group key access
+### 2065. Consumer group key access
 
 Los permisos criptográficos deberán alinearse con consumer groups y tenant scope.
 
 ---
 
-# 2066. Message replay prevention
+### 2066. Message replay prevention
 
 VoltStack deberá detectar reenvío no autorizado del mismo mensaje.
 
 ---
 
-# 2067. MessageReplayRegistry
+### 2067. MessageReplayRegistry
 
 ```php
 interface MessageReplayRegistryInterface
@@ -27008,7 +27009,7 @@ interface MessageReplayRegistryInterface
 
 ---
 
-# 2068. Replay versus redelivery
+### 2068. Replay versus redelivery
 
 La arquitectura deberá distinguir:
 
@@ -27020,7 +27021,7 @@ La arquitectura deberá distinguir:
 
 ---
 
-# 2069. Replay decision inputs
+### 2069. Replay decision inputs
 
 La decisión deberá considerar:
 
@@ -27035,7 +27036,7 @@ La decisión deberá considerar:
 
 ---
 
-# 2070. Manual replay authorization
+### 2070. Manual replay authorization
 
 Reprocesar mensajes históricos deberá requerir:
 
@@ -27049,13 +27050,13 @@ Reprocesar mensajes históricos deberá requerir:
 
 ---
 
-# 2071. Message ordering security
+### 2071. Message ordering security
 
 El orden deberá protegerse cuando afecte seguridad o integridad de negocio.
 
 ---
 
-# 2072. SequenceNumber
+### 2072. SequenceNumber
 
 ```php
 final readonly class SequenceNumber
@@ -27071,7 +27072,7 @@ final readonly class SequenceNumber
 
 ---
 
-# 2073. Sequence validation
+### 2073. Sequence validation
 
 El consumidor podrá detectar:
 
@@ -27083,7 +27084,7 @@ El consumidor podrá detectar:
 
 ---
 
-# 2074. Ordering trust scope
+### 2074. Ordering trust scope
 
 El orden deberá definirse por:
 
@@ -27096,19 +27097,19 @@ El orden deberá definirse por:
 
 ---
 
-# 2075. Ordering attack prevention
+### 2075. Ordering attack prevention
 
 No deberá confiarse en sequence numbers no autenticados.
 
 ---
 
-# 2076. Idempotency architecture
+### 2076. Idempotency architecture
 
 Los consumidores deberán diseñarse para soportar entrega at-least-once.
 
 ---
 
-# 2077. IdempotencyKey
+### 2077. IdempotencyKey
 
 ```php
 final readonly class IdempotencyKey
@@ -27125,7 +27126,7 @@ final readonly class IdempotencyKey
 
 ---
 
-# 2078. IdempotencyRegistry
+### 2078. IdempotencyRegistry
 
 ```php
 interface IdempotencyRegistryInterface
@@ -27149,7 +27150,7 @@ interface IdempotencyRegistryInterface
 
 ---
 
-# 2079. Idempotency scope
+### 2079. Idempotency scope
 
 La key deberá ligarse a:
 
@@ -27161,13 +27162,13 @@ La key deberá ligarse a:
 
 ---
 
-# 2080. Idempotency retention
+### 2080. Idempotency retention
 
 La retención deberá superar la ventana máxima de redelivery esperada.
 
 ---
 
-# 2081. Exactly-once claims
+### 2081. Exactly-once claims
 
 VoltStack no deberá asumir exactly-once delivery como garantía universal.
 
@@ -27182,7 +27183,7 @@ La consistencia deberá construirse con:
 
 ---
 
-# 2082. Secure outbox pattern
+### 2082. Secure outbox pattern
 
 El outbox deberá persistir:
 
@@ -27196,7 +27197,7 @@ dentro de una frontera transaccional apropiada.
 
 ---
 
-# 2083. OutboxMessageRecord
+### 2083. OutboxMessageRecord
 
 ```php
 final readonly class OutboxMessageRecord
@@ -27215,13 +27216,13 @@ final readonly class OutboxMessageRecord
 
 ---
 
-# 2084. Secure inbox pattern
+### 2084. Secure inbox pattern
 
 El consumidor deberá registrar mensajes procesados antes o junto con efectos de negocio críticos.
 
 ---
 
-# 2085. InboxMessageRecord
+### 2085. InboxMessageRecord
 
 ```php
 final readonly class InboxMessageRecord
@@ -27240,13 +27241,13 @@ final readonly class InboxMessageRecord
 
 ---
 
-# 2086. Poison message detection
+### 2086. Poison message detection
 
 Un poison message es aquel que falla repetidamente de forma no transitoria.
 
 ---
 
-# 2087. PoisonMessageAssessment
+### 2087. PoisonMessageAssessment
 
 ```php
 final readonly class PoisonMessageAssessment
@@ -27264,7 +27265,7 @@ final readonly class PoisonMessageAssessment
 
 ---
 
-# 2088. PoisonMessageReason
+### 2088. PoisonMessageReason
 
 ```php
 enum PoisonMessageReason: string
@@ -27281,7 +27282,7 @@ enum PoisonMessageReason: string
 
 ---
 
-# 2089. PoisonMessageAction
+### 2089. PoisonMessageAction
 
 ```php
 enum PoisonMessageAction: string
@@ -27296,7 +27297,7 @@ enum PoisonMessageAction: string
 
 ---
 
-# 2090. Retry policy
+### 2090. Retry policy
 
 Los retries deberán distinguir fallos:
 
@@ -27311,13 +27312,13 @@ Los fallos de firma o tenant no deberán resolverse mediante retries indefinidos
 
 ---
 
-# 2091. Dead-letter queue security
+### 2091. Dead-letter queue security
 
 Las DLQs deberán considerarse repositorios de datos sensibles.
 
 ---
 
-# 2092. DeadLetterRecord
+### 2092. DeadLetterRecord
 
 ```php
 final readonly class DeadLetterRecord
@@ -27337,7 +27338,7 @@ final readonly class DeadLetterRecord
 
 ---
 
-# 2093. DeadLetterState
+### 2093. DeadLetterState
 
 ```php
 enum DeadLetterState: string
@@ -27353,7 +27354,7 @@ enum DeadLetterState: string
 
 ---
 
-# 2094. DLQ access controls
+### 2094. DLQ access controls
 
 El acceso deberá limitarse por:
 
@@ -27367,7 +27368,7 @@ El acceso deberá limitarse por:
 
 ---
 
-# 2095. DLQ payload handling
+### 2095. DLQ payload handling
 
 Las interfaces administrativas deberán:
 
@@ -27380,13 +27381,13 @@ Las interfaces administrativas deberán:
 
 ---
 
-# 2096. Delayed message authorization
+### 2096. Delayed message authorization
 
 Un mensaje válido al publicarse puede dejar de estar autorizado al ejecutarse.
 
 ---
 
-# 2097. DelayedAuthorizationPolicy
+### 2097. DelayedAuthorizationPolicy
 
 ```php
 interface DelayedAuthorizationPolicyInterface
@@ -27400,7 +27401,7 @@ interface DelayedAuthorizationPolicyInterface
 
 ---
 
-# 2098. Authorization reevaluation triggers
+### 2098. Authorization reevaluation triggers
 
 Se deberá reevaluar cuando:
 
@@ -27415,7 +27416,7 @@ Se deberá reevaluar cuando:
 
 ---
 
-# 2099. Delayed command rejection
+### 2099. Delayed command rejection
 
 Si la autorización ya no es válida, el command deberá:
 
@@ -27428,7 +27429,7 @@ sin ejecutar efectos parciales.
 
 ---
 
-# 2100. Resultado de esta entrega
+### 2100. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -27499,4 +27500,2909 @@ Entrega 22
 - Broker compromise response
 - Messaging observability
 - Messaging security governance
+```
+
+
+## Entrega 22
+
+
+**Documento:** Parte 05
+**Entrega:** 22 de varias
+**Cobertura:** Secciones **2101–2200**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 21`
+
+---
+
+### 2101. Cross-Tenant Messaging Isolation
+
+VoltStack deberá garantizar aislamiento estricto entre tenants dentro de:
+
+* queues;
+* topics;
+* streams;
+* exchanges;
+* partitions;
+* consumer groups;
+* dead-letter queues;
+* retry queues;
+* event stores;
+* outbox e inbox stores.
+
+El aislamiento no deberá depender únicamente de convenciones de nombres.
+
+---
+
+### 2102. Multi-tenant messaging security goals
+
+La arquitectura deberá garantizar:
+
+* separación lógica o física;
+* tenant binding verificable;
+* autorización por destino;
+* prevención de cross-tenant routing;
+* aislamiento de credenciales;
+* trazabilidad;
+* límites de consumo;
+* cifrado por tenant cuando aplique;
+* recuperación independiente;
+* control de administración.
+
+---
+
+### 2103. Multi-tenant messaging threat model
+
+El modelo deberá considerar:
+
+* publicación en topic incorrecto;
+* consumo entre tenants;
+* partition leakage;
+* wildcard subscriptions;
+* tenant spoofing;
+* metadata manipulation;
+* shared credential abuse;
+* broker administrator overreach;
+* DLQ cross-tenant exposure;
+* event-store query leakage;
+* retry routing incorrecto;
+* topic naming collisions;
+* encryption key reuse;
+* replay sobre tenant distinto.
+
+---
+
+### 2104. Tenant-bound messaging pipeline
+
+```text
+Producer Identity
+       ↓
+Tenant Resolution
+       ↓
+Tenant Binding Validation
+       ↓
+Destination Resolution
+       ↓
+Publication Authorization
+       ↓
+Partition Selection
+       ↓
+Broker Delivery
+       ↓
+Consumer Tenant Validation
+       ↓
+Message Tenant Verification
+       ↓
+Business Processing
+```
+
+---
+
+### 2105. TenantMessagingContext
+
+```php
+final readonly class TenantMessagingContext
+{
+    public function __construct(
+        public string $tenantId,
+        public string $environment,
+        public string $region,
+        public TenantMessagingIsolationMode $isolationMode,
+        public array $allowedNamespaces,
+        public array $restrictions,
+    ) {
+    }
+}
+```
+
+---
+
+### 2106. TenantMessagingIsolationMode
+
+```php
+enum TenantMessagingIsolationMode: string
+{
+    case SharedLogical = 'shared_logical';
+    case SharedPartitioned = 'shared_partitioned';
+    case DedicatedNamespace = 'dedicated_namespace';
+    case DedicatedBroker = 'dedicated_broker';
+    case DedicatedCluster = 'dedicated_cluster';
+}
+```
+
+---
+
+### 2107. Isolation mode selection
+
+La selección deberá considerar:
+
+* clasificación de datos;
+* tamaño del tenant;
+* compliance;
+* volumen;
+* riesgo;
+* residencia de datos;
+* tolerancia a fallos;
+* coste operativo;
+* necesidad de administración separada.
+
+---
+
+### 2108. Dedicated broker requirements
+
+Tenants de alto riesgo podrán requerir:
+
+* broker dedicado;
+* red dedicada;
+* credenciales dedicadas;
+* claves dedicadas;
+* monitoring separado;
+* administración aislada;
+* backups separados.
+
+---
+
+### 2109. Tenant-bound destinations
+
+Cada destination deberá declarar de forma explícita su tenant scope.
+
+---
+
+### 2110. TenantBoundDestination
+
+```php
+final readonly class TenantBoundDestination
+{
+    public function __construct(
+        public string $destinationId,
+        public MessagingDestinationType $type,
+        public TenantScope $tenantScope,
+        public string $namespace,
+        public string $environment,
+        public string $region,
+        public DestinationIsolationPolicy $isolationPolicy,
+    ) {
+    }
+}
+```
+
+---
+
+### 2111. TenantScope
+
+```php
+final readonly class TenantScope
+{
+    public function __construct(
+        public TenantScopeType $type,
+        public array $tenantIds,
+    ) {
+    }
+}
+```
+
+---
+
+### 2112. TenantScopeType
+
+```php
+enum TenantScopeType: string
+{
+    case SingleTenant = 'single_tenant';
+    case TenantGroup = 'tenant_group';
+    case ControlPlane = 'control_plane';
+    case GlobalShared = 'global_shared';
+}
+```
+
+---
+
+### 2113. Global shared destination restrictions
+
+Los destinos globales deberán reservarse para:
+
+* control plane;
+* metadata no sensible;
+* eventos agregados;
+* señales de salud;
+* operaciones explícitamente globales.
+
+No deberán transportar datos de tenant sin encapsulación y policy específica.
+
+---
+
+### 2114. Tenant destination resolution
+
+```php
+interface TenantDestinationResolverInterface
+{
+    public function resolve(
+        string $logicalDestination,
+        TenantMessagingContext $context
+    ): TenantBoundDestination;
+}
+```
+
+---
+
+### 2115. Destination resolution integrity
+
+El tenant no deberá seleccionar libremente el nombre físico del destino.
+
+La resolución deberá realizarse desde metadata confiable.
+
+---
+
+### 2116. Messaging namespace policies
+
+VoltStack deberá aplicar namespaces por:
+
+* framework;
+* environment;
+* region;
+* tenant;
+* domain;
+* message category;
+* version.
+
+---
+
+### 2117. MessagingNamespace
+
+```php
+final readonly class MessagingNamespace
+{
+    public function __construct(
+        public string $framework,
+        public string $environment,
+        public string $region,
+        public string $tenantScope,
+        public string $domain,
+        public string $category,
+        public int $version,
+    ) {
+    }
+}
+```
+
+---
+
+### 2118. Canonical namespace format
+
+Un formato conceptual podrá ser:
+
+```text
+voltstack.<environment>.<region>.<tenant>.<domain>.<category>.v<version>
+```
+
+La implementación deberá escapar y validar todos los componentes.
+
+---
+
+### 2119. Namespace injection prevention
+
+Los componentes del namespace no deberán aceptar:
+
+* separators arbitrarios;
+* wildcards;
+* control characters;
+* path traversal;
+* broker-specific syntax no autorizada.
+
+---
+
+### 2120. Reserved namespaces
+
+VoltStack deberá reservar namespaces para:
+
+* system;
+* security;
+* audit;
+* control;
+* provisioning;
+* dead-letter;
+* quarantine;
+* recovery.
+
+---
+
+### 2121. Tenant-aware partitioning
+
+La selección de partition deberá preservar afinidad e aislamiento.
+
+---
+
+### 2122. TenantPartitionKey
+
+```php
+final readonly class TenantPartitionKey
+{
+    public function __construct(
+        public string $tenantId,
+        public string $aggregateId,
+        public ?string $shardId,
+        public string $normalizedKey,
+    ) {
+    }
+}
+```
+
+---
+
+### 2123. Partition key integrity
+
+La partition key deberá construirse desde valores validados y no desde headers libres.
+
+---
+
+### 2124. Partition leakage prevention
+
+La lógica deberá evitar que datos de un tenant compartan inadvertidamente una partition reservada para otro.
+
+---
+
+### 2125. Hot tenant protection
+
+Un tenant con alto volumen no deberá degradar de forma desproporcionada a otros.
+
+Se deberán aplicar:
+
+* quotas;
+* partition allocation;
+* backpressure;
+* rate limits;
+* throughput reservations;
+* queue depth limits.
+
+---
+
+### 2126. Tenant message quotas
+
+```php
+final readonly class TenantMessagingQuota
+{
+    public function __construct(
+        public int $maximumMessagesPerSecond,
+        public int $maximumBytesPerSecond,
+        public int $maximumQueueDepth,
+        public int $maximumConcurrentConsumers,
+        public int $maximumRetainedMessages,
+    ) {
+    }
+}
+```
+
+---
+
+### 2127. Quota enforcement location
+
+Los límites deberán aplicarse en:
+
+* producer SDK;
+* gateway;
+* broker;
+* consumer;
+* control plane.
+
+No deberá dependerse de un único punto.
+
+---
+
+### 2128. Cross-tenant event routing
+
+Todo routing entre tenants deberá considerarse operación privilegiada.
+
+---
+
+### 2129. CrossTenantRoutingRequest
+
+```php
+final readonly class CrossTenantRoutingRequest
+{
+    public function __construct(
+        public string $sourceTenantId,
+        public string $targetTenantId,
+        public string $eventType,
+        public string $purpose,
+        public IdentityIdentifier|string $actor,
+        public array $requestedFields,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2130. CrossTenantRoutingPolicy
+
+```php
+interface CrossTenantRoutingPolicyInterface
+{
+    public function evaluate(
+        CrossTenantRoutingRequest $request
+    ): CrossTenantRoutingDecision;
+}
+```
+
+---
+
+### 2131. CrossTenantRoutingDecision
+
+```php
+final readonly class CrossTenantRoutingDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $includedFields,
+        public array $removedFields,
+        public bool $pseudonymizationRequired,
+        public bool $approvalRequired,
+        public DateInterval $maximumLifetime,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+### 2132. Cross-tenant routing requirements
+
+La operación deberá requerir:
+
+* finalidad legítima;
+* authorization explícita;
+* minimización;
+* consentimiento o base jurídica cuando aplique;
+* auditoría;
+* target binding;
+* expiración;
+* owner definido.
+
+---
+
+### 2133. Tenant data minimization
+
+No deberá propagarse un event completo cuando solo se necesiten algunos campos.
+
+---
+
+### 2134. Tenant pseudonymization
+
+Los identificadores podrán transformarse antes de cruzar fronteras de tenant.
+
+---
+
+### 2135. Cross-tenant correlation identifiers
+
+Los IDs de correlación no deberán permitir enumerar o inferir recursos internos de otro tenant.
+
+---
+
+### 2136. Shared broker security
+
+Los brokers compartidos deberán considerarse infraestructura multi-tenant crítica.
+
+---
+
+### 2137. Shared broker control objectives
+
+Deberán implementarse:
+
+* ACLs;
+* namespace isolation;
+* quotas;
+* encryption;
+* tenant-aware logging;
+* admin separation;
+* resource limits;
+* secret rotation;
+* broker hardening.
+
+---
+
+### 2138. BrokerCredential
+
+```php
+final readonly class BrokerCredential
+{
+    public function __construct(
+        public string $credentialId,
+        public string $principalId,
+        public string $tenantScope,
+        public array $allowedOperations,
+        public array $allowedDestinations,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public BrokerCredentialState $state,
+    ) {
+    }
+}
+```
+
+---
+
+### 2139. BrokerCredentialState
+
+```php
+enum BrokerCredentialState: string
+{
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+### 2140. Broker credential isolation
+
+No deberán compartirse credenciales entre:
+
+* tenants;
+* environments;
+* services;
+* producer y consumer roles;
+* administration y application access.
+
+---
+
+### 2141. Short-lived broker credentials
+
+Cuando sea viable, el broker deberá aceptar credenciales efímeras emitidas mediante:
+
+* workload federation;
+* mTLS;
+* OIDC;
+* short-lived certificates;
+* dynamic credentials.
+
+---
+
+### 2142. Broker ACL model
+
+Las ACLs deberán limitar:
+
+* connect;
+* publish;
+* consume;
+* subscribe;
+* create;
+* delete;
+* alter;
+* inspect;
+* replay;
+* administer.
+
+---
+
+### 2143. Producer and consumer role separation
+
+Un principal productor no deberá consumir mensajes salvo necesidad documentada.
+
+---
+
+### 2144. Broker administration security
+
+Las operaciones administrativas deberán usar identidades privilegiadas separadas.
+
+---
+
+### 2145. BrokerAdministratorIdentity
+
+```php
+final readonly class BrokerAdministratorIdentity
+{
+    public function __construct(
+        public string $administratorId,
+        public IdentityIdentifier $identity,
+        public array $allowedOperations,
+        public array $allowedClusters,
+        public PrivilegedRiskLevel $riskLevel,
+        public BrokerAdministratorState $state,
+    ) {
+    }
+}
+```
+
+---
+
+### 2146. BrokerAdministratorState
+
+```php
+enum BrokerAdministratorState: string
+{
+    case Eligible = 'eligible';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+### 2147. Broker administrative elevation
+
+La administración deberá requerir:
+
+* JIT access;
+* MFA reciente;
+* approval;
+* ticket;
+* sesión privilegiada;
+* duración corta;
+* recording cuando sea viable.
+
+---
+
+### 2148. Broker admin operation restrictions
+
+Operaciones críticas incluyen:
+
+* eliminar topics;
+* cambiar retención;
+* alterar ACLs;
+* reconfigurar replicas;
+* leer payloads;
+* forzar replay;
+* purgar queues;
+* modificar encryption.
+
+---
+
+### 2149. Four-eyes broker controls
+
+Las acciones destructivas podrán requerir dual control.
+
+---
+
+### 2150. Broker configuration integrity
+
+La configuración deberá:
+
+* versionarse;
+* firmarse;
+* revisarse;
+* desplegarse por pipeline;
+* evitar cambios manuales no auditados.
+
+---
+
+### 2151. Broker hardening
+
+VoltStack deberá exigir:
+
+* protocolos seguros;
+* TLS actualizado;
+* autenticación fuerte;
+* network segmentation;
+* patching;
+* deshabilitar cuentas default;
+* limitar plugins;
+* proteger management interfaces.
+
+---
+
+### 2152. Broker metadata confidentiality
+
+Los nombres de topics, tenants y schemas pueden revelar información y deberán protegerse.
+
+---
+
+### 2153. Broker audit logging
+
+Deberán registrarse:
+
+* logins;
+* publications;
+* subscriptions;
+* ACL changes;
+* topic changes;
+* retention changes;
+* replays;
+* purges;
+* credential changes;
+* admin access.
+
+---
+
+### 2154. Event chain integrity
+
+VoltStack deberá poder demostrar que una secuencia de events no fue alterada.
+
+---
+
+### 2155. EventChainEntry
+
+```php
+final readonly class EventChainEntry
+{
+    public function __construct(
+        public string $eventId,
+        public string $streamId,
+        public int $sequence,
+        public string $eventDigest,
+        public ?string $previousChainHash,
+        public string $chainHash,
+        public DateTimeImmutable $recordedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2156. Event chain hash
+
+El hash podrá calcularse conceptualmente como:
+
+```text
+H(
+    stream_id
+    || sequence
+    || event_digest
+    || previous_chain_hash
+)
+```
+
+---
+
+### 2157. Chain domain separation
+
+El cálculo deberá incluir un identificador de propósito para evitar reutilización del mismo esquema criptográfico en otros dominios.
+
+---
+
+### 2158. EventHashChainService
+
+```php
+interface EventHashChainServiceInterface
+{
+    public function append(
+        EventChainEntryInput $input,
+        ?EventChainEntry $previous
+    ): EventChainEntry;
+
+    public function verify(
+        iterable $entries
+    ): EventChainVerificationResult;
+}
+```
+
+---
+
+### 2159. EventChainVerificationResult
+
+```php
+final readonly class EventChainVerificationResult
+{
+    public function __construct(
+        public bool $valid,
+        public ?int $firstInvalidSequence,
+        public ?string $failureReason,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+### 2160. Event chain limitations
+
+Una hash chain detecta alteraciones, pero no impide que un actor con control total reescriba toda la cadena.
+
+---
+
+### 2161. External checkpoints
+
+Para reforzar integridad, VoltStack podrá publicar checkpoints en:
+
+* append-only ledger;
+* external timestamp service;
+* immutable object storage;
+* audit system independiente;
+* transparency log.
+
+---
+
+### 2162. EventChainCheckpoint
+
+```php
+final readonly class EventChainCheckpoint
+{
+    public function __construct(
+        public string $streamId,
+        public int $sequence,
+        public string $chainHash,
+        public DateTimeImmutable $createdAt,
+        public string $checkpointProvider,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+### 2163. Checkpoint frequency
+
+La frecuencia deberá depender de:
+
+* criticidad;
+* volumen;
+* RPO;
+* compliance;
+* capacidad operativa.
+
+---
+
+### 2164. Event provenance verification
+
+El consumidor deberá poder verificar el origen de events sensibles.
+
+---
+
+### 2165. EventProvenanceVerifier
+
+```php
+interface EventProvenanceVerifierInterface
+{
+    public function verify(
+        SecureEventEnvelope $event,
+        EventProvenanceVerificationContext $context
+    ): EventProvenanceVerificationResult;
+}
+```
+
+---
+
+### 2166. Provenance verification checks
+
+La validación deberá comprobar:
+
+* producer identity;
+* trust domain;
+* signature;
+* key state;
+* destination;
+* tenant;
+* causation;
+* schema;
+* timestamps;
+* payload digest.
+
+---
+
+### 2167. Causation chain integrity
+
+Los campos `causationId` y `parentEventIds` deberán autenticarse para impedir reconstrucciones falsas del flujo.
+
+---
+
+### 2168. Correlation ID trust
+
+Un correlation ID ayuda a observabilidad, pero no deberá considerarse evidencia de autenticidad por sí mismo.
+
+---
+
+### 2169. Event sourcing security architecture
+
+En event sourcing, el event store se convierte en sistema crítico de registro y reconstrucción.
+
+---
+
+### 2170. EventStoreRecord
+
+```php
+final readonly class EventStoreRecord
+{
+    public function __construct(
+        public string $eventId,
+        public string $streamId,
+        public string $aggregateId,
+        public string $tenantId,
+        public int $sequence,
+        public string $eventType,
+        public MessagePayload|EncryptedMessagePayload $payload,
+        public EventProvenance $provenance,
+        public EventChainEntry $chainEntry,
+        public DateTimeImmutable $recordedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2171. Event store append-only policy
+
+Los events confirmados no deberán modificarse in-place.
+
+Correcciones deberán representarse mediante nuevos events.
+
+---
+
+### 2172. Event store write authorization
+
+Solo producers autorizados deberán poder append events a streams específicos.
+
+---
+
+### 2173. Event store read authorization
+
+La lectura deberá limitarse por:
+
+* tenant;
+* aggregate;
+* stream;
+* event type;
+* classification;
+* purpose;
+* retention policy.
+
+---
+
+### 2174. EventStoreAuthorizationPolicy
+
+```php
+interface EventStoreAuthorizationPolicyInterface
+{
+    public function authorizeAppend(
+        EventStoreAppendRequest $request
+    ): EventStoreAuthorizationDecision;
+
+    public function authorizeRead(
+        EventStoreReadRequest $request
+    ): EventStoreAuthorizationDecision;
+}
+```
+
+---
+
+### 2175. Stream ownership
+
+Cada stream deberá declarar:
+
+* tenant;
+* aggregate type;
+* owning service;
+* authorized writers;
+* authorized readers;
+* classification;
+* retention.
+
+---
+
+### 2176. Stream identifier security
+
+El stream ID no deberá permitir acceso sin authorization ni revelar información sensible innecesaria.
+
+---
+
+### 2177. Optimistic concurrency security
+
+La expected version deberá verificarse para evitar:
+
+* lost updates;
+* reordering;
+* race conditions;
+* unauthorized overwrite attempts.
+
+---
+
+### 2178. Snapshot security
+
+Los snapshots deberán:
+
+* derivarse de event streams verificados;
+* incluir versión;
+* incluir digest;
+* respetar tenant;
+* cifrarse cuando corresponda;
+* invalidarse ante inconsistencias.
+
+---
+
+### 2179. SnapshotRecord
+
+```php
+final readonly class SnapshotRecord
+{
+    public function __construct(
+        public string $snapshotId,
+        public string $streamId,
+        public string $tenantId,
+        public int $lastSequence,
+        public string $stateDigest,
+        public string $encodedState,
+        public DateTimeImmutable $createdAt,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+### 2180. Snapshot trust
+
+Un snapshot no deberá aceptarse si la cadena de events previa no puede validarse hasta el checkpoint requerido.
+
+---
+
+### 2181. Event redaction
+
+Los sistemas event-sourced deberán evitar registrar secretos o datos innecesarios desde el origen.
+
+---
+
+### 2182. Redactable event fields
+
+Los schemas deberán marcar explícitamente campos:
+
+* public;
+* internal;
+* sensitive;
+* redactable;
+* encrypted;
+* non-exportable.
+
+---
+
+### 2183. EventFieldSecurityMetadata
+
+```php
+final readonly class EventFieldSecurityMetadata
+{
+    public function __construct(
+        public string $field,
+        public MessageClassification $classification,
+        public bool $encrypted,
+        public bool $redactable,
+        public bool $exportable,
+        public ?string $retentionPolicyId,
+    ) {
+    }
+}
+```
+
+---
+
+### 2184. Event redaction strategy
+
+Cuando exista obligación de supresión, VoltStack podrá aplicar:
+
+* crypto-shredding;
+* tokenization;
+* detached personal data;
+* redaction events;
+* access restriction;
+* projection rebuild.
+
+---
+
+### 2185. Immutable history and privacy
+
+La inmutabilidad no deberá interpretarse como permiso para conservar indefinidamente datos personales.
+
+---
+
+### 2186. Detached sensitive payloads
+
+Los events podrán almacenar referencias a datos sensibles mantenidos en un store separado y eliminable.
+
+---
+
+### 2187. Crypto-shredding
+
+El cifrado por sujeto, tenant o data domain podrá permitir inutilizar datos destruyendo la clave asociada.
+
+---
+
+### 2188. CryptoShreddingRequest
+
+```php
+final readonly class CryptoShreddingRequest
+{
+    public function __construct(
+        public string $keyScopeId,
+        public string $tenantId,
+        public string $reason,
+        public IdentityIdentifier $authorizedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2189. Crypto-shredding controls
+
+La destrucción de claves deberá requerir:
+
+* authorization;
+* approval;
+* scope validation;
+* backup consideration;
+* legal hold check;
+* audit;
+* irreversible action warning.
+
+---
+
+### 2190. Projection security
+
+Las proyecciones deberán heredar:
+
+* tenant isolation;
+* field-level controls;
+* redaction;
+* retention;
+* authorization.
+
+---
+
+### 2191. Projection rebuild authorization
+
+Reconstruir proyecciones puede exponer grandes volúmenes de datos y deberá considerarse operación privilegiada.
+
+---
+
+### 2192. Event replay governance
+
+El replay deberá ser una operación controlada y no una capacidad libre del consumidor.
+
+---
+
+### 2193. EventReplayRequest
+
+```php
+final readonly class EventReplayRequest
+{
+    public function __construct(
+        public string $replayId,
+        public string $streamOrTopic,
+        public string $tenantScope,
+        public ?DateTimeImmutable $from,
+        public ?DateTimeImmutable $to,
+        public array $eventTypes,
+        public ReplayMode $mode,
+        public IdentityIdentifier $requestedBy,
+        public string $reason,
+    ) {
+    }
+}
+```
+
+---
+
+### 2194. ReplayMode
+
+```php
+enum ReplayMode: string
+{
+    case DryRun = 'dry_run';
+    case RebuildProjection = 'rebuild_projection';
+    case Reprocess = 'reprocess';
+    case CompensatingReplay = 'compensating_replay';
+    case Forensic = 'forensic';
+}
+```
+
+---
+
+### 2195. EventReplayPolicy
+
+```php
+interface EventReplayPolicyInterface
+{
+    public function evaluate(
+        EventReplayRequest $request
+    ): EventReplayDecision;
+}
+```
+
+---
+
+### 2196. Replay safeguards
+
+Un replay deberá incluir:
+
+* bounded range;
+* tenant scope;
+* target consumer;
+* idempotency strategy;
+* rate limits;
+* side-effect mode;
+* approval;
+* monitoring;
+* rollback plan.
+
+---
+
+### 2197. Replay side-effect controls
+
+Para rebuilds o análisis deberán poder deshabilitarse:
+
+* emails;
+* payments;
+* external webhooks;
+* notifications;
+* irreversible integrations.
+
+---
+
+### 2198. Messaging incident response
+
+VoltStack deberá definir playbooks para incidentes de mensajería.
+
+---
+
+### 2199. MessagingSecurityIncident
+
+```php
+final readonly class MessagingSecurityIncident
+{
+    public function __construct(
+        public string $incidentId,
+        public MessagingIncidentType $type,
+        public ThreatSeverity $severity,
+        public array $affectedTenants,
+        public array $affectedDestinations,
+        public array $affectedCredentials,
+        public DateTimeImmutable $detectedAt,
+        public MessagingIncidentState $state,
+    ) {
+    }
+}
+```
+
+---
+
+### 2200. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Cross-Tenant Messaging Isolation
+Tenant-Bound Destinations
+Tenant-Aware Namespaces
+Tenant-Aware Partitioning
+Hot Tenant Protection
+Messaging Quotas
+Cross-Tenant Event Routing
+Cross-Tenant Data Minimization
+Shared Broker Security
+Broker Credential Isolation
+Short-Lived Broker Credentials
+Producer and Consumer Role Separation
+Broker Administration Security
+JIT Broker Administration
+Four-Eyes Broker Controls
+Broker Configuration Integrity
+Broker Hardening
+Event Chain Integrity
+Event Hash Chains
+External Chain Checkpoints
+Event Provenance Verification
+Causation Chain Integrity
+Event Sourcing Security
+Append-Only Event Stores
+Event Store Access Control
+Stream Ownership
+Optimistic Concurrency Security
+Snapshot Security
+Event Field Classification
+Event Redaction
+Detached Sensitive Payloads
+Crypto-Shredding
+Projection Security
+Event Replay Governance
+Replay Side-Effect Controls
+Messaging Incident Foundations
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 23
+
+- Messaging incident classification
+- Broker compromise response
+- Producer compromise response
+- Consumer compromise response
+- Malicious message containment
+- Queue quarantine
+- Topic quarantine
+- Credential emergency rotation
+- Message forensic preservation
+- Messaging chain of custody
+- Messaging observability
+- Security metrics
+- Broker health security signals
+- Messaging anomaly detection
+- Cross-tenant leakage detection
+- Messaging SIEM integration
+- Messaging SOAR playbooks
+- Compliance evidence
+- Messaging security governance
+- Messaging security audit events
+```
+
+## Entrega 23
+
+
+**Documento:** Parte 05
+**Entrega:** 23 de varias
+**Cobertura:** Secciones **2201–2300**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 22`
+
+---
+
+### 2201. Messaging Incident Response Architecture
+
+VoltStack deberá incorporar una arquitectura formal para detectar, clasificar, contener, investigar, remediar y cerrar incidentes relacionados con mensajería.
+
+La arquitectura deberá cubrir incidentes en:
+
+* brokers;
+* productores;
+* consumidores;
+* topics;
+* queues;
+* streams;
+* event stores;
+* dead-letter queues;
+* retry queues;
+* credenciales;
+* firmas;
+* cifrado;
+* rutas cross-tenant;
+* sistemas de replay.
+
+---
+
+### 2202. Messaging incident response goals
+
+La respuesta deberá garantizar:
+
+* detección temprana;
+* clasificación consistente;
+* contención rápida;
+* reducción del impacto;
+* preservación de evidencia;
+* rotación de credenciales;
+* aislamiento de tenants;
+* continuidad controlada;
+* trazabilidad;
+* recuperación verificable;
+* aprendizaje posterior.
+
+---
+
+### 2203. Messaging incident threat model
+
+La arquitectura deberá contemplar:
+
+* broker comprometido;
+* credencial filtrada;
+* producer malicioso;
+* consumer comprometido;
+* inyección de mensajes;
+* replay masivo;
+* cross-tenant leakage;
+* alteración de eventos;
+* eliminación de mensajes;
+* queue poisoning;
+* abuso de administración;
+* exfiltración desde DLQ;
+* manipulación de offsets;
+* replay no autorizado;
+* bypass de firmas;
+* degradación de cifrado.
+
+---
+
+### 2204. Messaging incident lifecycle
+
+```text
+Security Signal
+      ↓
+Initial Triage
+      ↓
+Incident Classification
+      ↓
+Scope Determination
+      ↓
+Containment
+      ↓
+Evidence Preservation
+      ↓
+Credential and Access Remediation
+      ↓
+Safe Recovery
+      ↓
+Post-Incident Review
+      ↓
+Control Improvement
+```
+
+---
+
+### 2205. MessagingIncidentResponseService
+
+```php
+interface MessagingIncidentResponseServiceInterface
+{
+    public function open(
+        MessagingIncidentSignal $signal
+    ): MessagingSecurityIncident;
+
+    public function contain(
+        MessagingSecurityIncident $incident,
+        MessagingContainmentPlan $plan
+    ): MessagingContainmentResult;
+
+    public function recover(
+        MessagingSecurityIncident $incident,
+        MessagingRecoveryPlan $plan
+    ): MessagingRecoveryResult;
+
+    public function close(
+        MessagingSecurityIncident $incident,
+        MessagingIncidentClosure $closure
+    ): void;
+}
+```
+
+---
+
+### 2206. MessagingIncidentSignal
+
+```php
+final readonly class MessagingIncidentSignal
+{
+    public function __construct(
+        public string $signalId,
+        public MessagingIncidentSignalType $type,
+        public ThreatSeverity $severity,
+        public array $affectedResources,
+        public array $affectedTenants,
+        public array $evidence,
+        public DateTimeImmutable $detectedAt,
+        public string $detectorId,
+    ) {
+    }
+}
+```
+
+---
+
+### 2207. MessagingIncidentSignalType
+
+```php
+enum MessagingIncidentSignalType: string
+{
+    case BrokerCompromise = 'broker_compromise';
+    case ProducerCompromise = 'producer_compromise';
+    case ConsumerCompromise = 'consumer_compromise';
+    case CredentialLeak = 'credential_leak';
+    case MaliciousMessage = 'malicious_message';
+    case ReplayAttack = 'replay_attack';
+    case CrossTenantLeakage = 'cross_tenant_leakage';
+    case SignatureFailure = 'signature_failure';
+    case DecryptionFailure = 'decryption_failure';
+    case UnauthorizedSubscription = 'unauthorized_subscription';
+    case AdministrativeAbuse = 'administrative_abuse';
+}
+```
+
+---
+
+### 2208. Messaging incident classification
+
+Todo incidente deberá clasificarse por:
+
+* tipo;
+* severidad;
+* confianza;
+* alcance;
+* tenant impact;
+* data classification;
+* control plane impact;
+* availability impact;
+* integrity impact;
+* confidentiality impact.
+
+---
+
+### 2209. MessagingIncidentType
+
+```php
+enum MessagingIncidentType: string
+{
+    case BrokerCompromise = 'broker_compromise';
+    case ProducerCompromise = 'producer_compromise';
+    case ConsumerCompromise = 'consumer_compromise';
+    case MessageForgery = 'message_forgery';
+    case MessageTampering = 'message_tampering';
+    case MessageReplay = 'message_replay';
+    case CrossTenantExposure = 'cross_tenant_exposure';
+    case CredentialCompromise = 'credential_compromise';
+    case UnauthorizedAdministration = 'unauthorized_administration';
+    case EventStoreIntegrityFailure = 'event_store_integrity_failure';
+    case DeadLetterExposure = 'dead_letter_exposure';
+    case RoutingPolicyFailure = 'routing_policy_failure';
+}
+```
+
+---
+
+### 2210. MessagingIncidentState
+
+```php
+enum MessagingIncidentState: string
+{
+    case Detected = 'detected';
+    case Triaged = 'triaged';
+    case Confirmed = 'confirmed';
+    case Containing = 'containing';
+    case Contained = 'contained';
+    case Investigating = 'investigating';
+    case Recovering = 'recovering';
+    case Monitoring = 'monitoring';
+    case Closed = 'closed';
+}
+```
+
+---
+
+### 2211. Incident severity model
+
+La severidad deberá considerar:
+
+* número de tenants afectados;
+* clasificación de datos;
+* capacidad de expansión;
+* integridad del broker;
+* persistencia;
+* abuso privilegiado;
+* impacto regulatorio;
+* impacto financiero;
+* tiempo de exposición.
+
+---
+
+### 2212. Incident confidence
+
+La confianza deberá expresarse de forma separada a la severidad.
+
+Un evento de alta severidad y baja confianza podrá requerir contención preventiva limitada.
+
+---
+
+### 2213. MessagingIncidentAssessment
+
+```php
+final readonly class MessagingIncidentAssessment
+{
+    public function __construct(
+        public MessagingIncidentType $type,
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $affectedTenants,
+        public array $affectedDestinations,
+        public array $affectedPrincipals,
+        public array $affectedCredentials,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+### 2214. Initial triage
+
+El triage deberá responder:
+
+* qué ocurrió;
+* cuándo ocurrió;
+* qué componente detectó;
+* qué tenants están afectados;
+* qué mensajes están involucrados;
+* qué credenciales fueron usadas;
+* si el incidente continúa activo;
+* si existe riesgo de propagación.
+
+---
+
+### 2215. Incident ownership
+
+Todo incidente deberá asignarse a:
+
+* incident commander;
+* security lead;
+* messaging platform owner;
+* tenant liaison cuando aplique;
+* forensic owner;
+* recovery owner.
+
+---
+
+### 2216. Broker compromise response
+
+Un broker comprometido deberá considerarse una pérdida potencial de:
+
+* confidencialidad;
+* integridad;
+* disponibilidad;
+* metadata;
+* credenciales;
+* offsets;
+* routing state;
+* retained messages.
+
+---
+
+### 2217. Broker compromise indicators
+
+Indicadores posibles:
+
+* cambios no autorizados de ACL;
+* subscriptions desconocidas;
+* plugins inesperados;
+* login administrativo anómalo;
+* lectura masiva;
+* eliminación de topics;
+* alteración de retention;
+* configuración no versionada;
+* certificados desconocidos;
+* discrepancias de cluster state.
+
+---
+
+### 2218. BrokerCompromiseAssessment
+
+```php
+final readonly class BrokerCompromiseAssessment
+{
+    public function __construct(
+        public string $brokerId,
+        public bool $controlPlaneAffected,
+        public bool $dataPlaneAffected,
+        public bool $credentialStoreAffected,
+        public bool $messageIntegrityTrusted,
+        public array $affectedClusters,
+        public array $affectedTenants,
+        public array $recommendedContainment,
+    ) {
+    }
+}
+```
+
+---
+
+### 2219. Broker containment options
+
+La contención podrá incluir:
+
+* bloquear acceso administrativo;
+* revocar credenciales;
+* aislar nodos;
+* suspender publishers;
+* suspender consumers;
+* congelar cambios de configuración;
+* redirigir tráfico;
+* activar broker de contingencia;
+* colocar destinations en modo read-only.
+
+---
+
+### 2220. Broker isolation mode
+
+```php
+enum BrokerIsolationMode: string
+{
+    case None = 'none';
+    case AdministrativeFreeze = 'administrative_freeze';
+    case ReadOnly = 'read_only';
+    case ProducerSuspension = 'producer_suspension';
+    case ConsumerSuspension = 'consumer_suspension';
+    case FullIsolation = 'full_isolation';
+}
+```
+
+---
+
+### 2221. Broker failover security
+
+El failover no deberá trasladar automáticamente:
+
+* credenciales comprometidas;
+* ACLs no verificadas;
+* configuraciones alteradas;
+* offsets corruptos;
+* mensajes no confiables.
+
+---
+
+### 2222. Broker recovery validation
+
+Antes de reanudar operaciones deberá verificarse:
+
+* integridad de configuración;
+* estado de credenciales;
+* confianza en certificados;
+* ACLs;
+* plugins;
+* retained messages;
+* event chain checkpoints;
+* observabilidad.
+
+---
+
+### 2223. Producer compromise response
+
+Un producer comprometido puede:
+
+* publicar mensajes falsos;
+* abusar de destinos autorizados;
+* generar alto volumen;
+* insertar payloads maliciosos;
+* falsificar eventos de negocio;
+* intentar cross-tenant routing.
+
+---
+
+### 2224. Producer compromise indicators
+
+Indicadores:
+
+* incremento súbito de volumen;
+* nuevos message types;
+* destinations no habituales;
+* cambios geográficos;
+* firmas inválidas;
+* payloads atípicos;
+* tenant mismatches;
+* uso fuera de horario;
+* alta tasa de retries.
+
+---
+
+### 2225. Producer containment
+
+La contención deberá permitir:
+
+* suspender identidad;
+* revocar credenciales;
+* bloquear destinos;
+* limitar message types;
+* reducir throughput;
+* quarantine de mensajes recientes;
+* invalidar firmas futuras;
+* rotar keys.
+
+---
+
+### 2226. ProducerContainmentPlan
+
+```php
+final readonly class ProducerContainmentPlan
+{
+    public function __construct(
+        public string $producerId,
+        public bool $suspendIdentity,
+        public bool $revokeCredentials,
+        public array $blockedDestinations,
+        public array $quarantineMessageTypes,
+        public ?DateTimeImmutable $quarantineFrom,
+        public array $tenantScopes,
+    ) {
+    }
+}
+```
+
+---
+
+### 2227. Producer message retrospective analysis
+
+Los mensajes emitidos durante la ventana sospechosa deberán analizarse por:
+
+* firma;
+* schema;
+* destination;
+* tenant;
+* payload;
+* causalidad;
+* efectos de negocio;
+* downstream propagation.
+
+---
+
+### 2228. Producer compromise blast radius
+
+El blast radius deberá incluir mensajes derivados y no solo publicaciones directas.
+
+---
+
+### 2229. Consumer compromise response
+
+Un consumer comprometido puede:
+
+* exfiltrar mensajes;
+* manipular acknowledgements;
+* provocar redelivery;
+* ejecutar efectos maliciosos;
+* leer otros tenants;
+* alterar offsets;
+* abusar de DLQ.
+
+---
+
+### 2230. Consumer compromise indicators
+
+Indicadores:
+
+* subscriptions nuevas;
+* lectura masiva;
+* cambios de consumer group;
+* offsets anómalos;
+* aumento de nack;
+* acceso a tenants no habituales;
+* descarga de DLQ;
+* ejecución desde workload desconocido.
+
+---
+
+### 2231. Consumer containment
+
+La respuesta podrá:
+
+* suspender consumer;
+* remover subscriptions;
+* revocar credenciales;
+* invalidar workload identity;
+* detener acknowledgements;
+* aislar consumer group;
+* rotar encryption grants;
+* revisar datos accedidos.
+
+---
+
+### 2232. ConsumerContainmentPlan
+
+```php
+final readonly class ConsumerContainmentPlan
+{
+    public function __construct(
+        public string $consumerId,
+        public bool $suspendIdentity,
+        public bool $revokeCredentials,
+        public bool $removeSubscriptions,
+        public array $affectedConsumerGroups,
+        public array $tenantScopes,
+        public bool $rotateDecryptionAccess,
+    ) {
+    }
+}
+```
+
+---
+
+### 2233. Consumer offset recovery
+
+Los offsets deberán restaurarse desde un punto confiable cuando exista evidencia de manipulación.
+
+---
+
+### 2234. Malicious message containment
+
+Un mensaje malicioso deberá aislarse sin permitir ejecución, renderizado o propagación adicional.
+
+---
+
+### 2235. MaliciousMessageAssessment
+
+```php
+final readonly class MaliciousMessageAssessment
+{
+    public function __construct(
+        public string $messageId,
+        public MaliciousMessageType $type,
+        public ThreatSeverity $severity,
+        public array $indicators,
+        public array $affectedConsumers,
+        public array $derivedMessages,
+        public MaliciousMessageAction $recommendedAction,
+    ) {
+    }
+}
+```
+
+---
+
+### 2236. MaliciousMessageType
+
+```php
+enum MaliciousMessageType: string
+{
+    case Forged = 'forged';
+    case Tampered = 'tampered';
+    case Replay = 'replay';
+    case SchemaExploit = 'schema_exploit';
+    case DeserializationExploit = 'deserialization_exploit';
+    case PayloadBomb = 'payload_bomb';
+    case CrossTenantInjection = 'cross_tenant_injection';
+    case CommandAbuse = 'command_abuse';
+}
+```
+
+---
+
+### 2237. MaliciousMessageAction
+
+```php
+enum MaliciousMessageAction: string
+{
+    case Reject = 'reject';
+    case Quarantine = 'quarantine';
+    case DeadLetter = 'dead_letter';
+    case BlockProducer = 'block_producer';
+    case SuspendDestination = 'suspend_destination';
+    case EscalateIncident = 'escalate_incident';
+}
+```
+
+---
+
+### 2238. Payload bomb protection
+
+La infraestructura deberá limitar:
+
+* payload size;
+* decompression ratio;
+* nested depth;
+* collection size;
+* processing time;
+* memory allocation;
+* schema complexity.
+
+---
+
+### 2239. Safe message inspection
+
+La inspección forense deberá realizarse en entornos aislados y sin deserialización insegura.
+
+---
+
+### 2240. Queue quarantine
+
+VoltStack deberá permitir colocar una queue en cuarentena.
+
+---
+
+### 2241. QueueQuarantinePolicy
+
+```php
+final readonly class QueueQuarantinePolicy
+{
+    public function __construct(
+        public string $queueId,
+        public QueueQuarantineMode $mode,
+        public array $allowedOperations,
+        public array $authorizedReviewers,
+        public DateTimeImmutable $activatedAt,
+        public string $incidentId,
+    ) {
+    }
+}
+```
+
+---
+
+### 2242. QueueQuarantineMode
+
+```php
+enum QueueQuarantineMode: string
+{
+    case StopConsumers = 'stop_consumers';
+    case StopProducers = 'stop_producers';
+    case FreezeAll = 'freeze_all';
+    case DivertIncoming = 'divert_incoming';
+    case ReviewOnly = 'review_only';
+}
+```
+
+---
+
+### 2243. Queue quarantine invariants
+
+Durante quarantine:
+
+* no deberán ejecutarse handlers normales;
+* no deberán perderse evidencias;
+* no deberá alterarse el orden sin registro;
+* el acceso deberá ser privilegiado;
+* toda extracción deberá auditarse.
+
+---
+
+### 2244. Topic quarantine
+
+Los topics podrán requerir:
+
+* bloqueo de nuevos publishers;
+* suspensión de subscribers;
+* duplicación hacia forensic sink;
+* retención ampliada;
+* bloqueo de replay;
+* inspección de partitions.
+
+---
+
+### 2245. DestinationQuarantineService
+
+```php
+interface DestinationQuarantineServiceInterface
+{
+    public function quarantine(
+        MessagingDestination $destination,
+        DestinationQuarantineRequest $request
+    ): DestinationQuarantineResult;
+
+    public function release(
+        MessagingDestination $destination,
+        DestinationReleaseRequest $request
+    ): DestinationReleaseResult;
+}
+```
+
+---
+
+### 2246. Quarantine release requirements
+
+La liberación deberá exigir:
+
+* incidente contenido;
+* evidencia preservada;
+* credenciales rotadas;
+* configuración validada;
+* mensajes afectados identificados;
+* approval;
+* monitoring reforzado.
+
+---
+
+### 2247. Emergency credential rotation
+
+VoltStack deberá soportar rotación urgente de:
+
+* broker credentials;
+* producer keys;
+* consumer credentials;
+* signing keys;
+* encryption keys;
+* webhook secrets;
+* mTLS certificates.
+
+---
+
+### 2248. MessagingCredentialRotationPlan
+
+```php
+final readonly class MessagingCredentialRotationPlan
+{
+    public function __construct(
+        public string $planId,
+        public array $credentialIds,
+        public RotationUrgency $urgency,
+        public array $affectedPrincipals,
+        public array $affectedDestinations,
+        public bool $revokeImmediately,
+        public bool $allowOverlap,
+        public DateTimeImmutable $deadline,
+    ) {
+    }
+}
+```
+
+---
+
+### 2249. Emergency rotation modes
+
+```php
+enum RotationUrgency: string
+{
+    case Planned = 'planned';
+    case Accelerated = 'accelerated';
+    case Emergency = 'emergency';
+    case ImmediateRevocation = 'immediate_revocation';
+}
+```
+
+---
+
+### 2250. Emergency rotation trade-offs
+
+La rotación inmediata podrá afectar disponibilidad, pero deberá preferirse cuando exista compromiso confirmado de alta severidad.
+
+---
+
+### 2251. Signing key compromise response
+
+Si una signing key fue comprometida, deberán considerarse no confiables todos los mensajes firmados dentro de la ventana afectada.
+
+---
+
+### 2252. Encryption key compromise response
+
+La respuesta deberá determinar:
+
+* qué mensajes fueron cifrados;
+* qué tenants están afectados;
+* qué backups contienen ciphertext;
+* si hubo acceso al key material;
+* si es necesaria re-encryption;
+* si debe destruirse la versión comprometida.
+
+---
+
+### 2253. Credential dependency graph
+
+VoltStack deberá mantener relaciones entre:
+
+* credencial;
+* producer;
+* consumer;
+* broker;
+* destination;
+* tenant;
+* message type;
+* environment.
+
+---
+
+### 2254. MessagingCredentialDependencyGraph
+
+```php
+interface MessagingCredentialDependencyGraphInterface
+{
+    public function dependentsOf(
+        string $credentialId
+    ): MessagingCredentialDependents;
+}
+```
+
+---
+
+### 2255. Forensic preservation
+
+Toda investigación deberá preservar:
+
+* mensajes;
+* headers;
+* broker metadata;
+* offsets;
+* ACLs;
+* configurations;
+* signatures;
+* keys metadata;
+* access logs;
+* admin logs;
+* trace references.
+
+---
+
+### 2256. MessagingForensicPackage
+
+```php
+final readonly class MessagingForensicPackage
+{
+    public function __construct(
+        public string $packageId,
+        public string $incidentId,
+        public array $messageReferences,
+        public array $configurationSnapshots,
+        public array $accessLogs,
+        public array $credentialMetadata,
+        public array $chainCheckpoints,
+        public DateTimeImmutable $createdAt,
+        public string $packageDigest,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+### 2257. Evidence immutability
+
+La evidencia deberá almacenarse en un sistema:
+
+* append-only;
+* access-controlled;
+* integrity-protected;
+* retention-managed;
+* independently monitored.
+
+---
+
+### 2258. Messaging chain of custody
+
+Toda transferencia de evidencia deberá registrarse.
+
+---
+
+### 2259. MessagingEvidenceTransfer
+
+```php
+final readonly class MessagingEvidenceTransfer
+{
+    public function __construct(
+        public string $evidenceId,
+        public IdentityIdentifier|string $fromCustodian,
+        public IdentityIdentifier|string $toCustodian,
+        public string $purpose,
+        public DateTimeImmutable $transferredAt,
+        public string $evidenceDigest,
+        public DigitalSignature $acknowledgement,
+    ) {
+    }
+}
+```
+
+---
+
+### 2260. Forensic clock integrity
+
+Los timestamps deberán correlacionarse con fuentes de tiempo confiables y documentar drift conocido.
+
+---
+
+### 2261. Evidence minimization
+
+La preservación deberá ser suficiente para investigación sin recolectar datos irrelevantes de otros tenants.
+
+---
+
+### 2262. Legal hold integration
+
+La evidencia podrá quedar sujeta a legal hold, bloqueando eliminación o crypto-shredding hasta autorización.
+
+---
+
+### 2263. Messaging observability architecture
+
+VoltStack deberá proporcionar observabilidad de seguridad sobre todo el ciclo de mensajería.
+
+---
+
+### 2264. MessagingSecurityTelemetry
+
+```php
+final readonly class MessagingSecurityTelemetry
+{
+    public function __construct(
+        public string $telemetryId,
+        public string $source,
+        public string $tenantId,
+        public string $destinationId,
+        public string $principalId,
+        public MessagingTelemetryType $type,
+        public array $metrics,
+        public DateTimeImmutable $observedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2265. MessagingTelemetryType
+
+```php
+enum MessagingTelemetryType: string
+{
+    case Publication = 'publication';
+    case Consumption = 'consumption';
+    case Authentication = 'authentication';
+    case Authorization = 'authorization';
+    case SignatureValidation = 'signature_validation';
+    case Encryption = 'encryption';
+    case Replay = 'replay';
+    case Administration = 'administration';
+    case Routing = 'routing';
+    case Quarantine = 'quarantine';
+}
+```
+
+---
+
+### 2266. Security-relevant metrics
+
+Métricas recomendadas:
+
+* failed authentication rate;
+* failed authorization rate;
+* invalid signatures;
+* replay detections;
+* tenant mismatches;
+* unauthorized subscriptions;
+* DLQ access;
+* admin changes;
+* key rotation age;
+* queue depth anomalies;
+* message size anomalies;
+* schema rejection rate.
+
+---
+
+### 2267. MessagingSecurityMetric
+
+```php
+final readonly class MessagingSecurityMetric
+{
+    public function __construct(
+        public string $metricName,
+        public float|int $value,
+        public array $dimensions,
+        public DateTimeImmutable $windowStart,
+        public DateTimeImmutable $windowEnd,
+        public SecurityMetricClassification $classification,
+    ) {
+    }
+}
+```
+
+---
+
+### 2268. Metric cardinality protection
+
+Las dimensiones deberán limitarse para evitar:
+
+* cardinality explosion;
+* observability denial of service;
+* costos excesivos;
+* exposición de identificadores sensibles.
+
+---
+
+### 2269. Tenant-aware telemetry
+
+Toda métrica multi-tenant deberá preservar aislamiento y evitar mezclar datos no autorizados.
+
+---
+
+### 2270. Broker health security signals
+
+El estado del broker deberá producir señales cuando existan:
+
+* replica divergence;
+* storage corruption;
+* configuration drift;
+* auth backend failures;
+* certificate expiration;
+* ACL inconsistencies;
+* unexpected leadership changes;
+* clock drift;
+* unusual rebalance activity.
+
+---
+
+### 2271. BrokerSecurityHealthAssessment
+
+```php
+final readonly class BrokerSecurityHealthAssessment
+{
+    public function __construct(
+        public string $brokerId,
+        public BrokerSecurityHealthState $state,
+        public array $signals,
+        public array $degradedControls,
+        public array $recommendedActions,
+        public DateTimeImmutable $assessedAt,
+    ) {
+    }
+}
+```
+
+---
+
+### 2272. BrokerSecurityHealthState
+
+```php
+enum BrokerSecurityHealthState: string
+{
+    case Healthy = 'healthy';
+    case Degraded = 'degraded';
+    case AtRisk = 'at_risk';
+    case Compromised = 'compromised';
+    case Isolated = 'isolated';
+}
+```
+
+---
+
+### 2273. Messaging anomaly detection
+
+VoltStack deberá detectar desviaciones respecto al comportamiento esperado.
+
+---
+
+### 2274. MessagingAnomalyDetector
+
+```php
+interface MessagingAnomalyDetectorInterface
+{
+    public function analyze(
+        MessagingSecurityTelemetry $telemetry
+    ): MessagingAnomalyAssessment;
+}
+```
+
+---
+
+### 2275. MessagingAnomalyAssessment
+
+```php
+final readonly class MessagingAnomalyAssessment
+{
+    public function __construct(
+        public bool $anomalous,
+        public MessagingAnomalyType $type,
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $evidence,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+### 2276. MessagingAnomalyType
+
+```php
+enum MessagingAnomalyType: string
+{
+    case VolumeSpike = 'volume_spike';
+    case DestinationDeviation = 'destination_deviation';
+    case TenantDeviation = 'tenant_deviation';
+    case MessageTypeDeviation = 'message_type_deviation';
+    case ConsumerBehaviorDeviation = 'consumer_behavior_deviation';
+    case ReplayPattern = 'replay_pattern';
+    case AdministrativeDeviation = 'administrative_deviation';
+    case GeographicDeviation = 'geographic_deviation';
+    case CredentialSharing = 'credential_sharing';
+}
+```
+
+---
+
+### 2277. Producer behavior baselines
+
+Las baselines podrán incluir:
+
+* volumen habitual;
+* destinations;
+* message types;
+* tenants;
+* horario;
+* payload size;
+* error rate;
+* geographic origin;
+* workload identity.
+
+---
+
+### 2278. Consumer behavior baselines
+
+Las baselines podrán incluir:
+
+* subscriptions;
+* throughput;
+* acknowledgement rate;
+* processing latency;
+* DLQ access;
+* tenant scope;
+* event types;
+* replay activity.
+
+---
+
+### 2279. Adaptive containment
+
+Las anomalías de alta confianza podrán activar:
+
+* rate limiting;
+* restricted mode;
+* credential challenge;
+* producer suspension;
+* consumer isolation;
+* destination quarantine.
+
+---
+
+### 2280. Cross-tenant leakage detection
+
+VoltStack deberá detectar señales de datos o rutas que crucen tenants sin autorización.
+
+---
+
+### 2281. CrossTenantLeakageDetector
+
+```php
+interface CrossTenantLeakageDetectorInterface
+{
+    public function inspect(
+        SecureMessage $message,
+        TenantBoundDestination $destination,
+        MessageConsumptionContext $context
+    ): CrossTenantLeakageAssessment;
+}
+```
+
+---
+
+### 2282. CrossTenantLeakageAssessment
+
+```php
+final readonly class CrossTenantLeakageAssessment
+{
+    public function __construct(
+        public bool $leakageDetected,
+        public string $sourceTenantId,
+        public ?string $targetTenantId,
+        public array $conflictingEvidence,
+        public ThreatSeverity $severity,
+        public array $containmentActions,
+    ) {
+    }
+}
+```
+
+---
+
+### 2283. Leakage detection signals
+
+Se deberá comparar:
+
+* message tenant;
+* destination tenant;
+* producer tenant scope;
+* consumer tenant scope;
+* payload references;
+* encryption key scope;
+* partition;
+* schema ownership.
+
+---
+
+### 2284. Cross-tenant containment
+
+Ante leakage confirmado deberá:
+
+* detener consumo;
+* bloquear producer;
+* aislar destination;
+* preservar evidencia;
+* identificar mensajes derivados;
+* notificar incident response;
+* evaluar exposición regulatoria.
+
+---
+
+### 2285. Messaging SIEM integration
+
+Los eventos de seguridad deberán enviarse a SIEM mediante formatos estructurados y estables.
+
+---
+
+### 2286. MessagingSecurityEventExporter
+
+```php
+interface MessagingSecurityEventExporterInterface
+{
+    public function export(
+        MessagingSecurityAuditEvent $event,
+        SecurityEventExportContext $context
+    ): SecurityEventExportResult;
+}
+```
+
+---
+
+### 2287. SIEM event fields
+
+Los eventos deberán incluir:
+
+* event ID;
+* timestamp;
+* severity;
+* confidence;
+* tenant;
+* principal;
+* destination;
+* message ID;
+* incident ID;
+* action;
+* outcome;
+* evidence references;
+* trace ID.
+
+---
+
+### 2288. SIEM data minimization
+
+Los payloads completos no deberán enviarse al SIEM salvo necesidad justificada.
+
+---
+
+### 2289. SIEM delivery assurance
+
+La exportación deberá soportar:
+
+* buffering;
+* retry;
+* integrity;
+* backpressure;
+* dead-lettering;
+* delivery monitoring.
+
+---
+
+### 2290. Messaging SOAR playbooks
+
+VoltStack deberá exponer acciones controladas para automatización de respuesta.
+
+---
+
+### 2291. MessagingSoarAction
+
+```php
+enum MessagingSoarAction: string
+{
+    case SuspendProducer = 'suspend_producer';
+    case SuspendConsumer = 'suspend_consumer';
+    case RevokeCredential = 'revoke_credential';
+    case QuarantineDestination = 'quarantine_destination';
+    case BlockReplay = 'block_replay';
+    case RotateKey = 'rotate_key';
+    case SnapshotConfiguration = 'snapshot_configuration';
+    case PreserveEvidence = 'preserve_evidence';
+}
+```
+
+---
+
+### 2292. SOAR action authorization
+
+Las acciones automáticas deberán limitarse por:
+
+* severity;
+* confidence;
+* environment;
+* tenant;
+* business criticality;
+* blast radius;
+* approval requirements.
+
+---
+
+### 2293. Human-in-the-loop controls
+
+Acciones de alto impacto podrán requerir aprobación humana antes de ejecutarse.
+
+---
+
+### 2294. Automated playbook safety
+
+Todo playbook deberá tener:
+
+* preconditions;
+* maximum scope;
+* timeout;
+* rollback;
+* audit;
+* idempotency;
+* dry-run;
+* manual override.
+
+---
+
+### 2295. Messaging compliance evidence
+
+VoltStack deberá producir evidencia sobre:
+
+* access controls;
+* key rotation;
+* broker configuration;
+* message integrity;
+* tenant isolation;
+* incident handling;
+* replay governance;
+* administrative access;
+* retention;
+* legal hold.
+
+---
+
+### 2296. MessagingComplianceEvidencePackage
+
+```php
+final readonly class MessagingComplianceEvidencePackage
+{
+    public function __construct(
+        public string $packageId,
+        public string $controlFramework,
+        public array $controlMappings,
+        public array $auditEvents,
+        public array $configurationSnapshots,
+        public array $rotationRecords,
+        public array $incidentRecords,
+        public DateTimeImmutable $generatedAt,
+        public string $packageDigest,
+    ) {
+    }
+}
+```
+
+---
+
+### 2297. Messaging security governance
+
+La gobernanza deberá definir:
+
+* owners;
+* supported brokers;
+* approved protocols;
+* credential policies;
+* encryption requirements;
+* tenant isolation models;
+* retention;
+* replay controls;
+* incident SLAs;
+* exception process.
+
+---
+
+### 2298. Messaging security exception management
+
+Toda excepción deberá incluir:
+
+* motivo;
+* owner;
+* riesgo aceptado;
+* compensating controls;
+* tenant scope;
+* expiration;
+* approval;
+* review date.
+
+---
+
+### 2299. Messaging security audit events
+
+Eventos recomendados:
+
+* `MessagingIncidentOpened`;
+* `MessagingIncidentClassified`;
+* `BrokerCompromiseDetected`;
+* `BrokerIsolated`;
+* `ProducerCompromiseDetected`;
+* `ProducerSuspended`;
+* `ConsumerCompromiseDetected`;
+* `ConsumerSuspended`;
+* `MaliciousMessageDetected`;
+* `MessageQuarantined`;
+* `QueueQuarantined`;
+* `TopicQuarantined`;
+* `MessagingCredentialEmergencyRotationStarted`;
+* `MessagingCredentialEmergencyRotationCompleted`;
+* `MessagingForensicPackageCreated`;
+* `MessagingEvidenceTransferred`;
+* `MessagingAnomalyDetected`;
+* `CrossTenantLeakageDetected`;
+* `MessagingSoarActionExecuted`;
+* `MessagingIncidentClosed`.
+
+---
+
+### 2300. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Messaging Incident Response Architecture
+Messaging Incident Classification
+Incident Severity and Confidence
+Broker Compromise Response
+Broker Isolation and Recovery
+Producer Compromise Response
+Consumer Compromise Response
+Malicious Message Containment
+Payload Bomb Protection
+Safe Message Inspection
+Queue Quarantine
+Topic Quarantine
+Destination Release Controls
+Emergency Credential Rotation
+Signing Key Compromise Response
+Encryption Key Compromise Response
+Credential Dependency Graphs
+Messaging Forensic Preservation
+Messaging Chain of Custody
+Legal Hold Integration
+Messaging Security Observability
+Security Metrics
+Broker Health Security Signals
+Messaging Anomaly Detection
+Behavior Baselines
+Adaptive Containment
+Cross-Tenant Leakage Detection
+Cross-Tenant Containment
+SIEM Integration
+SOAR Playbooks
+Human-in-the-Loop Controls
+Compliance Evidence
+Messaging Security Governance
+Messaging Security Exception Management
+Messaging Security Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 24
+
+- Identity lifecycle orchestration
+- Identity state machines
+- Identity activation
+- Identity suspension
+- Identity disablement
+- Identity deprovisioning
+- Identity reactivation
+- Identity archival
+- Identity deletion
+- Identity merge
+- Identity split
+- Duplicate identity resolution
+- Identity migration
+- Identity portability
+- Tenant transfer
+- Identity ownership transfer
+- Identity lifecycle approvals
+- Identity lifecycle eventing
+- Lifecycle rollback
+- Lifecycle governance
+- Lifecycle audit events
 ```
