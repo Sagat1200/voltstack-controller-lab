@@ -1,6 +1,5 @@
-# 12_CONTROLLER_LIFECYCLE_AND_EXECUTION_STATE.md
+# Ciclo de vida y estado de ejecución de controladores en VoltStack
 
-## Ciclo de vida y estado de ejecución de controladores en VoltStack
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Controller Lifecycle and Execution State System** es el subsistema responsable de representar, coordinar y proteger el ciclo de vida completo de una ejecución de controlador en VoltStack.
 
@@ -42,7 +41,7 @@ Este documento define ese modelo.
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Proporcionar una representación formal, observable y segura del ciclo de ejecución completo de un controlador.
 
@@ -81,7 +80,7 @@ El sistema deberá permitir que todos los motores colaboren sin compartir estado
 
 ---
 
-# 3. Problema arquitectónico
+## 3. Problema arquitectónico
 
 Sin un modelo formal de ejecución, cada motor podría mantener su propio estado de manera aislada.
 
@@ -104,7 +103,7 @@ El sistema de lifecycle será la fuente de verdad sobre el estado de una ejecuci
 
 ---
 
-# 4. Principios arquitectónicos
+## 4. Principios arquitectónicos
 
 El sistema seguirá estos principios:
 
@@ -123,7 +122,7 @@ El sistema seguirá estos principios:
 
 ---
 
-# 5. No responsabilidades
+## 5. No responsabilidades
 
 El sistema no deberá:
 
@@ -143,7 +142,7 @@ Su función será coordinar y representar el estado de esas operaciones.
 
 ---
 
-# 6. Posición dentro de la arquitectura
+## 6. Posición dentro de la arquitectura
 
 ```text
 HttpKernel
@@ -168,7 +167,7 @@ Todos los motores operan dentro del mismo contexto de ejecución.
 
 ---
 
-# 7. Componentes principales
+## 7. Componentes principales
 
 ```text
 ControllerExecutionManager
@@ -194,7 +193,7 @@ CompiledLifecyclePlan
 
 ---
 
-# 8. ControllerExecutionManager
+## 8. ControllerExecutionManager
 
 Será el orquestador de alto nivel del ciclo de ejecución.
 
@@ -218,7 +217,7 @@ final class ControllerExecutionManager
 
 ---
 
-# 9. Responsabilidades del Manager
+## 9. Responsabilidades del Manager
 
 El Manager deberá:
 
@@ -237,7 +236,7 @@ El Manager deberá:
 
 ---
 
-# 10. ControllerExecutionRequest
+## 10. ControllerExecutionRequest
 
 Representa la entrada inicial del lifecycle.
 
@@ -257,7 +256,7 @@ final readonly class ControllerExecutionRequest
 
 ---
 
-# 11. ControllerExecution
+## 11. ControllerExecution
 
 Objeto mutable central de una ejecución.
 
@@ -292,7 +291,7 @@ final class ControllerExecution
 
 ---
 
-# 12. ControllerExecutionId
+## 12. ControllerExecutionId
 
 Cada ejecución tendrá un identificador único.
 
@@ -316,7 +315,7 @@ El ID deberá ser:
 
 ---
 
-# 13. ControllerExecutionContext
+## 13. ControllerExecutionContext
 
 Contexto inmutable de la ejecución.
 
@@ -338,7 +337,7 @@ final readonly class ControllerExecutionContext
 
 ---
 
-# 14. Estado mutable e inmutable
+## 14. Estado mutable e inmutable
 
 La arquitectura separará:
 
@@ -358,7 +357,7 @@ ControllerExecutionTimeline
 
 ---
 
-# 15. ControllerExecutionStatus
+## 15. ControllerExecutionStatus
 
 Representa el estado global.
 
@@ -383,7 +382,7 @@ enum ControllerExecutionStatus: string
 
 ---
 
-# 16. ControllerExecutionPhase
+## 16. ControllerExecutionPhase
 
 Representa la fase específica.
 
@@ -411,7 +410,7 @@ enum ControllerExecutionPhase: string
 
 ---
 
-# 17. ControllerExecutionState
+## 17. ControllerExecutionState
 
 ```php
 final class ControllerExecutionState
@@ -442,7 +441,7 @@ final class ControllerExecutionState
 
 ---
 
-# 18. Estado inicial
+## 18. Estado inicial
 
 Toda ejecución comenzará como:
 
@@ -459,7 +458,7 @@ Created → Initializing
 
 ---
 
-# 19. State Machine
+## 19. State Machine
 
 El lifecycle estará protegido por una máquina de estados explícita.
 
@@ -480,7 +479,7 @@ interface ControllerExecutionStateMachineInterface
 
 ---
 
-# 20. ControllerExecutionTransition
+## 20. ControllerExecutionTransition
 
 ```php
 enum ControllerExecutionTransition: string
@@ -520,7 +519,7 @@ enum ControllerExecutionTransition: string
 
 ---
 
-# 21. Reglas de transición
+## 21. Reglas de transición
 
 Las transiciones inválidas deberán lanzar:
 
@@ -540,7 +539,7 @@ Ejemplos inválidos:
 
 ---
 
-# 22. Diagrama principal de estados
+## 22. Diagrama principal de estados
 
 ```text
 Created
@@ -584,7 +583,7 @@ Cleaned
 
 ---
 
-# 23. LifecyclePlan
+## 23. LifecyclePlan
 
 Describe las fases que deberán ejecutarse.
 
@@ -605,7 +604,7 @@ final readonly class ControllerLifecyclePlan
 
 ---
 
-# 24. LifecyclePlanResolver
+## 24. LifecyclePlanResolver
 
 ```php
 interface ControllerLifecyclePlanResolverInterface
@@ -618,7 +617,7 @@ interface ControllerLifecyclePlanResolverInterface
 
 ---
 
-# 25. Plan estándar
+## 25. Plan estándar
 
 ```text
 Initialize
@@ -636,7 +635,7 @@ Cleanup
 
 ---
 
-# 26. Planes especializados
+## 26. Planes especializados
 
 Podrán existir planes para:
 
@@ -656,7 +655,7 @@ Streaming controller
 
 ---
 
-# 27. CompiledLifecyclePlan
+## 27. CompiledLifecyclePlan
 
 ```php
 final readonly class CompiledLifecyclePlan
@@ -677,7 +676,7 @@ final readonly class CompiledLifecyclePlan
 
 ---
 
-# 28. Phase Handler
+## 28. Phase Handler
 
 Cada fase será ejecutada por un handler especializado.
 
@@ -694,7 +693,7 @@ interface ControllerLifecyclePhaseHandlerInterface
 
 ---
 
-# 29. ControllerPhaseResult
+## 29. ControllerPhaseResult
 
 ```php
 final readonly class ControllerPhaseResult
@@ -711,7 +710,7 @@ final readonly class ControllerPhaseResult
 
 ---
 
-# 30. ControllerPhaseOutcome
+## 30. ControllerPhaseOutcome
 
 ```php
 enum ControllerPhaseOutcome: string
@@ -726,7 +725,7 @@ enum ControllerPhaseOutcome: string
 
 ---
 
-# 31. Fase de inicialización
+## 31. Fase de inicialización
 
 La inicialización deberá:
 
@@ -741,7 +740,7 @@ La inicialización deberá:
 
 ---
 
-# 32. Fase de resolución del controlador
+## 32. Fase de resolución del controlador
 
 Delegará al `ControllerResolver`.
 
@@ -759,7 +758,7 @@ execution.controller !== null
 
 ---
 
-# 33. Fase de metadata
+## 33. Fase de metadata
 
 Delegará al `MetadataEngine`.
 
@@ -767,7 +766,7 @@ La metadata resultante se asociará al contexto de ejecución sin realizar refle
 
 ---
 
-# 34. Fase de parámetros
+## 34. Fase de parámetros
 
 Delegará al `ParameterResolutionEngine`.
 
@@ -779,7 +778,7 @@ ResolvedArguments
 
 ---
 
-# 35. Fase de interceptores
+## 35. Fase de interceptores
 
 Resolverá el plan de interceptores aplicable.
 
@@ -794,7 +793,7 @@ El lifecycle no ejecutará su lógica interna, pero registrará:
 
 ---
 
-# 36. Fase de invocación
+## 36. Fase de invocación
 
 Delegará al `ControllerInvoker`.
 
@@ -806,7 +805,7 @@ $execution->state->controllerInvoked = true;
 
 ---
 
-# 37. Invocation guard
+## 37. Invocation guard
 
 ```php
 final class ControllerInvocationGuard
@@ -826,7 +825,7 @@ Deberá impedir:
 
 ---
 
-# 38. Resultado bruto
+## 38. Resultado bruto
 
 El resultado del controlador se almacenará en:
 
@@ -838,7 +837,7 @@ No deberá persistir más allá del cleanup cuando contenga recursos pesados.
 
 ---
 
-# 39. Fase de transformación
+## 39. Fase de transformación
 
 Delegará al `ResultTransformationEngine`.
 
@@ -856,7 +855,7 @@ La transformación solo podrá ocurrir cuando exista:
 
 ---
 
-# 40. Transformation guard
+## 40. Transformation guard
 
 Impedirá:
 
@@ -867,7 +866,7 @@ Impedirá:
 
 ---
 
-# 41. Fase de transporte
+## 41. Fase de transporte
 
 Delegará al `ResponseTransportSystem`.
 
@@ -885,7 +884,7 @@ $execution->state->responseEmitted = true;
 
 ---
 
-# 42. Frontera irreversible
+## 42. Frontera irreversible
 
 La emisión marca una frontera irreversible.
 
@@ -905,7 +904,7 @@ Después:
 
 ---
 
-# 43. Short-circuit
+## 43. Short-circuit
 
 Un short-circuit termina anticipadamente una parte del pipeline proporcionando un resultado válido.
 
@@ -921,7 +920,7 @@ Ejemplos:
 
 ---
 
-# 44. ShortCircuitDecision
+## 44. ShortCircuitDecision
 
 ```php
 final readonly class ShortCircuitDecision
@@ -939,7 +938,7 @@ final readonly class ShortCircuitDecision
 
 ---
 
-# 45. ShortCircuitOrigin
+## 45. ShortCircuitOrigin
 
 ```php
 enum ShortCircuitOrigin: string
@@ -960,7 +959,7 @@ enum ShortCircuitOrigin: string
 
 ---
 
-# 46. ShortCircuitMode
+## 46. ShortCircuitMode
 
 ```php
 enum ShortCircuitMode: string
@@ -974,7 +973,7 @@ enum ShortCircuitMode: string
 
 ---
 
-# 47. Reglas del short-circuit
+## 47. Reglas del short-circuit
 
 Un short-circuit deberá:
 
@@ -989,7 +988,7 @@ Un short-circuit deberá:
 
 ---
 
-# 48. Short-circuit antes de invocación
+## 48. Short-circuit antes de invocación
 
 ```text
 Interceptor
@@ -1009,7 +1008,7 @@ Transport
 
 ---
 
-# 49. Short-circuit con Response existente
+## 49. Short-circuit con Response existente
 
 Cuando el resultado ya sea `ResponseInterface`:
 
@@ -1021,7 +1020,7 @@ podrá saltar la transformación semántica, pero seguirá pasando por validaci�
 
 ---
 
-# 50. Cancelación
+## 50. Cancelación
 
 La cancelación representa una solicitud para detener la ejecución.
 
@@ -1038,7 +1037,7 @@ Puede originarse por:
 
 ---
 
-# 51. CancellationToken
+## 51. CancellationToken
 
 ```php
 interface CancellationTokenInterface
@@ -1055,7 +1054,7 @@ interface CancellationTokenInterface
 
 ---
 
-# 52. CancellationSource
+## 52. CancellationSource
 
 ```php
 interface CancellationSourceInterface
@@ -1070,7 +1069,7 @@ interface CancellationSourceInterface
 
 ---
 
-# 53. CancellationReason
+## 53. CancellationReason
 
 ```php
 enum CancellationReason: string
@@ -1088,7 +1087,7 @@ enum CancellationReason: string
 
 ---
 
-# 54. Cancelación cooperativa
+## 54. Cancelación cooperativa
 
 La cancelación no deberá interrumpir arbitrariamente código PHP.
 
@@ -1104,7 +1103,7 @@ Los motores deberán consultar el token en puntos seguros:
 
 ---
 
-# 55. Cancellation checkpoints
+## 55. Cancellation checkpoints
 
 ```php
 $execution->context
@@ -1114,7 +1113,7 @@ $execution->context
 
 ---
 
-# 56. Cancelación antes de invocación
+## 56. Cancelación antes de invocación
 
 Si se cancela antes de invocar:
 
@@ -1125,7 +1124,7 @@ Si se cancela antes de invocar:
 
 ---
 
-# 57. Cancelación durante invocación
+## 57. Cancelación durante invocación
 
 Solo podrá detenerse cooperativamente.
 
@@ -1133,7 +1132,7 @@ Si el controlador no comprueba cancelación, el lifecycle deberá esperar su fin
 
 ---
 
-# 58. Cancelación durante streaming
+## 58. Cancelación durante streaming
 
 El productor deberá detenerse al detectar:
 
@@ -1144,7 +1143,7 @@ El productor deberá detenerse al detectar:
 
 ---
 
-# 59. Cancelación después de emisión
+## 59. Cancelación después de emisión
 
 La cancelación se tratará como cierre o aborto del transporte.
 
@@ -1152,7 +1151,7 @@ No se intentará construir una nueva respuesta.
 
 ---
 
-# 60. Deadline
+## 60. Deadline
 
 El contexto podrá incluir un deadline absoluto.
 
@@ -1170,7 +1169,7 @@ final readonly class ExecutionDeadline
 
 ---
 
-# 61. TimeoutPolicy
+## 61. TimeoutPolicy
 
 ```php
 final readonly class ControllerTimeoutPolicy
@@ -1188,7 +1187,7 @@ final readonly class ControllerTimeoutPolicy
 
 ---
 
-# 62. Execution guards
+## 62. Execution guards
 
 Los guards protegen invariantes del lifecycle.
 
@@ -1203,7 +1202,7 @@ interface ExecutionGuardInterface
 
 ---
 
-# 63. Guards oficiales
+## 63. Guards oficiales
 
 ```text
 StateTransitionGuard
@@ -1219,7 +1218,7 @@ ExecutionRecursionGuard
 
 ---
 
-# 64. ResponseMutationGuard
+## 64. ResponseMutationGuard
 
 Después de iniciar la emisión deberá impedir:
 
@@ -1231,7 +1230,7 @@ Después de iniciar la emisión deberá impedir:
 
 ---
 
-# 65. ExecutionRecursionGuard
+## 65. ExecutionRecursionGuard
 
 Controlará subrequests o reentradas.
 
@@ -1244,7 +1243,7 @@ Deberá evitar:
 
 ---
 
-# 66. Subrequests
+## 66. Subrequests
 
 VoltStack podrá soportar ejecuciones hijas.
 
@@ -1266,7 +1265,7 @@ Cada hijo tendrá:
 
 ---
 
-# 67. ParentExecutionReference
+## 67. ParentExecutionReference
 
 ```php
 final readonly class ParentExecutionReference
@@ -1281,7 +1280,7 @@ final readonly class ParentExecutionReference
 
 ---
 
-# 68. Propagación de cancelación
+## 68. Propagación de cancelación
 
 La cancelación del padre podrá cancelar a los hijos.
 
@@ -1289,7 +1288,7 @@ La cancelación de un hijo no deberá cancelar al padre por defecto.
 
 ---
 
-# 69. Execution resources
+## 69. Execution resources
 
 Todos los recursos adquiridos durante la ejecución deberán registrarse.
 
@@ -1308,7 +1307,7 @@ final class ControllerExecutionResources
 
 ---
 
-# 70. ExecutionResourceInterface
+## 70. ExecutionResourceInterface
 
 ```php
 interface ExecutionResourceInterface
@@ -1327,7 +1326,7 @@ interface ExecutionResourceInterface
 
 ---
 
-# 71. Tipos de recursos
+## 71. Tipos de recursos
 
 ```php
 enum ExecutionResourceType: string
@@ -1348,7 +1347,7 @@ enum ExecutionResourceType: string
 
 ---
 
-# 72. Ownership
+## 72. Ownership
 
 Todo recurso deberá tener un propietario.
 
@@ -1363,7 +1362,7 @@ Un recurso transferido al transporte deberá cambiar formalmente de ownership.
 
 ---
 
-# 73. ResourceOwnership
+## 73. ResourceOwnership
 
 ```php
 enum ResourceOwnership: string
@@ -1380,7 +1379,7 @@ enum ResourceOwnership: string
 
 ---
 
-# 74. Transferencia de ownership
+## 74. Transferencia de ownership
 
 Ejemplo:
 
@@ -1402,7 +1401,7 @@ Transport closes stream
 
 ---
 
-# 75. CleanupCoordinator
+## 75. CleanupCoordinator
 
 ```php
 interface CleanupCoordinatorInterface
@@ -1415,7 +1414,7 @@ interface CleanupCoordinatorInterface
 
 ---
 
-# 76. CleanupResult
+## 76. CleanupResult
 
 ```php
 final readonly class CleanupResult
@@ -1432,7 +1431,7 @@ final readonly class CleanupResult
 
 ---
 
-# 77. CleanupStatus
+## 77. CleanupStatus
 
 ```php
 enum CleanupStatus: string
@@ -1447,7 +1446,7 @@ enum CleanupStatus: string
 
 ---
 
-# 78. Orden de cleanup
+## 78. Orden de cleanup
 
 El cleanup deberá ejecutarse en orden inverso a la adquisición cuando sea posible.
 
@@ -1461,7 +1460,7 @@ Esto sigue una semántica LIFO.
 
 ---
 
-# 79. Cleanup handlers
+## 79. Cleanup handlers
 
 ```text
 TransportCleanupHandler
@@ -1477,7 +1476,7 @@ TelemetryCleanupHandler
 
 ---
 
-# 80. Cleanup obligatorio
+## 80. Cleanup obligatorio
 
 El cleanup se ejecutará en:
 
@@ -1491,7 +1490,7 @@ El cleanup se ejecutará en:
 
 ---
 
-# 81. Cleanup failure
+## 81. Cleanup failure
 
 Un error de cleanup:
 
@@ -1502,7 +1501,7 @@ Un error de cleanup:
 
 ---
 
-# 82. Transaction lifecycle
+## 82. Transaction lifecycle
 
 Las transacciones deberán administrarse principalmente mediante interceptores.
 
@@ -1516,7 +1515,7 @@ El lifecycle registrará:
 
 ---
 
-# 83. Transacciones abiertas
+## 83. Transacciones abiertas
 
 Durante cleanup:
 
@@ -1534,7 +1533,7 @@ Nunca deberá mantenerse una transacción abierta entre peticiones.
 
 ---
 
-# 84. Lock lifecycle
+## 84. Lock lifecycle
 
 Todo lock adquirido deberá:
 
@@ -1546,13 +1545,13 @@ Todo lock adquirido deberá:
 
 ---
 
-# 85. Scoped services
+## 85. Scoped services
 
 Los servicios request-scoped deberán destruirse o resetearse al finalizar.
 
 ---
 
-# 86. ExecutionScope
+## 86. ExecutionScope
 
 ```php
 interface ExecutionScopeInterface
@@ -1569,7 +1568,7 @@ interface ExecutionScopeInterface
 
 ---
 
-# 87. Worker safety
+## 87. Worker safety
 
 En FrankenPHP, la ejecución ocurre dentro de un proceso persistente.
 
@@ -1589,7 +1588,7 @@ El lifecycle deberá garantizar que A no contamine B.
 
 ---
 
-# 88. Datos que nunca se compartirán
+## 88. Datos que nunca se compartirán
 
 * Request;
 * RouteMatch mutable;
@@ -1607,7 +1606,7 @@ El lifecycle deberá garantizar que A no contamine B.
 
 ---
 
-# 89. Datos reutilizables
+## 89. Datos reutilizables
 
 * lifecycle plans compilados;
 * registries congelados;
@@ -1619,7 +1618,7 @@ El lifecycle deberá garantizar que A no contamine B.
 
 ---
 
-# 90. Worker reset sequence
+## 90. Worker reset sequence
 
 ```text
 Finish transport
@@ -1645,7 +1644,7 @@ Evaluate worker health
 
 ---
 
-# 91. WorkerDisposition
+## 91. WorkerDisposition
 
 Se reutilizará:
 
@@ -1661,7 +1660,7 @@ enum WorkerDisposition: string
 
 ---
 
-# 92. WorkerHealthEvaluator
+## 92. WorkerHealthEvaluator
 
 Considerará:
 
@@ -1678,7 +1677,7 @@ Considerará:
 
 ---
 
-# 93. ControllerExecutionTimeline
+## 93. ControllerExecutionTimeline
 
 Registra eventos temporales.
 
@@ -1697,7 +1696,7 @@ final class ControllerExecutionTimeline
 
 ---
 
-# 94. ExecutionTimelineEntry
+## 94. ExecutionTimelineEntry
 
 ```php
 final readonly class ExecutionTimelineEntry
@@ -1715,7 +1714,7 @@ final readonly class ExecutionTimelineEntry
 
 ---
 
-# 95. Timeline estándar
+## 95. Timeline estándar
 
 ```text
 execution.created
@@ -1737,7 +1736,7 @@ cleanup.completed
 
 ---
 
-# 96. ExecutionSnapshot
+## 96. ExecutionSnapshot
 
 Representación inmutable del estado en un momento.
 
@@ -1758,7 +1757,7 @@ final readonly class ExecutionSnapshot
 
 ---
 
-# 97. Uso de snapshots
+## 97. Uso de snapshots
 
 Los snapshots servirán para:
 
@@ -1773,7 +1772,7 @@ No deberán contener objetos pesados.
 
 ---
 
-# 98. ExecutionRecorder
+## 98. ExecutionRecorder
 
 ```php
 interface ExecutionRecorderInterface
@@ -1791,7 +1790,7 @@ interface ExecutionRecorderInterface
 
 ---
 
-# 99. Eventos
+## 99. Eventos
 
 ```text
 ControllerExecutionCreated
@@ -1828,7 +1827,7 @@ ControllerExecutionTerminated
 
 ---
 
-# 100. Event payloads
+## 100. Event payloads
 
 Los eventos deberán contener referencias seguras:
 
@@ -1851,7 +1850,7 @@ No deberán contener automáticamente:
 
 ---
 
-# 101. Métricas
+## 101. Métricas
 
 ```text
 controller.execution.total
@@ -1869,7 +1868,7 @@ controller.execution.worker_terminated
 
 ---
 
-# 102. Métricas por fase
+## 102. Métricas por fase
 
 ```text
 controller.phase.controller_resolution.duration
@@ -1884,7 +1883,7 @@ controller.phase.cleanup.duration
 
 ---
 
-# 103. Tracing
+## 103. Tracing
 
 Span principal:
 
@@ -1907,7 +1906,7 @@ controller.cleanup
 
 ---
 
-# 104. Context propagation
+## 104. Context propagation
 
 El contexto de tracing deberá propagarse a:
 
@@ -1921,7 +1920,7 @@ El contexto de tracing deberá propagarse a:
 
 ---
 
-# 105. Error handling integration
+## 105. Error handling integration
 
 Cuando ocurra una excepción:
 
@@ -1945,7 +1944,7 @@ ExceptionHandlingSystem
 
 ---
 
-# 106. Recovery integration
+## 106. Recovery integration
 
 Si el sistema de excepciones devuelve una recuperación:
 
@@ -1968,7 +1967,7 @@ Recovering
 
 ---
 
-# 107. Retry de fase
+## 107. Retry de fase
 
 Los retries deberán limitarse a fases explícitamente retryable.
 
@@ -1981,7 +1980,7 @@ No podrán reintentarse automáticamente:
 
 ---
 
-# 108. RetryPolicy
+## 108. RetryPolicy
 
 ```php
 final readonly class ControllerPhaseRetryPolicy
@@ -1998,7 +1997,7 @@ final readonly class ControllerPhaseRetryPolicy
 
 ---
 
-# 109. Idempotency
+## 109. Idempotency
 
 El lifecycle podrá consumir metadata de idempotencia.
 
@@ -2010,7 +2009,7 @@ execution.retryable
 
 ---
 
-# 110. Completion
+## 110. Completion
 
 La fase de completion ocurre después de obtener un resultado terminal.
 
@@ -2025,7 +2024,7 @@ Podrá ejecutar:
 
 ---
 
-# 111. Completion no es cleanup
+## 111. Completion no es cleanup
 
 ```text
 Completion
@@ -2039,7 +2038,7 @@ Ambos conceptos deberán mantenerse separados.
 
 ---
 
-# 112. Completion hooks
+## 112. Completion hooks
 
 ```php
 interface ControllerExecutionCompletionHookInterface
@@ -2052,7 +2051,7 @@ interface ControllerExecutionCompletionHookInterface
 
 ---
 
-# 113. Cleanup hooks
+## 113. Cleanup hooks
 
 ```php
 interface ControllerExecutionCleanupHookInterface
@@ -2065,7 +2064,7 @@ interface ControllerExecutionCleanupHookInterface
 
 ---
 
-# 114. Hook failure policy
+## 114. Hook failure policy
 
 Un fallo en completion podrá convertir la ejecución en fallida si aún no comenzó la emisión.
 
@@ -2073,7 +2072,7 @@ Un fallo en cleanup se tratará como fallo secundario y afectará la salud del W
 
 ---
 
-# 115. Lifecycle callbacks
+## 115. Lifecycle callbacks
 
 Podrán registrarse callbacks:
 
@@ -2091,7 +2090,7 @@ Estos callbacks deberán ser controlados y no sustituirán eventos globales.
 
 ---
 
-# 116. Prioridad de callbacks
+## 116. Prioridad de callbacks
 
 Los callbacks deberán ejecutarse:
 
@@ -2102,7 +2101,7 @@ Los callbacks deberán ejecutarse:
 
 ---
 
-# 117. Lifecycle metadata
+## 117. Lifecycle metadata
 
 ```text
 lifecycle.plan
@@ -2118,7 +2117,7 @@ lifecycle.worker_disposition
 
 ---
 
-# 118. Attributes potenciales
+## 118. Attributes potenciales
 
 ```php
 #[ExecutionTimeout(5)]
@@ -2135,7 +2134,7 @@ Los atributos serán procesados por el Metadata Engine.
 
 ---
 
-# 119. Lifecycle registry
+## 119. Lifecycle registry
 
 ```php
 interface ControllerLifecycleRegistryInterface
@@ -2158,7 +2157,7 @@ interface ControllerLifecycleRegistryInterface
 
 ---
 
-# 120. Freeze
+## 120. Freeze
 
 El registry deberá congelarse después del bootstrap.
 
@@ -2171,7 +2170,7 @@ Esto garantiza:
 
 ---
 
-# 121. Lifecycle compiler
+## 121. Lifecycle compiler
 
 ```php
 interface ControllerLifecycleCompilerInterface
@@ -2182,7 +2181,7 @@ interface ControllerLifecycleCompilerInterface
 
 ---
 
-# 122. Compilación
+## 122. Compilación
 
 El compiler podrá resolver:
 
@@ -2198,7 +2197,7 @@ El compiler podrá resolver:
 
 ---
 
-# 123. Cache multinivel
+## 123. Cache multinivel
 
 ```text
 L1 Execution
@@ -2209,7 +2208,7 @@ L4 Compiled
 
 ---
 
-# 124. L1 Execution
+## 124. L1 Execution
 
 Contendrá:
 
@@ -2222,13 +2221,13 @@ Contendrá:
 
 ---
 
-# 125. L2 Request
+## 125. L2 Request
 
 Podrá almacenar información compartida con subrequests controlados.
 
 ---
 
-# 126. L3 Worker
+## 126. L3 Worker
 
 Podrá almacenar:
 
@@ -2240,13 +2239,13 @@ Podrá almacenar:
 
 ---
 
-# 127. L4 Compiled
+## 127. L4 Compiled
 
 Artefactos PHP optimizados para OPcache.
 
 ---
 
-# 128. Invalidation
+## 128. Invalidation
 
 Los planes se invalidarán por cambios en:
 
@@ -2262,7 +2261,7 @@ Los planes se invalidarán por cambios en:
 
 ---
 
-# 129. Diagnóstico
+## 129. Diagnóstico
 
 El sistema deberá detectar:
 
@@ -2278,7 +2277,7 @@ El sistema deberá detectar:
 
 ---
 
-# 130. Diagnostic report
+## 130. Diagnostic report
 
 ```php
 final readonly class ControllerExecutionDiagnosticReport
@@ -2296,7 +2295,7 @@ final readonly class ControllerExecutionDiagnosticReport
 
 ---
 
-# 131. Debug mode
+## 131. Debug mode
 
 En modo Debug se podrá mostrar:
 
@@ -2311,7 +2310,7 @@ En modo Debug se podrá mostrar:
 
 ---
 
-# 132. Producción
+## 132. Producción
 
 En producción se limitará la exposición, pero se mantendrán:
 
@@ -2323,7 +2322,7 @@ En producción se limitará la exposición, pero se mantendrán:
 
 ---
 
-# 133. Testing
+## 133. Testing
 
 El módulo incluirá:
 
@@ -2340,7 +2339,7 @@ ControllerExecutionAssertions
 
 ---
 
-# 134. Assertions
+## 134. Assertions
 
 ```php
 ControllerExecutionAssert::completed($execution);
@@ -2362,7 +2361,7 @@ ControllerExecutionAssert::allResourcesReleased($execution);
 
 ---
 
-# 135. Casos de prueba
+## 135. Casos de prueba
 
 * flujo normal;
 * closure;
@@ -2388,7 +2387,7 @@ ControllerExecutionAssert::allResourcesReleased($execution);
 
 ---
 
-# 136. Benchmarks
+## 136. Benchmarks
 
 ```text
 Standard controller execution
@@ -2404,7 +2403,7 @@ Subrequest execution
 
 ---
 
-# 137. Performance principles
+## 137. Performance principles
 
 El lifecycle no deberá introducir reflexión en runtime.
 
@@ -2419,7 +2418,7 @@ Deberá evitar:
 
 ---
 
-# 138. Estructura de directorios
+## 138. Estructura de directorios
 
 ```text
 src/
@@ -2566,7 +2565,7 @@ src/
 
 ---
 
-# 139. Configuración
+## 139. Configuración
 
 ```php
 // config/controller_lifecycle.php
@@ -2625,7 +2624,7 @@ return [
 
 ---
 
-# 140. Service Provider
+## 140. Service Provider
 
 ```php
 final class ControllerLifecycleServiceProvider
@@ -2664,7 +2663,7 @@ final class ControllerLifecycleServiceProvider
 
 ---
 
-# 141. Integración con HttpKernel
+## 141. Integración con HttpKernel
 
 El `HttpKernel` deberá delegar el ciclo completo.
 
@@ -2684,7 +2683,7 @@ El `HttpKernel` no deberá coordinar manualmente cada motor.
 
 ---
 
-# 142. ControllerExecutionResult
+## 142. ControllerExecutionResult
 
 ```php
 final readonly class ControllerExecutionResult
@@ -2704,7 +2703,7 @@ final readonly class ControllerExecutionResult
 
 ---
 
-# 143. Flujo end-to-end
+## 143. Flujo end-to-end
 
 ```text
 HttpKernel
@@ -2751,7 +2750,7 @@ Worker Health Evaluation
 
 ---
 
-# 144. Flujo con short-circuit
+## 144. Flujo con short-circuit
 
 ```text
 Interceptor
@@ -2774,7 +2773,7 @@ Cleanup
 
 ---
 
-# 145. Flujo con cancelación
+## 145. Flujo con cancelación
 
 ```text
 Cancellation requested
@@ -2797,7 +2796,7 @@ Cleanup
 
 ---
 
-# 146. Flujo con error recuperable
+## 146. Flujo con error recuperable
 
 ```text
 Phase failure
@@ -2819,7 +2818,7 @@ Recovery result
 
 ---
 
-# 147. Flujo con error después de emisión
+## 147. Flujo con error después de emisión
 
 ```text
 Response emission started
@@ -2842,31 +2841,31 @@ Evaluate Worker
 
 ---
 
-# 148. ADR-001
+## 148. ADR-001
 
 **Toda ejecución tendrá un único objeto `ControllerExecution`.**
 
 ---
 
-# 149. ADR-002
+## 149. ADR-002
 
 **El lifecycle será coordinado por una máquina de estados explícita.**
 
 ---
 
-# 150. ADR-003
+## 150. ADR-003
 
 **Las transiciones inválidas deberán fallar inmediatamente.**
 
 ---
 
-# 151. ADR-004
+## 151. ADR-004
 
 **La invocación del controlador será exactamente una vez, salvo retry explícitamente seguro.**
 
 ---
 
-# 152. ADR-005
+## 152. ADR-005
 
 **Short-circuit y cancelación serán conceptos distintos.**
 
@@ -2874,97 +2873,97 @@ El short-circuit produce una terminación válida; la cancelación detiene la ej
 
 ---
 
-# 153. ADR-006
+## 153. ADR-006
 
 **El cleanup se ejecutará independientemente del resultado funcional.**
 
 ---
 
-# 154. ADR-007
+## 154. ADR-007
 
 **Completion y cleanup serán fases separadas.**
 
 ---
 
-# 155. ADR-008
+## 155. ADR-008
 
 **Todo recurso tendrá ownership explícito.**
 
 ---
 
-# 156. ADR-009
+## 156. ADR-009
 
 **La transferencia de recursos deberá registrarse formalmente.**
 
 ---
 
-# 157. ADR-010
+## 157. ADR-010
 
 **La cancelación será cooperativa.**
 
 ---
 
-# 158. ADR-011
+## 158. ADR-011
 
 **La emisión iniciada constituye una frontera irreversible.**
 
 ---
 
-# 159. ADR-012
+## 159. ADR-012
 
 **Los estados request-scoped nunca se compartirán entre Workers.**
 
 ---
 
-# 160. ADR-013
+## 160. ADR-013
 
 **Los planes compilados no contendrán estado de ejecución.**
 
 ---
 
-# 161. ADR-014
+## 161. ADR-014
 
 **Los errores de cleanup no reemplazarán automáticamente el resultado principal.**
 
 ---
 
-# 162. ADR-015
+## 162. ADR-015
 
 **La salud del Worker se evaluará después de cada ejecución anormal.**
 
 ---
 
-# 163. ADR-016
+## 163. ADR-016
 
 **Los subrequests tendrán ejecuciones independientes enlazadas al padre.**
 
 ---
 
-# 164. ADR-017
+## 164. ADR-017
 
 **La cancelación del padre podrá propagarse a hijos.**
 
 ---
 
-# 165. ADR-018
+## 165. ADR-018
 
 **Los retries deberán respetar idempotencia y fronteras irreversibles.**
 
 ---
 
-# 166. ADR-019
+## 166. ADR-019
 
 **La observabilidad consumirá snapshots seguros, no el objeto mutable completo.**
 
 ---
 
-# 167. ADR-020
+## 167. ADR-020
 
 **El HttpKernel delegará el lifecycle completo al `ControllerExecutionManager`.**
 
 ---
 
-# 168. Implementación V1
+## 168. Implementación V1
 
 La V1 deberá incluir:
 
@@ -2995,7 +2994,7 @@ La V1 deberá incluir:
 
 ---
 
-# 169. Fuera de V1
+## 169. Fuera de V1
 
 Se aplazarán:
 
@@ -3010,7 +3009,7 @@ Se aplazarán:
 
 ---
 
-# 170. Roadmap V2
+## 170. Roadmap V2
 
 Podrá incorporar:
 
@@ -3026,7 +3025,7 @@ Podrá incorporar:
 
 ---
 
-# 171. Roadmap V3
+## 171. Roadmap V3
 
 Podrá incluir:
 
@@ -3041,7 +3040,7 @@ Podrá incluir:
 
 ---
 
-# 172. Beneficios de la arquitectura
+## 172. Beneficios de la arquitectura
 
 Este sistema proporciona:
 
@@ -3060,7 +3059,7 @@ Este sistema proporciona:
 
 ---
 
-# 173. Conclusión
+## 173. Conclusión
 
 El **Controller Lifecycle and Execution State System** une todos los subsistemas de Controllers en una ejecución coherente.
 

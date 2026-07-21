@@ -1,6 +1,5 @@
-# 09_RESULT_TRANSFORMATION_ENGINE_PART_ONE.md
-
 # Result Transformation Engine
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -8,7 +7,7 @@
 
 ---
 
-# Documentos relacionados
+## Documentos relacionados
 
 ```text
 00_CONTROLLER_PROJECT_CONTEXT.md
@@ -24,7 +23,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Result Transformation Engine** es el motor responsable de transformar cualquier resultado devuelto por un controlador en una respuesta consumible por el cliente.
 
@@ -50,7 +49,7 @@ También deberá:
 
 ---
 
-# 2. Objetivos
+## 2. Objetivos
 
 El Result Transformation Engine deberá:
 
@@ -70,23 +69,23 @@ El Result Transformation Engine deberá:
 
 ---
 
-# 3. Principios
+## 3. Principios
 
 El diseño seguirá los siguientes principios.
 
-## Responsabilidad única
+### Responsabilidad única
 
 Cada estrategia transforma únicamente un tipo de resultado.
 
 ---
 
-## Open / Closed
+### Open / Closed
 
 Nuevos tipos de resultado deberán agregarse sin modificar el núcleo.
 
 ---
 
-## Registry Driven
+### Registry Driven
 
 Las estrategias nunca serán descubiertas mediante reflexión dinámica.
 
@@ -94,25 +93,25 @@ Siempre existirán dentro de un Registry.
 
 ---
 
-## Compilación
+### Compilación
 
 En producción deberá utilizar planes compilados.
 
 ---
 
-## Determinismo
+### Determinismo
 
 El mismo resultado siempre deberá producir exactamente la misma estrategia.
 
 ---
 
-## Separación
+### Separación
 
 El Controller Invoker nunca transformará resultados.
 
 ---
 
-## Neutralidad
+### Neutralidad
 
 El controlador podrá devolver cualquier objeto.
 
@@ -120,7 +119,7 @@ El framework decidirá cómo transformarlo.
 
 ---
 
-# 4. Flujo general
+## 4. Flujo general
 
 ```text
 Controller
@@ -164,7 +163,7 @@ Final Response
 
 ---
 
-# 5. Posición dentro del Framework
+## 5. Posición dentro del Framework
 
 ```text
 Routing
@@ -204,7 +203,7 @@ Client
 
 ---
 
-# 6. Arquitectura
+## 6. Arquitectura
 
 ```text
 Raw Result
@@ -256,7 +255,7 @@ Final Response
 
 ---
 
-# 7. Componentes
+## 7. Componentes
 
 ```text
 ResultTransformationEngine
@@ -298,45 +297,45 @@ ContentNegotiationEngine
 
 ---
 
-# 8. Responsabilidades
+## 8. Responsabilidades
 
-## El Engine
+### El Engine
 
 Coordina todo el proceso.
 
 ---
 
-## Inspector
+### Inspector
 
 Descubre el tipo del resultado.
 
 ---
 
-## Registry
+### Registry
 
 Resuelve la estrategia.
 
 ---
 
-## Strategy
+### Strategy
 
 Transforma el resultado.
 
 ---
 
-## Builder
+### Builder
 
 Construye la respuesta.
 
 ---
 
-## Decorators
+### Decorators
 
 Aplican metadata adicional.
 
 ---
 
-# 9. No responsabilidades
+## 9. No responsabilidades
 
 Este motor no deberá:
 
@@ -351,7 +350,7 @@ Este motor no deberá:
 
 ---
 
-# 10. Controller Result
+## 10. Controller Result
 
 Todo controlador podrá devolver:
 
@@ -385,7 +384,7 @@ return null;
 
 ---
 
-# 11. Filosofía
+## 11. Filosofía
 
 El desarrollador escribe:
 
@@ -419,7 +418,7 @@ Response
 
 ---
 
-# 12. Result Transformation Engine
+## 12. Result Transformation Engine
 
 Contrato principal.
 
@@ -435,7 +434,7 @@ interface ResultTransformationEngineInterface
 
 ---
 
-# 13. Implementación
+## 13. Implementación
 
 ```php
 final class ResultTransformationEngine
@@ -448,7 +447,7 @@ Será completamente stateless.
 
 ---
 
-# 14. Pipeline interno
+## 14. Pipeline interno
 
 ```text
 inspect()
@@ -480,7 +479,7 @@ build response
 
 ---
 
-# 15. TransformationContext
+## 15. TransformationContext
 
 Todo proceso utilizará un único contexto.
 
@@ -492,7 +491,7 @@ final readonly class TransformationContext
 
 ---
 
-# 16. Contenido del Context
+## 16. Contenido del Context
 
 ```text
 ControllerExecution
@@ -514,13 +513,13 @@ Attributes
 
 ---
 
-# 17. Objetivo del Context
+## 17. Objetivo del Context
 
 Evitar pasar veinte argumentos distintos entre estrategias.
 
 ---
 
-# 18. Result Inspector
+## 18. Result Inspector
 
 El inspector determina qué tipo de resultado produjo el controlador.
 
@@ -538,7 +537,7 @@ interface ResultInspectorInterface
 
 ---
 
-# 19. Filosofía del Inspector
+## 19. Filosofía del Inspector
 
 El Inspector jamás transforma.
 
@@ -546,7 +545,7 @@ El Inspector jamás transforma.
 
 ---
 
-# 20. ResultDefinition
+## 20. ResultDefinition
 
 Representa la descripción del resultado.
 
@@ -558,7 +557,7 @@ final readonly class ResultDefinition
 
 ---
 
-# 21. Información del ResultDefinition
+## 21. Información del ResultDefinition
 
 ```text
 ResultType
@@ -580,7 +579,7 @@ Attributes
 
 ---
 
-# 22. Ejemplo
+## 22. Ejemplo
 
 ```php
 return User::find(1);
@@ -598,7 +597,7 @@ Model
 
 ---
 
-# 23. Otro ejemplo
+## 23. Otro ejemplo
 
 ```php
 return "Hola";
@@ -616,7 +615,7 @@ String
 
 ---
 
-# 24. Otro ejemplo
+## 24. Otro ejemplo
 
 ```php
 return Volt::component(...)
@@ -630,7 +629,7 @@ VoltComponent
 
 ---
 
-# 25. ResultType
+## 25. ResultType
 
 El framework definirá un enum.
 
@@ -642,7 +641,7 @@ enum ResultType
 
 ---
 
-# 26. ResultTypes iniciales
+## 26. ResultTypes iniciales
 
 ```text
 Response
@@ -708,7 +707,7 @@ Custom
 
 ---
 
-# 27. ResultMetadata
+## 27. ResultMetadata
 
 Cada resultado tendrá metadata.
 
@@ -720,7 +719,7 @@ final readonly class ResultMetadata
 
 ---
 
-# 28. Metadata
+## 28. Metadata
 
 Podrá contener:
 
@@ -750,7 +749,7 @@ Streaming
 
 ---
 
-# 29. Metadata Engine
+## 29. Metadata Engine
 
 Toda metadata provendrá del:
 
@@ -762,7 +761,7 @@ Nunca mediante lógica hardcodeada.
 
 ---
 
-# 30. TransformationPlan
+## 30. TransformationPlan
 
 Representa cómo transformar un resultado.
 
@@ -774,7 +773,7 @@ final readonly class TransformationPlan
 
 ---
 
-# 31. Información del Plan
+## 31. Información del Plan
 
 ```text
 ResultType
@@ -794,7 +793,7 @@ Hash
 
 ---
 
-# 32. Plan Resolver
+## 32. Plan Resolver
 
 ```php
 interface TransformationPlanResolverInterface
@@ -807,7 +806,7 @@ interface TransformationPlanResolverInterface
 
 ---
 
-# 33. Pipeline del Resolver
+## 33. Pipeline del Resolver
 
 ```text
 Definition
@@ -835,7 +834,7 @@ Plan
 
 ---
 
-# 34. Plan compilado
+## 34. Plan compilado
 
 Existirá:
 
@@ -845,13 +844,13 @@ CompiledTransformationPlan
 
 ---
 
-# 35. Objetivo
+## 35. Objetivo
 
 Eliminar trabajo repetitivo.
 
 ---
 
-# 36. Registry
+## 36. Registry
 
 Las estrategias vivirán aquí.
 
@@ -861,7 +860,7 @@ TransformationStrategyRegistry
 
 ---
 
-# 37. Contrato
+## 37. Contrato
 
 ```php
 interface TransformationStrategyRegistryInterface
@@ -871,7 +870,7 @@ interface TransformationStrategyRegistryInterface
 
 ---
 
-# 38. Funciones
+## 38. Funciones
 
 ```text
 register()
@@ -889,13 +888,13 @@ all()
 
 ---
 
-# 39. Freeze
+## 39. Freeze
 
 En producción el Registry será inmutable.
 
 ---
 
-# 40. Transformation Strategy
+## 40. Transformation Strategy
 
 Contrato principal.
 
@@ -907,13 +906,13 @@ interface TransformationStrategyInterface
 
 ---
 
-# 41. Responsabilidad
+## 41. Responsabilidad
 
 Cada estrategia transforma únicamente un tipo.
 
 ---
 
-# 42. Ejemplo
+## 42. Ejemplo
 
 ```php
 ModelStrategy
@@ -927,7 +926,7 @@ Generator
 
 ---
 
-# 43. Otro ejemplo
+## 43. Otro ejemplo
 
 ```php
 ViewStrategy
@@ -937,7 +936,7 @@ Nunca construirá un Redirect.
 
 ---
 
-# 44. Métodos
+## 44. Métodos
 
 ```php
 supports()
@@ -949,7 +948,7 @@ priority()
 
 ---
 
-# 45. Transformación
+## 45. Transformación
 
 Entrada:
 
@@ -965,7 +964,7 @@ TransformationResult
 
 ---
 
-# 46. TransformationResult
+## 46. TransformationResult
 
 Objeto intermedio.
 
@@ -977,7 +976,7 @@ final readonly class TransformationResult
 
 ---
 
-# 47. Contenido
+## 47. Contenido
 
 ```text
 Payload
@@ -995,13 +994,13 @@ ResponseType
 
 ---
 
-# 48. ResponseBuilder
+## 48. ResponseBuilder
 
 Su trabajo será construir la respuesta final.
 
 ---
 
-# 49. Contrato
+## 49. Contrato
 
 ```php
 interface ResponseBuilderInterface
@@ -1011,7 +1010,7 @@ interface ResponseBuilderInterface
 
 ---
 
-# 50. Builder
+## 50. Builder
 
 Entrada:
 
@@ -1027,13 +1026,13 @@ Response
 
 ---
 
-# 51. Builder no transforma
+## 51. Builder no transforma
 
 Toda transformación ocurre antes.
 
 ---
 
-# 52. Decorators
+## 52. Decorators
 
 Después del Builder.
 
@@ -1063,7 +1062,7 @@ Metrics
 
 ---
 
-# 53. ResponseDecoratorPipeline
+## 53. ResponseDecoratorPipeline
 
 ```php
 ResponseDecoratorPipeline
@@ -1071,7 +1070,7 @@ ResponseDecoratorPipeline
 
 ---
 
-# 54. Decorator
+## 54. Decorator
 
 Contrato.
 
@@ -1083,7 +1082,7 @@ interface ResponseDecoratorInterface
 
 ---
 
-# 55. Ejemplos
+## 55. Ejemplos
 
 ```text
 HeaderDecorator
@@ -1101,7 +1100,7 @@ SecurityDecorator
 
 ---
 
-# 56. Content Negotiation
+## 56. Content Negotiation
 
 Motor independiente.
 
@@ -1111,7 +1110,7 @@ ContentNegotiationEngine
 
 ---
 
-# 57. Objetivo
+## 57. Objetivo
 
 Resolver:
 
@@ -1125,7 +1124,7 @@ Accept-Encoding
 
 ---
 
-# 58. Nunca en las estrategias
+## 58. Nunca en las estrategias
 
 Las estrategias no deberán inspeccionar directamente:
 
@@ -1135,7 +1134,7 @@ Accept Header
 
 ---
 
-# 59. Negotiation Context
+## 59. Negotiation Context
 
 Será parte del:
 
@@ -1145,7 +1144,7 @@ TransformationContext
 
 ---
 
-# 60. ResponseFactory
+## 60. ResponseFactory
 
 Toda respuesta será creada por una Factory.
 
@@ -1159,7 +1158,7 @@ directamente dentro de las estrategias.
 
 ---
 
-# 61. ResponseFactoryInterface
+## 61. ResponseFactoryInterface
 
 ```php
 interface ResponseFactoryInterface
@@ -1169,7 +1168,7 @@ interface ResponseFactoryInterface
 
 ---
 
-# 62. Beneficios
+## 62. Beneficios
 
 Permite:
 
@@ -1180,7 +1179,7 @@ Permite:
 
 ---
 
-# 63. Response Types
+## 63. Response Types
 
 ```text
 HttpResponse
@@ -1198,7 +1197,7 @@ RedirectResponse
 
 ---
 
-# 64. Builder Pipeline
+## 64. Builder Pipeline
 
 ```text
 TransformationResult
@@ -1222,7 +1221,7 @@ Response
 
 ---
 
-# 65. Estrategias iniciales
+## 65. Estrategias iniciales
 
 ```text
 ResponseStrategy
@@ -1264,7 +1263,7 @@ NullStrategy
 
 ---
 
-# 66. Prioridad
+## 66. Prioridad
 
 Cada estrategia tendrá prioridad.
 
@@ -1274,7 +1273,7 @@ priority()
 
 ---
 
-# 67. Estrategias específicas primero
+## 67. Estrategias específicas primero
 
 Ejemplo.
 
@@ -1290,7 +1289,7 @@ Object
 
 ---
 
-# 68. Strategy Resolver
+## 68. Strategy Resolver
 
 Nunca hará:
 
@@ -1312,13 +1311,13 @@ Registry
 
 ---
 
-# 69. Registry congelado
+## 69. Registry congelado
 
 Esto elimina búsquedas dinámicas costosas.
 
 ---
 
-# 70. Cache
+## 70. Cache
 
 El Engine tendrá cache.
 
@@ -1342,7 +1341,7 @@ Compiled
 
 ---
 
-# 71. Cache compilado
+## 71. Cache compilado
 
 Existirá:
 
@@ -1352,7 +1351,7 @@ CompiledTransformationRegistry
 
 ---
 
-# 72. Objetivo
+## 72. Objetivo
 
 Eliminar:
 
@@ -1366,7 +1365,7 @@ switch
 
 ---
 
-# 73. Compilación
+## 73. Compilación
 
 Cada tipo podrá tener:
 
@@ -1376,7 +1375,7 @@ CompiledTransformationPlan
 
 ---
 
-# 74. Ejemplo
+## 74. Ejemplo
 
 ```text
 UserResource
@@ -1392,13 +1391,13 @@ JsonResponse
 
 ---
 
-# 75. Sin inspección
+## 75. Sin inspección
 
 En producción.
 
 ---
 
-# 76. Metadata
+## 76. Metadata
 
 El Engine consumirá metadata.
 
@@ -1406,7 +1405,7 @@ Nunca atributos directamente.
 
 ---
 
-# 77. Metadata Keys
+## 77. Metadata Keys
 
 Ejemplos.
 
@@ -1424,7 +1423,7 @@ response.type
 
 ---
 
-# 78. TransformationContext
+## 78. TransformationContext
 
 También contendrá:
 
@@ -1440,13 +1439,13 @@ Request Id
 
 ---
 
-# 79. Objetivo
+## 79. Objetivo
 
 Evitar servicios globales.
 
 ---
 
-# 80. Integración
+## 80. Integración
 
 El siguiente bloque del documento definirá completamente:
 
@@ -1463,7 +1462,7 @@ El siguiente bloque del documento definirá completamente:
 
 ---
 
-# 81. Transformation Strategy System
+## 81. Transformation Strategy System
 
 El sistema de estrategias constituye el núcleo del Result Transformation Engine.
 
@@ -1489,7 +1488,7 @@ El Engine nunca conocerá implementaciones concretas.
 
 ---
 
-# 82. Principios del Strategy System
+## 82. Principios del Strategy System
 
 Cada estrategia deberá cumplir los siguientes principios:
 
@@ -1504,7 +1503,7 @@ Cada estrategia deberá cumplir los siguientes principios:
 
 ---
 
-# 83. Contrato base
+## 83. Contrato base
 
 ```php
 interface TransformationStrategyInterface
@@ -1524,7 +1523,7 @@ interface TransformationStrategyInterface
 
 ---
 
-# 84. Filosofía
+## 84. Filosofía
 
 El método `supports()` únicamente determina si la estrategia puede transformar el resultado.
 
@@ -1532,13 +1531,13 @@ Nunca realizará la transformación.
 
 ---
 
-# 85. Transformación
+## 85. Transformación
 
 El método `transform()` será el único responsable de producir un `TransformationResult`.
 
 ---
 
-# 86. Prioridad
+## 86. Prioridad
 
 Cada estrategia tendrá una prioridad numérica.
 
@@ -1551,7 +1550,7 @@ Mayor prioridad
 
 ---
 
-# 87. Ejemplo
+## 87. Ejemplo
 
 ```text
 VoltComponentStrategy
@@ -1569,7 +1568,7 @@ Siempre se ejecutará la estrategia más específica.
 
 ---
 
-# 88. Transformation Strategy Registry
+## 88. Transformation Strategy Registry
 
 Todas las estrategias vivirán en un Registry central.
 
@@ -1579,7 +1578,7 @@ TransformationStrategyRegistry
 
 ---
 
-# 89. Objetivos del Registry
+## 89. Objetivos del Registry
 
 * Registrar estrategias.
 * Resolver estrategias.
@@ -1589,7 +1588,7 @@ TransformationStrategyRegistry
 
 ---
 
-# 90. Contrato
+## 90. Contrato
 
 ```php
 interface TransformationStrategyRegistryInterface
@@ -1610,7 +1609,7 @@ interface TransformationStrategyRegistryInterface
 
 ---
 
-# 91. Registro dinámico
+## 91. Registro dinámico
 
 Durante el bootstrap del framework los paquetes podrán registrar nuevas estrategias.
 
@@ -1622,7 +1621,7 @@ $registry->register(
 
 ---
 
-# 92. Freeze
+## 92. Freeze
 
 Una vez iniciado el runtime:
 
@@ -1634,7 +1633,7 @@ No podrán registrarse nuevas estrategias.
 
 ---
 
-# 93. Beneficios
+## 93. Beneficios
 
 * Thread-safe.
 * Compatible con FrankenPHP.
@@ -1643,7 +1642,7 @@ No podrán registrarse nuevas estrategias.
 
 ---
 
-# 94. Strategy Resolver
+## 94. Strategy Resolver
 
 El Resolver será el encargado de encontrar la estrategia correcta.
 
@@ -1651,7 +1650,7 @@ Nunca el Engine.
 
 ---
 
-# 95. Contrato
+## 95. Contrato
 
 ```php
 interface StrategyResolverInterface
@@ -1664,7 +1663,7 @@ interface StrategyResolverInterface
 
 ---
 
-# 96. Flujo
+## 96. Flujo
 
 ```text
 ResultDefinition
@@ -1688,7 +1687,7 @@ Selected Strategy
 
 ---
 
-# 97. Resolución
+## 97. Resolución
 
 Nunca utilizará grandes bloques de:
 
@@ -1702,13 +1701,13 @@ elseif (...)
 
 ---
 
-# 98. Selección
+## 98. Selección
 
 El Resolver únicamente evaluará estrategias registradas.
 
 ---
 
-# 99. Strategy Match
+## 99. Strategy Match
 
 Cada estrategia devolverá:
 
@@ -1726,7 +1725,7 @@ mediante `supports()`.
 
 ---
 
-# 100. Result Classifier
+## 100. Result Classifier
 
 Antes de resolver una estrategia se clasificará el resultado.
 
@@ -1736,13 +1735,13 @@ ResultClassifier
 
 ---
 
-# 101. Objetivo
+## 101. Objetivo
 
 Reducir el número de estrategias candidatas.
 
 ---
 
-# 102. Ejemplo
+## 102. Ejemplo
 
 ```php
 return User::find(1);
@@ -1762,7 +1761,7 @@ Object
 
 ---
 
-# 103. Otro ejemplo
+## 103. Otro ejemplo
 
 ```php
 return [];
@@ -1776,19 +1775,19 @@ Array
 
 ---
 
-# 104. Clasificación temprana
+## 104. Clasificación temprana
 
 La clasificación ocurre una sola vez.
 
 ---
 
-# 105. Cache de clasificación
+## 105. Cache de clasificación
 
 El tipo detectado podrá almacenarse durante la ejecución.
 
 ---
 
-# 106. Pipeline interno
+## 106. Pipeline interno
 
 ```text
 Raw Result
@@ -1812,7 +1811,7 @@ Transformation
 
 ---
 
-# 107. Strategy Priority
+## 107. Strategy Priority
 
 Las prioridades recomendadas:
 
@@ -1848,13 +1847,13 @@ Las prioridades recomendadas:
 
 ---
 
-# 108. Native Response Strategy
+## 108. Native Response Strategy
 
 Será la estrategia de mayor prioridad.
 
 ---
 
-# 109. Objetivo
+## 109. Objetivo
 
 Si el controlador ya devuelve una respuesta válida:
 
@@ -1866,7 +1865,7 @@ No deberá transformarse nuevamente.
 
 ---
 
-# 110. ResponseStrategy
+## 110. ResponseStrategy
 
 Responsabilidad:
 
@@ -1882,7 +1881,7 @@ Sin modificaciones.
 
 ---
 
-# 111. JsonStrategy
+## 111. JsonStrategy
 
 Transformará:
 
@@ -1896,7 +1895,7 @@ JsonResource
 
 ---
 
-# 112. Resultado
+## 112. Resultado
 
 ```text
 JSON Response
@@ -1904,7 +1903,7 @@ JSON Response
 
 ---
 
-# 113. ArrayStrategy
+## 113. ArrayStrategy
 
 Transformará:
 
@@ -1916,13 +1915,13 @@ return [
 
 ---
 
-# 114. Política
+## 114. Política
 
 Por defecto un arreglo se convertirá en JSON.
 
 ---
 
-# 115. Metadata
+## 115. Metadata
 
 La metadata podrá cambiar este comportamiento.
 
@@ -1934,7 +1933,7 @@ response.type = xml
 
 ---
 
-# 116. StringStrategy
+## 116. StringStrategy
 
 Transformará:
 
@@ -1944,7 +1943,7 @@ return "Hola Mundo";
 
 ---
 
-# 117. Resultado
+## 117. Resultado
 
 ```text
 text/plain
@@ -1954,7 +1953,7 @@ Por defecto.
 
 ---
 
-# 118. Metadata
+## 118. Metadata
 
 Podrá indicar:
 
@@ -1968,7 +1967,7 @@ text/xml
 
 ---
 
-# 119. ScalarStrategy
+## 119. ScalarStrategy
 
 Agrupa:
 
@@ -1982,13 +1981,13 @@ bool
 
 ---
 
-# 120. Conversión
+## 120. Conversión
 
 Los escalares serán convertidos a texto salvo que exista una política distinta.
 
 ---
 
-# 121. NullStrategy
+## 121. NullStrategy
 
 Responsabilidad:
 
@@ -1998,7 +1997,7 @@ return null;
 
 ---
 
-# 122. Resultado por defecto
+## 122. Resultado por defecto
 
 ```text
 204 No Content
@@ -2006,7 +2005,7 @@ return null;
 
 ---
 
-# 123. Configurable
+## 123. Configurable
 
 Podrá configurarse para responder:
 
@@ -2018,19 +2017,19 @@ con cuerpo vacío.
 
 ---
 
-# 124. ObjectStrategy
+## 124. ObjectStrategy
 
 Será una estrategia de último recurso.
 
 ---
 
-# 125. Filosofía
+## 125. Filosofía
 
 Nunca debe ejecutarse si existe una estrategia más específica.
 
 ---
 
-# 126. CollectionStrategy
+## 126. CollectionStrategy
 
 Transformará:
 
@@ -2040,13 +2039,13 @@ Transformará:
 
 ---
 
-# 127. Política
+## 127. Política
 
 La representación por defecto será JSON.
 
 ---
 
-# 128. ModelStrategy
+## 128. ModelStrategy
 
 Responsabilidad:
 
@@ -2054,13 +2053,13 @@ Transformar entidades del ORM.
 
 ---
 
-# 129. Filosofía
+## 129. Filosofía
 
 Nunca expondrá automáticamente todas las propiedades del modelo.
 
 ---
 
-# 130. Integración
+## 130. Integración
 
 Consultará el Metadata Engine para determinar:
 
@@ -2072,19 +2071,19 @@ Consultará el Metadata Engine para determinar:
 
 ---
 
-# 131. DTOStrategy
+## 131. DTOStrategy
 
 Transformará cualquier DTO registrado.
 
 ---
 
-# 132. Beneficio
+## 132. Beneficio
 
 Evita lógica repetitiva dentro de los controladores.
 
 ---
 
-# 133. ResourceStrategy
+## 133. ResourceStrategy
 
 Será utilizada por los recursos de API.
 
@@ -2092,7 +2091,7 @@ Inspirada en Laravel Resources, pero desacoplada del HTTP.
 
 ---
 
-# 134. Transformación
+## 134. Transformación
 
 ```text
 Resource
@@ -2108,7 +2107,7 @@ TransformationResult
 
 ---
 
-# 135. Strategy Pipeline
+## 135. Strategy Pipeline
 
 ```text
 supports()
@@ -2124,7 +2123,7 @@ TransformationResult
 
 ---
 
-# 136. Nunca
+## 136. Nunca
 
 Una estrategia no podrá invocar otra estrategia directamente.
 
@@ -2132,7 +2131,7 @@ Toda coordinación pertenece al Engine.
 
 ---
 
-# 137. Strategy Decorators
+## 137. Strategy Decorators
 
 Las estrategias podrán decorarse.
 
@@ -2156,13 +2155,13 @@ Strategy
 
 ---
 
-# 138. Beneficio
+## 138. Beneficio
 
 No contaminar la lógica principal.
 
 ---
 
-# 139. Instrumentación
+## 139. Instrumentación
 
 Cada estrategia podrá registrar:
 
@@ -2173,7 +2172,7 @@ Cada estrategia podrá registrar:
 
 ---
 
-# 140. Eventos
+## 140. Eventos
 
 Se emitirán eventos durante la transformación:
 
@@ -2191,13 +2190,13 @@ TransformationFailed
 
 ---
 
-# 141. Cache de estrategias
+## 141. Cache de estrategias
 
 Una vez resuelta una estrategia podrá reutilizarse durante toda la ejecución.
 
 ---
 
-# 142. Compiled Strategy Registry
+## 142. Compiled Strategy Registry
 
 Durante el proceso de compilación se generará un registro optimizado.
 
@@ -2207,13 +2206,13 @@ CompiledTransformationStrategyRegistry
 
 ---
 
-# 143. Objetivo
+## 143. Objetivo
 
 Eliminar búsquedas dinámicas.
 
 ---
 
-# 144. Ejemplo
+## 144. Ejemplo
 
 ```text
 Model
@@ -2227,7 +2226,7 @@ Sin recorrer todo el Registry.
 
 ---
 
-# 145. Transformation Compiler
+## 145. Transformation Compiler
 
 Será responsable de generar:
 
@@ -2239,19 +2238,19 @@ CompiledMappings
 
 ---
 
-# 146. Compatibilidad con OPcache
+## 146. Compatibilidad con OPcache
 
 Todos los artefactos compilados deberán ser simples clases PHP para maximizar el rendimiento.
 
 ---
 
-# 147. Compatibilidad con FrankenPHP
+## 147. Compatibilidad con FrankenPHP
 
 Los planes compilados serán completamente inmutables y seguros para procesos persistentes.
 
 ---
 
-# 148. Integración con Metadata Engine
+## 148. Integración con Metadata Engine
 
 Las estrategias nunca leerán atributos PHP directamente.
 
@@ -2263,7 +2262,7 @@ MetadataBag
 
 ---
 
-# 149. Beneficios
+## 149. Beneficios
 
 Esto permite:
 
@@ -2275,7 +2274,7 @@ Esto permite:
 
 ---
 
-# 150. Próxima sección
+## 150. Próxima sección
 
 La Parte 3 desarrollará el sistema avanzado de construcción de respuestas:
 
@@ -2294,7 +2293,7 @@ La Parte 3 desarrollará el sistema avanzado de construcción de respuestas:
 
 ---
 
-# 151. Response Construction Layer
+## 151. Response Construction Layer
 
 Una vez que una estrategia produce un `TransformationResult`, comienza la segunda fase del motor: la **construcción de la respuesta**.
 
@@ -2315,7 +2314,7 @@ Final Response
 
 ---
 
-# 152. Objetivos
+## 152. Objetivos
 
 La Response Construction Layer deberá:
 
@@ -2328,7 +2327,7 @@ La Response Construction Layer deberá:
 
 ---
 
-# 153. Responsabilidad
+## 153. Responsabilidad
 
 Las estrategias producen información.
 
@@ -2338,7 +2337,7 @@ Nunca al revés.
 
 ---
 
-# 154. ResponseBuilder
+## 154. ResponseBuilder
 
 Contrato principal.
 
@@ -2358,7 +2357,7 @@ interface ResponseBuilderInterface
 
 ---
 
-# 155. Filosofía
+## 155. Filosofía
 
 El Builder jamás inspecciona el resultado original.
 
@@ -2366,7 +2365,7 @@ El Builder jamás inspecciona el resultado original.
 
 ---
 
-# 156. Builder Registry
+## 156. Builder Registry
 
 Todos los builders vivirán dentro de:
 
@@ -2376,7 +2375,7 @@ ResponseBuilderRegistry
 
 ---
 
-# 157. Contrato
+## 157. Contrato
 
 ```php
 interface ResponseBuilderRegistryInterface
@@ -2395,7 +2394,7 @@ interface ResponseBuilderRegistryInterface
 
 ---
 
-# 158. Builders iniciales
+## 158. Builders iniciales
 
 ```text
 HttpResponseBuilder
@@ -2419,13 +2418,13 @@ FileResponseBuilder
 
 ---
 
-# 159. Builder Resolver
+## 159. Builder Resolver
 
 El Builder Resolver selecciona el Builder correcto según el `ResponseType` definido en el `TransformationResult`.
 
 ---
 
-# 160. ResponseType
+## 160. ResponseType
 
 Nuevo enum del sistema.
 
@@ -2437,7 +2436,7 @@ enum ResponseType
 
 ---
 
-# 161. Response Types
+## 161. Response Types
 
 ```text
 Http
@@ -2463,7 +2462,7 @@ Custom
 
 ---
 
-# 162. HTTP Response Builder
+## 162. HTTP Response Builder
 
 Builder por defecto.
 
@@ -2471,7 +2470,7 @@ Construye respuestas HTTP estándar.
 
 ---
 
-# 163. JsonResponseBuilder
+## 163. JsonResponseBuilder
 
 Especializado para respuestas JSON.
 
@@ -2481,13 +2480,13 @@ La serialización ya ocurrió durante la transformación.
 
 ---
 
-# 164. RedirectResponseBuilder
+## 164. RedirectResponseBuilder
 
 Construye respuestas 301, 302, 303, 307 y 308.
 
 ---
 
-# 165. StreamResponseBuilder
+## 165. StreamResponseBuilder
 
 Construye respuestas basadas en flujos continuos.
 
@@ -2500,7 +2499,7 @@ Compatible con:
 
 ---
 
-# 166. DownloadResponseBuilder
+## 166. DownloadResponseBuilder
 
 Construye respuestas de descarga.
 
@@ -2512,7 +2511,7 @@ Configurará automáticamente:
 
 ---
 
-# 167. BinaryResponseBuilder
+## 167. BinaryResponseBuilder
 
 Especializado en contenido binario.
 
@@ -2526,7 +2525,7 @@ Ejemplos:
 
 ---
 
-# 168. SPAResponseBuilder
+## 168. SPAResponseBuilder
 
 Builder exclusivo del Runtime Volt.
 
@@ -2536,7 +2535,7 @@ Podrá producir directamente un **Volt Protocol Response**.
 
 ---
 
-# 169. SSEBuilder
+## 169. SSEBuilder
 
 Builder para **Server-Sent Events**.
 
@@ -2544,7 +2543,7 @@ Permitirá integrar streaming reactivo sin WebSockets.
 
 ---
 
-# 170. ResponseFactory
+## 170. ResponseFactory
 
 Todos los Builders utilizarán una Factory común.
 
@@ -2552,7 +2551,7 @@ Nunca instanciarán respuestas directamente.
 
 ---
 
-# 171. Contrato
+## 171. Contrato
 
 ```php
 interface ResponseFactoryInterface
@@ -2562,7 +2561,7 @@ interface ResponseFactoryInterface
 
 ---
 
-# 172. Responsabilidad
+## 172. Responsabilidad
 
 Centralizar la creación de:
 
@@ -2575,7 +2574,7 @@ Centralizar la creación de:
 
 ---
 
-# 173. Beneficios
+## 173. Beneficios
 
 Permite:
 
@@ -2586,7 +2585,7 @@ Permite:
 
 ---
 
-# 174. Response Decorator Pipeline
+## 174. Response Decorator Pipeline
 
 Una respuesta recién creada aún no está lista para enviarse.
 
@@ -2606,13 +2605,13 @@ Final Response
 
 ---
 
-# 175. Objetivos
+## 175. Objetivos
 
 Aplicar modificaciones transversales sin alterar el Builder.
 
 ---
 
-# 176. Contrato
+## 176. Contrato
 
 ```php
 interface ResponseDecoratorInterface
@@ -2626,7 +2625,7 @@ interface ResponseDecoratorInterface
 
 ---
 
-# 177. Decorator Pipeline
+## 177. Decorator Pipeline
 
 ```php
 ResponseDecoratorPipeline
@@ -2634,7 +2633,7 @@ ResponseDecoratorPipeline
 
 ---
 
-# 178. Decorators iniciales
+## 178. Decorators iniciales
 
 ```text
 HeaderDecorator
@@ -2658,7 +2657,7 @@ TracingDecorator
 
 ---
 
-# 179. Orden recomendado
+## 179. Orden recomendado
 
 ```text
 Headers
@@ -2686,19 +2685,19 @@ Telemetry
 
 ---
 
-# 180. HeaderDecorator
+## 180. HeaderDecorator
 
 Añade encabezados provenientes del `TransformationResult` y del `MetadataBag`.
 
 ---
 
-# 181. CookieDecorator
+## 181. CookieDecorator
 
 Gestiona todas las cookies pendientes.
 
 ---
 
-# 182. CacheDecorator
+## 182. CacheDecorator
 
 Aplica políticas como:
 
@@ -2710,13 +2709,13 @@ Aplica políticas como:
 
 ---
 
-# 183. CompressionDecorator
+## 183. CompressionDecorator
 
 Permite aplicar compresión de salida cuando la política lo indique.
 
 ---
 
-# 184. SecurityDecorator
+## 184. SecurityDecorator
 
 Aplica encabezados de seguridad.
 
@@ -2729,19 +2728,19 @@ Ejemplos:
 
 ---
 
-# 185. TelemetryDecorator
+## 185. TelemetryDecorator
 
 Inserta información utilizada por observabilidad.
 
 ---
 
-# 186. Content Negotiation Engine
+## 186. Content Negotiation Engine
 
 El Engine de negociación decide el formato final de la respuesta.
 
 ---
 
-# 187. Filosofía
+## 187. Filosofía
 
 Las estrategias producen datos.
 
@@ -2749,7 +2748,7 @@ La negociación decide cómo entregarlos.
 
 ---
 
-# 188. Entrada
+## 188. Entrada
 
 ```text
 TransformationResult
@@ -2765,7 +2764,7 @@ Metadata
 
 ---
 
-# 189. Salida
+## 189. Salida
 
 ```text
 Negotiated Response Type
@@ -2773,7 +2772,7 @@ Negotiated Response Type
 
 ---
 
-# 190. Factores considerados
+## 190. Factores considerados
 
 * Accept.
 * Accept-Language.
@@ -2785,7 +2784,7 @@ Negotiated Response Type
 
 ---
 
-# 191. Accept Resolver
+## 191. Accept Resolver
 
 ```php
 AcceptHeaderResolver
@@ -2795,13 +2794,13 @@ Especializado en interpretar el encabezado `Accept`.
 
 ---
 
-# 192. Language Resolver
+## 192. Language Resolver
 
 Resolverá el idioma preferido del cliente.
 
 ---
 
-# 193. Encoding Resolver
+## 193. Encoding Resolver
 
 Resolverá:
 
@@ -2812,7 +2811,7 @@ Resolverá:
 
 ---
 
-# 194. Negotiation Policy
+## 194. Negotiation Policy
 
 Las políticas serán configurables.
 
@@ -2830,13 +2829,13 @@ PreferXml
 
 ---
 
-# 195. Negotiation Result
+## 195. Negotiation Result
 
 Se almacenará dentro del `TransformationContext`.
 
 ---
 
-# 196. Volt View Integration
+## 196. Volt View Integration
 
 Cuando el resultado sea una `VoltView`, el motor no renderizará directamente.
 
@@ -2844,7 +2843,7 @@ Delegará al **Volt Render Engine**.
 
 ---
 
-# 197. Flujo
+## 197. Flujo
 
 ```text
 VoltView
@@ -2864,7 +2863,7 @@ Response Builder
 
 ---
 
-# 198. Volt Component Integration
+## 198. Volt Component Integration
 
 Para componentes interactivos:
 
@@ -2886,7 +2885,7 @@ SPAResponseBuilder
 
 ---
 
-# 199. SPA Protocol
+## 199. SPA Protocol
 
 El Result Transformation Engine nunca construirá manualmente el protocolo.
 
@@ -2894,7 +2893,7 @@ Delegará esa responsabilidad al Runtime SPA.
 
 ---
 
-# 200. Server Side Rendering
+## 200. Server Side Rendering
 
 Cuando la ruta utilice SSR:
 
@@ -2916,7 +2915,7 @@ HTTP Response
 
 ---
 
-# 201. Client Navigation
+## 201. Client Navigation
 
 Cuando la petición sea SPA:
 
@@ -2934,7 +2933,7 @@ SPA Response
 
 ---
 
-# 202. Render Modes
+## 202. Render Modes
 
 ```text
 SSR
@@ -2948,13 +2947,13 @@ Hybrid
 
 ---
 
-# 203. Render Policy
+## 203. Render Policy
 
 El modo podrá definirse mediante metadata.
 
 ---
 
-# 204. Response Metadata
+## 204. Response Metadata
 
 Toda respuesta tendrá un objeto de metadata asociado.
 
@@ -2964,7 +2963,7 @@ ResponseMetadata
 
 ---
 
-# 205. Contenido
+## 205. Contenido
 
 * Status.
 * Headers.
@@ -2976,7 +2975,7 @@ ResponseMetadata
 
 ---
 
-# 206. Response Policies
+## 206. Response Policies
 
 El sistema permitirá definir políticas reutilizables.
 
@@ -2994,7 +2993,7 @@ StaticFilePolicy
 
 ---
 
-# 207. Integración con Metadata Engine
+## 207. Integración con Metadata Engine
 
 Toda política será obtenida desde el `MetadataBag`.
 
@@ -3002,7 +3001,7 @@ Nunca mediante atributos consultados directamente.
 
 ---
 
-# 208. Error Responses
+## 208. Error Responses
 
 Los errores también pasarán por el Result Transformation Engine.
 
@@ -3010,13 +3009,13 @@ Esto garantiza un único mecanismo de construcción de respuestas.
 
 ---
 
-# 209. Beneficio
+## 209. Beneficio
 
 Las respuestas de éxito y de error compartirán exactamente el mismo pipeline.
 
 ---
 
-# 210. Próxima sección
+## 210. Próxima sección
 
 La Parte 4 desarrollará los tipos avanzados de resultados y la integración con el Runtime Volt:
 
@@ -3035,7 +3034,7 @@ La Parte 4 desarrollará los tipos avanzados de resultados y la integración con
 
 ---
 
-# 211. Advanced Transformation Strategies
+## 211. Advanced Transformation Strategies
 
 Las estrategias avanzadas son responsables de transformar resultados complejos producidos por el ecosistema de VoltStack.
 
@@ -3053,7 +3052,7 @@ Concurrency
 
 ---
 
-# 212. Principios
+## 212. Principios
 
 Las estrategias avanzadas deberán:
 
@@ -3065,7 +3064,7 @@ Las estrategias avanzadas deberán:
 
 ---
 
-# 213. ModelStrategy
+## 213. ModelStrategy
 
 La `ModelStrategy` transforma entidades del ORM de VoltStack.
 
@@ -3073,7 +3072,7 @@ Nunca serializa directamente el modelo.
 
 ---
 
-# 214. Flujo
+## 214. Flujo
 
 ```text
 Model
@@ -3101,13 +3100,13 @@ TransformationResult
 
 ---
 
-# 215. Objetivo
+## 215. Objetivo
 
 Separar completamente el modelo persistente de su representación pública.
 
 ---
 
-# 216. Resource Resolution
+## 216. Resource Resolution
 
 Antes de serializar un modelo, la estrategia consultará si existe un recurso asociado.
 
@@ -3125,7 +3124,7 @@ UserResource
 
 ---
 
-# 217. Resource Resolver
+## 217. Resource Resolver
 
 ```php
 interface ResourceResolverInterface
@@ -3138,7 +3137,7 @@ interface ResourceResolverInterface
 
 ---
 
-# 218. Beneficios
+## 218. Beneficios
 
 Permite:
 
@@ -3149,13 +3148,13 @@ Permite:
 
 ---
 
-# 219. CollectionStrategy
+## 219. CollectionStrategy
 
 Transforma colecciones del ORM y colecciones genéricas.
 
 ---
 
-# 220. Tipos soportados
+## 220. Tipos soportados
 
 ```text
 ModelCollection
@@ -3173,7 +3172,7 @@ Custom Collections
 
 ---
 
-# 221. Lazy Collections
+## 221. Lazy Collections
 
 Las colecciones perezosas nunca serán materializadas automáticamente.
 
@@ -3185,25 +3184,25 @@ La política de transformación decidirá si:
 
 ---
 
-# 222. Pagination
+## 222. Pagination
 
 Si la colección contiene metadatos de paginación, estos se preservarán en el `TransformationResult`.
 
 ---
 
-# 223. DTOStrategy
+## 223. DTOStrategy
 
 Responsable de transformar DTOs registrados.
 
 ---
 
-# 224. Filosofía
+## 224. Filosofía
 
 El DTO representa un contrato de datos, no un mecanismo de serialización.
 
 ---
 
-# 225. Metadata
+## 225. Metadata
 
 El `Metadata Engine` podrá definir:
 
@@ -3215,7 +3214,7 @@ El `Metadata Engine` podrá definir:
 
 ---
 
-# 226. ResourceStrategy
+## 226. ResourceStrategy
 
 Especializada en recursos de API.
 
@@ -3223,7 +3222,7 @@ Inspirada en Laravel Resources, pero desacoplada del transporte.
 
 ---
 
-# 227. Flujo
+## 227. Flujo
 
 ```text
 Resource
@@ -3239,13 +3238,13 @@ TransformationResult
 
 ---
 
-# 228. Relaciones
+## 228. Relaciones
 
 Los recursos podrán incluir relaciones bajo demanda.
 
 ---
 
-# 229. Versionado
+## 229. Versionado
 
 El recurso podrá variar según:
 
@@ -3256,13 +3255,13 @@ El recurso podrá variar según:
 
 ---
 
-# 230. VoltViewStrategy
+## 230. VoltViewStrategy
 
 Especializada en vistas Volt.
 
 ---
 
-# 231. Responsabilidad
+## 231. Responsabilidad
 
 Nunca renderiza HTML directamente.
 
@@ -3270,7 +3269,7 @@ Delega el proceso al Render Engine.
 
 ---
 
-# 232. Flujo
+## 232. Flujo
 
 ```text
 VoltView
@@ -3290,19 +3289,19 @@ TransformationResult
 
 ---
 
-# 233. Beneficio
+## 233. Beneficio
 
 El Result Transformation Engine permanece independiente del sistema de plantillas.
 
 ---
 
-# 234. VoltComponentStrategy
+## 234. VoltComponentStrategy
 
 Especializada en componentes interactivos.
 
 ---
 
-# 235. Filosofía
+## 235. Filosofía
 
 Un componente Volt no representa HTML.
 
@@ -3310,13 +3309,13 @@ Representa una unidad de UI reactiva.
 
 ---
 
-# 236. Delegación
+## 236. Delegación
 
 La estrategia delegará al Runtime SPA.
 
 ---
 
-# 237. Flujo
+## 237. Flujo
 
 ```text
 Volt Component
@@ -3340,7 +3339,7 @@ TransformationResult
 
 ---
 
-# 238. Component Metadata
+## 238. Component Metadata
 
 La metadata podrá definir:
 
@@ -3352,19 +3351,19 @@ La metadata podrá definir:
 
 ---
 
-# 239. VoltPageStrategy
+## 239. VoltPageStrategy
 
 Especializada en páginas completas.
 
 ---
 
-# 240. Diferencia
+## 240. Diferencia
 
 Un `VoltPage` puede contener múltiples componentes.
 
 ---
 
-# 241. Flujo
+## 241. Flujo
 
 ```text
 Volt Page
@@ -3388,13 +3387,13 @@ TransformationResult
 
 ---
 
-# 242. SPAProtocolStrategy
+## 242. SPAProtocolStrategy
 
 Produce directamente una respuesta compatible con el protocolo Volt.
 
 ---
 
-# 243. Resultado
+## 243. Resultado
 
 ```text
 Volt Protocol
@@ -3406,7 +3405,7 @@ SPAResponseBuilder
 
 ---
 
-# 244. Integración
+## 244. Integración
 
 No conoce HTTP.
 
@@ -3414,13 +3413,13 @@ Solo produce un protocolo de aplicación.
 
 ---
 
-# 245. StreamStrategy
+## 245. StreamStrategy
 
 Especializada en flujos continuos.
 
 ---
 
-# 246. Tipos soportados
+## 246. Tipos soportados
 
 ```text
 StreamInterface
@@ -3436,19 +3435,19 @@ Custom Stream
 
 ---
 
-# 247. Filosofía
+## 247. Filosofía
 
 El contenido nunca deberá cargarse completamente en memoria.
 
 ---
 
-# 248. GeneratorStrategy
+## 248. GeneratorStrategy
 
 Especializada en objetos `Generator`.
 
 ---
 
-# 249. Beneficio
+## 249. Beneficio
 
 Permite:
 
@@ -3458,13 +3457,13 @@ Permite:
 
 ---
 
-# 250. DownloadStrategy
+## 250. DownloadStrategy
 
 Especializada en descargas.
 
 ---
 
-# 251. Metadata
+## 251. Metadata
 
 La metadata podrá definir:
 
@@ -3476,7 +3475,7 @@ La metadata podrá definir:
 
 ---
 
-# 252. BinaryStrategy
+## 252. BinaryStrategy
 
 Responsable de archivos binarios.
 
@@ -3489,19 +3488,19 @@ Ejemplos:
 
 ---
 
-# 253. FileStrategy
+## 253. FileStrategy
 
 Especializada en archivos locales o remotos.
 
 ---
 
-# 254. ImageStrategy
+## 254. ImageStrategy
 
 Especializada en imágenes.
 
 ---
 
-# 255. Capacidades
+## 255. Capacidades
 
 Podrá integrar:
 
@@ -3515,37 +3514,37 @@ Siempre mediante motores especializados.
 
 ---
 
-# 256. HtmlStrategy
+## 256. HtmlStrategy
 
 Produce documentos HTML.
 
 ---
 
-# 257. MarkdownStrategy
+## 257. MarkdownStrategy
 
 Transforma Markdown utilizando el motor configurado.
 
 ---
 
-# 258. XmlStrategy
+## 258. XmlStrategy
 
 Produce documentos XML.
 
 ---
 
-# 259. CsvStrategy
+## 259. CsvStrategy
 
 Especializada en exportaciones tabulares.
 
 ---
 
-# 260. AsyncResultStrategy
+## 260. AsyncResultStrategy
 
 Responsable de resultados asíncronos.
 
 ---
 
-# 261. Tipos soportados
+## 261. Tipos soportados
 
 ```text
 Future
@@ -3561,19 +3560,19 @@ Fiber Result
 
 ---
 
-# 262. Filosofía
+## 262. Filosofía
 
 El Engine no bloqueará innecesariamente la ejecución.
 
 ---
 
-# 263. Await Resolver
+## 263. Await Resolver
 
 Resolverá el momento adecuado para materializar el resultado.
 
 ---
 
-# 264. Streaming Asíncrono
+## 264. Streaming Asíncrono
 
 Permitirá combinar:
 
@@ -3591,7 +3590,7 @@ SSE
 
 ---
 
-# 265. Hydration Integration
+## 265. Hydration Integration
 
 El Result Transformation Engine nunca hidrata componentes.
 
@@ -3603,7 +3602,7 @@ Hydration Engine
 
 ---
 
-# 266. Render Integration
+## 266. Render Integration
 
 Toda generación de HTML será responsabilidad del:
 
@@ -3613,7 +3612,7 @@ Volt Render Engine
 
 ---
 
-# 267. Runtime Integration
+## 267. Runtime Integration
 
 Toda construcción del protocolo SPA será responsabilidad del:
 
@@ -3623,13 +3622,13 @@ Volt Runtime
 
 ---
 
-# 268. Component Manifest
+## 268. Component Manifest
 
 Cuando un componente requiera un manifiesto, éste será resuelto por el Runtime.
 
 ---
 
-# 269. SSR Integration
+## 269. SSR Integration
 
 En modo SSR el flujo será:
 
@@ -3651,7 +3650,7 @@ TransformationResult
 
 ---
 
-# 270. SPA Integration
+## 270. SPA Integration
 
 En modo SPA:
 
@@ -3673,31 +3672,31 @@ TransformationResult
 
 ---
 
-# 271. Hybrid Mode
+## 271. Hybrid Mode
 
 Permitirá combinar SSR con hidratación progresiva.
 
 ---
 
-# 272. Islands Architecture
+## 272. Islands Architecture
 
 Los componentes marcados como "Island" conservarán su metadata durante toda la transformación.
 
 ---
 
-# 273. Deferred Components
+## 273. Deferred Components
 
 Los componentes diferidos no serán materializados inmediatamente.
 
 ---
 
-# 274. Progressive Rendering
+## 274. Progressive Rendering
 
 El motor podrá producir resultados parciales cuando la política de renderizado lo permita.
 
 ---
 
-# 275. Transformation Policies
+## 275. Transformation Policies
 
 Cada estrategia podrá consultar políticas declarativas.
 
@@ -3717,7 +3716,7 @@ CachePolicy
 
 ---
 
-# 276. Strategy Composition
+## 276. Strategy Composition
 
 Una estrategia podrá delegar en motores especializados.
 
@@ -3725,13 +3724,13 @@ Nunca en otra estrategia.
 
 ---
 
-# 277. Beneficio
+## 277. Beneficio
 
 Se evita crear dependencias circulares entre estrategias.
 
 ---
 
-# 278. Observabilidad
+## 278. Observabilidad
 
 Cada estrategia avanzada emitirá métricas específicas.
 
@@ -3744,7 +3743,7 @@ Ejemplos:
 
 ---
 
-# 279. Compatibilidad con FrankenPHP
+## 279. Compatibilidad con FrankenPHP
 
 Todas las estrategias deberán ser:
 
@@ -3755,7 +3754,7 @@ Todas las estrategias deberán ser:
 
 ---
 
-# 280. Próxima sección
+## 280. Próxima sección
 
 La Parte 5 desarrollará:
 
@@ -3774,7 +3773,7 @@ La Parte 5 desarrollará:
 
 ---
 
-# 281. Transformation Compiler
+## 281. Transformation Compiler
 
 El **Transformation Compiler** es responsable de convertir la configuración dinámica del Result Transformation Engine en estructuras compiladas e inmutables optimizadas para producción.
 
@@ -3784,7 +3783,7 @@ Su objetivo es que la transformación de resultados en producción sea esencialm
 
 ---
 
-# 282. Objetivos
+## 282. Objetivos
 
 El compilador deberá:
 
@@ -3798,7 +3797,7 @@ El compilador deberá:
 
 ---
 
-# 283. Principios
+## 283. Principios
 
 El compilador seguirá estos principios:
 
@@ -3811,7 +3810,7 @@ El compilador seguirá estos principios:
 
 ---
 
-# 284. Pipeline del Compilador
+## 284. Pipeline del Compilador
 
 ```text
 Transformation Definitions
@@ -3837,7 +3836,7 @@ Compiled Cache
 
 ---
 
-# 285. TransformationCompilerInterface
+## 285. TransformationCompilerInterface
 
 ```php
 interface TransformationCompilerInterface
@@ -3848,7 +3847,7 @@ interface TransformationCompilerInterface
 
 ---
 
-# 286. Implementación
+## 286. Implementación
 
 ```php
 final class TransformationCompiler
@@ -3861,7 +3860,7 @@ La implementación oficial será completamente stateless.
 
 ---
 
-# 287. CompiledTransformationRegistry
+## 287. CompiledTransformationRegistry
 
 Representa el conjunto completo de estrategias compiladas.
 
@@ -3873,7 +3872,7 @@ final readonly class CompiledTransformationRegistry
 
 ---
 
-# 288. Responsabilidades
+## 288. Responsabilidades
 
 El registro compilado contendrá:
 
@@ -3886,13 +3885,13 @@ El registro compilado contendrá:
 
 ---
 
-# 289. Filosofía
+## 289. Filosofía
 
 Durante producción el Engine consultará preferentemente este registro antes que el registro dinámico.
 
 ---
 
-# 290. CompiledTransformationPlan
+## 290. CompiledTransformationPlan
 
 Cada tipo de resultado podrá disponer de un plan compilado.
 
@@ -3904,7 +3903,7 @@ final readonly class CompiledTransformationPlan
 
 ---
 
-# 291. Contenido
+## 291. Contenido
 
 Un plan compilado contendrá, entre otros:
 
@@ -3918,13 +3917,13 @@ Un plan compilado contendrá, entre otros:
 
 ---
 
-# 292. Objetivo
+## 292. Objetivo
 
 Evitar la reconstrucción del pipeline para cada petición.
 
 ---
 
-# 293. TransformationPlanFactory
+## 293. TransformationPlanFactory
 
 Responsable de construir planes dinámicos cuando no exista un plan compilado.
 
@@ -3939,7 +3938,7 @@ interface TransformationPlanFactoryInterface
 
 ---
 
-# 294. Estrategia de resolución
+## 294. Estrategia de resolución
 
 ```text
 Compiled Plan
@@ -3954,7 +3953,7 @@ TransformationPlanFactory
 
 ---
 
-# 295. Dynamic Fallback
+## 295. Dynamic Fallback
 
 Si el plan compilado no es válido o está ausente, el sistema recurrirá automáticamente a la resolución dinámica.
 
@@ -3962,7 +3961,7 @@ Este comportamiento será transparente para el desarrollador.
 
 ---
 
-# 296. Plan Versioning
+## 296. Plan Versioning
 
 Cada plan compilado incluirá:
 
@@ -3976,7 +3975,7 @@ Esto permitirá invalidaciones precisas.
 
 ---
 
-# 297. Strategy Compilation
+## 297. Strategy Compilation
 
 Durante la compilación se resolverán todas las prioridades entre estrategias.
 
@@ -3994,7 +3993,7 @@ El resultado compilado almacenará directamente la estrategia ganadora.
 
 ---
 
-# 298. Strategy Mapping
+## 298. Strategy Mapping
 
 El compilador generará tablas optimizadas similares a:
 
@@ -4009,13 +4008,13 @@ El Engine evitará recorrer el Registry completo.
 
 ---
 
-# 299. Optimización de búsquedas
+## 299. Optimización de búsquedas
 
 Las búsquedas pasarán de una resolución lineal a una resolución prácticamente constante.
 
 ---
 
-# 300. Registry Freeze
+## 300. Registry Freeze
 
 Una vez compilado:
 
@@ -4027,7 +4026,7 @@ El registro será completamente inmutable.
 
 ---
 
-# 301. Cache Architecture
+## 301. Cache Architecture
 
 El Result Transformation Engine utilizará una arquitectura multinivel.
 
@@ -4040,7 +4039,7 @@ L4 → Compiled Cache
 
 ---
 
-# 302. L1 - Execution Cache
+## 302. L1 - Execution Cache
 
 Vive únicamente durante la ejecución de un controlador.
 
@@ -4054,7 +4053,7 @@ Se destruye al finalizar la ejecución.
 
 ---
 
-# 303. L2 - Request Cache
+## 303. L2 - Request Cache
 
 Comparte información durante todo el ciclo de vida de una petición HTTP.
 
@@ -4062,7 +4061,7 @@ Evita recalcular datos cuando múltiples componentes transforman resultados dent
 
 ---
 
-# 304. L3 - Worker Cache
+## 304. L3 - Worker Cache
 
 Disponible únicamente en entornos con procesos persistentes (por ejemplo, FrankenPHP).
 
@@ -4076,7 +4075,7 @@ Almacena:
 
 ---
 
-# 305. L4 - Compiled Cache
+## 305. L4 - Compiled Cache
 
 Representa los artefactos PHP generados durante la compilación.
 
@@ -4084,7 +4083,7 @@ Está diseñado para aprovechar OPcache al máximo.
 
 ---
 
-# 306. Cache Invalidation
+## 306. Cache Invalidation
 
 La invalidación podrá dispararse por:
 
@@ -4096,7 +4095,7 @@ La invalidación podrá dispararse por:
 
 ---
 
-# 307. Metadata Integration
+## 307. Metadata Integration
 
 El Result Transformation Engine nunca leerá atributos PHP directamente.
 
@@ -4104,7 +4103,7 @@ Toda la información será obtenida desde el **Metadata Engine**.
 
 ---
 
-# 308. MetadataBag
+## 308. MetadataBag
 
 Cada transformación recibirá un `MetadataBag` previamente resuelto.
 
@@ -4112,7 +4111,7 @@ Esto elimina múltiples consultas repetidas durante el pipeline.
 
 ---
 
-# 309. Metadata Keys
+## 309. Metadata Keys
 
 Ejemplos de claves consumidas:
 
@@ -4131,13 +4130,13 @@ response.render
 
 ---
 
-# 310. Metadata Merge
+## 310. Metadata Merge
 
 Cuando existan múltiples fuentes de metadata (controlador, ruta, componente, configuración), el Engine utilizará las estrategias de mezcla definidas por el `Metadata Engine`.
 
 ---
 
-# 311. Performance Model
+## 311. Performance Model
 
 El objetivo principal es minimizar:
 
@@ -4149,7 +4148,7 @@ El objetivo principal es minimizar:
 
 ---
 
-# 312. Diseño para OPcache
+## 312. Diseño para OPcache
 
 Todos los artefactos compilados serán clases PHP simples, favoreciendo:
 
@@ -4160,7 +4159,7 @@ Todos los artefactos compilados serán clases PHP simples, favoreciendo:
 
 ---
 
-# 313. Compatibilidad con FrankenPHP
+## 313. Compatibilidad con FrankenPHP
 
 Todos los objetos almacenados en el Worker Cache deberán ser:
 
@@ -4172,7 +4171,7 @@ Todos los objetos almacenados en el Worker Cache deberán ser:
 
 ---
 
-# 314. Seguridad de Memoria
+## 314. Seguridad de Memoria
 
 Nunca se almacenarán en caché:
 
@@ -4184,7 +4183,7 @@ Nunca se almacenarán en caché:
 
 ---
 
-# 315. Objetos compartibles
+## 315. Objetos compartibles
 
 Sí podrán compartirse:
 
@@ -4197,13 +4196,13 @@ Sí podrán compartirse:
 
 ---
 
-# 316. Warmup
+## 316. Warmup
 
 El compilador podrá ejecutarse durante el proceso de despliegue para generar todos los artefactos antes de recibir tráfico.
 
 ---
 
-# 317. Recompilación
+## 317. Recompilación
 
 El sistema permitirá recompilar únicamente los módulos afectados cuando cambien:
 
@@ -4215,13 +4214,13 @@ Sin necesidad de reconstruir todo el registro.
 
 ---
 
-# 318. Resultado
+## 318. Resultado
 
 Al finalizar esta fase, el Result Transformation Engine dispondrá de una infraestructura optimizada para producción, preparada para aprovechar OPcache y los Workers persistentes de FrankenPHP sin sacrificar extensibilidad ni mantenibilidad.
 
 ---
 
-# 319. Próxima sección
+## 319. Próxima sección
 
 La **Parte 05B** desarrollará:
 
@@ -4235,7 +4234,7 @@ La **Parte 05B** desarrollará:
 
 ---
 
-# 320. Observabilidad
+## 320. Observabilidad
 
 El **Result Transformation Engine** deberá integrarse completamente con el sistema de observabilidad de VoltStack.
 
@@ -4245,7 +4244,7 @@ La observabilidad será transversal y desacoplada.
 
 ---
 
-# 321. Objetivos
+## 321. Objetivos
 
 El sistema permitirá:
 
@@ -4258,7 +4257,7 @@ El sistema permitirá:
 
 ---
 
-# 322. Arquitectura
+## 322. Arquitectura
 
 ```text
 Transformation Engine
@@ -4275,7 +4274,7 @@ Event Dispatcher
 
 ---
 
-# 323. Principios
+## 323. Principios
 
 La observabilidad deberá ser:
 
@@ -4287,7 +4286,7 @@ La observabilidad deberá ser:
 
 ---
 
-# 324. Transformation Events
+## 324. Transformation Events
 
 El Engine emitirá eventos durante todo el ciclo de vida.
 
@@ -4295,7 +4294,7 @@ Estos eventos nunca modificarán el resultado de la transformación.
 
 ---
 
-# 325. Eventos principales
+## 325. Eventos principales
 
 ```text
 TransformationStarted
@@ -4321,7 +4320,7 @@ TransformationCompleted
 
 ---
 
-# 326. Strategy Events
+## 326. Strategy Events
 
 Cada estrategia podrá emitir eventos específicos.
 
@@ -4339,7 +4338,7 @@ VoltComponentTransformationFinished
 
 ---
 
-# 327. Builder Events
+## 327. Builder Events
 
 Los builders también serán observables.
 
@@ -4353,7 +4352,7 @@ ResponseBuilt
 
 ---
 
-# 328. Decorator Events
+## 328. Decorator Events
 
 Cada decorador podrá registrar su ejecución.
 
@@ -4373,7 +4372,7 @@ SecurityHeadersApplied
 
 ---
 
-# 329. Error Events
+## 329. Error Events
 
 Cuando ocurra una excepción durante la transformación:
 
@@ -4391,7 +4390,7 @@ El evento contendrá:
 
 ---
 
-# 330. Telemetry Context
+## 330. Telemetry Context
 
 Toda la información de telemetría viajará dentro de un contexto compartido.
 
@@ -4403,7 +4402,7 @@ final readonly class TransformationTelemetryContext
 
 ---
 
-# 331. Contenido
+## 331. Contenido
 
 El contexto podrá incluir:
 
@@ -4418,13 +4417,13 @@ El contexto podrá incluir:
 
 ---
 
-# 332. Metrics System
+## 332. Metrics System
 
 El motor publicará métricas estandarizadas.
 
 ---
 
-# 333. Métricas básicas
+## 333. Métricas básicas
 
 ```text
 transformations.total
@@ -4442,7 +4441,7 @@ decorators.total
 
 ---
 
-# 334. Métricas por estrategia
+## 334. Métricas por estrategia
 
 Ejemplos:
 
@@ -4458,7 +4457,7 @@ strategy.component.duration
 
 ---
 
-# 335. Métricas por Builder
+## 335. Métricas por Builder
 
 ```text
 builder.json.duration
@@ -4472,7 +4471,7 @@ builder.stream.duration
 
 ---
 
-# 336. Métricas por Decorator
+## 336. Métricas por Decorator
 
 ```text
 decorator.headers.duration
@@ -4486,7 +4485,7 @@ decorator.compression.duration
 
 ---
 
-# 337. Histogramas
+## 337. Histogramas
 
 El sistema deberá soportar histogramas para:
 
@@ -4497,7 +4496,7 @@ El sistema deberá soportar histogramas para:
 
 ---
 
-# 338. Counters
+## 338. Counters
 
 Se utilizarán contadores para:
 
@@ -4508,7 +4507,7 @@ Se utilizarán contadores para:
 
 ---
 
-# 339. Gauges
+## 339. Gauges
 
 Ejemplos:
 
@@ -4518,13 +4517,13 @@ Ejemplos:
 
 ---
 
-# 340. Tracing
+## 340. Tracing
 
 El Engine se integrará con el sistema de tracing del framework.
 
 ---
 
-# 341. Span Principal
+## 341. Span Principal
 
 Cada transformación abrirá un span principal.
 
@@ -4534,7 +4533,7 @@ Result Transformation
 
 ---
 
-# 342. Subspans
+## 342. Subspans
 
 ```text
 Inspection
@@ -4552,19 +4551,19 @@ Decorators
 
 ---
 
-# 343. Beneficio
+## 343. Beneficio
 
 Permite detectar rápidamente qué fase consume más tiempo.
 
 ---
 
-# 344. Profiling
+## 344. Profiling
 
 En modo Debug el motor podrá generar perfiles detallados.
 
 ---
 
-# 345. Información del Perfil
+## 345. Información del Perfil
 
 * Tiempo por etapa.
 * Tiempo por estrategia.
@@ -4575,7 +4574,7 @@ En modo Debug el motor podrá generar perfiles detallados.
 
 ---
 
-# 346. Timeline
+## 346. Timeline
 
 El profiler podrá representar la transformación como una línea temporal.
 
@@ -4595,7 +4594,7 @@ Decorate
 
 ---
 
-# 347. Logging
+## 347. Logging
 
 El motor nunca escribirá directamente en un logger concreto.
 
@@ -4603,7 +4602,7 @@ Delegará al sistema de logging del framework.
 
 ---
 
-# 348. Niveles recomendados
+## 348. Niveles recomendados
 
 ```text
 DEBUG
@@ -4621,7 +4620,7 @@ CRITICAL
 
 ---
 
-# 349. Debug Mode
+## 349. Debug Mode
 
 Cuando el framework opere en modo Debug se registrará información adicional.
 
@@ -4634,19 +4633,19 @@ Ejemplos:
 
 ---
 
-# 350. Production Mode
+## 350. Production Mode
 
 En producción la observabilidad minimizará el impacto sobre el rendimiento.
 
 ---
 
-# 351. Benchmarking
+## 351. Benchmarking
 
 El Engine incluirá benchmarks oficiales.
 
 ---
 
-# 352. Casos de Benchmark
+## 352. Casos de Benchmark
 
 ```text
 Scalar
@@ -4670,7 +4669,7 @@ Stream
 
 ---
 
-# 353. Indicadores
+## 353. Indicadores
 
 Se medirán:
 
@@ -4681,7 +4680,7 @@ Se medirán:
 
 ---
 
-# 354. Objetivo
+## 354. Objetivo
 
 Comparar el rendimiento entre:
 
@@ -4691,13 +4690,13 @@ Comparar el rendimiento entre:
 
 ---
 
-# 355. Testing Strategy
+## 355. Testing Strategy
 
 El Result Transformation Engine contará con una estrategia de pruebas específica.
 
 ---
 
-# 356. Niveles de prueba
+## 356. Niveles de prueba
 
 ```text
 Unit
@@ -4713,19 +4712,19 @@ Concurrency
 
 ---
 
-# 357. Unit Tests
+## 357. Unit Tests
 
 Cada estrategia tendrá pruebas independientes.
 
 ---
 
-# 358. Integration Tests
+## 358. Integration Tests
 
 Validarán el pipeline completo.
 
 ---
 
-# 359. Functional Tests
+## 359. Functional Tests
 
 Verificarán la integración con:
 
@@ -4736,7 +4735,7 @@ Verificarán la integración con:
 
 ---
 
-# 360. Performance Tests
+## 360. Performance Tests
 
 Compararán:
 
@@ -4745,13 +4744,13 @@ Compararán:
 
 ---
 
-# 361. Concurrency Tests
+## 361. Concurrency Tests
 
 Especialmente relevantes para FrankenPHP.
 
 ---
 
-# 362. Casos
+## 362. Casos
 
 Se validará que:
 
@@ -4761,7 +4760,7 @@ Se validará que:
 
 ---
 
-# 363. Failure Tests
+## 363. Failure Tests
 
 El sistema deberá probar:
 
@@ -4772,13 +4771,13 @@ El sistema deberá probar:
 
 ---
 
-# 364. Recovery Tests
+## 364. Recovery Tests
 
 Verificarán que el motor pueda volver a la resolución dinámica cuando falle un plan compilado.
 
 ---
 
-# 365. Compatibilidad
+## 365. Compatibilidad
 
 Las pruebas deberán ejecutarse sobre:
 
@@ -4789,7 +4788,7 @@ Las pruebas deberán ejecutarse sobre:
 
 ---
 
-# 366. Diagnóstico
+## 366. Diagnóstico
 
 El Engine expondrá un modo diagnóstico para desarrolladores.
 
@@ -4803,13 +4802,13 @@ Permitirá visualizar:
 
 ---
 
-# 367. Health Checks
+## 367. Health Checks
 
 El sistema podrá ejecutar verificaciones de consistencia antes del arranque de la aplicación.
 
 ---
 
-# 368. Validaciones
+## 368. Validaciones
 
 Ejemplos:
 
@@ -4820,13 +4819,13 @@ Ejemplos:
 
 ---
 
-# 369. Objetivo
+## 369. Objetivo
 
 Detectar problemas durante el despliegue y no en tiempo de ejecución.
 
 ---
 
-# 370. Próxima sección
+## 370. Próxima sección
 
 La **Parte 05C** cerrará el documento con:
 
@@ -4839,13 +4838,15 @@ La **Parte 05C** cerrará el documento con:
 * Recomendaciones de implementación.
 * Conclusiones finales.
 
-# 09_RESULT_TRANSFORMATION_ENGINE_PART_05C.md
+
+## Part 05C
+
 
 > Continuación de **09_RESULT_TRANSFORMATION_ENGINE_PART_05B.md**
 
 ---
 
-# 371. Organización del módulo
+## 371. Organización del módulo
 
 El **Result Transformation Engine** se organizará siguiendo la arquitectura modular de VoltStack.
 
@@ -4853,7 +4854,7 @@ Cada responsabilidad deberá vivir en un namespace independiente, evitando clase
 
 ---
 
-# 372. Objetivos de la estructura
+## 372. Objetivos de la estructura
 
 La organización deberá:
 
@@ -4865,7 +4866,7 @@ La organización deberá:
 
 ---
 
-# 373. Estructura de directorios
+## 373. Estructura de directorios
 
 ```text
 Quantum/
@@ -4904,7 +4905,7 @@ Quantum/
 
 ---
 
-# 374. Contracts
+## 374. Contracts
 
 Contendrá únicamente interfaces públicas del módulo.
 
@@ -4919,7 +4920,7 @@ Ejemplos:
 
 ---
 
-# 375. Engine
+## 375. Engine
 
 Implementación del orquestador principal.
 
@@ -4927,7 +4928,7 @@ Responsable exclusivamente del pipeline de transformación.
 
 ---
 
-# 376. Inspector
+## 376. Inspector
 
 Contendrá:
 
@@ -4937,7 +4938,7 @@ Contendrá:
 
 ---
 
-# 377. Definitions
+## 377. Definitions
 
 Modelos inmutables del dominio.
 
@@ -4950,7 +4951,7 @@ Ejemplos:
 
 ---
 
-# 378. Context
+## 378. Context
 
 Agrupará los objetos de contexto.
 
@@ -4960,7 +4961,7 @@ Agrupará los objetos de contexto.
 
 ---
 
-# 379. Strategies
+## 379. Strategies
 
 Las estrategias se organizarán por dominio.
 
@@ -4980,7 +4981,7 @@ Esto evita un único directorio con decenas de clases.
 
 ---
 
-# 380. Registry
+## 380. Registry
 
 Contendrá:
 
@@ -4992,7 +4993,7 @@ Todos implementarán el mismo patrón de registro utilizado en otros módulos de
 
 ---
 
-# 381. Planning
+## 381. Planning
 
 Responsable de:
 
@@ -5003,7 +5004,7 @@ Responsable de:
 
 ---
 
-# 382. Compiler
+## 382. Compiler
 
 Contendrá exclusivamente la lógica de compilación.
 
@@ -5011,25 +5012,25 @@ Nunca será utilizada directamente por el runtime de producción.
 
 ---
 
-# 383. Cache
+## 383. Cache
 
 Implementará los distintos niveles de caché definidos anteriormente.
 
 ---
 
-# 384. Builders
+## 384. Builders
 
 Contendrá todos los Response Builders oficiales.
 
 ---
 
-# 385. Decorators
+## 385. Decorators
 
 Contendrá todos los Response Decorators oficiales.
 
 ---
 
-# 386. Negotiation
+## 386. Negotiation
 
 Motor especializado en negociación de contenido.
 
@@ -5042,7 +5043,7 @@ Responsable de:
 
 ---
 
-# 387. Metadata
+## 387. Metadata
 
 Adaptadores hacia el Metadata Engine.
 
@@ -5050,31 +5051,31 @@ Nunca contendrá lógica de reflexión.
 
 ---
 
-# 388. Events
+## 388. Events
 
 Definición de eventos emitidos por el módulo.
 
 ---
 
-# 389. Metrics
+## 389. Metrics
 
 Implementaciones de métricas internas.
 
 ---
 
-# 390. Diagnostics
+## 390. Diagnostics
 
 Herramientas de depuración y diagnóstico.
 
 ---
 
-# 391. Benchmark
+## 391. Benchmark
 
 Casos oficiales de medición de rendimiento.
 
 ---
 
-# 392. Exceptions
+## 392. Exceptions
 
 Excepciones específicas del módulo.
 
@@ -5087,13 +5088,13 @@ Ejemplos:
 
 ---
 
-# 393. Providers
+## 393. Providers
 
 Registro de servicios del contenedor.
 
 ---
 
-# 394. Configuración
+## 394. Configuración
 
 El módulo expondrá una configuración dedicada.
 
@@ -5119,7 +5120,7 @@ return [
 
 ---
 
-# 395. Integración con el Container
+## 395. Integración con el Container
 
 Todos los servicios serán registrados mediante el Container de VoltStack.
 
@@ -5127,7 +5128,7 @@ El Engine nunca instanciará dependencias manualmente.
 
 ---
 
-# 396. Service Registration
+## 396. Service Registration
 
 Durante el bootstrap se registrarán:
 
@@ -5141,7 +5142,7 @@ Durante el bootstrap se registrarán:
 
 ---
 
-# 397. Boot Sequence
+## 397. Boot Sequence
 
 ```text
 Framework Boot
@@ -5177,7 +5178,7 @@ Ready
 
 ---
 
-# 398. Integración con HttpKernel
+## 398. Integración con HttpKernel
 
 El `HttpKernel` interactuará con un único punto de entrada:
 
@@ -5189,7 +5190,7 @@ Nunca conocerá estrategias ni builders concretos.
 
 ---
 
-# 399. Integración con ControllerInvoker
+## 399. Integración con ControllerInvoker
 
 El `ControllerInvoker` devolverá un resultado bruto (`mixed`).
 
@@ -5197,7 +5198,7 @@ La transformación será responsabilidad exclusiva del Result Transformation Eng
 
 ---
 
-# 400. Integración con Render Engine
+## 400. Integración con Render Engine
 
 Las estrategias relacionadas con vistas delegarán el renderizado al Render Engine.
 
@@ -5205,13 +5206,13 @@ Esta separación evita duplicar responsabilidades.
 
 ---
 
-# 401. Integración con Hydration Engine
+## 401. Integración con Hydration Engine
 
 Las estrategias SPA delegarán la hidratación al Hydration Engine.
 
 ---
 
-# 402. Integración con Runtime SPA
+## 402. Integración con Runtime SPA
 
 La construcción del Volt Protocol permanecerá centralizada en el Runtime.
 
@@ -5219,7 +5220,7 @@ El Result Transformation Engine únicamente coordinará el flujo.
 
 ---
 
-# 403. Compatibilidad con paquetes
+## 403. Compatibilidad con paquetes
 
 Los paquetes podrán registrar:
 
@@ -5232,7 +5233,7 @@ Sin modificar el núcleo del framework.
 
 ---
 
-# 404. Extensibilidad
+## 404. Extensibilidad
 
 Toda la infraestructura deberá permanecer abierta para:
 
@@ -5244,7 +5245,7 @@ Toda la infraestructura deberá permanecer abierta para:
 
 ---
 
-# 405. ADR-001
+## 405. ADR-001
 
 **El Engine nunca transforma directamente.**
 
@@ -5252,7 +5253,7 @@ Toda transformación pertenece a estrategias especializadas.
 
 ---
 
-# 406. ADR-002
+## 406. ADR-002
 
 **Los Builders nunca inspeccionan resultados originales.**
 
@@ -5260,7 +5261,7 @@ Solo consumen `TransformationResult`.
 
 ---
 
-# 407. ADR-003
+## 407. ADR-003
 
 **Las estrategias son stateless.**
 
@@ -5268,7 +5269,7 @@ Esto garantiza compatibilidad con FrankenPHP y procesos persistentes.
 
 ---
 
-# 408. ADR-004
+## 408. ADR-004
 
 **Toda metadata proviene del Metadata Engine.**
 
@@ -5276,7 +5277,7 @@ Se prohíbe la lectura directa de atributos PHP durante la transformación.
 
 ---
 
-# 409. ADR-005
+## 409. ADR-005
 
 **La compilación es una optimización, no un requisito funcional.**
 
@@ -5284,7 +5285,7 @@ El motor siempre podrá recurrir a la resolución dinámica.
 
 ---
 
-# 410. ADR-006
+## 410. ADR-006
 
 **La observabilidad es transversal.**
 
@@ -5292,7 +5293,7 @@ Nunca deberá mezclarse con la lógica de transformación.
 
 ---
 
-# 411. ADR-007
+## 411. ADR-007
 
 **El Engine debe ser agnóstico del protocolo.**
 
@@ -5300,7 +5301,7 @@ Las respuestas HTTP, SPA o futuras variantes serán responsabilidad de Builders 
 
 ---
 
-# 412. Roadmap V1
+## 412. Roadmap V1
 
 La primera versión incluirá:
 
@@ -5320,7 +5321,7 @@ La primera versión incluirá:
 
 ---
 
-# 413. Roadmap V2
+## 413. Roadmap V2
 
 Se añadirán:
 
@@ -5333,7 +5334,7 @@ Se añadirán:
 
 ---
 
-# 414. Roadmap V3
+## 414. Roadmap V3
 
 Se contemplan:
 
@@ -5345,7 +5346,7 @@ Se contemplan:
 
 ---
 
-# 415. Beneficios del diseño
+## 415. Beneficios del diseño
 
 Esta arquitectura proporciona:
 
@@ -5360,7 +5361,7 @@ Esta arquitectura proporciona:
 
 ---
 
-# 416. Relación con otros motores
+## 416. Relación con otros motores
 
 El Result Transformation Engine se convierte en el punto de unión entre:
 
@@ -5382,7 +5383,7 @@ Con ello se mantiene una clara separación de responsabilidades entre todos los 
 
 ---
 
-# 417. Estado del documento
+## 417. Estado del documento
 
 Con esta parte se considera finalizada la especificación funcional de **09_RESULT_TRANSFORMATION_ENGINE.md** para la versión 1 de VoltStack.
 
@@ -5390,7 +5391,7 @@ Las futuras versiones ampliarán capacidades sin alterar la arquitectura base aq
 
 ---
 
-# 418. Próximo documento recomendado
+## 418. Próximo documento recomendado
 
 Una vez concluido el Result Transformation Engine, el siguiente paso natural dentro del pipeline de ejecución es definir el sistema encargado de convertir la respuesta construida en la salida final del framework.
 

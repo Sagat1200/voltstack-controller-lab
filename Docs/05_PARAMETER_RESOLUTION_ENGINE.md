@@ -1,6 +1,5 @@
-# 05_PARAMETER_RESOLUTION_ENGINE.md
-
 # Motor de resolución de parámetros de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -9,7 +8,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura del motor de resolución de parámetros utilizado por los controladores de VoltStack.
 
@@ -49,7 +48,7 @@ Su salida será un `ResolvedParameterBag`, consumido posteriormente por el `Cont
 
 ---
 
-# 2. Posición dentro del flujo
+## 2. Posición dentro del flujo
 
 ```text
 ControllerDefinition
@@ -90,7 +89,7 @@ $execution->arguments = $execution
 
 ---
 
-# 3. Objetivos
+## 3. Objetivos
 
 El motor deberá:
 
@@ -120,37 +119,37 @@ El motor deberá:
 
 ---
 
-# 4. Principios arquitectónicos
+## 4. Principios arquitectónicos
 
 El sistema seguirá los siguientes principios:
 
-## 4.1 Un resolver por responsabilidad
+### 4.1 Un resolver por responsabilidad
 
 Cada fuente o estrategia de resolución tendrá su propio resolver.
 
-## 4.2 Resolución explícita antes que inferencia
+### 4.2 Resolución explícita antes que inferencia
 
 Los atributos declarativos tendrán prioridad sobre las convenciones implícitas.
 
-## 4.3 Tipado antes que nombre
+### 4.3 Tipado antes que nombre
 
 Cuando no exista un atributo explícito, el tipo declarado tendrá prioridad sobre el nombre del parámetro.
 
-## 4.4 No ocultar ambigüedades
+### 4.4 No ocultar ambigüedades
 
 Cuando dos resolvers puedan resolver el mismo parámetro con la misma prioridad, el sistema deberá fallar en lugar de seleccionar uno arbitrariamente.
 
-## 4.5 La compilación no cambia la semántica
+### 4.5 La compilación no cambia la semántica
 
 El modo compilado deberá producir exactamente los mismos valores que el modo dinámico.
 
-## 4.6 El Container resuelve servicios, no datos HTTP
+### 4.6 El Container resuelve servicios, no datos HTTP
 
 Los parámetros que representan servicios se delegarán al Container. Los datos provenientes de la petición se resolverán mediante resolvers HTTP especializados.
 
 ---
 
-# 5. Arquitectura general
+## 5. Arquitectura general
 
 ```text
 ┌─────────────────────────────────┐
@@ -196,7 +195,7 @@ Los parámetros que representan servicios se delegarán al Container. Los datos 
 
 ---
 
-# 6. Contrato principal
+## 6. Contrato principal
 
 ```php
 namespace VoltStack\Quantum\Controllers\Contracts;
@@ -251,7 +250,7 @@ final class ParameterResolutionEngine implements
 
 ---
 
-# 7. ParameterDefinition
+## 7. ParameterDefinition
 
 `ParameterDefinition` representará un parámetro de método de forma independiente de Reflection durante el resto de la ejecución.
 
@@ -283,7 +282,7 @@ En producción compilada, `reflection` podrá ser `null`.
 
 ---
 
-# 8. ParameterTypeDefinition
+## 8. ParameterTypeDefinition
 
 ```php
 final readonly class ParameterTypeDefinition
@@ -337,7 +336,7 @@ Countable&Iterator
 
 ---
 
-# 9. ParameterDefinitionFactory
+## 9. ParameterDefinitionFactory
 
 ```php
 interface ParameterDefinitionFactoryInterface
@@ -357,7 +356,7 @@ En modo compilado podrá cargar definiciones serializadas.
 
 ---
 
-# 10. ResolvedParameter
+## 10. ResolvedParameter
 
 Cada parámetro resuelto conservará información sobre su origen.
 
@@ -380,7 +379,7 @@ final readonly class ResolvedParameter
 
 ---
 
-# 11. ParameterSource
+## 11. ParameterSource
 
 ```php
 enum ParameterSource: string
@@ -413,7 +412,7 @@ enum ParameterSource: string
 
 ---
 
-# 12. ResolvedParameterBag
+## 12. ResolvedParameterBag
 
 ```php
 final class ResolvedParameterBag implements
@@ -482,7 +481,7 @@ final class ResolvedParameterBag implements
 
 ---
 
-# 13. Contrato de resolver de valores
+## 13. Contrato de resolver de valores
 
 ```php
 interface ParameterValueResolverInterface
@@ -505,7 +504,7 @@ Los resolvers deberán ser stateless siempre que sea posible.
 
 ---
 
-# 14. ParameterResolutionResult
+## 14. ParameterResolutionResult
 
 Un resolver podrá:
 
@@ -575,7 +574,7 @@ enum ParameterResolutionStatus: string
 
 ---
 
-# 15. ParameterResolverPipeline
+## 15. ParameterResolverPipeline
 
 ```php
 interface ParameterResolverPipelineInterface
@@ -640,7 +639,7 @@ final class ParameterResolverPipeline implements
 
 ---
 
-# 16. Registro de resolvers
+## 16. Registro de resolvers
 
 ```php
 interface ParameterResolverRegistryInterface
@@ -667,7 +666,7 @@ Los paquetes podrán registrar nuevos resolvers sin modificar el núcleo.
 
 ---
 
-# 17. Orden de precedencia
+## 17. Orden de precedencia
 
 Orden recomendado:
 
@@ -704,7 +703,7 @@ Las resoluciones explícitas mediante atributos tendrán prioridad sobre las con
 
 ---
 
-# 18. Resolución por atributos
+## 18. Resolución por atributos
 
 Los atributos podrán indicar la fuente exacta del parámetro.
 
@@ -734,7 +733,7 @@ Cada atributo deberá implementar o referenciar una estrategia de resolución.
 
 ---
 
-# 19. Contrato de atributo de parámetro
+## 19. Contrato de atributo de parámetro
 
 ```php
 interface ParameterAttributeInterface
@@ -777,7 +776,7 @@ final readonly class Query implements
 
 ---
 
-# 20. Atributos iniciales
+## 20. Atributos iniciales
 
 La primera arquitectura podrá contemplar:
 
@@ -804,7 +803,7 @@ La primera arquitectura podrá contemplar:
 
 ---
 
-# 21. ExplicitAttributeResolver
+## 21. ExplicitAttributeResolver
 
 El `ExplicitAttributeResolver` no necesariamente resolverá el valor directamente.
 
@@ -852,7 +851,7 @@ final class ExplicitAttributeResolver implements
 
 ---
 
-# 22. Conflictos entre atributos
+## 22. Conflictos entre atributos
 
 No se deberán permitir atributos de fuente incompatibles en el mismo parámetro.
 
@@ -883,7 +882,7 @@ CreateUserData $data
 
 ---
 
-# 23. RequestResolver
+## 23. RequestResolver
 
 Resolverá la petición HTTP actual.
 
@@ -929,7 +928,7 @@ public function store(RequestInterface $request): ResponseInterface
 
 ---
 
-# 24. ControllerExecutionResolver
+## 24. ControllerExecutionResolver
 
 Permitirá inyectar el objeto de ejecución cuando sea necesario.
 
@@ -946,7 +945,7 @@ Podrá restringirse mediante configuración.
 
 ---
 
-# 25. ControllerContextResolver
+## 25. ControllerContextResolver
 
 ```php
 public function show(
@@ -959,7 +958,7 @@ Permitirá acceder al contexto inmutable sin utilizar la clase base.
 
 ---
 
-# 26. RouteMatchResolver
+## 26. RouteMatchResolver
 
 ```php
 public function show(
@@ -972,7 +971,7 @@ Resolverá el match actual desde `ControllerContext`.
 
 ---
 
-# 27. RouteParameterResolver
+## 27. RouteParameterResolver
 
 Resolverá valores provenientes de parámetros de ruta.
 
@@ -997,7 +996,7 @@ El nombre del parámetro será utilizado por convención.
 
 ---
 
-# 28. Resolución explícita de ruta
+## 28. Resolución explícita de ruta
 
 ```php
 public function show(
@@ -1011,7 +1010,7 @@ El atributo permite desacoplar el nombre del método del nombre de la ruta.
 
 ---
 
-# 29. Algoritmo de RouteParameterResolver
+## 29. Algoritmo de RouteParameterResolver
 
 ```text
 Read explicit route parameter name
@@ -1033,7 +1032,7 @@ Si no existe el parámetro de ruta, el resolver devolverá `unresolved`, salvo q
 
 ---
 
-# 30. QueryParameterResolver
+## 30. QueryParameterResolver
 
 ```php
 public function index(
@@ -1059,7 +1058,7 @@ No deberá resolver automáticamente cualquier parámetro escalar desde query si
 
 ---
 
-# 31. HeaderParameterResolver
+## 31. HeaderParameterResolver
 
 ```php
 public function index(
@@ -1078,7 +1077,7 @@ Reglas:
 
 ---
 
-# 32. CookieParameterResolver
+## 32. CookieParameterResolver
 
 ```php
 public function dashboard(
@@ -1092,7 +1091,7 @@ El resolver deberá considerar cookies firmadas o cifradas mediante los servicio
 
 ---
 
-# 33. BodyParameterResolver
+## 33. BodyParameterResolver
 
 Resolverá datos de formularios o cuerpo decodificado.
 
@@ -1116,7 +1115,7 @@ public function store(
 
 ---
 
-# 34. JsonBodyParameterResolver
+## 34. JsonBodyParameterResolver
 
 ```php
 public function store(
@@ -1138,7 +1137,7 @@ Cuando el cuerpo no sea JSON válido, deberá lanzar una excepción HTTP especí
 
 ---
 
-# 35. UploadedFileResolver
+## 35. UploadedFileResolver
 
 ```php
 public function upload(
@@ -1171,7 +1170,7 @@ La validación avanzada pertenecerá al módulo de Validation.
 
 ---
 
-# 36. CurrentUserResolver
+## 36. CurrentUserResolver
 
 ```php
 public function profile(
@@ -1206,7 +1205,7 @@ Atributo:
 
 ---
 
-# 37. CurrentTenantResolver
+## 37. CurrentTenantResolver
 
 ```php
 public function index(
@@ -1227,7 +1226,7 @@ Reglas:
 
 ---
 
-# 38. SessionResolver
+## 38. SessionResolver
 
 Podrá resolver la sesión completa:
 
@@ -1252,7 +1251,7 @@ En rutas stateless deberá fallar de manera explícita.
 
 ---
 
-# 39. EnumResolver
+## 39. EnumResolver
 
 ```php
 enum UserStatus: string
@@ -1293,7 +1292,7 @@ y lanzar una excepción descriptiva.
 
 ---
 
-# 40. Unit Enum
+## 40. Unit Enum
 
 Para enums sin valor respaldado:
 
@@ -1316,7 +1315,7 @@ La comparación sensible o insensible a mayúsculas será configurable.
 
 ---
 
-# 41. DateTimeResolver
+## 41. DateTimeResolver
 
 ```php
 public function report(
@@ -1339,7 +1338,7 @@ El timezone deberá provenir del contexto o del atributo.
 
 ---
 
-# 42. ModelResolver
+## 42. ModelResolver
 
 Resolverá modelos o entidades a partir de valores de ruta.
 
@@ -1378,7 +1377,7 @@ User instance
 
 ---
 
-# 43. Model binding explícito
+## 43. Model binding explícito
 
 ```php
 public function show(
@@ -1403,7 +1402,7 @@ Post $post
 
 ---
 
-# 44. ModelBindingManager
+## 44. ModelBindingManager
 
 El resolver no deberá implementar directamente consultas del ORM.
 
@@ -1426,7 +1425,7 @@ Esto permitirá integrar:
 
 ---
 
-# 45. ModelBindingRequest
+## 45. ModelBindingRequest
 
 ```php
 final readonly class ModelBindingRequest
@@ -1448,7 +1447,7 @@ final readonly class ModelBindingRequest
 
 ---
 
-# 46. Scoped binding
+## 46. Scoped binding
 
 Ruta:
 
@@ -1472,7 +1471,7 @@ Esto evita acceso horizontal entre tenants u organizaciones.
 
 ---
 
-# 47. Binding faltante
+## 47. Binding faltante
 
 Cuando un modelo requerido no exista:
 
@@ -1498,7 +1497,7 @@ la política podrá devolver `null`, aunque se recomienda usar nullable solo cua
 
 ---
 
-# 48. DtoResolver
+## 48. DtoResolver
 
 Resolverá DTOs desde distintas fuentes de entrada.
 
@@ -1525,7 +1524,7 @@ public function store(
 
 ---
 
-# 49. Estrategias de DTO
+## 49. Estrategias de DTO
 
 El DTO podrá crearse mediante:
 
@@ -1554,7 +1553,7 @@ interface DtoHydratorInterface
 
 ---
 
-# 50. Fuente de datos de DTO
+## 50. Fuente de datos de DTO
 
 La fuente podrá declararse:
 
@@ -1583,7 +1582,7 @@ o una política predeterminada basada en el verbo HTTP.
 
 ---
 
-# 51. DTO y validación
+## 51. DTO y validación
 
 El DTO resolver podrá:
 
@@ -1611,9 +1610,9 @@ o producir un DTO provisional para el `ValidationStage`.
 
 ---
 
-# 52. Estrategias de validación de DTO
+## 52. Estrategias de validación de DTO
 
-## 52.1 Validación durante resolución
+### 52.1 Validación durante resolución
 
 ```text
 Input
@@ -1625,7 +1624,7 @@ Create DTO
 
 Ventaja: el controlador siempre recibe un DTO válido.
 
-## 52.2 Validación en ValidationStage
+### 52.2 Validación en ValidationStage
 
 ```text
 Input
@@ -1647,7 +1646,7 @@ Recomendación de VoltStack:
 
 ---
 
-# 53. ServiceResolver
+## 53. ServiceResolver
 
 Resolverá dependencias desde el Container.
 
@@ -1668,7 +1667,7 @@ El resolver deberá comprobar:
 
 ---
 
-# 54. Regla de prioridad entre Model y Service
+## 54. Regla de prioridad entre Model y Service
 
 Una clase como `User` podría estar registrada en el Container, pero también representar un modelo.
 
@@ -1690,7 +1689,7 @@ Así se evita que modelos se resuelvan accidentalmente como servicios.
 
 ---
 
-# 55. FromContainer explícito
+## 55. FromContainer explícito
 
 ```php
 public function index(
@@ -1711,7 +1710,7 @@ Solo IDs permitidos podrán utilizarse.
 
 ---
 
-# 56. CollectionResolver
+## 56. CollectionResolver
 
 Resolverá colecciones tipadas cuando exista metadata suficiente.
 
@@ -1739,7 +1738,7 @@ La semántica de colecciones deberá ser explícita para evitar consultas inespe
 
 ---
 
-# 57. PaginationResolver
+## 57. PaginationResolver
 
 ```php
 public function index(
@@ -1771,7 +1770,7 @@ Este resolver podrá vivir inicialmente en un paquete opcional.
 
 ---
 
-# 58. LocaleResolver
+## 58. LocaleResolver
 
 ```php
 public function index(
@@ -1793,7 +1792,7 @@ La negociación real deberá pertenecer al módulo de Localization.
 
 ---
 
-# 59. ScalarCoercionResolver
+## 59. ScalarCoercionResolver
 
 Permitirá convertir valores HTTP escalares al tipo declarado.
 
@@ -1822,7 +1821,7 @@ La coerción deberá ser estricta y configurable.
 
 ---
 
-# 60. Reglas para enteros
+## 60. Reglas para enteros
 
 Valores aceptables:
 
@@ -1845,7 +1844,7 @@ salvo que nullable o default lo permitan.
 
 ---
 
-# 61. Reglas para booleanos
+## 61. Reglas para booleanos
 
 Valores posibles:
 
@@ -1876,7 +1875,7 @@ porque `"false"` se convertiría incorrectamente en `true`.
 
 ---
 
-# 62. Arrays
+## 62. Arrays
 
 Los arrays no deberán construirse automáticamente desde cadenas separadas por comas, salvo atributo explícito.
 
@@ -1891,7 +1890,7 @@ Sin atributo, se requerirá una entrada realmente estructurada como array.
 
 ---
 
-# 63. Parámetros nullable
+## 63. Parámetros nullable
 
 ```php
 public function index(?string $search): ResponseInterface
@@ -1908,7 +1907,7 @@ public function index(?string $search): ResponseInterface
 
 ---
 
-# 64. Valores por defecto
+## 64. Valores por defecto
 
 ```php
 public function index(
@@ -1923,7 +1922,7 @@ El valor por defecto deberá validarse contra el tipo del parámetro.
 
 ---
 
-# 65. Orden entre default y nullable
+## 65. Orden entre default y nullable
 
 Para:
 
@@ -1957,7 +1956,7 @@ NullableResolver
 
 ---
 
-# 66. Parámetros sin tipo
+## 66. Parámetros sin tipo
 
 ```php
 public function legacy($value): ResponseInterface
@@ -1978,7 +1977,7 @@ Se recomendará declarar tipos en todos los controladores.
 
 ---
 
-# 67. Parámetros mixed
+## 67. Parámetros mixed
 
 ```php
 public function handle(
@@ -1994,7 +1993,7 @@ Sin atributo, el motor deberá considerarlo ambiguo.
 
 ---
 
-# 68. Union types
+## 68. Union types
 
 ```php
 public function show(
@@ -2025,7 +2024,7 @@ AmbiguousUnionParameterException
 
 ---
 
-# 69. Union con null
+## 69. Union con null
 
 ```php
 User|null
@@ -2035,7 +2034,7 @@ se tratará como nullable y no como una unión ambigua.
 
 ---
 
-# 70. Intersection types
+## 70. Intersection types
 
 ```php
 public function process(
@@ -2054,7 +2053,7 @@ El valor deberá implementar todos los tipos declarados.
 
 ---
 
-# 71. Parámetros variádicos
+## 71. Parámetros variádicos
 
 ```php
 public function report(
@@ -2076,7 +2075,7 @@ El invoker deberá expandirlos correctamente.
 
 ---
 
-# 72. Parámetros por referencia
+## 72. Parámetros por referencia
 
 ```php
 public function legacy(
@@ -2097,7 +2096,7 @@ Esto simplifica resolución, compilación y seguridad.
 
 ---
 
-# 73. Named arguments internos
+## 73. Named arguments internos
 
 El motor mantendrá resolución por posición para invocación.
 
@@ -2115,7 +2114,7 @@ $bag->value('user');
 
 ---
 
-# 74. Dependencias entre parámetros
+## 74. Dependencias entre parámetros
 
 Algunos parámetros podrán depender de otros.
 
@@ -2137,7 +2136,7 @@ Esto coincide con el orden de la firma y permite scoped bindings.
 
 ---
 
-# 75. ParameterResolutionContext
+## 75. ParameterResolutionContext
 
 Cada resolución podrá recibir un contexto específico.
 
@@ -2159,7 +2158,7 @@ Esto permitirá que un resolver consulte valores ya resueltos.
 
 ---
 
-# 76. Contrato actualizado del resolver
+## 76. Contrato actualizado del resolver
 
 Para soportar dependencias:
 
@@ -2182,7 +2181,7 @@ interface ParameterValueResolverInterface
 
 ---
 
-# 77. Resolución completa del método
+## 77. Resolución completa del método
 
 ```php
 public function resolve(
@@ -2216,7 +2215,7 @@ public function resolve(
 
 ---
 
-# 78. Ambigüedad de resolvers
+## 78. Ambigüedad de resolvers
 
 En modo debug, el pipeline podrá identificar todos los resolvers que soportan un parámetro.
 
@@ -2238,7 +2237,7 @@ El error deberá mostrar:
 
 ---
 
-# 79. Resolución fallida
+## 79. Resolución fallida
 
 Ejemplo de mensaje:
 
@@ -2271,7 +2270,7 @@ Route parameter [user] was not found and the parameter is required.
 
 ---
 
-# 80. Validación del valor resuelto
+## 80. Validación del valor resuelto
 
 Antes de aceptar un valor, deberá verificarse:
 
@@ -2305,7 +2304,7 @@ interface ParameterResolutionValidatorInterface
 
 ---
 
-# 81. Coerción vs validación
+## 81. Coerción vs validación
 
 La coerción transforma:
 
@@ -2331,7 +2330,7 @@ cuando haya transformado el valor.
 
 ---
 
-# 82. Plan compilado de parámetros
+## 82. Plan compilado de parámetros
 
 ```php
 final readonly class CompiledParameterPlan
@@ -2355,7 +2354,7 @@ final readonly class CompiledParameterPlan
 
 ---
 
-# 83. CompiledMethodParameterPlan
+## 83. CompiledMethodParameterPlan
 
 ```php
 final readonly class CompiledMethodParameterPlan
@@ -2375,7 +2374,7 @@ final readonly class CompiledMethodParameterPlan
 
 ---
 
-# 84. Resolución compilada
+## 84. Resolución compilada
 
 En producción:
 
@@ -2404,7 +2403,7 @@ No será necesario:
 
 ---
 
-# 85. ParameterResolutionPlanCompiler
+## 85. ParameterResolutionPlanCompiler
 
 ```php
 interface ParameterResolutionPlanCompilerInterface
@@ -2427,7 +2426,7 @@ El compilador deberá:
 
 ---
 
-# 86. Verificación de plan compilado
+## 86. Verificación de plan compilado
 
 El plan será inválido cuando cambie:
 
@@ -2445,7 +2444,7 @@ En producción podrá fallar de forma estricta o hacer fallback dinámico.
 
 ---
 
-# 87. Caché de definiciones
+## 87. Caché de definiciones
 
 Además del plan compilado, el modo dinámico podrá cachear:
 
@@ -2467,7 +2466,7 @@ No deberá cachear:
 
 ---
 
-# 88. ParameterResolutionCache
+## 88. ParameterResolutionCache
 
 ```php
 interface ParameterResolutionCacheInterface
@@ -2494,7 +2493,7 @@ interface ParameterResolutionCacheInterface
 
 ---
 
-# 89. Seguridad
+## 89. Seguridad
 
 El motor deberá:
 
@@ -2515,7 +2514,7 @@ El motor deberá:
 
 ---
 
-# 90. Protección contra mass assignment
+## 90. Protección contra mass assignment
 
 La hidratación de DTOs no deberá asignar automáticamente cualquier propiedad pública.
 
@@ -2542,7 +2541,7 @@ final readonly class CreateUserData
 
 ---
 
-# 91. Protección de datos sensibles
+## 91. Protección de datos sensibles
 
 Parámetros como:
 
@@ -2575,7 +2574,7 @@ Estos valores no aparecerán en:
 
 ---
 
-# 92. Integración con autorización
+## 92. Integración con autorización
 
 El `ResolvedParameterBag` permitirá atributos como:
 
@@ -2593,7 +2592,7 @@ Esto evita volver a resolver modelos o datos.
 
 ---
 
-# 93. Integración con validación
+## 93. Integración con validación
 
 El `ValidationStage` podrá consultar:
 
@@ -2616,7 +2615,7 @@ Los valores sensibles deberán omitirse.
 
 ---
 
-# 94. Integración con model binding
+## 94. Integración con model binding
 
 Los modelos resueltos deberán almacenarse en el bag.
 
@@ -2632,7 +2631,7 @@ Esto permite:
 
 ---
 
-# 95. Integración con SPA Runtime
+## 95. Integración con SPA Runtime
 
 El motor podrá incluir resolvers opcionales para:
 
@@ -2658,7 +2657,7 @@ Estos resolvers pertenecerán al módulo SPA o Component Runtime.
 
 ---
 
-# 96. Integración con Server Actions
+## 96. Integración con Server Actions
 
 Las Actions podrán recibir:
 
@@ -2675,7 +2674,7 @@ El paquete de Actions registrará sus resolvers especializados.
 
 ---
 
-# 97. Integración con WebSockets
+## 97. Integración con WebSockets
 
 Un adaptador futuro podrá registrar:
 
@@ -2689,7 +2688,7 @@ El motor no deberá estar acoplado exclusivamente a HTTP, aunque la V1 se enfoqu
 
 ---
 
-# 98. Observabilidad
+## 98. Observabilidad
 
 Métricas:
 
@@ -2725,7 +2724,7 @@ No se deberán usar valores de parámetros como tags.
 
 ---
 
-# 99. Eventos
+## 99. Eventos
 
 Eventos propuestos:
 
@@ -2747,7 +2746,7 @@ Los eventos por parámetro podrán desactivarse en producción.
 
 ---
 
-# 100. Debugging
+## 100. Debugging
 
 La debug toolbar podrá mostrar:
 
@@ -2782,7 +2781,7 @@ Los valores sensibles no se mostrarán.
 
 ---
 
-# 101. Excepciones
+## 101. Excepciones
 
 Excepciones previstas:
 
@@ -2818,7 +2817,7 @@ StaleParameterResolutionPlanException
 
 ---
 
-# 102. Ejemplo de excepción
+## 102. Ejemplo de excepción
 
 ```text
 Unable to resolve controller parameter.
@@ -2849,7 +2848,7 @@ En producción, el raw value podrá ocultarse según sensibilidad.
 
 ---
 
-# 103. Configuración
+## 103. Configuración
 
 Archivo sugerido:
 
@@ -2912,7 +2911,7 @@ return [
 
 ---
 
-# 104. Registro en el Container
+## 104. Registro en el Container
 
 ```php
 $container->singleton(
@@ -2950,7 +2949,7 @@ Los resolvers stateless podrán registrarse como singleton.
 
 ---
 
-# 105. Bootstrapping
+## 105. Bootstrapping
 
 Durante `register`:
 
@@ -2973,7 +2972,7 @@ Durante `boot`:
 
 ---
 
-# 106. Resolvers iniciales del núcleo
+## 106. Resolvers iniciales del núcleo
 
 La V1 deberá registrar:
 
@@ -3005,7 +3004,7 @@ Algunos podrán pertenecer a módulos opcionales y cargarse solo cuando estén i
 
 ---
 
-# 107. Estructura de directorios
+## 107. Estructura de directorios
 
 ```text
 src/
@@ -3183,7 +3182,7 @@ src/
 
 ---
 
-# 108. Implementación mínima para V1
+## 108. Implementación mínima para V1
 
 La V1 deberá incluir:
 
@@ -3229,7 +3228,7 @@ Podrán posponerse:
 
 ---
 
-# 109. Ejemplo completo
+## 109. Ejemplo completo
 
 Ruta:
 
@@ -3363,7 +3362,7 @@ $bag->orderedValues();
 
 ---
 
-# 110. Pruebas unitarias
+## 110. Pruebas unitarias
 
 Casos mínimos:
 
@@ -3399,7 +3398,7 @@ Casos mínimos:
 
 ---
 
-# 111. Pruebas de integración
+## 111. Pruebas de integración
 
 * Routing → Parameter Engine.
 * Container → ServiceResolver.
@@ -3416,7 +3415,7 @@ Casos mínimos:
 
 ---
 
-# 112. Prueba de contaminación
+## 112. Prueba de contaminación
 
 ```php
 public function test_resolved_parameters_are_not_shared_between_requests(): void
@@ -3441,7 +3440,7 @@ public function test_resolved_parameters_are_not_shared_between_requests(): void
 
 ---
 
-# 113. Benchmarks
+## 113. Benchmarks
 
 Escenarios:
 
@@ -3475,9 +3474,9 @@ Métricas:
 
 ---
 
-# 114. Decisiones arquitectónicas
+## 114. Decisiones arquitectónicas
 
-## ADR-CTRL-PARAM-001
+### ADR-CTRL-PARAM-001
 
 **Decisión:** La resolución se dividirá en resolvers especializados.
 
@@ -3485,7 +3484,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-002
+### ADR-CTRL-PARAM-002
 
 **Decisión:** La salida será un `ResolvedParameterBag`.
 
@@ -3493,7 +3492,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-003
+### ADR-CTRL-PARAM-003
 
 **Decisión:** Los atributos explícitos tendrán prioridad.
 
@@ -3501,7 +3500,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-004
+### ADR-CTRL-PARAM-004
 
 **Decisión:** Los parámetros se resolverán de izquierda a derecha.
 
@@ -3509,7 +3508,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-005
+### ADR-CTRL-PARAM-005
 
 **Decisión:** ModelResolver tendrá prioridad sobre ServiceResolver.
 
@@ -3517,7 +3516,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-006
+### ADR-CTRL-PARAM-006
 
 **Decisión:** El Container resolverá servicios, no datos HTTP.
 
@@ -3525,7 +3524,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-007
+### ADR-CTRL-PARAM-007
 
 **Decisión:** La coerción escalar será estricta.
 
@@ -3533,7 +3532,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-008
+### ADR-CTRL-PARAM-008
 
 **Decisión:** Los parámetros ambiguos producirán error.
 
@@ -3541,7 +3540,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-009
+### ADR-CTRL-PARAM-009
 
 **Decisión:** Los parámetros por referencia no se soportarán en V1.
 
@@ -3549,7 +3548,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-010
+### ADR-CTRL-PARAM-010
 
 **Decisión:** La compilación preseleccionará el resolver por parámetro.
 
@@ -3557,7 +3556,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-011
+### ADR-CTRL-PARAM-011
 
 **Decisión:** Los valores resueltos nunca se almacenarán en caché global.
 
@@ -3565,7 +3564,7 @@ Métricas:
 
 ---
 
-## ADR-CTRL-PARAM-012
+### ADR-CTRL-PARAM-012
 
 **Decisión:** La hidratación de DTO y su validación permanecerán conceptualmente separadas.
 
@@ -3573,7 +3572,7 @@ Métricas:
 
 ---
 
-# 115. Criterios de aceptación
+## 115. Criterios de aceptación
 
 El motor se considerará correctamente implementado cuando:
 
@@ -3605,7 +3604,7 @@ El motor se considerará correctamente implementado cuando:
 
 ---
 
-# 116. Conclusión
+## 116. Conclusión
 
 El `Parameter Resolution Engine` será uno de los motores centrales del sistema de controladores de VoltStack.
 

@@ -1,6 +1,5 @@
-# CONTROLLER_TESTING_ARCHITECTURE.md
+# Arquitectura de pruebas del subsistema Controllers de VoltStack
 
-## Arquitectura de pruebas del subsistema Controllers de VoltStack
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Controller Testing Architecture** define la estrategia completa de verificación del subsistema Controllers de VoltStack.
 
@@ -57,7 +56,7 @@ La estrategia de pruebas deberá verificar no solo cada componente, sino tambié
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Garantizar que el subsistema Controllers sea:
 
@@ -74,7 +73,7 @@ Garantizar que el subsistema Controllers sea:
 
 ---
 
-# 3. Principios de testing
+## 3. Principios de testing
 
 La arquitectura seguirá estos principios:
 
@@ -95,7 +94,7 @@ La arquitectura seguirá estos principios:
 
 ---
 
-# 4. Objetivos de cobertura
+## 4. Objetivos de cobertura
 
 La cobertura deberá verificarse en varias dimensiones:
 
@@ -115,7 +114,7 @@ La cobertura de líneas no será suficiente por sí sola.
 
 ---
 
-# 5. Pirámide de pruebas
+## 5. Pirámide de pruebas
 
 ```text
                  End-to-End
@@ -137,7 +136,7 @@ Distribución orientativa:
 
 ---
 
-# 6. Tipos principales de pruebas
+## 6. Tipos principales de pruebas
 
 ```text
 Unit Tests
@@ -161,7 +160,7 @@ End-to-End Tests
 
 ---
 
-# 7. Organización del módulo Testing
+## 7. Organización del módulo Testing
 
 El módulo deberá proporcionar:
 
@@ -181,7 +180,7 @@ El módulo deberá proporcionar:
 
 ---
 
-# 8. Estructura general de pruebas
+## 8. Estructura general de pruebas
 
 ```text
 tests/
@@ -205,7 +204,7 @@ tests/
 
 ---
 
-# 9. Convenciones de nombres
+## 9. Convenciones de nombres
 
 Clases de prueba:
 
@@ -227,7 +226,7 @@ it_releases_resources_after_a_failed_transport
 
 ---
 
-# 10. Estilo de pruebas
+## 10. Estilo de pruebas
 
 El estilo recomendado será:
 
@@ -253,7 +252,7 @@ Las pruebas deberán expresar:
 
 ---
 
-# 11. TestCase base
+## 11. TestCase base
 
 ```php
 abstract class ControllerTestCase extends TestCase
@@ -271,7 +270,7 @@ abstract class ControllerTestCase extends TestCase
 
 ---
 
-# 12. ControllerTestEnvironment
+## 12. ControllerTestEnvironment
 
 ```php
 final class ControllerTestEnvironment
@@ -291,7 +290,7 @@ final class ControllerTestEnvironment
 
 ---
 
-# 13. Determinismo
+## 13. Determinismo
 
 Los tests deberán controlar:
 
@@ -306,7 +305,7 @@ Los tests deberán controlar:
 
 ---
 
-# 14. FakeClock
+## 14. FakeClock
 
 ```php
 interface TestClockInterface
@@ -328,7 +327,7 @@ Esto permitirá probar:
 
 ---
 
-# 15. DeterministicIdGenerator
+## 15. DeterministicIdGenerator
 
 ```php
 final class DeterministicIdGenerator
@@ -344,7 +343,7 @@ final class DeterministicIdGenerator
 
 ---
 
-# 16. Fixtures
+## 16. Fixtures
 
 Los fixtures oficiales deberán incluir:
 
@@ -364,7 +363,7 @@ AsyncLikeController
 
 ---
 
-# 17. Fixture controllers
+## 17. Fixture controllers
 
 Ejemplo:
 
@@ -380,7 +379,7 @@ final class SimpleController
 
 ---
 
-# 18. Fixture routes
+## 18. Fixture routes
 
 Deberán existir definiciones pequeñas para:
 
@@ -397,7 +396,7 @@ Deberán existir definiciones pequeñas para:
 
 ---
 
-# 19. Builders
+## 19. Builders
 
 La arquitectura deberá incluir builders para reducir ruido.
 
@@ -411,7 +410,7 @@ $execution = ControllerExecutionBuilder::new()
 
 ---
 
-# 20. Builders oficiales
+## 20. Builders oficiales
 
 ```text
 ControllerExecutionBuilder
@@ -427,7 +426,7 @@ ObservabilityContextBuilder
 
 ---
 
-# 21. Assertions especializadas
+## 21. Assertions especializadas
 
 ```text
 ControllerExecutionAssert
@@ -443,7 +442,7 @@ WorkerIsolationAssert
 
 ---
 
-# 22. ControllerExecutionAssert
+## 22. ControllerExecutionAssert
 
 ```php
 ControllerExecutionAssert::completed($execution);
@@ -460,7 +459,7 @@ ControllerExecutionAssert::allResourcesReleased($execution);
 
 ---
 
-# 23. Unit testing
+## 23. Unit testing
 
 Las pruebas unitarias deberán verificar una clase o unidad pequeña usando dependencias controladas.
 
@@ -477,7 +476,7 @@ Ejemplos:
 
 ---
 
-# 24. Contract testing
+## 24. Contract testing
 
 Las contract suites deberán validar implementaciones intercambiables de una interfaz.
 
@@ -498,7 +497,7 @@ Implementaciones:
 
 ---
 
-# 25. Contratos prioritarios
+## 25. Contratos prioritarios
 
 ```text
 ControllerResolverInterface
@@ -519,7 +518,7 @@ ObservabilityExporterInterface
 
 ---
 
-# 26. Contract tests del Resolver
+## 26. Contract tests del Resolver
 
 Deberán verificar:
 
@@ -535,7 +534,7 @@ Deberán verificar:
 
 ---
 
-# 27. Pruebas de ControllerResolver
+## 27. Pruebas de ControllerResolver
 
 Casos mínimos:
 
@@ -558,7 +557,7 @@ Non-public method
 
 ---
 
-# 28. Pruebas de ParameterResolutionEngine
+## 28. Pruebas de ParameterResolutionEngine
 
 Deberán cubrir:
 
@@ -588,7 +587,7 @@ Missing values
 
 ---
 
-# 29. Pruebas de orden de resolvers
+## 29. Pruebas de orden de resolvers
 
 Se verificará:
 
@@ -601,7 +600,7 @@ Se verificará:
 
 ---
 
-# 30. DTO Hydrator tests
+## 30. DTO Hydrator tests
 
 Casos:
 
@@ -617,7 +616,7 @@ Casos:
 
 ---
 
-# 31. Model Binding tests
+## 31. Model Binding tests
 
 Deberán cubrir:
 
@@ -633,7 +632,7 @@ Deberán cubrir:
 
 ---
 
-# 32. Metadata Engine tests
+## 32. Metadata Engine tests
 
 Se verificará:
 
@@ -650,7 +649,7 @@ Se verificará:
 
 ---
 
-# 33. Metadata precedence
+## 33. Metadata precedence
 
 Ejemplo:
 
@@ -672,7 +671,7 @@ Los tests deberán verificar la precedencia oficial.
 
 ---
 
-# 34. Attribute system integration tests
+## 34. Attribute system integration tests
 
 Deberán cubrir:
 
@@ -690,7 +689,7 @@ Deberán cubrir:
 
 ---
 
-# 35. Interceptor tests
+## 35. Interceptor tests
 
 Cada interceptor deberá probar:
 
@@ -707,7 +706,7 @@ Cada interceptor deberá probar:
 
 ---
 
-# 36. Interceptor pipeline tests
+## 36. Interceptor pipeline tests
 
 Casos:
 
@@ -727,7 +726,7 @@ Cleanup after failure
 
 ---
 
-# 37. Orden esperado de interceptores
+## 37. Orden esperado de interceptores
 
 ```text
 A.before
@@ -741,7 +740,7 @@ La prueba deberá verificarlo explícitamente.
 
 ---
 
-# 38. ControllerInvoker tests
+## 38. ControllerInvoker tests
 
 Deberán cubrir:
 
@@ -759,7 +758,7 @@ Deberán cubrir:
 
 ---
 
-# 39. Invocation strategies contract
+## 39. Invocation strategies contract
 
 Cada strategy deberá cumplir:
 
@@ -771,7 +770,7 @@ Cada strategy deberá cumplir:
 
 ---
 
-# 40. ResultTransformationEngine tests
+## 40. ResultTransformationEngine tests
 
 Casos:
 
@@ -805,7 +804,7 @@ Unsupported result
 
 ---
 
-# 41. Content negotiation tests
+## 41. Content negotiation tests
 
 Deberán cubrir:
 
@@ -821,7 +820,7 @@ Deberán cubrir:
 
 ---
 
-# 42. Response builder tests
+## 42. Response builder tests
 
 Se verificará:
 
@@ -838,7 +837,7 @@ Se verificará:
 
 ---
 
-# 43. Transport tests
+## 43. Transport tests
 
 Casos:
 
@@ -861,7 +860,7 @@ Partial emission
 
 ---
 
-# 44. Emitter contract tests
+## 44. Emitter contract tests
 
 Cada emitter deberá verificar:
 
@@ -876,7 +875,7 @@ Cada emitter deberá verificar:
 
 ---
 
-# 45. SAPI emitter tests
+## 45. SAPI emitter tests
 
 Deberán aislar efectos globales usando adapters o procesos separados.
 
@@ -884,7 +883,7 @@ No se dependerá directamente de headers reales en unit tests.
 
 ---
 
-# 46. FrankenPHP emitter tests
+## 46. FrankenPHP emitter tests
 
 Deberán validar:
 
@@ -898,7 +897,7 @@ Deberán validar:
 
 ---
 
-# 47. Exception Handling tests
+## 47. Exception Handling tests
 
 Casos:
 
@@ -922,7 +921,7 @@ Emergency renderer
 
 ---
 
-# 48. Error mapping tests
+## 48. Error mapping tests
 
 Se verificará:
 
@@ -937,7 +936,7 @@ Se verificará:
 
 ---
 
-# 49. Recovery tests
+## 49. Recovery tests
 
 Casos:
 
@@ -952,7 +951,7 @@ Casos:
 
 ---
 
-# 50. Emergency mode tests
+## 50. Emergency mode tests
 
 Se deberá probar cuando fallen:
 
@@ -967,7 +966,7 @@ El emergency renderer deberá producir una salida mínima segura.
 
 ---
 
-# 51. Lifecycle tests
+## 51. Lifecycle tests
 
 Deberán verificar el pipeline completo de estados.
 
@@ -983,7 +982,7 @@ Created → Failed → Terminated → Cleaned
 
 ---
 
-# 52. State machine tests
+## 52. State machine tests
 
 Cada transición válida e inválida deberá probarse.
 
@@ -991,7 +990,7 @@ Se recomienda una tabla de transición.
 
 ---
 
-# 53. Transition dataset
+## 53. Transition dataset
 
 ```php
 yield 'created to initializing' => [
@@ -1003,7 +1002,7 @@ yield 'created to initializing' => [
 
 ---
 
-# 54. State coverage
+## 54. State coverage
 
 La suite deberá cubrir todos los estados:
 
@@ -1025,7 +1024,7 @@ Terminated
 
 ---
 
-# 55. Phase coverage
+## 55. Phase coverage
 
 También todas las fases:
 
@@ -1048,7 +1047,7 @@ Cleanup
 
 ---
 
-# 56. Guard tests
+## 56. Guard tests
 
 Cada guard deberá probar:
 
@@ -1061,7 +1060,7 @@ Cada guard deberá probar:
 
 ---
 
-# 57. Short-circuit tests
+## 57. Short-circuit tests
 
 Casos:
 
@@ -1077,7 +1076,7 @@ Casos:
 
 ---
 
-# 58. Short-circuit invariants
+## 58. Short-circuit invariants
 
 Se verificará:
 
@@ -1090,7 +1089,7 @@ Se verificará:
 
 ---
 
-# 59. Cancellation tests
+## 59. Cancellation tests
 
 Casos:
 
@@ -1108,7 +1107,7 @@ Deadline exceeded
 
 ---
 
-# 60. Cancellation token contract
+## 60. Cancellation token contract
 
 Deberá probar:
 
@@ -1122,7 +1121,7 @@ Deberá probar:
 
 ---
 
-# 61. Resource ownership tests
+## 61. Resource ownership tests
 
 Deberán verificar:
 
@@ -1137,7 +1136,7 @@ Deberán verificar:
 
 ---
 
-# 62. Cleanup tests
+## 62. Cleanup tests
 
 Casos:
 
@@ -1156,7 +1155,7 @@ Temporary file deletion
 
 ---
 
-# 63. Cleanup invariants
+## 63. Cleanup invariants
 
 Después de toda ejecución terminal:
 
@@ -1171,7 +1170,7 @@ No current correlation context
 
 ---
 
-# 64. Subrequest tests
+## 64. Subrequest tests
 
 Deberán verificar:
 
@@ -1186,7 +1185,7 @@ Deberán verificar:
 
 ---
 
-# 65. Recursion tests
+## 65. Recursion tests
 
 Casos:
 
@@ -1199,7 +1198,7 @@ Casos:
 
 ---
 
-# 66. Observability tests
+## 66. Observability tests
 
 Se verificará:
 
@@ -1219,7 +1218,7 @@ Se verificará:
 
 ---
 
-# 67. FakeEventDispatcher
+## 67. FakeEventDispatcher
 
 ```php
 final class FakeControllerEventDispatcher
@@ -1241,7 +1240,7 @@ final class FakeControllerEventDispatcher
 
 ---
 
-# 68. Event assertions
+## 68. Event assertions
 
 ```php
 ControllerObservabilityAssert::eventsInOrder([
@@ -1255,7 +1254,7 @@ ControllerObservabilityAssert::eventsInOrder([
 
 ---
 
-# 69. Metrics tests
+## 69. Metrics tests
 
 Deberán verificar:
 
@@ -1270,7 +1269,7 @@ Deberán verificar:
 
 ---
 
-# 70. Tracing tests
+## 70. Tracing tests
 
 Casos:
 
@@ -1286,7 +1285,7 @@ Casos:
 
 ---
 
-# 71. Sanitization tests
+## 71. Sanitization tests
 
 Se deberán incluir payloads con:
 
@@ -1304,7 +1303,7 @@ Ningún valor sensible deberá sobrevivir.
 
 ---
 
-# 72. Sampling tests
+## 72. Sampling tests
 
 Casos:
 
@@ -1319,7 +1318,7 @@ Casos:
 
 ---
 
-# 73. Compilation tests
+## 73. Compilation tests
 
 El framework de compilación deberá probar:
 
@@ -1341,7 +1340,7 @@ El framework de compilación deberá probar:
 
 ---
 
-# 74. Compiler contract tests
+## 74. Compiler contract tests
 
 Cada compiler especializado deberá:
 
@@ -1354,7 +1353,7 @@ Cada compiler especializado deberá:
 
 ---
 
-# 75. Deterministic compilation test
+## 75. Deterministic compilation test
 
 ```php
 $first = $compiler->compile($unit, $context, $dependencies);
@@ -1368,7 +1367,7 @@ self::assertSame(
 
 ---
 
-# 76. Dynamic vs compiled equivalence
+## 76. Dynamic vs compiled equivalence
 
 Esta será una suite crítica.
 
@@ -1384,7 +1383,7 @@ Equivalent result
 
 ---
 
-# 77. Equivalence dimensions
+## 77. Equivalence dimensions
 
 Se comparará:
 
@@ -1402,7 +1401,7 @@ No será necesario que durations o IDs sean iguales.
 
 ---
 
-# 78. Equivalence harness
+## 78. Equivalence harness
 
 ```php
 final class ControllerExecutionEquivalenceHarness
@@ -1415,7 +1414,7 @@ final class ControllerExecutionEquivalenceHarness
 
 ---
 
-# 79. Equivalence scenarios
+## 79. Equivalence scenarios
 
 Deberán incluir:
 
@@ -1434,7 +1433,7 @@ Deberán incluir:
 
 ---
 
-# 80. Artifact serialization tests
+## 80. Artifact serialization tests
 
 Deberán validar:
 
@@ -1450,7 +1449,7 @@ Deberán validar:
 
 ---
 
-# 81. Artifact security tests
+## 81. Artifact security tests
 
 Casos:
 
@@ -1464,7 +1463,7 @@ Casos:
 
 ---
 
-# 82. Dependency graph tests
+## 82. Dependency graph tests
 
 Deberán cubrir:
 
@@ -1478,7 +1477,7 @@ Deberán cubrir:
 
 ---
 
-# 83. Incremental compilation tests
+## 83. Incremental compilation tests
 
 Casos:
 
@@ -1492,7 +1491,7 @@ Removed route → stale bundle pruned
 
 ---
 
-# 84. Cache tests
+## 84. Cache tests
 
 Niveles:
 
@@ -1516,7 +1515,7 @@ Cada nivel deberá probar:
 
 ---
 
-# 85. Worker cache tests
+## 85. Worker cache tests
 
 Deberán verificar:
 
@@ -1529,13 +1528,13 @@ Deberán verificar:
 
 ---
 
-# 86. Build pinning tests
+## 86. Build pinning tests
 
 Una ejecución iniciada con build A deberá terminar con A aunque build B sea activado durante su ejecución.
 
 ---
 
-# 87. Atomic deployment tests
+## 87. Atomic deployment tests
 
 Proceso a validar:
 
@@ -1550,7 +1549,7 @@ Existing execution remains on A
 
 ---
 
-# 88. Rollback tests
+## 88. Rollback tests
 
 Se verificará:
 
@@ -1561,7 +1560,7 @@ Se verificará:
 
 ---
 
-# 89. Warmup tests
+## 89. Warmup tests
 
 Casos:
 
@@ -1574,7 +1573,7 @@ Casos:
 
 ---
 
-# 90. Worker persistence tests
+## 90. Worker persistence tests
 
 Se deberá simular un Worker que atiende múltiples requests.
 
@@ -1586,7 +1585,7 @@ $worker->handle($requestC);
 
 ---
 
-# 91. Worker isolation invariants
+## 91. Worker isolation invariants
 
 Entre peticiones no deberá persistir:
 
@@ -1606,7 +1605,7 @@ Entre peticiones no deberá persistir:
 
 ---
 
-# 92. WorkerLeakDetector
+## 92. WorkerLeakDetector
 
 ```php
 final class WorkerLeakDetector
@@ -1622,7 +1621,7 @@ final class WorkerLeakDetector
 
 ---
 
-# 93. Worker tests con errores
+## 93. Worker tests con errores
 
 Se probará reutilización después de:
 
@@ -1636,7 +1635,7 @@ Se probará reutilización después de:
 
 ---
 
-# 94. WorkerDisposition tests
+## 94. WorkerDisposition tests
 
 Se verificará:
 
@@ -1651,7 +1650,7 @@ según los escenarios definidos.
 
 ---
 
-# 95. Concurrency tests
+## 95. Concurrency tests
 
 PHP no siempre ejecutará threads internos, pero deberán probarse condiciones concurrentes relevantes:
 
@@ -1665,7 +1664,7 @@ PHP no siempre ejecutará threads internos, pero deberán probarse condiciones c
 
 ---
 
-# 96. Compilation lock tests
+## 96. Compilation lock tests
 
 Casos:
 
@@ -1679,7 +1678,7 @@ Casos:
 
 ---
 
-# 97. Cache stampede tests
+## 97. Cache stampede tests
 
 Cuando varios Workers no tengan el mismo artefacto en L3:
 
@@ -1689,7 +1688,7 @@ Cuando varios Workers no tengan el mismo artefacto en L3:
 
 ---
 
-# 98. Process-based tests
+## 98. Process-based tests
 
 Los escenarios que involucren:
 
@@ -1703,7 +1702,7 @@ deberán ejecutarse en procesos separados.
 
 ---
 
-# 99. Property-based testing
+## 99. Property-based testing
 
 Podrá utilizarse para:
 
@@ -1717,7 +1716,7 @@ Podrá utilizarse para:
 
 ---
 
-# 100. Property de state machine
+## 100. Property de state machine
 
 Propiedad:
 
@@ -1727,7 +1726,7 @@ Ninguna secuencia válida puede volver desde un estado terminal a Running.
 
 ---
 
-# 101. Property de fingerprints
+## 101. Property de fingerprints
 
 ```text
 Mismos inputs normalizados → mismo fingerprint
@@ -1737,7 +1736,7 @@ Cambio irrelevante → fingerprint estable
 
 ---
 
-# 102. Fuzz testing
+## 102. Fuzz testing
 
 Aplicable a:
 
@@ -1752,7 +1751,7 @@ Aplicable a:
 
 ---
 
-# 103. Security testing
+## 103. Security testing
 
 Deberá cubrir:
 
@@ -1769,7 +1768,7 @@ Deberá cubrir:
 
 ---
 
-# 104. Mutation testing
+## 104. Mutation testing
 
 Mutation testing deberá usarse principalmente en:
 
@@ -1783,7 +1782,7 @@ Mutation testing deberá usarse principalmente en:
 
 ---
 
-# 105. Objetivo de mutation score
+## 105. Objetivo de mutation score
 
 No se establecerá únicamente un porcentaje global.
 
@@ -1799,7 +1798,7 @@ Sanitization
 
 ---
 
-# 106. Regression tests
+## 106. Regression tests
 
 Todo bug corregido deberá añadir una prueba que:
 
@@ -1810,7 +1809,7 @@ Todo bug corregido deberá añadir una prueba que:
 
 ---
 
-# 107. Snapshot testing
+## 107. Snapshot testing
 
 Podrá usarse para:
 
@@ -1824,7 +1823,7 @@ No deberá sustituir assertions semánticas.
 
 ---
 
-# 108. Normalización de snapshots
+## 108. Normalización de snapshots
 
 Antes de guardar snapshots deberán eliminarse:
 
@@ -1836,7 +1835,7 @@ Antes de guardar snapshots deberán eliminarse:
 
 ---
 
-# 109. End-to-end tests
+## 109. End-to-end tests
 
 Deberán cubrir el pipeline real desde route match hasta transport result.
 
@@ -1855,7 +1854,7 @@ Casos prioritarios:
 
 ---
 
-# 110. E2E con servidor real
+## 110. E2E con servidor real
 
 Podrá existir una suite opcional usando:
 
@@ -1869,7 +1868,7 @@ Esta suite será más lenta y se ejecutará separadamente.
 
 ---
 
-# 111. Pruebas de streaming
+## 111. Pruebas de streaming
 
 Se verificará:
 
@@ -1884,7 +1883,7 @@ Se verificará:
 
 ---
 
-# 112. Pruebas de SSE
+## 112. Pruebas de SSE
 
 Deberán cubrir:
 
@@ -1898,7 +1897,7 @@ Deberán cubrir:
 
 ---
 
-# 113. Pruebas de subrequests
+## 113. Pruebas de subrequests
 
 Se deberá verificar el comportamiento end-to-end de:
 
@@ -1914,7 +1913,7 @@ Result returned to A
 
 ---
 
-# 114. Performance testing
+## 114. Performance testing
 
 Las pruebas de rendimiento estarán separadas de las funcionales.
 
@@ -1932,7 +1931,7 @@ Regression benchmarks
 
 ---
 
-# 115. Microbenchmarks
+## 115. Microbenchmarks
 
 Medirán:
 
@@ -1946,7 +1945,7 @@ Medirán:
 
 ---
 
-# 116. Pipeline benchmarks
+## 116. Pipeline benchmarks
 
 Compararán:
 
@@ -1959,7 +1958,7 @@ Compiled Worker cache hit
 
 ---
 
-# 117. Compilation benchmarks
+## 117. Compilation benchmarks
 
 Medirán:
 
@@ -1973,7 +1972,7 @@ Medirán:
 
 ---
 
-# 118. Memory benchmarks
+## 118. Memory benchmarks
 
 Medirán:
 
@@ -1988,7 +1987,7 @@ Medirán:
 
 ---
 
-# 119. Benchmark environment
+## 119. Benchmark environment
 
 Todo benchmark deberá registrar:
 
@@ -2004,7 +2003,7 @@ Todo benchmark deberá registrar:
 
 ---
 
-# 120. Performance baselines
+## 120. Performance baselines
 
 Los resultados deberán compararse contra baselines versionados.
 
@@ -2016,7 +2015,7 @@ Un cambio significativo deberá producir:
 
 ---
 
-# 121. Load testing
+## 121. Load testing
 
 Los load tests deberán evaluar:
 
@@ -2030,7 +2029,7 @@ Los load tests deberán evaluar:
 
 ---
 
-# 122. Percentiles
+## 122. Percentiles
 
 Se deberán observar al menos:
 
@@ -2045,7 +2044,7 @@ No solo promedio.
 
 ---
 
-# 123. CI pipeline
+## 123. CI pipeline
 
 Pipeline recomendado:
 
@@ -2075,7 +2074,7 @@ Optional E2E
 
 ---
 
-# 124. Matriz de versiones
+## 124. Matriz de versiones
 
 La CI deberá probar versiones soportadas de:
 
@@ -2087,7 +2086,7 @@ La CI deberá probar versiones soportadas de:
 
 ---
 
-# 125. Test groups
+## 125. Test groups
 
 ```text
 unit
@@ -2107,7 +2106,7 @@ slow
 
 ---
 
-# 126. Ejecución local
+## 126. Ejecución local
 
 Comandos potenciales:
 
@@ -2123,7 +2122,7 @@ volt test controllers --benchmark
 
 ---
 
-# 127. Parallel test execution
+## 127. Parallel test execution
 
 Los tests paralelos deberán usar:
 
@@ -2136,7 +2135,7 @@ Los tests paralelos deberán usar:
 
 ---
 
-# 128. Test sandbox
+## 128. Test sandbox
 
 ```php
 final class ControllerTestSandbox
@@ -2150,7 +2149,7 @@ final class ControllerTestSandbox
 
 ---
 
-# 129. Cleanup de pruebas
+## 129. Cleanup de pruebas
 
 Toda prueba deberá eliminar:
 
@@ -2164,7 +2163,7 @@ Toda prueba deberá eliminar:
 
 ---
 
-# 130. Failure injection
+## 130. Failure injection
 
 El sistema de testing deberá permitir inyectar errores.
 
@@ -2178,7 +2177,7 @@ $resource->failOnRelease();
 
 ---
 
-# 131. Failure points
+## 131. Failure points
 
 ```text
 Controller resolution
@@ -2200,7 +2199,7 @@ Manifest activation
 
 ---
 
-# 132. Chaos-style tests
+## 132. Chaos-style tests
 
 Podrán simular:
 
@@ -2216,7 +2215,7 @@ Se usarán con seeds reproducibles.
 
 ---
 
-# 133. Test doubles
+## 133. Test doubles
 
 Clasificación:
 
@@ -2231,7 +2230,7 @@ Harness
 
 ---
 
-# 134. Uso recomendado
+## 134. Uso recomendado
 
 * Stub: devolver valor simple.
 * Fake: implementación funcional ligera.
@@ -2242,7 +2241,7 @@ Harness
 
 ---
 
-# 135. Evitar mocks excesivos
+## 135. Evitar mocks excesivos
 
 Los motores con múltiples componentes deberán probarse preferentemente con fakes reales y pequeñas integraciones.
 
@@ -2250,7 +2249,7 @@ Mocks profundamente encadenados producen pruebas frágiles.
 
 ---
 
-# 136. Fakes oficiales
+## 136. Fakes oficiales
 
 ```text
 FakeControllerResolver
@@ -2272,7 +2271,7 @@ FakeWorkerRuntime
 
 ---
 
-# 137. InMemoryArtifactStore
+## 137. InMemoryArtifactStore
 
 Deberá comportarse de forma equivalente al store PHP en contratos básicos:
 
@@ -2285,7 +2284,7 @@ Deberá comportarse de forma equivalente al store PHP en contratos básicos:
 
 ---
 
-# 138. FakeWorkerRuntime
+## 138. FakeWorkerRuntime
 
 ```php
 final class FakeWorkerRuntime
@@ -2302,7 +2301,7 @@ final class FakeWorkerRuntime
 
 ---
 
-# 139. Test harness principal
+## 139. Test harness principal
 
 ```php
 final class ControllerPipelineTestHarness
@@ -2316,7 +2315,7 @@ final class ControllerPipelineTestHarness
 
 ---
 
-# 140. ExecutionMode
+## 140. ExecutionMode
 
 ```php
 enum ExecutionMode: string
@@ -2330,7 +2329,7 @@ enum ExecutionMode: string
 
 ---
 
-# 141. ControllerScenario
+## 141. ControllerScenario
 
 ```php
 final readonly class ControllerScenario
@@ -2349,7 +2348,7 @@ final readonly class ControllerScenario
 
 ---
 
-# 142. Scenario catalog
+## 142. Scenario catalog
 
 Se mantendrá un catálogo reutilizable:
 
@@ -2368,7 +2367,7 @@ SubrequestScenario
 
 ---
 
-# 143. Contract test package
+## 143. Contract test package
 
 VoltStack podrá publicar una suite para paquetes externos.
 
@@ -2384,7 +2383,7 @@ podrá ejecutar contract tests oficiales.
 
 ---
 
-# 144. Extension certification
+## 144. Extension certification
 
 La suite podrá generar un reporte:
 
@@ -2398,7 +2397,7 @@ según contratos del framework.
 
 ---
 
-# 145. Backward compatibility tests
+## 145. Backward compatibility tests
 
 Para versiones futuras deberán conservarse fixtures de versiones anteriores de:
 
@@ -2410,7 +2409,7 @@ Para versiones futuras deberán conservarse fixtures de versiones anteriores de:
 
 ---
 
-# 146. Schema migration tests
+## 146. Schema migration tests
 
 Cuando cambie un schema compilado se deberá verificar:
 
@@ -2421,7 +2420,7 @@ Cuando cambie un schema compilado se deberá verificar:
 
 ---
 
-# 147. Event compatibility tests
+## 147. Event compatibility tests
 
 Eventos versionados deberán probar:
 
@@ -2433,7 +2432,7 @@ Eventos versionados deberán probar:
 
 ---
 
-# 148. Test data privacy
+## 148. Test data privacy
 
 Los fixtures no deberán contener:
 
@@ -2445,7 +2444,7 @@ Los fixtures no deberán contener:
 
 ---
 
-# 149. Documentation tests
+## 149. Documentation tests
 
 Los ejemplos de código de documentación crítica deberán ejecutarse cuando sea viable.
 
@@ -2453,7 +2452,7 @@ Esto evitará divergencia entre arquitectura, API y comportamiento real.
 
 ---
 
-# 150. Static analysis
+## 150. Static analysis
 
 El módulo deberá cumplir un nivel estricto de análisis estático.
 
@@ -2469,7 +2468,7 @@ Se verificarán especialmente:
 
 ---
 
-# 151. Exhaustive enum tests
+## 151. Exhaustive enum tests
 
 Los tests deberán fallar cuando se agregue:
 
@@ -2482,7 +2481,7 @@ sin actualizar los datasets correspondientes.
 
 ---
 
-# 152. Architectural tests
+## 152. Architectural tests
 
 Podrán verificar reglas como:
 
@@ -2496,7 +2495,7 @@ Testing no se carga en producción
 
 ---
 
-# 153. Dependency rule tests
+## 153. Dependency rule tests
 
 Ejemplo conceptual:
 
@@ -2507,13 +2506,13 @@ ArchitectureAssert::module('Controllers/Invocation')
 
 ---
 
-# 154. Production package isolation
+## 154. Production package isolation
 
 Las clases bajo `Testing` no deberán incluirse en preload ni registrarse en producción salvo solicitud explícita.
 
 ---
 
-# 155. Testability requirements
+## 155. Testability requirements
 
 Toda nueva capacidad del subsistema Controllers deberá proporcionar:
 
@@ -2527,7 +2526,7 @@ Toda nueva capacidad del subsistema Controllers deberá proporcionar:
 
 ---
 
-# 156. Definition of Done
+## 156. Definition of Done
 
 Una funcionalidad no se considerará completa hasta cumplir:
 
@@ -2545,7 +2544,7 @@ Static analysis
 
 ---
 
-# 157. Quality gates
+## 157. Quality gates
 
 Gates mínimos recomendados:
 
@@ -2559,7 +2558,7 @@ Gates mínimos recomendados:
 
 ---
 
-# 158. Reportes de CI
+## 158. Reportes de CI
 
 La CI deberá producir:
 
@@ -2573,7 +2572,7 @@ La CI deberá producir:
 
 ---
 
-# 159. Estructura de directorios del módulo
+## 159. Estructura de directorios del módulo
 
 ```text
 src/
@@ -2708,7 +2707,7 @@ src/
 
 ---
 
-# 160. Configuración de testing
+## 160. Configuración de testing
 
 ```php
 // config/controller_testing.php
@@ -2759,7 +2758,7 @@ return [
 
 ---
 
-# 161. Testing Service Provider
+## 161. Testing Service Provider
 
 ```php
 final class ControllerTestingServiceProvider
@@ -2786,127 +2785,127 @@ Este provider solo deberá cargarse en entorno de pruebas.
 
 ---
 
-# 162. ADR-001
+## 162. ADR-001
 
 **La cobertura de líneas no será la única medida de calidad.**
 
 ---
 
-# 163. ADR-002
+## 163. ADR-002
 
 **Todo contrato extensible tendrá una suite de contract tests.**
 
 ---
 
-# 164. ADR-003
+## 164. ADR-003
 
 **El modo dinámico y el compilado deberán demostrar equivalencia semántica.**
 
 ---
 
-# 165. ADR-004
+## 165. ADR-004
 
 **Los Workers persistentes tendrán una suite dedicada de aislamiento.**
 
 ---
 
-# 166. ADR-005
+## 166. ADR-005
 
 **El cleanup se verificará en todos los caminos terminales.**
 
 ---
 
-# 167. ADR-006
+## 167. ADR-006
 
 **El tiempo, IDs y aleatoriedad serán controlables en tests.**
 
 ---
 
-# 168. ADR-007
+## 168. ADR-007
 
 **Los fakes deberán implementar los contratos reales.**
 
 ---
 
-# 169. ADR-008
+## 169. ADR-008
 
 **Se evitará el mocking profundo de pipelines completos.**
 
 ---
 
-# 170. ADR-009
+## 170. ADR-009
 
 **La máquina de estados deberá probarse mediante cobertura de estados y transiciones.**
 
 ---
 
-# 171. ADR-010
+## 171. ADR-010
 
 **Los errores podrán inyectarse en puntos formales del pipeline.**
 
 ---
 
-# 172. ADR-011
+## 172. ADR-011
 
 **Los artefactos compilados deberán probar determinismo.**
 
 ---
 
-# 173. ADR-012
+## 173. ADR-012
 
 **Los tests de OPcache, SAPI y locking se ejecutarán en procesos aislados.**
 
 ---
 
-# 174. ADR-013
+## 174. ADR-013
 
 **Los eventos, métricas y traces se probarán mediante recorders en memoria.**
 
 ---
 
-# 175. ADR-014
+## 175. ADR-014
 
 **Los datos sensibles deberán tener pruebas negativas explícitas.**
 
 ---
 
-# 176. ADR-015
+## 176. ADR-015
 
 **Los benchmarks no formarán parte de la suite funcional rápida.**
 
 ---
 
-# 177. ADR-016
+## 177. ADR-016
 
 **Todo bug corregido deberá añadir una prueba de regresión.**
 
 ---
 
-# 178. ADR-017
+## 178. ADR-017
 
 **Los snapshots se usarán como apoyo, no como única validación.**
 
 ---
 
-# 179. ADR-018
+## 179. ADR-018
 
 **Las extensiones externas podrán reutilizar contract tests oficiales.**
 
 ---
 
-# 180. ADR-019
+## 180. ADR-019
 
 **Las clases de Testing no se cargarán en producción por defecto.**
 
 ---
 
-# 181. ADR-020
+## 181. ADR-020
 
 **Una nueva capacidad no estará completa sin pruebas de fallo y Worker safety cuando correspondan.**
 
 ---
 
-# 182. Implementación V1
+## 182. Implementación V1
 
 La V1 deberá incluir:
 
@@ -2932,7 +2931,7 @@ La V1 deberá incluir:
 
 ---
 
-# 183. Fuera de V1
+## 183. Fuera de V1
 
 Se aplazarán:
 
@@ -2946,7 +2945,7 @@ Se aplazarán:
 
 ---
 
-# 184. Roadmap V2
+## 184. Roadmap V2
 
 Podrá incorporar:
 
@@ -2960,7 +2959,7 @@ Podrá incorporar:
 
 ---
 
-# 185. Roadmap V3
+## 185. Roadmap V3
 
 Podrá incorporar:
 
@@ -2973,7 +2972,7 @@ Podrá incorporar:
 
 ---
 
-# 186. Flujo de prueba recomendado
+## 186. Flujo de prueba recomendado
 
 ```text
 Build scenario
@@ -3008,7 +3007,7 @@ Assert cleanup and isolation
 
 ---
 
-# 187. Resultado arquitectónico
+## 187. Resultado arquitectónico
 
 Esta arquitectura permitirá verificar preguntas críticas como:
 
@@ -3028,7 +3027,7 @@ Esta arquitectura permitirá verificar preguntas críticas como:
 
 ---
 
-# 188. Conclusión
+## 188. Conclusión
 
 El **Controller Testing Architecture** convierte la calidad del subsistema Controllers en una responsabilidad estructural y verificable.
 

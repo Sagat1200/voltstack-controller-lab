@@ -1,6 +1,5 @@
-# 07_CONTROLLER_INTERCEPTOR_SYSTEM.md
-
 # Sistema de interceptores de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -19,7 +18,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura del sistema de interceptores de controladores de VoltStack.
 
@@ -65,7 +64,7 @@ y podrán envolver la invocación del controlador mediante un pipeline especiali
 
 ---
 
-# 2. Problema que resuelve
+## 2. Problema que resuelve
 
 Sin interceptores, las responsabilidades transversales terminarían distribuidas en lugares incorrectos.
 
@@ -147,7 +146,7 @@ final class UserController
 
 ---
 
-# 3. Diferencia entre middleware e interceptores
+## 3. Diferencia entre middleware e interceptores
 
 VoltStack diferenciará explícitamente:
 
@@ -165,7 +164,7 @@ Aunque ambos utilizan una estructura de pipeline, tienen responsabilidades y con
 
 ---
 
-# 4. Middleware HTTP
+## 4. Middleware HTTP
 
 El middleware HTTP opera sobre:
 
@@ -207,7 +206,7 @@ interface MiddlewareInterface
 
 ---
 
-# 5. Controller Interceptor
+## 5. Controller Interceptor
 
 Un interceptor opera sobre:
 
@@ -247,7 +246,7 @@ interface ControllerInterceptorInterface
 
 ---
 
-# 6. Comparación
+## 6. Comparación
 
 | Característica                        | HTTP Middleware                | Controller Interceptor    |
 | ------------------------------------- | ------------------------------ | ------------------------- |
@@ -266,7 +265,7 @@ interface ControllerInterceptorInterface
 
 ---
 
-# 7. Principios de diseño
+## 7. Principios de diseño
 
 El sistema seguirá estos principios:
 
@@ -288,7 +287,7 @@ El sistema seguirá estos principios:
 
 ---
 
-# 8. Posición dentro del pipeline
+## 8. Posición dentro del pipeline
 
 El pipeline general del controlador se mantiene así:
 
@@ -390,7 +389,7 @@ ControllerInterceptorPipeline
 
 ---
 
-# 9. Arquitectura general
+## 9. Arquitectura general
 
 ```text
 ControllerExecution
@@ -438,7 +437,7 @@ Raw Controller Result
 
 ---
 
-# 10. Conceptos fundamentales
+## 10. Conceptos fundamentales
 
 El sistema estará formado por:
 
@@ -465,7 +464,7 @@ InterceptorExecutionRecord
 
 ---
 
-# 11. Contrato principal
+## 11. Contrato principal
 
 ```php
 namespace VoltStack\Quantum\Controllers\Interceptors\Contracts;
@@ -495,7 +494,7 @@ Un interceptor podrá:
 
 ---
 
-# 12. Contrato de la cadena
+## 12. Contrato de la cadena
 
 ```php
 interface ControllerInterceptorChainInterface
@@ -534,7 +533,7 @@ final class MetricsInterceptor implements
 
 ---
 
-# 13. Semántica around
+## 13. Semántica around
 
 Los interceptores utilizarán semántica `around`.
 
@@ -575,7 +574,7 @@ public function intercept(
 
 ---
 
-# 14. Resultado del interceptor
+## 14. Resultado del interceptor
 
 La primera versión utilizará `mixed` como retorno para mantener compatibilidad con el resultado bruto del controlador.
 
@@ -600,7 +599,7 @@ Posteriormente, el `Result Normalization System` convertirá el resultado a una 
 
 ---
 
-# 15. ControllerExecution como contexto
+## 15. ControllerExecution como contexto
 
 Todos los interceptores recibirán el mismo:
 
@@ -630,7 +629,7 @@ El interceptor no deberá crear un contexto paralelo cuando la información pert
 
 ---
 
-# 16. Mutabilidad controlada
+## 16. Mutabilidad controlada
 
 `ControllerExecution` será mutable durante el pipeline, pero la mutabilidad deberá estar controlada.
 
@@ -656,7 +655,7 @@ No deberá modificar:
 
 ---
 
-# 17. InterceptorDefinition
+## 17. InterceptorDefinition
 
 Los interceptores no se representarán únicamente mediante nombres de clase.
 
@@ -686,9 +685,9 @@ final readonly class InterceptorDefinition
 
 ---
 
-# 18. Propiedades de InterceptorDefinition
+## 18. Propiedades de InterceptorDefinition
 
-## interceptor
+### interceptor
 
 Clase o identificador registrado.
 
@@ -696,7 +695,7 @@ Clase o identificador registrado.
 TransactionInterceptor::class
 ```
 
-## arguments
+### arguments
 
 Configuración del interceptor.
 
@@ -707,19 +706,19 @@ Configuración del interceptor.
 ]
 ```
 
-## priority
+### priority
 
 Prioridad numérica.
 
-## phase
+### phase
 
 Momento lógico de ejecución.
 
-## scope
+### scope
 
 Ciclo de vida de la instancia.
 
-## alias
+### alias
 
 Nombre legible.
 
@@ -729,33 +728,33 @@ audit
 cache
 ```
 
-## before / after
+### before / after
 
 Dependencias de orden.
 
-## conditions
+### conditions
 
 Condiciones de activación.
 
-## enabled
+### enabled
 
 Permite deshabilitar la definición.
 
-## repeatable
+### repeatable
 
 Permite múltiples instancias equivalentes.
 
-## terminal
+### terminal
 
 Indica que puede impedir continuar intencionalmente.
 
-## source
+### source
 
 Origen de la definición.
 
 ---
 
-# 19. InterceptorPhase
+## 19. InterceptorPhase
 
 Aunque el contrato sea around, las fases facilitarán orden y semántica.
 
@@ -776,7 +775,7 @@ enum InterceptorPhase: string
 
 ---
 
-# 20. Fases recomendadas
+## 20. Fases recomendadas
 
 ```text
 Guard
@@ -833,7 +832,7 @@ La fase no reemplaza la prioridad; ambos se combinarán.
 
 ---
 
-# 21. Orden de fases
+## 21. Orden de fases
 
 ```text
 Guard
@@ -859,7 +858,7 @@ Debido a la semántica around, algunos interceptores ejecutarán su parte poster
 
 ---
 
-# 22. Prioridad
+## 22. Prioridad
 
 VoltStack definirá rangos sugeridos:
 
@@ -880,7 +879,7 @@ Los números más altos se ejecutarán antes.
 
 ---
 
-# 23. Orden antes/después
+## 23. Orden antes/después
 
 La prioridad no será suficiente para todos los casos.
 
@@ -898,7 +897,7 @@ El `InterceptorPlanBuilder` construirá un grafo de dependencias.
 
 ---
 
-# 24. Detección de ciclos
+## 24. Detección de ciclos
 
 Ejemplo inválido:
 
@@ -929,7 +928,7 @@ C
 
 ---
 
-# 25. InterceptorScope
+## 25. InterceptorScope
 
 ```php
 enum InterceptorScope: string
@@ -944,9 +943,9 @@ enum InterceptorScope: string
 
 ---
 
-# 26. Significado de scopes
+## 26. Significado de scopes
 
-## Singleton
+### Singleton
 
 Una sola instancia durante la vida de la aplicación.
 
@@ -957,31 +956,31 @@ Solo para interceptores:
 * Thread-safe.
 * Sin referencias al request.
 
-## Worker
+### Worker
 
 Una instancia por worker persistente.
 
 Debe cumplir reglas similares a singleton.
 
-## Request
+### Request
 
 Una instancia por petición.
 
 Puede recibir dependencias request-scoped.
 
-## Execution
+### Execution
 
 Una instancia por ejecución de controlador.
 
 Será el scope predeterminado.
 
-## Transient
+### Transient
 
 Una nueva instancia cada vez que sea solicitada.
 
 ---
 
-# 27. Scope predeterminado
+## 27. Scope predeterminado
 
 Se recomienda:
 
@@ -1001,7 +1000,7 @@ Los interceptores completamente stateless podrán optimizarse a singleton.
 
 ---
 
-# 28. InterceptorDescriptor
+## 28. InterceptorDescriptor
 
 El registry almacenará descriptores.
 
@@ -1026,7 +1025,7 @@ final readonly class InterceptorDescriptor
 
 ---
 
-# 29. Registry
+## 29. Registry
 
 ```php
 interface ControllerInterceptorRegistryInterface
@@ -1063,7 +1062,7 @@ interface ControllerInterceptorRegistryInterface
 
 ---
 
-# 30. Registro de interceptores
+## 30. Registro de interceptores
 
 ```php
 $registry->register(
@@ -1091,7 +1090,7 @@ $registry->alias(
 
 ---
 
-# 31. Fuentes de interceptores
+## 31. Fuentes de interceptores
 
 Los interceptores podrán provenir de:
 
@@ -1110,7 +1109,7 @@ Compiled interceptor plan
 
 ---
 
-# 32. InterceptorSource
+## 32. InterceptorSource
 
 ```php
 final readonly class InterceptorSource
@@ -1145,7 +1144,7 @@ enum InterceptorSourceType: string
 
 ---
 
-# 33. Precedencia de fuentes
+## 33. Precedencia de fuentes
 
 Orden recomendado:
 
@@ -1181,7 +1180,7 @@ No implica necesariamente el orden de ejecución.
 
 ---
 
-# 34. Metadata del sistema
+## 34. Metadata del sistema
 
 El `Metadata Engine` expondrá keys como:
 
@@ -1219,7 +1218,7 @@ new MetadataSchema(
 
 ---
 
-# 35. Atributos de interceptores
+## 35. Atributos de interceptores
 
 Aunque el catálogo detallado pertenecerá a:
 
@@ -1245,7 +1244,7 @@ Los atributos específicos serán convertidos a metadata.
 
 ---
 
-# 36. Atributo genérico
+## 36. Atributo genérico
 
 ```php
 #[Attribute(
@@ -1294,7 +1293,7 @@ final readonly class Intercept implements
 
 ---
 
-# 37. Atributos semánticos
+## 37. Atributos semánticos
 
 Los atributos semánticos serán preferibles para capacidades comunes.
 
@@ -1323,7 +1322,7 @@ El controlador no necesitará conocer la clase concreta.
 
 ---
 
-# 38. Grupos de interceptores
+## 38. Grupos de interceptores
 
 Se podrán registrar grupos.
 
@@ -1351,7 +1350,7 @@ public function store(CreateUserData $data): User
 
 ---
 
-# 39. Contrato del registry de grupos
+## 39. Contrato del registry de grupos
 
 ```php
 interface InterceptorGroupRegistryInterface
@@ -1375,7 +1374,7 @@ interface InterceptorGroupRegistryInterface
 
 ---
 
-# 40. Grupos parametrizables
+## 40. Grupos parametrizables
 
 ```php
 $groups->registerFactory(
@@ -1407,7 +1406,7 @@ En modo compilado no se permitirán factories arbitrarias no registradas.
 
 ---
 
-# 41. Exclusiones
+## 41. Exclusiones
 
 Un controlador o método podrá excluir interceptores heredados.
 
@@ -1434,7 +1433,7 @@ final readonly class InterceptorExclusion
 
 ---
 
-# 42. Modos de exclusión
+## 42. Modos de exclusión
 
 ```php
 enum InterceptorExclusionMode: string
@@ -1472,7 +1471,7 @@ new InterceptorExclusion(
 
 ---
 
-# 43. Interceptores protegidos
+## 43. Interceptores protegidos
 
 Algunos interceptores no podrán excluirse desde niveles inferiores.
 
@@ -1498,7 +1497,7 @@ ProtectedInterceptorRemovalException
 
 ---
 
-# 44. ControllerInterceptorResolver
+## 44. ControllerInterceptorResolver
 
 ```php
 interface ControllerInterceptorResolverInterface
@@ -1524,7 +1523,7 @@ Responsabilidades:
 
 ---
 
-# 45. Implementación conceptual
+## 45. Implementación conceptual
 
 ```php
 final class ControllerInterceptorResolver implements
@@ -1584,7 +1583,7 @@ final class ControllerInterceptorResolver implements
 
 ---
 
-# 46. InterceptorPlanBuilder
+## 46. InterceptorPlanBuilder
 
 ```php
 interface InterceptorPlanBuilderInterface
@@ -1600,7 +1599,7 @@ interface InterceptorPlanBuilderInterface
 
 ---
 
-# 47. Pasos del builder
+## 47. Pasos del builder
 
 ```text
 Collect definitions
@@ -1640,7 +1639,7 @@ Produce plan
 
 ---
 
-# 48. ControllerInterceptorPlan
+## 48. ControllerInterceptorPlan
 
 ```php
 final readonly class ControllerInterceptorPlan
@@ -1674,7 +1673,7 @@ final readonly class ControllerInterceptorPlan
 
 ---
 
-# 49. ResolvedInterceptorDefinition
+## 49. ResolvedInterceptorDefinition
 
 ```php
 final readonly class ResolvedInterceptorDefinition
@@ -1695,7 +1694,7 @@ final readonly class ResolvedInterceptorDefinition
 
 ---
 
-# 50. Deduplicación
+## 50. Deduplicación
 
 Por defecto, un interceptor no repeatable aparecerá una sola vez.
 
@@ -1722,7 +1721,7 @@ La política dependerá del descriptor.
 
 ---
 
-# 51. InterceptorMergePolicy
+## 51. InterceptorMergePolicy
 
 ```php
 enum InterceptorMergePolicy: string
@@ -1744,7 +1743,7 @@ public InterceptorMergePolicy $mergePolicy;
 
 ---
 
-# 52. Ejemplo de fusión
+## 52. Ejemplo de fusión
 
 Definición global:
 
@@ -1774,7 +1773,7 @@ Con `MergeArguments`:
 
 ---
 
-# 53. InterceptorCondition
+## 53. InterceptorCondition
 
 ```php
 interface InterceptorConditionInterface
@@ -1790,7 +1789,7 @@ interface InterceptorConditionInterface
 
 ---
 
-# 54. Condiciones iniciales
+## 54. Condiciones iniciales
 
 ```text
 EnvironmentInterceptorCondition
@@ -1807,9 +1806,9 @@ ExceptionTypeInterceptorCondition
 
 ---
 
-# 55. Condiciones estáticas y dinámicas
+## 55. Condiciones estáticas y dinámicas
 
-## Estática
+### Estática
 
 Puede evaluarse al construir o compilar el plan.
 
@@ -1821,7 +1820,7 @@ Ejemplos:
 * Metadata fija.
 * Ruta compilada.
 
-## Dinámica
+### Dinámica
 
 Debe evaluarse durante cada ejecución.
 
@@ -1838,7 +1837,7 @@ Los planes con condiciones dinámicas podrán cachearse parcialmente, pero no co
 
 ---
 
-# 56. ControllerInterceptorPipeline
+## 56. ControllerInterceptorPipeline
 
 ```php
 interface ControllerInterceptorPipelineInterface
@@ -1853,7 +1852,7 @@ interface ControllerInterceptorPipelineInterface
 
 ---
 
-# 57. Implementación conceptual
+## 57. Implementación conceptual
 
 ```php
 final class ControllerInterceptorPipeline implements
@@ -1883,7 +1882,7 @@ final class ControllerInterceptorPipeline implements
 
 ---
 
-# 58. ControllerInterceptorChain
+## 58. ControllerInterceptorChain
 
 ```php
 final class ControllerInterceptorChain implements
@@ -1931,7 +1930,7 @@ final class ControllerInterceptorChain implements
 
 ---
 
-# 59. Reutilización de la cadena
+## 59. Reutilización de la cadena
 
 Por defecto, cada cadena será de un solo uso.
 
@@ -1946,7 +1945,7 @@ Un interceptor de retry no deberá reiniciar el mismo índice mutable de forma i
 
 ---
 
-# 60. Fork de cadena
+## 60. Fork de cadena
 
 Para soportar retries se definirá:
 
@@ -1964,7 +1963,7 @@ El interceptor de retry podrá crear una cadena segura.
 
 ---
 
-# 61. Retry semantics
+## 61. Retry semantics
 
 ```php
 final class RetryInterceptor implements
@@ -2003,7 +2002,7 @@ La implementación real evitará `goto`; el ejemplo representa la semántica.
 
 ---
 
-# 62. Reglas de retry
+## 62. Reglas de retry
 
 Un retry no deberá repetir indiscriminadamente:
 
@@ -2029,7 +2028,7 @@ cuando se necesite una transacción nueva por intento.
 
 ---
 
-# 63. ControllerInvocationTerminal
+## 63. ControllerInvocationTerminal
 
 ```php
 interface ControllerInvocationTerminalInterface
@@ -2065,17 +2064,17 @@ final class ControllerInvocationTerminal implements
 
 ---
 
-# 64. Relación con InvokeControllerStage
+## 64. Relación con InvokeControllerStage
 
 Existen dos opciones arquitectónicas.
 
-## Opción A
+### Opción A
 
 `ControllerInterceptorsStage` ejecuta todo el pipeline y el terminal usa directamente `ControllerInvoker`.
 
 En ese caso `InvokeControllerStage` deja de ser una etapa independiente.
 
-## Opción B
+### Opción B
 
 `InvokeControllerStage` se representa como terminal interno del pipeline.
 
@@ -2095,7 +2094,7 @@ El nombre `InvokeControllerStage` se conservará en trazabilidad y documentació
 
 ---
 
-# 65. Short circuit
+## 65. Short circuit
 
 Un interceptor puede no llamar:
 
@@ -2138,7 +2137,7 @@ En cache hit, el controlador no será invocado.
 
 ---
 
-# 66. Short circuit explícito
+## 66. Short circuit explícito
 
 Para mejorar observabilidad podrá utilizarse:
 
@@ -2170,7 +2169,7 @@ y devolver el resultado normal.
 
 ---
 
-# 67. Interceptores terminales
+## 67. Interceptores terminales
 
 Un interceptor marcado como terminal declara que puede finalizar la cadena de manera normal.
 
@@ -2186,7 +2185,7 @@ El plan builder podrá advertir si un interceptor inesperadamente terminal apare
 
 ---
 
-# 68. Transformación de argumentos
+## 68. Transformación de argumentos
 
 Un interceptor podrá modificar argumentos antes de la invocación.
 
@@ -2219,7 +2218,7 @@ Reglas:
 
 ---
 
-# 69. Transformación de resultado
+## 69. Transformación de resultado
 
 ```php
 final class ResultEnvelopeInterceptor implements
@@ -2246,7 +2245,7 @@ Esta transformación ocurre antes del `Result Normalization System`.
 
 ---
 
-# 70. Excepciones
+## 70. Excepciones
 
 Un interceptor puede capturar excepciones.
 
@@ -2276,7 +2275,7 @@ El sistema global de excepciones seguirá siendo responsable del mapping final.
 
 ---
 
-# 71. Registro de excepción
+## 71. Registro de excepción
 
 Cuando una excepción atraviese el pipeline:
 
@@ -2293,7 +2292,7 @@ El dispatcher o pipeline de ejecución deberá garantizar que:
 
 ---
 
-# 72. Interceptores de error
+## 72. Interceptores de error
 
 Un interceptor podrá ejecutar lógica solamente al fallar.
 
@@ -2323,7 +2322,7 @@ La fase `Error` es organizativa; la semántica se implementa mediante `try/catch
 
 ---
 
-# 73. Finalización
+## 73. Finalización
 
 Un interceptor que adquiere recursos debe liberarlos en `finally`.
 
@@ -2352,7 +2351,7 @@ El `ControllerExecutionFinalizer` seguirá actuando como última barrera de limp
 
 ---
 
-# 74. InterceptorInstanceResolver
+## 74. InterceptorInstanceResolver
 
 ```php
 interface InterceptorInstanceResolverInterface
@@ -2371,7 +2370,7 @@ interface InterceptorInstanceResolverInterface
 
 ---
 
-# 75. Resolución mediante Container
+## 75. Resolución mediante Container
 
 La implementación utilizará el Container.
 
@@ -2403,13 +2402,13 @@ final class InterceptorInstanceResolver implements
 
 ---
 
-# 76. Argumentos de constructor y configuración
+## 76. Argumentos de constructor y configuración
 
 Los argumentos de definición no deberán pasarse ciegamente al constructor.
 
 Se podrán utilizar dos mecanismos:
 
-## Constructor injection
+### Constructor injection
 
 Para dependencias registradas.
 
@@ -2419,7 +2418,7 @@ public function __construct(
 )
 ```
 
-## Runtime configuration
+### Runtime configuration
 
 Para valores declarativos.
 
@@ -2437,7 +2436,7 @@ Se prefiere crear un objeto de configuración tipado.
 
 ---
 
-# 77. Interceptor Factory
+## 77. Interceptor Factory
 
 ```php
 interface ControllerInterceptorFactoryInterface
@@ -2461,7 +2460,7 @@ RateLimitInterceptorFactory
 
 ---
 
-# 78. Configuración tipada
+## 78. Configuración tipada
 
 Ejemplo:
 
@@ -2490,7 +2489,7 @@ Esto evita arrays sin contrato dentro del interceptor.
 
 ---
 
-# 79. Validación de configuración
+## 79. Validación de configuración
 
 Durante build o compilación se deberá validar:
 
@@ -2511,7 +2510,7 @@ InvalidInterceptorConfigurationException
 
 ---
 
-# 80. Interceptores globales iniciales
+## 80. Interceptores globales iniciales
 
 El framework podrá registrar:
 
@@ -2526,7 +2525,7 @@ No todos deberán estar habilitados por defecto.
 
 ---
 
-# 81. AuthorizationInterceptor
+## 81. AuthorizationInterceptor
 
 Aunque exista `AuthorizationStage`, VoltStack deberá decidir dónde reside la ejecución final.
 
@@ -2540,7 +2539,7 @@ La metadata determinará el mecanismo.
 
 ---
 
-# 82. Separación recomendada
+## 82. Separación recomendada
 
 ```text
 AuthorizationStage
@@ -2560,7 +2559,7 @@ Ejemplos de interceptor:
 
 ---
 
-# 83. ValidationInterceptor
+## 83. ValidationInterceptor
 
 El `ValidationStage` ejecutará validación declarativa estándar antes del pipeline.
 
@@ -2577,7 +2576,7 @@ Debe evitarse duplicar reglas.
 
 ---
 
-# 84. TransactionInterceptor
+## 84. TransactionInterceptor
 
 Responsabilidades:
 
@@ -2613,7 +2612,7 @@ final class TransactionInterceptor implements
 
 ---
 
-# 85. Nested transactions
+## 85. Nested transactions
 
 Políticas:
 
@@ -2635,7 +2634,7 @@ transaction.nested_policy
 
 ---
 
-# 86. IdempotencyInterceptor
+## 86. IdempotencyInterceptor
 
 Responsabilidades:
 
@@ -2667,7 +2666,7 @@ Release lock
 
 ---
 
-# 87. Restricciones de idempotencia
+## 87. Restricciones de idempotencia
 
 No deberá guardar:
 
@@ -2682,7 +2681,7 @@ El resultado deberá pasar por un serializer controlado.
 
 ---
 
-# 88. AuditInterceptor
+## 88. AuditInterceptor
 
 El interceptor de auditoría registrará:
 
@@ -2710,7 +2709,7 @@ Utilizará metadata de redacción.
 
 ---
 
-# 89. CacheResultInterceptor
+## 89. CacheResultInterceptor
 
 Responsabilidades:
 
@@ -2726,7 +2725,7 @@ Responsabilidades:
 
 ---
 
-# 90. Posición de caché
+## 90. Posición de caché
 
 La posición es crítica.
 
@@ -2756,7 +2755,7 @@ El plan builder podrá validar políticas inseguras.
 
 ---
 
-# 91. RateLimitInterceptor
+## 91. RateLimitInterceptor
 
 A diferencia del rate limiter HTTP global, este interceptor podrá limitar por:
 
@@ -2782,7 +2781,7 @@ Ejemplo:
 
 ---
 
-# 92. TimeoutInterceptor
+## 92. TimeoutInterceptor
 
 El timeout lógico podrá:
 
@@ -2796,7 +2795,7 @@ PHP no puede interrumpir de forma segura cualquier operación arbitraria; por ta
 
 ---
 
-# 93. CircuitBreakerInterceptor
+## 93. CircuitBreakerInterceptor
 
 Útil cuando el controlador o Action invoca servicios externos.
 
@@ -2812,7 +2811,7 @@ La clave del circuit breaker deberá basarse en una dependencia estable, no úni
 
 ---
 
-# 94. MetricsInterceptor
+## 94. MetricsInterceptor
 
 Medirá:
 
@@ -2830,7 +2829,7 @@ No deberá utilizar valores de alta cardinalidad como etiquetas.
 
 ---
 
-# 95. TracingInterceptor
+## 95. TracingInterceptor
 
 Creará un span:
 
@@ -2859,7 +2858,7 @@ No incluirá:
 
 ---
 
-# 96. EventInterceptor
+## 96. EventInterceptor
 
 Podrá emitir:
 
@@ -2879,7 +2878,7 @@ Recomendación:
 
 ---
 
-# 97. FeatureFlagInterceptor
+## 97. FeatureFlagInterceptor
 
 Podrá:
 
@@ -2893,7 +2892,7 @@ Las decisiones runtime no deberán contaminar el plan global.
 
 ---
 
-# 98. TenantIsolationInterceptor
+## 98. TenantIsolationInterceptor
 
 Responsabilidades:
 
@@ -2907,7 +2906,7 @@ Este interceptor podrá marcarse como protegido.
 
 ---
 
-# 99. LockInterceptor
+## 99. LockInterceptor
 
 Tipos de lock:
 
@@ -2925,7 +2924,7 @@ El lock debe adquirirse después de autorización y antes de mutaciones.
 
 ---
 
-# 100. Interceptor de eventos after commit
+## 100. Interceptor de eventos after commit
 
 Cuando se use transacción:
 
@@ -2945,7 +2944,7 @@ Los eventos no deberán publicarse antes de confirmar la transacción, salvo dec
 
 ---
 
-# 101. Orden recomendado de interceptores
+## 101. Orden recomendado de interceptores
 
 Ejemplo para escritura:
 
@@ -3013,9 +3012,9 @@ El orden real dependerá de dependencias.
 
 ---
 
-# 102. Interacciones críticas
+## 102. Interacciones críticas
 
-## Retry y Transaction
+### Retry y Transaction
 
 Recomendado:
 
@@ -3029,7 +3028,7 @@ Controller
 
 Cada intento obtiene una transacción nueva.
 
-## Audit y Transaction
+### Audit y Transaction
 
 Depende del objetivo:
 
@@ -3045,11 +3044,11 @@ Audit fuera de Transaction
 
 si debe registrar también fallos.
 
-## Cache y Authorization
+### Cache y Authorization
 
 Autorización debe ejecutarse primero cuando el resultado depende del usuario.
 
-## Idempotency y Rate Limit
+### Idempotency y Rate Limit
 
 Puede convenir:
 
@@ -3065,7 +3064,7 @@ La política deberá ser configurable.
 
 ---
 
-# 103. Validación del plan
+## 103. Validación del plan
 
 El sistema deberá detectar:
 
@@ -3085,7 +3084,7 @@ El sistema deberá detectar:
 
 ---
 
-# 104. InterceptorPlanValidator
+## 104. InterceptorPlanValidator
 
 ```php
 interface InterceptorPlanValidatorInterface
@@ -3115,7 +3114,7 @@ CompiledInterceptorValidator
 
 ---
 
-# 105. Compilación
+## 105. Compilación
 
 El sistema permitirá compilar planes de interceptores.
 
@@ -3130,7 +3129,7 @@ interface ControllerInterceptorCompilerInterface
 
 ---
 
-# 106. CompiledControllerInterceptorPlan
+## 106. CompiledControllerInterceptorPlan
 
 ```php
 final readonly class CompiledControllerInterceptorPlan
@@ -3150,7 +3149,7 @@ final readonly class CompiledControllerInterceptorPlan
 
 ---
 
-# 107. Formato compilado
+## 107. Formato compilado
 
 ```php
 <?php
@@ -3193,7 +3192,7 @@ return [
 
 ---
 
-# 108. Beneficios de compilación
+## 108. Beneficios de compilación
 
 En producción podrá evitarse:
 
@@ -3216,7 +3215,7 @@ Solo quedará:
 
 ---
 
-# 109. Plan parcial
+## 109. Plan parcial
 
 Un plan podrá contener:
 
@@ -3243,7 +3242,7 @@ No se compilarán closures arbitrarias.
 
 ---
 
-# 110. Cache
+## 110. Cache
 
 Niveles:
 
@@ -3254,25 +3253,25 @@ L3 Worker Plan Cache
 L4 Compiled PHP Plan
 ```
 
-## L1
+### L1
 
 El plan ya resuelto dentro de `ControllerExecution`.
 
-## L2
+### L2
 
 Evita resolver el mismo controlador varias veces en una petición.
 
-## L3
+### L3
 
 Mantiene planes estáticos e inmutables en workers.
 
-## L4
+### L4
 
 Archivo PHP compatible con OPcache.
 
 ---
 
-# 111. Reglas de cache
+## 111. Reglas de cache
 
 Puede cachearse globalmente:
 
@@ -3298,7 +3297,7 @@ No puede cachearse globalmente:
 
 ---
 
-# 112. InterceptorPlanCacheKey
+## 112. InterceptorPlanCacheKey
 
 ```php
 final readonly class InterceptorPlanCacheKey
@@ -3326,7 +3325,7 @@ No incluirá valores request-scoped si el plan no depende de ellos.
 
 ---
 
-# 113. Invalidación
+## 113. Invalidación
 
 El plan se invalidará cuando cambie:
 
@@ -3348,7 +3347,7 @@ El plan se invalidará cuando cambie:
 
 ---
 
-# 114. Compatibilidad con FrankenPHP
+## 114. Compatibilidad con FrankenPHP
 
 El sistema deberá:
 
@@ -3368,7 +3367,7 @@ El sistema deberá:
 
 ---
 
-# 115. InterceptorLifecycleManager
+## 115. InterceptorLifecycleManager
 
 ```php
 interface InterceptorLifecycleManagerInterface
@@ -3400,7 +3399,7 @@ Será responsable de liberar instancias y recursos temporales.
 
 ---
 
-# 116. Finalización segura
+## 116. Finalización segura
 
 El dispatcher deberá usar:
 
@@ -3416,7 +3415,7 @@ El `ControllerExecutionFinalizer` será la última defensa.
 
 ---
 
-# 117. Observabilidad
+## 117. Observabilidad
 
 Métricas:
 
@@ -3457,7 +3456,7 @@ Evitar:
 
 ---
 
-# 118. Eventos
+## 118. Eventos
 
 ```text
 ControllerInterceptorsResolving
@@ -3479,7 +3478,7 @@ Los eventos por interceptor podrán desactivarse en producción.
 
 ---
 
-# 119. InterceptorExecutionRecord
+## 119. InterceptorExecutionRecord
 
 ```php
 final readonly class InterceptorExecutionRecord
@@ -3509,7 +3508,7 @@ o en un recorder especializado.
 
 ---
 
-# 120. Trace de ejecución
+## 120. Trace de ejecución
 
 Ejemplo:
 
@@ -3558,7 +3557,7 @@ controller
 
 ---
 
-# 121. Debugging del orden
+## 121. Debugging del orden
 
 La CLI podrá mostrar:
 
@@ -3601,7 +3600,7 @@ Resolved interceptor plan
 
 ---
 
-# 122. Debug de dependencias
+## 122. Debug de dependencias
 
 ```text
 transaction
@@ -3629,7 +3628,7 @@ domain_events
 
 ---
 
-# 123. Excepciones
+## 123. Excepciones
 
 ```text
 ControllerInterceptorException
@@ -3659,7 +3658,7 @@ InterceptorLifecycleException
 
 ---
 
-# 124. Ejemplo de error de orden
+## 124. Ejemplo de error de orden
 
 ```text
 Unsafe controller interceptor order detected.
@@ -3688,7 +3687,7 @@ Source:
 
 ---
 
-# 125. Configuración
+## 125. Configuración
 
 ```php
 return [
@@ -3760,7 +3759,7 @@ return [
 
 ---
 
-# 126. Registro en Container
+## 126. Registro en Container
 
 ```php
 $container->singleton(
@@ -3811,7 +3810,7 @@ $container->singleton(
 
 ---
 
-# 127. Bootstrapping
+## 127. Bootstrapping
 
 Durante `register`:
 
@@ -3840,7 +3839,7 @@ Durante `boot`:
 
 ---
 
-# 128. Registro desde paquetes
+## 128. Registro desde paquetes
 
 Ejemplo de paquete de auditoría:
 
@@ -3870,7 +3869,7 @@ public function boot(
 
 ---
 
-# 129. API de registro ergonómica
+## 129. API de registro ergonómica
 
 Podrá existir:
 
@@ -3898,7 +3897,7 @@ Volt::controllers()
 
 ---
 
-# 130. Integración con ControllerExecution
+## 130. Integración con ControllerExecution
 
 Se añadirán propiedades:
 
@@ -3923,7 +3922,7 @@ public InterceptorExecutionState $interceptorState;
 
 ---
 
-# 131. InterceptorExecutionState
+## 131. InterceptorExecutionState
 
 ```php
 final class InterceptorExecutionState
@@ -3948,7 +3947,7 @@ Este estado será request/execution-scoped.
 
 ---
 
-# 132. ResolveInterceptorsStage
+## 132. ResolveInterceptorsStage
 
 ```php
 final class ResolveInterceptorsStage implements
@@ -3973,7 +3972,7 @@ final class ResolveInterceptorsStage implements
 
 ---
 
-# 133. ControllerInterceptorsStage
+## 133. ControllerInterceptorsStage
 
 ```php
 final class ControllerInterceptorsStage implements
@@ -4012,7 +4011,7 @@ El pipeline exterior deberá omitir una segunda invocación del controlador.
 
 ---
 
-# 134. Garantía de invocación única
+## 134. Garantía de invocación única
 
 `ControllerExecution` tendrá:
 
@@ -4036,7 +4035,7 @@ Excepción: retries explícitos utilizarán un contador autorizado y una semánt
 
 ---
 
-# 135. InvocationAttempt
+## 135. InvocationAttempt
 
 ```php
 final readonly class InvocationAttempt
@@ -4055,7 +4054,7 @@ El retry interceptor registrará múltiples intentos sin confundirlos con una in
 
 ---
 
-# 136. Testing
+## 136. Testing
 
 El sistema deberá ofrecer:
 
@@ -4073,7 +4072,7 @@ InterceptorExecutionAssertions
 
 ---
 
-# 137. Fake interceptor
+## 137. Fake interceptor
 
 ```php
 final class FakeControllerInterceptor implements
@@ -4104,7 +4103,7 @@ final class FakeControllerInterceptor implements
 
 ---
 
-# 138. Assertions
+## 138. Assertions
 
 ```php
 expect($execution)
@@ -4119,7 +4118,7 @@ expect($execution)
 
 ---
 
-# 139. Unit tests mínimos
+## 139. Unit tests mínimos
 
 * Registry registra interceptor.
 * Registry resuelve alias.
@@ -4151,7 +4150,7 @@ expect($execution)
 
 ---
 
-# 140. Integration tests
+## 140. Integration tests
 
 * Routing aporta interceptores.
 * Metadata Engine combina interceptores.
@@ -4172,7 +4171,7 @@ expect($execution)
 
 ---
 
-# 141. Prueba de orden
+## 141. Prueba de orden
 
 ```php
 public function test_interceptors_run_in_expected_order(): void
@@ -4197,7 +4196,7 @@ public function test_interceptors_run_in_expected_order(): void
 
 ---
 
-# 142. Prueba de short circuit
+## 142. Prueba de short circuit
 
 ```php
 public function test_cache_interceptor_can_skip_controller(): void
@@ -4223,7 +4222,7 @@ public function test_cache_interceptor_can_skip_controller(): void
 
 ---
 
-# 143. Prueba de rollback
+## 143. Prueba de rollback
 
 ```php
 public function test_transaction_rolls_back_when_controller_fails(): void
@@ -4249,7 +4248,7 @@ public function test_transaction_rolls_back_when_controller_fails(): void
 
 ---
 
-# 144. Prueba FrankenPHP
+## 144. Prueba FrankenPHP
 
 ```php
 public function test_execution_scoped_interceptor_is_not_shared(): void
@@ -4278,7 +4277,7 @@ public function test_execution_scoped_interceptor_is_not_shared(): void
 
 ---
 
-# 145. Benchmarks
+## 145. Benchmarks
 
 Escenarios:
 
@@ -4318,7 +4317,7 @@ Métricas:
 
 ---
 
-# 146. Objetivos de rendimiento
+## 146. Objetivos de rendimiento
 
 Objetivos iniciales orientativos:
 
@@ -4345,7 +4344,7 @@ Los valores numéricos definitivos deberán obtenerse mediante benchmarks reales
 
 ---
 
-# 147. Estructura de directorios
+## 147. Estructura de directorios
 
 ```text
 src/
@@ -4559,7 +4558,7 @@ src/
 
 ---
 
-# 148. Implementación V1
+## 148. Implementación V1
 
 La primera versión deberá incluir:
 
@@ -4623,7 +4622,7 @@ Podrán posponerse:
 
 ---
 
-# 149. Ejemplo completo
+## 149. Ejemplo completo
 
 ```php
 #[InterceptorGroup('secured-write')]
@@ -4742,9 +4741,9 @@ Result Normalization System
 
 ---
 
-# 150. Decisiones arquitectónicas
+## 150. Decisiones arquitectónicas
 
-## ADR-CTRL-INT-001
+### ADR-CTRL-INT-001
 
 **Decisión:** Los interceptores serán distintos del middleware HTTP.
 
@@ -4752,7 +4751,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-002
+### ADR-CTRL-INT-002
 
 **Decisión:** El contrato utilizará semántica around.
 
@@ -4760,7 +4759,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-003
+### ADR-CTRL-INT-003
 
 **Decisión:** Los interceptores se resolverán antes de ejecutarse.
 
@@ -4768,7 +4767,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-004
+### ADR-CTRL-INT-004
 
 **Decisión:** El orden se definirá mediante fase, prioridad y dependencias.
 
@@ -4776,7 +4775,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-005
+### ADR-CTRL-INT-005
 
 **Decisión:** El plan será inmutable.
 
@@ -4784,7 +4783,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-006
+### ADR-CTRL-INT-006
 
 **Decisión:** Los interceptores utilizarán el Container.
 
@@ -4792,7 +4791,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-007
+### ADR-CTRL-INT-007
 
 **Decisión:** El scope predeterminado será `Execution`.
 
@@ -4800,7 +4799,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-008
+### ADR-CTRL-INT-008
 
 **Decisión:** Los interceptores singleton deberán ser stateless.
 
@@ -4808,7 +4807,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-009
+### ADR-CTRL-INT-009
 
 **Decisión:** El pipeline permitirá short circuit.
 
@@ -4816,7 +4815,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-010
+### ADR-CTRL-INT-010
 
 **Decisión:** El invoker será el terminal del pipeline.
 
@@ -4824,7 +4823,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-011
+### ADR-CTRL-INT-011
 
 **Decisión:** Los grupos de interceptores serán registrables.
 
@@ -4832,7 +4831,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-012
+### ADR-CTRL-INT-012
 
 **Decisión:** Las exclusiones serán objetos explícitos.
 
@@ -4840,7 +4839,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-013
+### ADR-CTRL-INT-013
 
 **Decisión:** Los interceptores críticos podrán marcarse como protegidos.
 
@@ -4848,7 +4847,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-014
+### ADR-CTRL-INT-014
 
 **Decisión:** Los planes podrán compilarse.
 
@@ -4856,7 +4855,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-015
+### ADR-CTRL-INT-015
 
 **Decisión:** Las condiciones runtime no formarán parte de la cache global definitiva.
 
@@ -4864,7 +4863,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-016
+### ADR-CTRL-INT-016
 
 **Decisión:** La transformación del resultado ocurrirá antes de la normalización.
 
@@ -4872,7 +4871,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-017
+### ADR-CTRL-INT-017
 
 **Decisión:** El sistema detectará órdenes inseguras.
 
@@ -4880,7 +4879,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-018
+### ADR-CTRL-INT-018
 
 **Decisión:** Los retries deberán crear intentos explícitos.
 
@@ -4888,7 +4887,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-019
+### ADR-CTRL-INT-019
 
 **Decisión:** La metadata declarará interceptores, pero no almacenará instancias.
 
@@ -4896,7 +4895,7 @@ Result Normalization System
 
 ---
 
-## ADR-CTRL-INT-020
+### ADR-CTRL-INT-020
 
 **Decisión:** El sistema general de excepciones seguirá siendo responsable del mapping final.
 
@@ -4904,7 +4903,7 @@ Result Normalization System
 
 ---
 
-# 151. Criterios de aceptación
+## 151. Criterios de aceptación
 
 El sistema se considerará correctamente implementado cuando:
 
@@ -4948,7 +4947,7 @@ El sistema se considerará correctamente implementado cuando:
 
 ---
 
-# 152. Conclusión
+## 152. Conclusión
 
 El `Controller Interceptor System` será la capa encargada de aplicar comportamiento transversal alrededor de la invocación de los controladores de VoltStack.
 

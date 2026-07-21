@@ -1,6 +1,5 @@
-# 01_CONTROLLER_ARCHITECTURE.md
-
 # Arquitectura del sistema de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -9,7 +8,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura interna del sistema de controladores de VoltStack.
 
@@ -33,7 +32,7 @@ La experiencia pública deberá mantenerse cercana a Laravel, mientras que la es
 
 ---
 
-# 2. Visión arquitectónica
+## 2. Visión arquitectónica
 
 El sistema de controladores se encuentra entre el sistema de rutas y el sistema de respuestas.
 
@@ -80,9 +79,9 @@ El sistema de controladores determina:
 
 ---
 
-# 3. Principios arquitectónicos
+## 3. Principios arquitectónicos
 
-## 3.1 Separación de responsabilidades
+### 3.1 Separación de responsabilidades
 
 Cada componente deberá tener una responsabilidad concreta.
 
@@ -105,7 +104,7 @@ Esta separación facilitará:
 
 ---
 
-## 3.2 Contratos antes que implementaciones
+### 3.2 Contratos antes que implementaciones
 
 Las dependencias internas utilizarán interfaces.
 
@@ -125,7 +124,7 @@ La implementación predeterminada podrá reemplazarse sin modificar el router, e
 
 ---
 
-## 3.3 Controladores sin conocimiento del framework interno
+### 3.3 Controladores sin conocimiento del framework interno
 
 Un controlador de aplicación no deberá conocer la arquitectura que lo ejecuta.
 
@@ -152,7 +151,7 @@ El controlador no necesita conocer:
 
 ---
 
-## 3.4 Ejecución determinista
+### 3.4 Ejecución determinista
 
 La resolución de controladores y parámetros deberá seguir reglas predecibles.
 
@@ -170,7 +169,7 @@ No se permitirán reglas ambiguas dependientes del orden accidental de registro.
 
 ---
 
-## 3.5 Compilación opcional
+### 3.5 Compilación opcional
 
 El sistema debe funcionar correctamente mediante reflexión durante desarrollo, pero permitir compilar la información necesaria para producción.
 
@@ -186,7 +185,7 @@ Producción
 
 ---
 
-## 3.6 Neutralidad de transporte
+### 3.6 Neutralidad de transporte
 
 La arquitectura principal no debe estar limitada exclusivamente a HTTP.
 
@@ -205,9 +204,9 @@ Para ello se utilizará un contexto de ejecución desacoplado.
 
 ---
 
-# 4. Límites del módulo
+## 4. Límites del módulo
 
-## 4.1 Responsabilidades del sistema
+### 4.1 Responsabilidades del sistema
 
 El módulo Controllers será responsable de:
 
@@ -229,7 +228,7 @@ El módulo Controllers será responsable de:
 
 ---
 
-## 4.2 Responsabilidades externas
+### 4.2 Responsabilidades externas
 
 El módulo no será responsable de:
 
@@ -248,7 +247,7 @@ Estas capacidades serán delegadas a sus respectivos contratos.
 
 ---
 
-# 5. Componentes principales
+## 5. Componentes principales
 
 La arquitectura estará formada por los siguientes componentes.
 
@@ -271,7 +270,7 @@ ControllerCache
 
 ---
 
-# 6. ControllerDefinition
+## 6. ControllerDefinition
 
 `ControllerDefinition` representa una descripción normalizada del controlador que debe ejecutarse.
 
@@ -316,7 +315,7 @@ final readonly class ControllerDefinition
 }
 ```
 
-## 6.1 Tipos de definición
+### 6.1 Tipos de definición
 
 ```php
 enum ControllerType: string
@@ -332,7 +331,7 @@ enum ControllerType: string
 }
 ```
 
-## 6.2 Responsabilidades
+### 6.2 Responsabilidades
 
 `ControllerDefinition` deberá:
 
@@ -351,7 +350,7 @@ No deberá:
 
 ---
 
-# 7. ControllerReferenceParser
+## 7. ControllerReferenceParser
 
 El `ControllerReferenceParser` convertirá las distintas sintaxis públicas en un `ControllerDefinition`.
 
@@ -392,7 +391,7 @@ final class CompositeControllerReferenceParser
 }
 ```
 
-## 7.1 Regla de prioridad
+### 7.1 Regla de prioridad
 
 Cada parser tendrá una prioridad explícita.
 
@@ -409,7 +408,7 @@ La sintaxis legacy basada en cadenas podrá mantenerse como compatibilidad, pero
 
 ---
 
-# 8. ControllerContext
+## 8. ControllerContext
 
 `ControllerContext` representa la información disponible durante la resolución y ejecución.
 
@@ -430,7 +429,7 @@ final readonly class ControllerContext
 
 El contexto permitirá que los resolvers obtengan información sin depender directamente de servicios globales.
 
-## 8.1 Información posible
+### 8.1 Información posible
 
 * Petición actual.
 * Ruta resuelta.
@@ -445,7 +444,7 @@ El contexto permitirá que los resolvers obtengan información sin depender dire
 * Estado de navegación SPA.
 * Metadata del kernel.
 
-## 8.2 Inmutabilidad
+### 8.2 Inmutabilidad
 
 El contexto deberá ser inmutable.
 
@@ -455,7 +454,7 @@ Esto evitará mutaciones laterales difíciles de rastrear.
 
 ---
 
-# 9. ControllerResolver
+## 9. ControllerResolver
 
 El `ControllerResolver` transforma una definición en un controlador ejecutable.
 
@@ -486,7 +485,7 @@ final readonly class ResolvedController
 }
 ```
 
-## 9.1 Responsabilidades
+### 9.1 Responsabilidades
 
 * Validar la definición.
 * Resolver la clase mediante el contenedor.
@@ -497,7 +496,7 @@ final readonly class ResolvedController
 * Cargar metadata asociada.
 * Devolver una representación ejecutable.
 
-## 9.2 Resolución mediante Container
+### 9.2 Resolución mediante Container
 
 ```php
 $instance = $container->make($definition->class);
@@ -513,7 +512,7 @@ Esto permitirá:
 * Contextual bindings.
 * Scoped services.
 
-## 9.3 Controladores request-scoped
+### 9.3 Controladores request-scoped
 
 Por defecto, cada controlador será resuelto dentro del scope de la petición.
 
@@ -528,7 +527,7 @@ final class UserController
 
 ---
 
-# 10. ControllerMetadataResolver
+## 10. ControllerMetadataResolver
 
 El `ControllerMetadataResolver` será responsable de leer y combinar metadata procedente de:
 
@@ -555,7 +554,7 @@ interface ControllerMetadataResolverInterface
 }
 ```
 
-## 10.1 Metadata posible
+### 10.1 Metadata posible
 
 ```php
 final readonly class ControllerMetadata
@@ -575,7 +574,7 @@ final readonly class ControllerMetadata
 }
 ```
 
-## 10.2 Precedencia
+### 10.2 Precedencia
 
 La precedencia recomendada será:
 
@@ -615,7 +614,7 @@ final class UserController
 
 ---
 
-# 11. ControllerArgumentResolver
+## 11. ControllerArgumentResolver
 
 El `ControllerArgumentResolver` construirá la lista ordenada de argumentos que necesita el método.
 
@@ -653,7 +652,7 @@ interface ArgumentValueResolverInterface
 }
 ```
 
-## 11.1 Resolvers iniciales
+### 11.1 Resolvers iniciales
 
 ```text
 RequestArgumentResolver
@@ -671,7 +670,7 @@ DefaultValueArgumentResolver
 NullableArgumentResolver
 ```
 
-## 11.2 Orden de resolución
+### 11.2 Orden de resolución
 
 El orden general será:
 
@@ -686,7 +685,7 @@ El orden general será:
 9. Valor nullable.
 10. Error de resolución.
 
-## 11.3 Ejemplo
+### 11.3 Ejemplo
 
 ```php
 public function update(
@@ -720,7 +719,7 @@ CurrentTenant
 
 ---
 
-# 12. ArgumentMetadata
+## 12. ArgumentMetadata
 
 Cada parámetro se representará mediante metadata normalizada.
 
@@ -746,7 +745,7 @@ En producción, esta estructura podrá generarse durante la compilación para ev
 
 ---
 
-# 13. ControllerMiddlewareResolver
+## 13. ControllerMiddlewareResolver
 
 El middleware asociado al controlador podrá proceder de:
 
@@ -773,7 +772,7 @@ interface ControllerMiddlewareResolverInterface
 }
 ```
 
-## 13.1 Tipos de middleware
+### 13.1 Tipos de middleware
 
 ```text
 Before middleware
@@ -786,7 +785,7 @@ El sistema deberá reutilizar el pipeline general de middleware del framework.
 
 No se creará un segundo motor de middleware exclusivo para controladores.
 
-## 13.2 Alcance
+### 13.2 Alcance
 
 El middleware de controlador se ejecutará después del middleware de ruta externo y antes de la invocación final.
 
@@ -802,7 +801,7 @@ Controller Invocation
 
 ---
 
-# 14. ControllerDispatcher
+## 14. ControllerDispatcher
 
 El `ControllerDispatcher` coordinará la ejecución del sistema.
 
@@ -837,7 +836,7 @@ final class ControllerDispatcher implements ControllerDispatcherInterface
 }
 ```
 
-## 14.1 Flujo interno
+### 14.1 Flujo interno
 
 ```text
 ControllerDefinition
@@ -878,7 +877,7 @@ Lifecycle: finished
 
 ---
 
-# 15. ControllerInvoker
+## 15. ControllerInvoker
 
 El `ControllerInvoker` será el único componente autorizado para invocar el controlador.
 
@@ -895,7 +894,7 @@ interface ControllerInvokerInterface
 }
 ```
 
-## 15.1 Implementación base
+### 15.1 Implementación base
 
 La implementación inicial podrá utilizar:
 
@@ -915,7 +914,7 @@ Para closures:
 $result = ($controller->method)(...$arguments);
 ```
 
-## 15.2 Razón de separación
+### 15.2 Razón de separación
 
 Separar la invocación permitirá implementar posteriormente:
 
@@ -933,7 +932,7 @@ Separar la invocación permitirá implementar posteriormente:
 
 ---
 
-# 16. ControllerResultNormalizer
+## 16. ControllerResultNormalizer
 
 Un controlador podrá devolver diferentes tipos de resultados.
 
@@ -983,7 +982,7 @@ interface ControllerResultNormalizerInterface
 }
 ```
 
-## 16.1 Normalizadores especializados
+### 16.1 Normalizadores especializados
 
 ```php
 interface ResultNormalizerInterface
@@ -1020,7 +1019,7 @@ StringResultNormalizer
 NullResultNormalizer
 ```
 
-## 16.2 Prioridad
+### 16.2 Prioridad
 
 Los tipos más explícitos tendrán mayor prioridad.
 
@@ -1048,7 +1047,7 @@ Esta conducta deberá ser explícita y configurable para evitar ambigüedad.
 
 ---
 
-# 17. ResponseFactory
+## 17. ResponseFactory
 
 El `ResponseFactory` construirá respuestas concretas.
 
@@ -1082,7 +1081,7 @@ El sistema de controladores dependerá del contrato, no de implementaciones HTTP
 
 ---
 
-# 18. ControllerLifecycle
+## 18. ControllerLifecycle
 
 El ciclo de vida encapsulará eventos, hooks e instrumentación.
 
@@ -1125,7 +1124,7 @@ interface ControllerLifecycleInterface
 }
 ```
 
-## 18.1 Eventos previstos
+### 18.1 Eventos previstos
 
 ```text
 ControllerResolving
@@ -1139,7 +1138,7 @@ ControllerFailed
 ControllerFinished
 ```
 
-## 18.2 Uso
+### 18.2 Uso
 
 Estos eventos permitirán:
 
@@ -1157,7 +1156,7 @@ Los listeners no deberán alterar silenciosamente el resultado salvo que un even
 
 ---
 
-# 19. ControllerRegistry
+## 19. ControllerRegistry
 
 El `ControllerRegistry` mantendrá información conocida sobre controladores.
 
@@ -1179,7 +1178,7 @@ interface ControllerRegistryInterface
 }
 ```
 
-## 19.1 Casos de uso
+### 19.1 Casos de uso
 
 * Service controllers.
 * Aliases.
@@ -1206,11 +1205,11 @@ $registry->register(
 
 ---
 
-# 20. Arquitectura de pipelines
+## 20. Arquitectura de pipelines
 
 El sistema utilizará pipelines en dos niveles.
 
-## 20.1 Pipeline HTTP externo
+### 20.1 Pipeline HTTP externo
 
 ```text
 Global Middleware
@@ -1220,7 +1219,7 @@ Application Middleware
 Route Middleware
 ```
 
-## 20.2 Pipeline del controlador
+### 20.2 Pipeline del controlador
 
 ```text
 Controller Metadata
@@ -1242,7 +1241,7 @@ La autorización y validación podrán implementarse como interceptores internos
 
 ---
 
-# 21. Interceptores del controlador
+## 21. Interceptores del controlador
 
 Además del middleware tradicional, la arquitectura podrá incorporar interceptores especializados.
 
@@ -1270,7 +1269,7 @@ TracingInterceptor
 TimeoutInterceptor
 ```
 
-## 21.1 Diferencia entre middleware e interceptor
+### 21.1 Diferencia entre middleware e interceptor
 
 El middleware opera principalmente sobre request y response.
 
@@ -1300,7 +1299,7 @@ final readonly class ControllerInvocation
 
 ---
 
-# 22. Integración con autorización
+## 22. Integración con autorización
 
 El sistema no implementará directamente las políticas, pero sí coordinará su ejecución.
 
@@ -1335,11 +1334,11 @@ La autorización deberá ejecutarse antes de entrar al cuerpo del método.
 
 ---
 
-# 23. Integración con validación
+## 23. Integración con validación
 
 El sistema permitirá varios estilos.
 
-## 23.1 Form Request
+### 23.1 Form Request
 
 ```php
 public function store(CreateUserRequest $request): Response
@@ -1347,7 +1346,7 @@ public function store(CreateUserRequest $request): Response
 }
 ```
 
-## 23.2 DTO validado
+### 23.2 DTO validado
 
 ```php
 public function store(CreateUserData $data): Response
@@ -1355,7 +1354,7 @@ public function store(CreateUserData $data): Response
 }
 ```
 
-## 23.3 Atributos
+### 23.3 Atributos
 
 ```php
 public function store(
@@ -1366,7 +1365,7 @@ public function store(
 }
 ```
 
-## 23.4 Metadata de método
+### 23.4 Metadata de método
 
 ```php
 #[Validate(CreateUserRules::class)]
@@ -1379,7 +1378,7 @@ La validación será coordinada por resolvers e interceptores, no directamente p
 
 ---
 
-# 24. Integración con transacciones
+## 24. Integración con transacciones
 
 Los controladores podrán declarar transacciones.
 
@@ -1416,7 +1415,7 @@ La lógica transaccional pertenecerá al módulo de persistencia o database, no 
 
 ---
 
-# 25. Integración con Volt Runtime
+## 25. Integración con Volt Runtime
 
 Los controladores de páginas podrán devolver respuestas Volt.
 
@@ -1453,7 +1452,7 @@ El sistema de controladores no renderizará las plantillas directamente.
 
 ---
 
-# 26. Integración con SPA Runtime
+## 26. Integración con SPA Runtime
 
 La respuesta podrá variar según el tipo de navegación.
 
@@ -1483,7 +1482,7 @@ El controlador no necesitará contener condicionales específicos del transporte
 
 ---
 
-# 27. Integración con componentes
+## 27. Integración con componentes
 
 Un controlador podrá devolver un descriptor de componente.
 
@@ -1507,7 +1506,7 @@ El `ComponentResultNormalizer` determinará:
 
 ---
 
-# 28. Integración con APIs
+## 28. Integración con APIs
 
 Las rutas de API proporcionarán metadata de formato.
 
@@ -1538,7 +1537,7 @@ El sistema deberá evitar serializar accidentalmente propiedades sensibles.
 
 ---
 
-# 29. Manejo de excepciones
+## 29. Manejo de excepciones
 
 Las excepciones se propagarán hacia el sistema central de manejo de errores, después de enriquecer su contexto.
 
@@ -1560,7 +1559,7 @@ try {
 }
 ```
 
-## 29.1 Excepciones del módulo
+### 29.1 Excepciones del módulo
 
 ```text
 InvalidControllerDefinitionException
@@ -1575,7 +1574,7 @@ ControllerExecutionException
 ControllerMetadataException
 ```
 
-## 29.2 Contexto de error
+### 29.2 Contexto de error
 
 Las excepciones deberán proporcionar:
 
@@ -1593,27 +1592,27 @@ No deberán exponer información sensible en producción.
 
 ---
 
-# 30. Caché y compilación
+## 30. Caché y compilación
 
 La arquitectura admitirá varios niveles de caché.
 
-## 30.1 Controller definition cache
+### 30.1 Controller definition cache
 
 Almacena la definición normalizada asociada a una ruta.
 
-## 30.2 Metadata cache
+### 30.2 Metadata cache
 
 Almacena atributos y configuración combinada.
 
-## 30.3 Argument metadata cache
+### 30.3 Argument metadata cache
 
 Almacena información de parámetros.
 
-## 30.4 Resolver plan cache
+### 30.4 Resolver plan cache
 
 Almacena qué resolver corresponde a cada argumento.
 
-## 30.5 Invocation plan cache
+### 30.5 Invocation plan cache
 
 Almacena el plan completo de ejecución.
 
@@ -1634,7 +1633,7 @@ final readonly class CompiledControllerPlan
 }
 ```
 
-## 30.6 Flujo compilado
+### 30.6 Flujo compilado
 
 ```text
 Route Match
@@ -1654,7 +1653,7 @@ La compilación no deberá cambiar el comportamiento observable respecto al modo
 
 ---
 
-# 31. Estructura de directorios
+## 31. Estructura de directorios
 
 ```text
 src/
@@ -1813,9 +1812,9 @@ src/
 
 ---
 
-# 32. Dependencias del módulo
+## 32. Dependencias del módulo
 
-## 32.1 Dependencias obligatorias
+### 32.1 Dependencias obligatorias
 
 ```text
 Container
@@ -1827,7 +1826,7 @@ Contracts
 Support
 ```
 
-## 32.2 Dependencias opcionales
+### 32.2 Dependencias opcionales
 
 ```text
 Authentication
@@ -1849,7 +1848,7 @@ El núcleo no deberá fallar porque un módulo opcional no se encuentre instalad
 
 ---
 
-# 33. Registro en el contenedor
+## 33. Registro en el contenedor
 
 El módulo registrará sus implementaciones predeterminadas.
 
@@ -1894,11 +1893,11 @@ Los controladores de aplicación serán request-scoped o transient.
 
 ---
 
-# 34. Bootstrapping
+## 34. Bootstrapping
 
 El módulo seguirá dos fases.
 
-## 34.1 Register
+### 34.1 Register
 
 Durante `register`:
 
@@ -1910,7 +1909,7 @@ Durante `register`:
 * Registrar compiladores.
 * Registrar configuración.
 
-## 34.2 Boot
+### 34.2 Boot
 
 Durante `boot`:
 
@@ -1923,7 +1922,7 @@ Durante `boot`:
 
 ---
 
-# 35. Flujo completo de ejecución
+## 35. Flujo completo de ejecución
 
 ```text
 1. HttpKernel recibe Request
@@ -1952,7 +1951,7 @@ Durante `boot`:
 
 ---
 
-# 36. Ejemplo de ejecución
+## 36. Ejemplo de ejecución
 
 Ruta:
 
@@ -2028,7 +2027,7 @@ HTTP 302 Response
 
 ---
 
-# 37. Reglas de extensibilidad
+## 37. Reglas de extensibilidad
 
 Los paquetes podrán registrar:
 
@@ -2068,7 +2067,7 @@ Las extensiones deberán declarar prioridad y soporte de manera explícita.
 
 ---
 
-# 38. Reglas de seguridad
+## 38. Reglas de seguridad
 
 La arquitectura deberá garantizar:
 
@@ -2087,7 +2086,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 39. Reglas de rendimiento
+## 39. Reglas de rendimiento
 
 El sistema deberá:
 
@@ -2105,7 +2104,7 @@ El sistema deberá:
 
 ---
 
-# 40. Observabilidad
+## 40. Observabilidad
 
 Cada ejecución deberá poder generar métricas como:
 
@@ -2142,9 +2141,9 @@ Los valores sensibles deberán anonimizarse o excluirse.
 
 ---
 
-# 41. Estrategia de pruebas
+## 41. Estrategia de pruebas
 
-## 41.1 Pruebas unitarias
+### 41.1 Pruebas unitarias
 
 * Parsing de referencias.
 * Resolución de controladores.
@@ -2154,7 +2153,7 @@ Los valores sensibles deberán anonimizarse o excluirse.
 * Prioridad de interceptores.
 * Excepciones.
 
-## 41.2 Pruebas de integración
+### 41.2 Pruebas de integración
 
 * Router → Dispatcher.
 * Container → Controller.
@@ -2165,7 +2164,7 @@ Los valores sensibles deberán anonimizarse o excluirse.
 * Model binding.
 * Middleware.
 
-## 41.3 Pruebas de contrato
+### 41.3 Pruebas de contrato
 
 Cada implementación sustituible deberá ejecutar una suite común.
 
@@ -2176,15 +2175,15 @@ abstract class ControllerResolverContractTest extends TestCase
 }
 ```
 
-## 41.4 Pruebas de equivalencia
+### 41.4 Pruebas de equivalencia
 
 El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-# 42. Fases de implementación
+## 42. Fases de implementación
 
-## Fase 1: núcleo mínimo
+### Fase 1: núcleo mínimo
 
 * `ControllerDefinition`.
 * Parsers básicos.
@@ -2194,7 +2193,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 * `ControllerDispatcher`.
 * Normalización de `ResponseInterface`.
 
-## Fase 2: integración HTTP
+### Fase 2: integración HTTP
 
 * Request resolver.
 * Route parameter resolver.
@@ -2203,7 +2202,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 * Manejo de excepciones.
 * Lifecycle events.
 
-## Fase 3: resolución avanzada
+### Fase 3: resolución avanzada
 
 * Model binding.
 * DTOs.
@@ -2213,7 +2212,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 * Uploaded files.
 * Argument metadata cache.
 
-## Fase 4: resultados especializados
+### Fase 4: resultados especializados
 
 * Views.
 * Volt.
@@ -2223,7 +2222,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 * Streams.
 * Downloads.
 
-## Fase 5: metadata e interceptores
+### Fase 5: metadata e interceptores
 
 * Atributos.
 * Autorización.
@@ -2233,7 +2232,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 * Rate limiting.
 * Auditoría.
 
-## Fase 6: compilación
+### Fase 6: compilación
 
 * Metadata compiler.
 * Argument resolver plans.
@@ -2244,9 +2243,9 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-# 43. Decisiones arquitectónicas iniciales
+## 43. Decisiones arquitectónicas iniciales
 
-## ADR-CTRL-001
+### ADR-CTRL-001
 
 **Decisión:** El router almacenará referencias de controlador, no instancias.
 
@@ -2254,7 +2253,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-002
+### ADR-CTRL-002
 
 **Decisión:** El dispatcher será un orquestador sin lógica de negocio específica.
 
@@ -2262,7 +2261,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-003
+### ADR-CTRL-003
 
 **Decisión:** La resolución de argumentos se realizará mediante resolvers especializados.
 
@@ -2270,7 +2269,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-004
+### ADR-CTRL-004
 
 **Decisión:** Los resultados se normalizarán después de ejecutar el controlador.
 
@@ -2278,7 +2277,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-005
+### ADR-CTRL-005
 
 **Decisión:** Los controladores serán request-scoped por defecto.
 
@@ -2286,7 +2285,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-006
+### ADR-CTRL-006
 
 **Decisión:** Los interceptores operarán sobre la invocación y el middleware sobre request/response.
 
@@ -2294,7 +2293,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-007
+### ADR-CTRL-007
 
 **Decisión:** El modo compilado deberá ser funcionalmente equivalente al dinámico.
 
@@ -2302,7 +2301,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-## ADR-CTRL-008
+### ADR-CTRL-008
 
 **Decisión:** Volt, SPA y Components serán integraciones mediante normalizadores.
 
@@ -2310,7 +2309,7 @@ El modo dinámico y el modo compilado deberán producir resultados equivalentes.
 
 ---
 
-# 44. Criterios de aceptación arquitectónicos
+## 44. Criterios de aceptación arquitectónicos
 
 La arquitectura se considerará correctamente implementada cuando:
 
@@ -2332,7 +2331,7 @@ La arquitectura se considerará correctamente implementada cuando:
 
 ---
 
-# 45. Arquitectura resumida
+## 45. Arquitectura resumida
 
 ```text
                     ┌─────────────────────┐
@@ -2387,7 +2386,7 @@ La arquitectura se considerará correctamente implementada cuando:
 
 ---
 
-# 46. Conclusión
+## 46. Conclusión
 
 La arquitectura del sistema de controladores de VoltStack se basa en una cadena de componentes pequeños, especializados y sustituibles.
 

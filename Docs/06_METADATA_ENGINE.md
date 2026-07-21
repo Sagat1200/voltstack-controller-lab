@@ -1,6 +1,5 @@
-# 06_METADATA_ENGINE.md
-
 # Motor unificado de metadatos de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura del `Metadata Engine` de VoltStack.
 
@@ -57,7 +56,7 @@ Su resultado será una representación inmutable, tipada y determinista.
 
 ---
 
-# 2. Problema que resuelve
+## 2. Problema que resuelve
 
 Sin un motor común, cada módulo podría implementar su propia lógica:
 
@@ -122,7 +121,7 @@ Immutable Metadata
 
 ---
 
-# 3. Posición arquitectónica
+## 3. Posición arquitectónica
 
 El motor pertenecerá a una capa de soporte compartida.
 
@@ -165,7 +164,7 @@ Cada módulo registrará sus propios:
 
 ---
 
-# 4. Objetivos
+## 4. Objetivos
 
 El motor deberá:
 
@@ -192,7 +191,7 @@ El motor deberá:
 
 ---
 
-# 5. No responsabilidades
+## 5. No responsabilidades
 
 El motor no será responsable de:
 
@@ -213,7 +212,7 @@ Los consumidores interpretarán esa metadata.
 
 ---
 
-# 6. Arquitectura general
+## 6. Arquitectura general
 
 ```text
 MetadataSubject
@@ -262,7 +261,7 @@ MetadataBag
 
 ---
 
-# 7. Conceptos fundamentales
+## 7. Conceptos fundamentales
 
 El motor utilizará los siguientes conceptos:
 
@@ -284,7 +283,7 @@ CompiledMetadataPlan
 
 ---
 
-# 8. MetadataSubject
+## 8. MetadataSubject
 
 `MetadataSubject` identifica el elemento sobre el cual se solicita metadata.
 
@@ -322,7 +321,7 @@ interface MetadataSubjectInterface
 
 ---
 
-# 9. MetadataSubjectType
+## 9. MetadataSubjectType
 
 ```php
 enum MetadataSubjectType: string
@@ -352,7 +351,7 @@ El enum podrá ampliarse mediante un identificador personalizado en versiones fu
 
 ---
 
-# 10. Implementaciones de sujetos
+## 10. Implementaciones de sujetos
 
 Implementaciones iniciales:
 
@@ -408,7 +407,7 @@ final readonly class MethodMetadataSubject implements
 
 ---
 
-# 11. MetadataScope
+## 11. MetadataScope
 
 El scope indica la categoría funcional de metadata solicitada.
 
@@ -456,7 +455,7 @@ El scope evita que todos los providers participen en todas las solicitudes.
 
 ---
 
-# 12. Scopes iniciales
+## 12. Scopes iniciales
 
 ```text
 application
@@ -497,7 +496,7 @@ MetadataScopeSet::from([
 
 ---
 
-# 13. MetadataRequest
+## 13. MetadataRequest
 
 ```php
 final readonly class MetadataRequest
@@ -516,7 +515,7 @@ final readonly class MetadataRequest
 
 ---
 
-# 14. MetadataResolutionMode
+## 14. MetadataResolutionMode
 
 ```php
 enum MetadataResolutionMode: string
@@ -552,7 +551,7 @@ Debug
 
 ---
 
-# 15. Contrato principal
+## 15. Contrato principal
 
 ```php
 namespace VoltStack\Support\Metadata\Contracts;
@@ -581,7 +580,7 @@ interface MetadataEngineInterface
 
 ---
 
-# 16. Implementación principal
+## 16. Implementación principal
 
 ```php
 final class MetadataEngine implements MetadataEngineInterface
@@ -632,7 +631,7 @@ final class MetadataEngine implements MetadataEngineInterface
 
 ---
 
-# 17. MetadataProvider
+## 17. MetadataProvider
 
 Cada provider representará una fuente de metadata.
 
@@ -658,7 +657,7 @@ interface MetadataProviderInterface
 
 ---
 
-# 18. Providers iniciales
+## 18. Providers iniciales
 
 ```text
 CompiledMetadataProvider
@@ -677,7 +676,7 @@ No todos deberán ejecutarse en cada request.
 
 ---
 
-# 19. Orden recomendado de providers
+## 19. Orden recomendado de providers
 
 La prioridad de recolección no será necesariamente la prioridad final de merge, pero se recomienda:
 
@@ -698,7 +697,7 @@ Las reglas efectivas dependerán del schema de cada key.
 
 ---
 
-# 20. CompiledMetadataProvider
+## 20. CompiledMetadataProvider
 
 Será el primer provider consultado en modo compilado.
 
@@ -742,7 +741,7 @@ Cuando el plan compilado sea completo, el pipeline podrá finalizar anticipadame
 
 ---
 
-# 21. RuntimeMetadataProvider
+## 21. RuntimeMetadataProvider
 
 Permitirá adjuntar metadata durante una ejecución.
 
@@ -767,7 +766,7 @@ No deberá utilizarse como sustituto de configuración estable.
 
 ---
 
-# 22. ExplicitDefinitionMetadataProvider
+## 22. ExplicitDefinitionMetadataProvider
 
 Leerá metadata incluida directamente en definiciones.
 
@@ -793,7 +792,7 @@ Esta fuente tendrá mayor precedencia que las convenciones.
 
 ---
 
-# 23. RouteMetadataProvider
+## 23. RouteMetadataProvider
 
 Convertirá metadata del sistema de rutas en fragmentos genéricos.
 
@@ -825,7 +824,7 @@ Route::middleware('auth')
 
 ---
 
-# 24. ConfigurationMetadataProvider
+## 24. ConfigurationMetadataProvider
 
 Obtendrá metadata desde archivos de configuración.
 
@@ -856,7 +855,7 @@ La configuración se normalizará antes del merge.
 
 ---
 
-# 25. AttributeMetadataProvider
+## 25. AttributeMetadataProvider
 
 Leerá atributos PHP.
 
@@ -880,7 +879,7 @@ No deberá dejar objetos `ReflectionAttribute` dentro del resultado final.
 
 ---
 
-# 26. Contrato para atributos de metadata
+## 26. Contrato para atributos de metadata
 
 ```php
 interface MetadataAttributeInterface
@@ -932,7 +931,7 @@ final readonly class Middleware implements
 
 ---
 
-# 27. MetadataAttributeMapper
+## 27. MetadataAttributeMapper
 
 No todos los atributos externos implementarán el contrato de VoltStack.
 
@@ -963,7 +962,7 @@ Esto permitirá integrar:
 
 ---
 
-# 28. ReflectionMetadataProvider
+## 28. ReflectionMetadataProvider
 
 Aportará metadata estructural.
 
@@ -988,7 +987,7 @@ La Reflection estructural deberá normalizarse en objetos simples y compilables.
 
 ---
 
-# 29. ConventionMetadataProvider
+## 29. ConventionMetadataProvider
 
 Aplicará convenciones cuando no exista configuración explícita.
 
@@ -1024,7 +1023,7 @@ Las convenciones:
 
 ---
 
-# 30. PackageMetadataProvider
+## 30. PackageMetadataProvider
 
 Los paquetes podrán aportar metadata sin modificar clases de aplicación.
 
@@ -1058,7 +1057,7 @@ Los packages deberán declarar claramente su prioridad.
 
 ---
 
-# 31. DefaultMetadataProvider
+## 31. DefaultMetadataProvider
 
 Aplicará valores predeterminados definidos por schemas.
 
@@ -1082,7 +1081,7 @@ Los defaults nunca deberán ocultar la ausencia de metadata requerida.
 
 ---
 
-# 32. MetadataFragment
+## 32. MetadataFragment
 
 Un provider no devolverá directamente un `MetadataBag`.
 
@@ -1108,7 +1107,7 @@ final readonly class MetadataFragment
 
 ---
 
-# 33. MetadataOrigin
+## 33. MetadataOrigin
 
 ```php
 final readonly class MetadataOrigin
@@ -1145,7 +1144,7 @@ enum MetadataOriginType: string
 
 ---
 
-# 34. MetadataMergeHint
+## 34. MetadataMergeHint
 
 ```php
 enum MetadataMergeHint: string
@@ -1170,7 +1169,7 @@ El schema tendrá la autoridad final.
 
 ---
 
-# 35. MetadataBag
+## 35. MetadataBag
 
 El resultado será inmutable.
 
@@ -1260,7 +1259,7 @@ final readonly class MetadataBag implements
 
 ---
 
-# 36. Acceso tipado
+## 36. Acceso tipado
 
 Además de los métodos básicos, podrán existir:
 
@@ -1279,7 +1278,7 @@ Para metadata compleja se recomendarán objetos especializados.
 
 ---
 
-# 37. Metadata Views
+## 37. Metadata Views
 
 Cada módulo podrá exponer una vista tipada sobre `MetadataBag`.
 
@@ -1322,7 +1321,7 @@ Esto permite mantener el motor genérico y ofrecer APIs específicas.
 
 ---
 
-# 38. Metadata View Factory
+## 38. Metadata View Factory
 
 ```php
 interface MetadataViewFactoryInterface
@@ -1348,7 +1347,7 @@ SpaMetadata
 
 ---
 
-# 39. MetadataKey
+## 39. MetadataKey
 
 Las keys no deberán ser cadenas dispersas sin control.
 
@@ -1389,7 +1388,7 @@ serialization.groups
 
 ---
 
-# 40. Namespaces de keys
+## 40. Namespaces de keys
 
 Convención:
 
@@ -1426,7 +1425,7 @@ package_name.feature
 
 ---
 
-# 41. MetadataSchema
+## 41. MetadataSchema
 
 Cada key deberá registrar un schema.
 
@@ -1454,7 +1453,7 @@ final readonly class MetadataSchema
 
 ---
 
-# 42. MetadataValueType
+## 42. MetadataValueType
 
 ```php
 enum MetadataValueType: string
@@ -1475,7 +1474,7 @@ enum MetadataValueType: string
 
 ---
 
-# 43. MetadataMergeStrategy
+## 43. MetadataMergeStrategy
 
 ```php
 enum MetadataMergeStrategy: string
@@ -1498,9 +1497,9 @@ enum MetadataMergeStrategy: string
 
 ---
 
-# 44. Ejemplos de schemas
+## 44. Ejemplos de schemas
 
-## Middleware
+### Middleware
 
 ```php
 new MetadataSchema(
@@ -1513,7 +1512,7 @@ new MetadataSchema(
 );
 ```
 
-## Scope
+### Scope
 
 ```php
 new MetadataSchema(
@@ -1525,7 +1524,7 @@ new MetadataSchema(
 );
 ```
 
-## Cache TTL
+### Cache TTL
 
 ```php
 new MetadataSchema(
@@ -1536,7 +1535,7 @@ new MetadataSchema(
 );
 ```
 
-## Seguridad
+### Seguridad
 
 ```php
 new MetadataSchema(
@@ -1549,7 +1548,7 @@ new MetadataSchema(
 
 ---
 
-# 45. MetadataSchemaRegistry
+## 45. MetadataSchemaRegistry
 
 ```php
 interface MetadataSchemaRegistryInterface
@@ -1572,7 +1571,7 @@ En producción se congelará después del boot.
 
 ---
 
-# 46. Keys no registradas
+## 46. Keys no registradas
 
 Políticas posibles:
 
@@ -1594,7 +1593,7 @@ Los paquetes deberán registrar sus schemas durante boot.
 
 ---
 
-# 47. MetadataNormalizer
+## 47. MetadataNormalizer
 
 Los providers podrán devolver distintas representaciones.
 
@@ -1628,7 +1627,7 @@ interface MetadataNormalizerInterface
 
 ---
 
-# 48. Value Normalizers
+## 48. Value Normalizers
 
 ```php
 interface MetadataValueNormalizerInterface
@@ -1664,7 +1663,7 @@ DefinitionMetadataNormalizer
 
 ---
 
-# 49. Ejemplo de normalización
+## 49. Ejemplo de normalización
 
 Input:
 
@@ -1694,7 +1693,7 @@ El valor final será compilable y consistente.
 
 ---
 
-# 50. MetadataMerger
+## 50. MetadataMerger
 
 ```php
 interface MetadataMergerInterface
@@ -1724,7 +1723,7 @@ El merger deberá:
 
 ---
 
-# 51. Precedencia
+## 51. Precedencia
 
 La precedencia predeterminada será:
 
@@ -1756,7 +1755,7 @@ Sin embargo, cada schema podrá personalizarla.
 
 ---
 
-# 52. Precedencia por nivel
+## 52. Precedencia por nivel
 
 Para un método de controlador:
 
@@ -1782,7 +1781,7 @@ Por defecto, el nivel más específico tendrá mayor precedencia en estrategias 
 
 ---
 
-# 53. MetadataHierarchy
+## 53. MetadataHierarchy
 
 ```php
 final readonly class MetadataHierarchy
@@ -1813,7 +1812,7 @@ El engine podrá resolver toda la jerarquía en una sola operación.
 
 ---
 
-# 54. Herencia de metadata
+## 54. Herencia de metadata
 
 El schema determinará si una key es heredable.
 
@@ -1837,7 +1836,7 @@ La herencia deberá ser explícita en el schema.
 
 ---
 
-# 55. Herencia de atributos PHP
+## 55. Herencia de atributos PHP
 
 Los atributos PHP no siempre se heredan automáticamente.
 
@@ -1862,7 +1861,7 @@ Fuentes posibles:
 
 ---
 
-# 56. Traits
+## 56. Traits
 
 Los traits pueden aportar metadata.
 
@@ -1884,7 +1883,7 @@ Política recomendada:
 
 ---
 
-# 57. Interfaces
+## 57. Interfaces
 
 Una interfaz podrá declarar contratos de metadata.
 
@@ -1901,7 +1900,7 @@ Podrá activarse por schema o configuración.
 
 ---
 
-# 58. Métodos sobrescritos
+## 58. Métodos sobrescritos
 
 Ejemplo:
 
@@ -1943,7 +1942,7 @@ Maximum
 
 ---
 
-# 59. Metadata final
+## 59. Metadata final
 
 Un fragmento podrá marcarse como final:
 
@@ -1973,7 +1972,7 @@ FinalMetadataOverrideException
 
 ---
 
-# 60. Metadata condicional
+## 60. Metadata condicional
 
 Un fragmento podrá tener condiciones:
 
@@ -2020,7 +2019,7 @@ PackageInstalledCondition
 
 ---
 
-# 61. Restricción de condiciones dinámicas
+## 61. Restricción de condiciones dinámicas
 
 Las condiciones que dependen de datos request-scoped:
 
@@ -2033,7 +2032,7 @@ No se permitirán closures arbitrarias en planes compilados.
 
 ---
 
-# 62. MetadataValidator
+## 62. MetadataValidator
 
 ```php
 interface MetadataValidatorInterface
@@ -2060,7 +2059,7 @@ Validará:
 
 ---
 
-# 63. Metadata Rule Validators
+## 63. Metadata Rule Validators
 
 ```php
 interface MetadataRuleValidatorInterface
@@ -2093,7 +2092,7 @@ MetadataCompilabilityValidator
 
 ---
 
-# 64. Dependencias entre keys
+## 64. Dependencias entre keys
 
 Ejemplo:
 
@@ -2131,7 +2130,7 @@ dependencies: [
 
 ---
 
-# 65. Keys mutuamente excluyentes
+## 65. Keys mutuamente excluyentes
 
 Ejemplo:
 
@@ -2153,7 +2152,7 @@ deberá rechazarse bajo FrankenPHP.
 
 ---
 
-# 66. MetadataTrace
+## 66. MetadataTrace
 
 En modo debug se generará trazabilidad completa.
 
@@ -2191,7 +2190,7 @@ final readonly class MetadataTraceEntry
 
 ---
 
-# 67. Ejemplo de trace
+## 67. Ejemplo de trace
 
 ```text
 Key: controller.middleware
@@ -2217,7 +2216,7 @@ Result:
 
 ---
 
-# 68. Metadata debugging API
+## 68. Metadata debugging API
 
 ```php
 $metadata = $engine->resolve(
@@ -2241,7 +2240,7 @@ php volt metadata:inspect \
 
 ---
 
-# 69. Metadata Compiler
+## 69. Metadata Compiler
 
 ```php
 interface MetadataCompilerInterface
@@ -2265,7 +2264,7 @@ El compilador deberá:
 
 ---
 
-# 70. CompiledMetadataPlan
+## 70. CompiledMetadataPlan
 
 ```php
 final readonly class CompiledMetadataPlan
@@ -2288,7 +2287,7 @@ final readonly class CompiledMetadataPlan
 
 ---
 
-# 71. Formato compilado
+## 71. Formato compilado
 
 Se recomienda generar PHP nativo:
 
@@ -2327,7 +2326,7 @@ Esto permitirá utilizar OPcache.
 
 ---
 
-# 72. Compilación por dominio
+## 72. Compilación por dominio
 
 Los planes podrán agruparse:
 
@@ -2350,7 +2349,7 @@ metadata/Quantum.ORM.php
 
 ---
 
-# 73. Metadata Registry compilado
+## 73. Metadata Registry compilado
 
 ```php
 interface CompiledMetadataRegistryInterface
@@ -2375,7 +2374,7 @@ En producción será inmutable.
 
 ---
 
-# 74. Short circuit compilado
+## 74. Short circuit compilado
 
 Si un plan compilado:
 
@@ -2396,7 +2395,7 @@ Return metadata
 
 ---
 
-# 75. Plan compilado parcial
+## 75. Plan compilado parcial
 
 Algunas keys pueden depender del request.
 
@@ -2423,7 +2422,7 @@ Así se mantiene la mayor parte compilada.
 
 ---
 
-# 76. Metadata dynamic resolver
+## 76. Metadata dynamic resolver
 
 ```php
 interface DynamicMetadataValueResolverInterface
@@ -2441,7 +2440,7 @@ No se almacenarán closures arbitrarias.
 
 ---
 
-# 77. Metadata Cache
+## 77. Metadata Cache
 
 ```php
 interface MetadataCacheInterface
@@ -2469,7 +2468,7 @@ interface MetadataCacheInterface
 
 ---
 
-# 78. Niveles de caché
+## 78. Niveles de caché
 
 ```text
 L1 Request Cache
@@ -2478,25 +2477,25 @@ L3 Compiled PHP Cache
 L4 Optional Distributed Cache
 ```
 
-## L1
+### L1
 
 Evita resolver varias veces el mismo subject dentro de una petición.
 
-## L2
+### L2
 
 Mantiene metadata inmutable entre peticiones en FrankenPHP.
 
-## L3
+### L3
 
 Utiliza archivos PHP y OPcache.
 
-## L4
+### L4
 
 Opcional para despliegues distribuidos, aunque no será la primera opción.
 
 ---
 
-# 79. Reglas para Worker Memory Cache
+## 79. Reglas para Worker Memory Cache
 
 Solo podrá almacenar:
 
@@ -2520,7 +2519,7 @@ No podrá almacenar:
 
 ---
 
-# 80. MetadataCacheKey
+## 80. MetadataCacheKey
 
 ```php
 final readonly class MetadataCacheKey
@@ -2552,7 +2551,7 @@ Solo deberá incluir contexto que altere realmente la metadata.
 
 ---
 
-# 81. Invalidación
+## 81. Invalidación
 
 La metadata deberá invalidarse cuando cambie:
 
@@ -2576,7 +2575,7 @@ La metadata deberá invalidarse cuando cambie:
 
 ---
 
-# 82. Source hash
+## 82. Source hash
 
 El hash podrá incluir:
 
@@ -2600,7 +2599,7 @@ En producción se recomienda hash de contenido durante build.
 
 ---
 
-# 83. Dependency Graph
+## 83. Dependency Graph
 
 El compiler podrá construir un grafo:
 
@@ -2618,7 +2617,7 @@ Esto permitirá invalidación precisa.
 
 ---
 
-# 84. Metadata Provider Registry
+## 84. Metadata Provider Registry
 
 ```php
 interface MetadataProviderRegistryInterface
@@ -2651,7 +2650,7 @@ Los providers podrán limitarse a scopes específicos.
 
 ---
 
-# 85. Provider descriptor
+## 85. Provider descriptor
 
 ```php
 final readonly class MetadataProviderDescriptor
@@ -2671,7 +2670,7 @@ Esto permitirá omitir providers incompatibles sin instanciarlos.
 
 ---
 
-# 86. MetadataProviderPipeline
+## 86. MetadataProviderPipeline
 
 ```php
 interface MetadataProviderPipelineInterface
@@ -2717,7 +2716,7 @@ final class MetadataProviderPipeline implements
 
 ---
 
-# 87. Integración con Controllers
+## 87. Integración con Controllers
 
 El módulo Controllers utilizará un adaptador.
 
@@ -2782,7 +2781,7 @@ final class ControllerMetadataResolver implements
 
 ---
 
-# 88. ControllerMetadata
+## 88. ControllerMetadata
 
 ```php
 final readonly class ControllerMetadata
@@ -2848,7 +2847,7 @@ final readonly class ControllerMetadata
 
 ---
 
-# 89. Metadata de controladores
+## 89. Metadata de controladores
 
 Keys iniciales:
 
@@ -2869,7 +2868,7 @@ controller.deprecated
 
 ---
 
-# 90. Metadata de autorización
+## 90. Metadata de autorización
 
 ```text
 authorization.required
@@ -2887,7 +2886,7 @@ Estas keys serán consumidas por `AuthorizationStage`.
 
 ---
 
-# 91. Metadata de validación
+## 91. Metadata de validación
 
 ```text
 validation.enabled
@@ -2903,7 +2902,7 @@ Serán consumidas por `ValidationStage`.
 
 ---
 
-# 92. Metadata de middleware
+## 92. Metadata de middleware
 
 ```text
 middleware.before
@@ -2918,7 +2917,7 @@ El schema deberá definir si las listas se anexan, sustituyen o eliminan.
 
 ---
 
-# 93. Exclusión de middleware
+## 93. Exclusión de middleware
 
 Ejemplo:
 
@@ -2939,7 +2938,7 @@ No se recomienda representar eliminaciones mediante strings especiales.
 
 ---
 
-# 94. Metadata Operations
+## 94. Metadata Operations
 
 Para merges complejos podrán utilizarse operaciones.
 
@@ -2965,7 +2964,7 @@ MergeMetadataOperation
 
 ---
 
-# 95. Integración con Routing
+## 95. Integración con Routing
 
 Routing utilizará metadata para:
 
@@ -2989,7 +2988,7 @@ El `RouteCompiler` podrá consumir planes compilados del mismo motor.
 
 ---
 
-# 96. Integración con Actions
+## 96. Integración con Actions
 
 Keys:
 
@@ -3018,7 +3017,7 @@ final class CreateUserAction
 
 ---
 
-# 97. Integración con Components
+## 97. Integración con Components
 
 Keys:
 
@@ -3039,7 +3038,7 @@ El Component Runtime podrá usar un `ComponentMetadata` tipado.
 
 ---
 
-# 98. Integración con SPA Runtime
+## 98. Integración con SPA Runtime
 
 Keys:
 
@@ -3068,7 +3067,7 @@ Esta metadata podrá combinar:
 
 ---
 
-# 99. Integración con ORM
+## 99. Integración con ORM
 
 Keys:
 
@@ -3091,7 +3090,7 @@ El ORM podrá utilizar el mismo motor, pero con schemas y providers propios.
 
 ---
 
-# 100. Integración con Parameters
+## 100. Integración con Parameters
 
 El `Parameter Resolution Engine` podrá solicitar metadata para cada parámetro.
 
@@ -3132,7 +3131,7 @@ $metadata = $engine->resolve(
 
 ---
 
-# 101. Integración con Events
+## 101. Integración con Events
 
 Keys:
 
@@ -3149,7 +3148,7 @@ event.retry
 
 ---
 
-# 102. Integración con Commands y Jobs
+## 102. Integración con Commands y Jobs
 
 ```text
 command.name
@@ -3169,7 +3168,7 @@ job.middleware
 
 ---
 
-# 103. Integración con Serialization
+## 103. Integración con Serialization
 
 ```text
 serialization.groups
@@ -3184,7 +3183,7 @@ serialization.hidden
 
 ---
 
-# 104. Integración con seguridad
+## 104. Integración con seguridad
 
 ```text
 security.csrf
@@ -3201,7 +3200,7 @@ Las keys sensibles podrán declararse `final`.
 
 ---
 
-# 105. Seguridad del motor
+## 105. Seguridad del motor
 
 El motor deberá:
 
@@ -3222,7 +3221,7 @@ El motor deberá:
 
 ---
 
-# 106. Ciclos de metadata
+## 106. Ciclos de metadata
 
 Un provider podría solicitar metadata durante su propia ejecución.
 
@@ -3259,7 +3258,7 @@ CircularMetadataResolutionException
 
 ---
 
-# 107. Reentrancia permitida
+## 107. Reentrancia permitida
 
 Se podrá solicitar metadata de otro subject.
 
@@ -3276,7 +3275,7 @@ La pila deberá mostrar la cadena completa en debug.
 
 ---
 
-# 108. Protección de valores sensibles
+## 108. Protección de valores sensibles
 
 Schemas podrán declarar:
 
@@ -3301,7 +3300,7 @@ La trace mostrará:
 
 ---
 
-# 109. Compatibilidad con FrankenPHP
+## 109. Compatibilidad con FrankenPHP
 
 El motor deberá:
 
@@ -3318,7 +3317,7 @@ El motor deberá:
 
 ---
 
-# 110. MetadataContext
+## 110. MetadataContext
 
 La metadata dependiente de request deberá viajar explícitamente.
 
@@ -3342,7 +3341,7 @@ No se deberán consultar globals.
 
 ---
 
-# 111. Observabilidad
+## 111. Observabilidad
 
 Métricas:
 
@@ -3377,7 +3376,7 @@ No se usarán identities de alta cardinalidad como tags globales.
 
 ---
 
-# 112. Eventos
+## 112. Eventos
 
 Eventos propuestos:
 
@@ -3404,7 +3403,7 @@ Los eventos por fragmento se desactivarán en producción.
 
 ---
 
-# 113. Excepciones
+## 113. Excepciones
 
 ```text
 MetadataException
@@ -3433,7 +3432,7 @@ InvalidMetadataScopeException
 
 ---
 
-# 114. Ejemplo de excepción de conflicto
+## 114. Ejemplo de excepción de conflicto
 
 ```text
 Metadata conflict detected.
@@ -3465,7 +3464,7 @@ The key was marked as final by the controller attribute.
 
 ---
 
-# 115. Debug Toolbar
+## 115. Debug Toolbar
 
 Ejemplo:
 
@@ -3514,7 +3513,7 @@ controller.middleware
 
 ---
 
-# 116. Comandos de consola
+## 116. Comandos de consola
 
 ```bash
 php volt metadata:inspect <subject>
@@ -3546,7 +3545,7 @@ php volt metadata:trace <subject>
 
 ---
 
-# 117. Metadata subject locator
+## 117. Metadata subject locator
 
 La CLI podrá aceptar:
 
@@ -3571,7 +3570,7 @@ interface MetadataSubjectLocatorInterface
 
 ---
 
-# 118. Configuración
+## 118. Configuración
 
 ```php
 return [
@@ -3638,7 +3637,7 @@ return [
 
 ---
 
-# 119. Registro en el Container
+## 119. Registro en el Container
 
 ```php
 $container->singleton(
@@ -3691,7 +3690,7 @@ Todos estos servicios deberán ser seguros para workers persistentes.
 
 ---
 
-# 120. Bootstrapping
+## 120. Bootstrapping
 
 Durante `register`:
 
@@ -3719,7 +3718,7 @@ Durante `boot`:
 
 ---
 
-# 121. Registro desde módulos
+## 121. Registro desde módulos
 
 Ejemplo del módulo Controllers:
 
@@ -3758,7 +3757,7 @@ $providers->add(
 
 ---
 
-# 122. Registry freezing
+## 122. Registry freezing
 
 Después del boot:
 
@@ -3779,7 +3778,7 @@ En desarrollo podrá permitirse recarga.
 
 ---
 
-# 123. Estructura de directorios
+## 123. Estructura de directorios
 
 ```text
 src/
@@ -4006,7 +4005,7 @@ src/
 
 ---
 
-# 124. Implementación mínima V1
+## 124. Implementación mínima V1
 
 La primera versión deberá incluir:
 
@@ -4059,7 +4058,7 @@ Podrán posponerse:
 
 ---
 
-# 125. Flujo completo para un controlador
+## 125. Flujo completo para un controlador
 
 Controlador:
 
@@ -4170,7 +4169,7 @@ Resultado conceptual:
 
 ---
 
-# 126. Pruebas unitarias
+## 126. Pruebas unitarias
 
 Casos mínimos:
 
@@ -4201,7 +4200,7 @@ Casos mínimos:
 
 ---
 
-# 127. Pruebas de integración
+## 127. Pruebas de integración
 
 * Routing → Metadata Engine.
 * Controllers → ControllerMetadata.
@@ -4219,7 +4218,7 @@ Casos mínimos:
 
 ---
 
-# 128. Prueba de precedencia
+## 128. Prueba de precedencia
 
 ```php
 public function test_method_metadata_overrides_class_metadata(): void
@@ -4236,7 +4235,7 @@ public function test_method_metadata_overrides_class_metadata(): void
 
 ---
 
-# 129. Prueba de middleware acumulativo
+## 129. Prueba de middleware acumulativo
 
 ```php
 public function test_middleware_is_merged_from_all_levels(): void
@@ -4262,7 +4261,7 @@ public function test_middleware_is_merged_from_all_levels(): void
 
 ---
 
-# 130. Prueba de aislamiento en FrankenPHP
+## 130. Prueba de aislamiento en FrankenPHP
 
 ```php
 public function test_runtime_metadata_is_not_shared_between_requests(): void
@@ -4285,7 +4284,7 @@ public function test_runtime_metadata_is_not_shared_between_requests(): void
 
 ---
 
-# 131. Benchmarks
+## 131. Benchmarks
 
 Escenarios:
 
@@ -4322,9 +4321,9 @@ Métricas:
 
 ---
 
-# 132. Decisiones arquitectónicas
+## 132. Decisiones arquitectónicas
 
-## ADR-META-001
+### ADR-META-001
 
 **Decisión:** VoltStack utilizará un motor de metadata transversal.
 
@@ -4332,7 +4331,7 @@ Métricas:
 
 ---
 
-## ADR-META-002
+### ADR-META-002
 
 **Decisión:** Los providers devolverán `MetadataFragment`.
 
@@ -4340,7 +4339,7 @@ Métricas:
 
 ---
 
-## ADR-META-003
+### ADR-META-003
 
 **Decisión:** El resultado será un `MetadataBag` inmutable.
 
@@ -4348,7 +4347,7 @@ Métricas:
 
 ---
 
-## ADR-META-004
+### ADR-META-004
 
 **Decisión:** Cada key deberá tener un schema.
 
@@ -4356,7 +4355,7 @@ Métricas:
 
 ---
 
-## ADR-META-005
+### ADR-META-005
 
 **Decisión:** Las reglas de merge pertenecerán al schema.
 
@@ -4364,7 +4363,7 @@ Métricas:
 
 ---
 
-## ADR-META-006
+### ADR-META-006
 
 **Decisión:** Los módulos expondrán vistas tipadas.
 
@@ -4372,7 +4371,7 @@ Métricas:
 
 ---
 
-## ADR-META-007
+### ADR-META-007
 
 **Decisión:** Los providers podrán registrarse por paquetes.
 
@@ -4380,7 +4379,7 @@ Métricas:
 
 ---
 
-## ADR-META-008
+### ADR-META-008
 
 **Decisión:** La metadata compilada tendrá prioridad.
 
@@ -4388,7 +4387,7 @@ Métricas:
 
 ---
 
-## ADR-META-009
+### ADR-META-009
 
 **Decisión:** La metadata runtime no se almacenará en cache global.
 
@@ -4396,7 +4395,7 @@ Métricas:
 
 ---
 
-## ADR-META-010
+### ADR-META-010
 
 **Decisión:** La herencia será controlada por schema.
 
@@ -4404,7 +4403,7 @@ Métricas:
 
 ---
 
-## ADR-META-011
+### ADR-META-011
 
 **Decisión:** Se conservará el origen de cada fragmento.
 
@@ -4412,7 +4411,7 @@ Métricas:
 
 ---
 
-## ADR-META-012
+### ADR-META-012
 
 **Decisión:** Los registries se congelarán en producción.
 
@@ -4420,7 +4419,7 @@ Métricas:
 
 ---
 
-## ADR-META-013
+### ADR-META-013
 
 **Decisión:** Las closures arbitrarias no serán compilables.
 
@@ -4428,7 +4427,7 @@ Métricas:
 
 ---
 
-## ADR-META-014
+### ADR-META-014
 
 **Decisión:** La compilación deberá mantener equivalencia semántica.
 
@@ -4436,7 +4435,7 @@ Métricas:
 
 ---
 
-## ADR-META-015
+### ADR-META-015
 
 **Decisión:** ControllerMetadataResolver será un adaptador del motor general.
 
@@ -4444,7 +4443,7 @@ Métricas:
 
 ---
 
-# 133. Criterios de aceptación
+## 133. Criterios de aceptación
 
 El motor se considerará correctamente implementado cuando:
 
@@ -4477,7 +4476,7 @@ El motor se considerará correctamente implementado cuando:
 
 ---
 
-# 134. Conclusión
+## 134. Conclusión
 
 El `Metadata Engine` será uno de los pilares internos de VoltStack.
 

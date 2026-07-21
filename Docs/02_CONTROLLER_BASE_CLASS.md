@@ -1,6 +1,5 @@
-# 02_CONTROLLER_BASE_CLASS.md
-
 # Clase base de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -9,7 +8,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la clase base de controladores de VoltStack, sus responsabilidades, capacidades, límites, contratos y mecanismos de extensión.
 
@@ -47,7 +46,7 @@ Ambos estilos deberán ser compatibles con el mismo dispatcher, resolver y ciclo
 
 ---
 
-# 2. Objetivos
+## 2. Objetivos
 
 La clase base deberá:
 
@@ -76,7 +75,7 @@ No deberá:
 
 ---
 
-# 3. Principio de uso opcional
+## 3. Principio de uso opcional
 
 Extender `Controller` será una conveniencia, no una obligación.
 
@@ -99,7 +98,7 @@ La compatibilidad se basará en que la referencia resuelta sea invocable.
 
 ---
 
-# 4. Ubicación
+## 4. Ubicación
 
 ```text
 src/
@@ -121,7 +120,7 @@ namespace VoltStack\Quantum\Controllers;
 
 ---
 
-# 5. Diseño inicial
+## 5. Diseño inicial
 
 ```php
 namespace VoltStack\Quantum\Controllers;
@@ -148,7 +147,7 @@ La mayoría de sus capacidades se implementarán mediante concerns reutilizables
 
 ---
 
-# 6. Arquitectura basada en concerns
+## 6. Arquitectura basada en concerns
 
 Las capacidades de la clase base se dividirán en traits especializados.
 
@@ -174,7 +173,7 @@ Cada concern deberá:
 
 ---
 
-# 7. Dependencias internas
+## 7. Dependencias internas
 
 La clase base no recibirá automáticamente todos los servicios posibles mediante constructor.
 
@@ -214,7 +213,7 @@ El contexto se asignará después de resolver el controlador y antes de invocarl
 
 ---
 
-# 8. ControllerExecutionContext
+## 8. ControllerExecutionContext
 
 El contexto de ejecución proporcionará acceso limitado y tipado a los servicios necesarios.
 
@@ -238,7 +237,7 @@ final readonly class ControllerExecutionContext
 
 No deberá exponer directamente el contenedor completo.
 
-## 8.1 Razones
+### 8.1 Razones
 
 Esto permite:
 
@@ -253,7 +252,7 @@ Esto permite:
 
 ---
 
-# 9. Ciclo de vida de la clase base
+## 9. Ciclo de vida de la clase base
 
 ```text
 Container crea controlador
@@ -285,7 +284,7 @@ try {
 
 ---
 
-# 10. Protección frente a procesos persistentes
+## 10. Protección frente a procesos persistentes
 
 FrankenPHP y otros runtimes persistentes reutilizan el proceso entre peticiones.
 
@@ -326,7 +325,7 @@ El contexto será request-scoped y deberá liberarse al finalizar la ejecución.
 
 ---
 
-# 11. Concern BuildsResponses
+## 11. Concern BuildsResponses
 
 Este concern proporcionará helpers para construir respuestas.
 
@@ -345,7 +344,7 @@ trait BuildsResponses
 }
 ```
 
-## 11.1 Métodos previstos
+### 11.1 Métodos previstos
 
 ```php
 protected function response(
@@ -453,7 +452,7 @@ protected function eventStream(
 
 ---
 
-# 12. Respuestas explícitas
+## 12. Respuestas explícitas
 
 Los helpers deberán devolver objetos de respuesta explícitos.
 
@@ -477,7 +476,7 @@ La clase base deberá favorecer expresividad sin imponer verbosidad.
 
 ---
 
-# 13. Concern AuthorizesRequests
+## 13. Concern AuthorizesRequests
 
 Este concern conectará el controlador con el módulo de autorización.
 
@@ -496,7 +495,7 @@ trait AuthorizesRequests
 }
 ```
 
-## 13.1 Métodos previstos
+### 13.1 Métodos previstos
 
 ```php
 protected function authorize(
@@ -533,7 +532,7 @@ protected function deny(
 protected function currentUser(): ?AuthenticatableInterface;
 ```
 
-## 13.2 Comportamiento
+### 13.2 Comportamiento
 
 `authorize()` deberá lanzar una excepción si el acceso es rechazado.
 
@@ -551,11 +550,11 @@ if ($this->check('delete', $user)) {
 
 ---
 
-# 14. Autorización declarativa vs imperativa
+## 14. Autorización declarativa vs imperativa
 
 VoltStack deberá permitir ambos estilos.
 
-## 14.1 Declarativa
+### 14.1 Declarativa
 
 ```php
 #[Authorize('update', subject: 'user')]
@@ -564,7 +563,7 @@ public function update(User $user): ResponseInterface
 }
 ```
 
-## 14.2 Imperativa
+### 14.2 Imperativa
 
 ```php
 public function update(User $user): ResponseInterface
@@ -579,7 +578,7 @@ La autorización imperativa se utilizará dentro del cuerpo del controlador.
 
 ---
 
-# 15. Concern ValidatesRequests
+## 15. Concern ValidatesRequests
 
 Este concern ofrecerá acceso conveniente al módulo de validación.
 
@@ -599,7 +598,7 @@ trait ValidatesRequests
 }
 ```
 
-## 15.1 Métodos previstos
+### 15.1 Métodos previstos
 
 ```php
 protected function validate(
@@ -638,9 +637,9 @@ protected function validationFactory(): ValidationFactoryInterface;
 
 ---
 
-# 16. Ejemplos de validación
+## 16. Ejemplos de validación
 
-## 16.1 Reglas directas
+### 16.1 Reglas directas
 
 ```php
 public function store(Request $request): RedirectResponse
@@ -654,7 +653,7 @@ public function store(Request $request): RedirectResponse
 }
 ```
 
-## 16.2 DTO
+### 16.2 DTO
 
 ```php
 public function store(Request $request): RedirectResponse
@@ -668,7 +667,7 @@ public function store(Request $request): RedirectResponse
 }
 ```
 
-## 16.3 Resolución automática
+### 16.3 Resolución automática
 
 ```php
 public function store(CreateUserData $data): RedirectResponse
@@ -680,7 +679,7 @@ Este último estilo será responsabilidad del `DtoArgumentResolver`.
 
 ---
 
-# 17. Concern InteractsWithMiddleware
+## 17. Concern InteractsWithMiddleware
 
 La clase base podrá declarar middleware de forma programática.
 
@@ -701,7 +700,7 @@ trait InteractsWithMiddleware
 }
 ```
 
-## 17.1 Uso desde constructor
+### 17.1 Uso desde constructor
 
 ```php
 final class UserController extends Controller
@@ -719,7 +718,7 @@ final class UserController extends Controller
 }
 ```
 
-## 17.2 API prevista
+### 17.2 API prevista
 
 ```php
 protected function middleware(
@@ -740,7 +739,7 @@ final public function controllerMiddlewareDefinitions(): array;
 
 ---
 
-# 18. ControllerMiddlewareRegistration
+## 18. ControllerMiddlewareRegistration
 
 ```php
 final class ControllerMiddlewareRegistration
@@ -769,7 +768,7 @@ $this->middleware('audit')
 
 ---
 
-# 19. Middleware declarativo
+## 19. Middleware declarativo
 
 El estilo mediante atributos también estará disponible.
 
@@ -793,7 +792,7 @@ La metadata declarativa y programática deberá combinarse de forma determinista
 
 ---
 
-# 20. Precedencia de middleware
+## 20. Precedencia de middleware
 
 Orden recomendado:
 
@@ -815,7 +814,7 @@ La eliminación de middleware deberá aplicarse después de combinar todas las f
 
 ---
 
-# 21. Concern DispatchesEvents
+## 21. Concern DispatchesEvents
 
 Este concern permitirá publicar eventos de aplicación.
 
@@ -831,7 +830,7 @@ trait DispatchesEvents
 }
 ```
 
-## 21.1 Métodos previstos
+### 21.1 Métodos previstos
 
 ```php
 protected function dispatch(object $event): object;
@@ -853,7 +852,7 @@ La disponibilidad de ejecución asíncrona dependerá del módulo correspondient
 
 ---
 
-# 22. Concern InteractsWithRouting
+## 22. Concern InteractsWithRouting
 
 Este concern proporcionará acceso al sistema de rutas y URL.
 
@@ -872,7 +871,7 @@ trait InteractsWithRouting
 }
 ```
 
-## 22.1 Métodos previstos
+### 22.1 Métodos previstos
 
 ```php
 protected function route(
@@ -911,7 +910,7 @@ protected function routeParameter(
 
 ---
 
-# 23. Concern InteractsWithSession
+## 23. Concern InteractsWithSession
 
 Este concern será opcional.
 
@@ -926,7 +925,7 @@ trait InteractsWithSession
 }
 ```
 
-## 23.1 Métodos previstos
+### 23.1 Métodos previstos
 
 ```php
 protected function session(): SessionInterface;
@@ -958,7 +957,7 @@ Estos métodos fallarán de forma explícita cuando la sesión no esté disponib
 
 ---
 
-# 24. Concern InteractsWithRuntime
+## 24. Concern InteractsWithRuntime
 
 Este concern integrará el controlador con Volt Runtime y SPA Runtime.
 
@@ -973,7 +972,7 @@ trait InteractsWithRuntime
 }
 ```
 
-## 24.1 Métodos previstos
+### 24.1 Métodos previstos
 
 ```php
 protected function isSpaNavigation(): bool;
@@ -1008,7 +1007,7 @@ protected function runtimeMetadata(
 
 ---
 
-# 25. Helpers de navegación SPA
+## 25. Helpers de navegación SPA
 
 Ejemplo:
 
@@ -1031,7 +1030,7 @@ El redirector podrá convertir la respuesta automáticamente en una instrucción
 
 ---
 
-# 26. Acceso a request
+## 26. Acceso a request
 
 La clase base podrá proporcionar acceso a la petición actual.
 
@@ -1065,7 +1064,7 @@ Esto conserva ergonomía sin ocultar demasiado las dependencias.
 
 ---
 
-# 27. Acceso a usuario y tenant
+## 27. Acceso a usuario y tenant
 
 ```php
 protected function user(): ?AuthenticatableInterface
@@ -1099,7 +1098,7 @@ Estas versiones lanzarán excepciones cuando no exista contexto válido.
 
 ---
 
-# 28. API pública recomendada
+## 28. API pública recomendada
 
 La clase base inicial podrá ofrecer:
 
@@ -1219,7 +1218,7 @@ abstract class Controller
 
 ---
 
-# 29. Método beforeAction
+## 29. Método beforeAction
 
 VoltStack podrá soportar hooks ligeros de ciclo de vida.
 
@@ -1245,7 +1244,7 @@ Su uso estará limitado a necesidades locales del controlador.
 
 ---
 
-# 30. Recomendación sobre hooks
+## 30. Recomendación sobre hooks
 
 Los hooks deberán:
 
@@ -1277,7 +1276,7 @@ La clase base podrá implementar métodos vacíos protegidos, detectados por el 
 
 ---
 
-# 31. No incluir lógica de negocio
+## 31. No incluir lógica de negocio
 
 Ejemplo incorrecto:
 
@@ -1322,7 +1321,7 @@ El controlador deberá coordinar la petición, no implementar el dominio complet
 
 ---
 
-# 32. Constructor injection
+## 32. Constructor injection
 
 Los controladores podrán utilizar constructor injection.
 
@@ -1347,7 +1346,7 @@ public function show(
 }
 ```
 
-## 32.1 Recomendación
+### 32.1 Recomendación
 
 Usar constructor injection para dependencias utilizadas por varios métodos.
 
@@ -1355,7 +1354,7 @@ Usar method injection para dependencias específicas de una acción.
 
 ---
 
-# 33. Restricciones de constructor
+## 33. Restricciones de constructor
 
 El constructor deberá:
 
@@ -1373,7 +1372,7 @@ Su función será declarar dependencias.
 
 ---
 
-# 34. Clase base minimalista
+## 34. Clase base minimalista
 
 Una implementación inicial podría ser:
 
@@ -1438,7 +1437,7 @@ abstract class Controller implements
 
 ---
 
-# 35. Inyección del contexto
+## 35. Inyección del contexto
 
 El dispatcher no deberá implementar directamente la inyección.
 
@@ -1495,7 +1494,7 @@ interface ControllerExecutionContextAwareInterface
 
 ---
 
-# 36. Contexto lazy
+## 36. Contexto lazy
 
 Para evitar crear servicios innecesarios, el contexto podrá utilizar accessors lazy.
 
@@ -1522,7 +1521,7 @@ Esto permitirá resolver únicamente los servicios realmente utilizados por el c
 
 ---
 
-# 37. Controller capabilities
+## 37. Controller capabilities
 
 Los controladores podrán declarar capacidades explícitas.
 
@@ -1555,7 +1554,7 @@ No serán necesarias para usar los helpers de la clase base.
 
 ---
 
-# 38. Traits personalizados
+## 38. Traits personalizados
 
 Los desarrolladores podrán crear traits propios.
 
@@ -1590,7 +1589,7 @@ Deberán utilizar métodos protegidos estables.
 
 ---
 
-# 39. Superficie protegida estable
+## 39. Superficie protegida estable
 
 VoltStack deberá definir qué métodos protegidos forman parte de la API estable.
 
@@ -1626,7 +1625,7 @@ Los métodos internos deberán marcarse como:
 
 ---
 
-# 40. Macros
+## 40. Macros
 
 Podrá existir un sistema de macros, pero no deberá formar parte del núcleo inicial.
 
@@ -1643,7 +1642,7 @@ Controller::macro('success', function (
 });
 ```
 
-## 40.1 Riesgos
+### 40.1 Riesgos
 
 Las macros pueden:
 
@@ -1662,7 +1661,7 @@ Por ello, se recomienda priorizar:
 
 ---
 
-# 41. Clases base especializadas
+## 41. Clases base especializadas
 
 VoltStack podrá proporcionar clases opcionales.
 
@@ -1674,7 +1673,7 @@ ComponentController
 ActionController
 ```
 
-## 41.1 ApiController
+### 41.1 ApiController
 
 ```php
 abstract class ApiController extends Controller
@@ -1690,7 +1689,7 @@ abstract class ApiController extends Controller
 }
 ```
 
-## 41.2 PageController
+### 41.2 PageController
 
 ```php
 abstract class PageController extends Controller
@@ -1710,7 +1709,7 @@ Solo ofrecerán convenciones adicionales.
 
 ---
 
-# 42. Controladores finales
+## 42. Controladores finales
 
 Se recomendará declarar los controladores como `final`.
 
@@ -1733,7 +1732,7 @@ Las clases base abstractas podrán extenderse; los controladores concretos prefe
 
 ---
 
-# 43. Métodos de acción públicos
+## 43. Métodos de acción públicos
 
 Solo los métodos públicos registrados explícitamente deberán poder ejecutarse.
 
@@ -1760,7 +1759,7 @@ El dispatcher validará que:
 
 ---
 
-# 44. Métodos protegidos y privados
+## 44. Métodos protegidos y privados
 
 Los métodos auxiliares del controlador deberán ser protegidos o privados.
 
@@ -1788,7 +1787,7 @@ El sistema nunca deberá exponer métodos protegidos o privados como acciones.
 
 ---
 
-# 45. Métodos mágicos
+## 45. Métodos mágicos
 
 El único método mágico ejecutable por convención será:
 
@@ -1814,7 +1813,7 @@ El resolver no deberá considerar `__call()` como sustituto de un método inexis
 
 ---
 
-# 46. Controladores invocables
+## 46. Controladores invocables
 
 Ejemplo:
 
@@ -1841,7 +1840,7 @@ No requerirá configuración adicional.
 
 ---
 
-# 47. Controladores sin clase base
+## 47. Controladores sin clase base
 
 Ejemplo completo:
 
@@ -1865,7 +1864,7 @@ La diferencia será únicamente ergonómica.
 
 ---
 
-# 48. Testabilidad
+## 48. Testabilidad
 
 La clase base deberá ser fácil de probar sin iniciar todo el framework.
 
@@ -1896,7 +1895,7 @@ InteractsWithControllerContext
 
 ---
 
-# 49. Pruebas unitarias de concerns
+## 49. Pruebas unitarias de concerns
 
 Cada concern deberá tener pruebas independientes.
 
@@ -1922,7 +1921,7 @@ Casos mínimos:
 
 ---
 
-# 50. Excepciones
+## 50. Excepciones
 
 Excepciones previstas:
 
@@ -1958,7 +1957,7 @@ final class ControllerContextUnavailableException
 
 ---
 
-# 51. Seguridad
+## 51. Seguridad
 
 La clase base deberá cumplir:
 
@@ -1975,7 +1974,7 @@ La clase base deberá cumplir:
 
 ---
 
-# 52. Rendimiento
+## 52. Rendimiento
 
 La clase base deberá tener un coste mínimo.
 
@@ -1994,7 +1993,7 @@ Medidas:
 
 ---
 
-# 53. Compatibilidad con análisis estático
+## 53. Compatibilidad con análisis estático
 
 La API deberá proporcionar tipos de retorno concretos.
 
@@ -2020,7 +2019,7 @@ Se deberán proporcionar stubs o extensiones para:
 
 ---
 
-# 54. Compatibilidad con FrankenPHP
+## 54. Compatibilidad con FrankenPHP
 
 Reglas específicas:
 
@@ -2035,7 +2034,7 @@ Reglas específicas:
 
 ---
 
-# 55. Configuración
+## 55. Configuración
 
 Archivo sugerido:
 
@@ -2074,7 +2073,7 @@ return [
 
 ---
 
-# 56. Estructura de archivos
+## 56. Estructura de archivos
 
 ```text
 Controllers/
@@ -2122,7 +2121,7 @@ Controllers/
 
 ---
 
-# 57. Implementación mínima para V1
+## 57. Implementación mínima para V1
 
 La primera versión deberá incluir:
 
@@ -2151,7 +2150,7 @@ Podrán posponerse:
 
 ---
 
-# 58. Ejemplo completo
+## 58. Ejemplo completo
 
 ```php
 namespace App\Http\Controllers;
@@ -2209,7 +2208,7 @@ final class UserController extends Controller
 
 ---
 
-# 59. Criterios de aceptación
+## 59. Criterios de aceptación
 
 La clase base estará correctamente implementada cuando:
 
@@ -2232,9 +2231,9 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-# 60. Decisiones arquitectónicas
+## 60. Decisiones arquitectónicas
 
-## ADR-CTRL-BASE-001
+### ADR-CTRL-BASE-001
 
 **Decisión:** Extender la clase base será opcional.
 
@@ -2242,7 +2241,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-002
+### ADR-CTRL-BASE-002
 
 **Decisión:** La clase base no expondrá el contenedor.
 
@@ -2250,7 +2249,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-003
+### ADR-CTRL-BASE-003
 
 **Decisión:** Las capacidades se implementarán mediante concerns.
 
@@ -2258,7 +2257,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-004
+### ADR-CTRL-BASE-004
 
 **Decisión:** El contexto será asignado y liberado por cada ejecución.
 
@@ -2266,7 +2265,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-005
+### ADR-CTRL-BASE-005
 
 **Decisión:** Los helpers devolverán objetos explícitos de respuesta.
 
@@ -2274,7 +2273,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-006
+### ADR-CTRL-BASE-006
 
 **Decisión:** Middleware, autorización y validación seguirán siendo sistemas externos.
 
@@ -2282,7 +2281,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-007
+### ADR-CTRL-BASE-007
 
 **Decisión:** Los controladores concretos deberán preferentemente ser `final`.
 
@@ -2290,7 +2289,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-## ADR-CTRL-BASE-008
+### ADR-CTRL-BASE-008
 
 **Decisión:** El contexto utilizará servicios lazy cuando sea posible.
 
@@ -2298,7 +2297,7 @@ La clase base estará correctamente implementada cuando:
 
 ---
 
-# 61. Conclusión
+## 61. Conclusión
 
 La clase base de VoltStack deberá ofrecer una experiencia cómoda sin comprometer la arquitectura interna del framework.
 

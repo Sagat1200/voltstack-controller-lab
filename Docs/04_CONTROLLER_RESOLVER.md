@@ -1,6 +1,5 @@
-# 04_CONTROLLER_RESOLVER.md
-
 # Sistema de resolución de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -9,7 +8,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura, contratos, reglas y flujo interno del `ControllerResolver` de VoltStack.
 
@@ -35,7 +34,7 @@ Su responsabilidad termina cuando entrega una representación válida y preparad
 
 ---
 
-# 2. Posición dentro del flujo
+## 2. Posición dentro del flujo
 
 ```text
 Route Match
@@ -66,7 +65,7 @@ $execution->controller = $resolver->resolve(
 
 ---
 
-# 3. Objetivos
+## 3. Objetivos
 
 El sistema deberá:
 
@@ -90,7 +89,7 @@ El sistema deberá:
 
 ---
 
-# 4. Responsabilidades
+## 4. Responsabilidades
 
 El resolver será responsable de:
 
@@ -122,7 +121,7 @@ No será responsable de:
 
 ---
 
-# 5. Contrato principal
+## 5. Contrato principal
 
 ```php
 namespace VoltStack\Quantum\Controllers\Contracts;
@@ -146,7 +145,7 @@ Si la definición no puede resolverse, el resolver deberá lanzar una excepción
 
 ---
 
-# 6. ResolvedController
+## 6. ResolvedController
 
 `ResolvedController` representa un controlador listo para continuar dentro del pipeline.
 
@@ -179,7 +178,7 @@ final readonly class ResolvedController
 
 ---
 
-# 7. ControllerResolutionType
+## 7. ControllerResolutionType
 
 ```php
 enum ControllerResolutionType: string
@@ -201,7 +200,7 @@ Este tipo permitirá que las etapas posteriores conozcan el origen de la resoluc
 
 ---
 
-# 8. ControllerDefinition
+## 8. ControllerDefinition
 
 La definición deberá contener una representación normalizada del objetivo.
 
@@ -231,7 +230,7 @@ El resolver recibirá una definición ya normalizada.
 
 ---
 
-# 9. Estrategias de resolución
+## 9. Estrategias de resolución
 
 El sistema utilizará resolvers especializados.
 
@@ -269,7 +268,7 @@ ComponentControllerResolver
 
 ---
 
-# 10. CompositeControllerResolver
+## 10. CompositeControllerResolver
 
 El resolver principal será un composite.
 
@@ -306,7 +305,7 @@ final class CompositeControllerResolver implements
 
 ---
 
-# 11. Prioridad de resolvers
+## 11. Prioridad de resolvers
 
 Orden recomendado:
 
@@ -327,7 +326,7 @@ El resolver compilado tendrá mayor prioridad porque puede evitar análisis din�
 
 ---
 
-# 12. Regla de resolución única
+## 12. Regla de resolución única
 
 Una definición deberá ser soportada por un único resolver efectivo.
 
@@ -354,7 +353,7 @@ En producción, la resolución podrá utilizar una tabla compilada.
 
 ---
 
-# 13. Resolución de clase y método
+## 13. Resolución de clase y método
 
 Ejemplo de ruta:
 
@@ -394,7 +393,7 @@ Create ResolvedController
 
 ---
 
-# 14. ClassMethodControllerResolver
+## 14. ClassMethodControllerResolver
 
 ```php
 final class ClassMethodControllerResolver implements
@@ -460,7 +459,7 @@ final class ClassMethodControllerResolver implements
 
 ---
 
-# 15. Resolución mediante Container
+## 15. Resolución mediante Container
 
 Los controladores de clase deberán resolverse mediante el contenedor.
 
@@ -489,7 +488,7 @@ salvo que el Container lo determine internamente.
 
 ---
 
-# 16. Scope de controladores
+## 16. Scope de controladores
 
 Los controladores serán transient o request-scoped por defecto.
 
@@ -510,7 +509,7 @@ Por ello, el sistema deberá impedir o advertir sobre controladores singleton co
 
 ---
 
-# 17. ControllerScope
+## 17. ControllerScope
 
 ```php
 enum ControllerScope: string
@@ -538,7 +537,7 @@ Configuración predeterminada:
 
 ---
 
-# 18. Validación de scope
+## 18. Validación de scope
 
 El resolver o un validador especializado deberá comprobar:
 
@@ -552,7 +551,7 @@ En producción, una infracción grave podrá impedir el arranque del framework.
 
 ---
 
-# 19. Controladores invocables
+## 19. Controladores invocables
 
 Ejemplo:
 
@@ -584,7 +583,7 @@ new ControllerDefinition(
 
 ---
 
-# 20. InvokableControllerResolver
+## 20. InvokableControllerResolver
 
 ```php
 final class InvokableControllerResolver implements
@@ -642,7 +641,7 @@ final class InvokableControllerResolver implements
 
 ---
 
-# 21. Reglas de controladores invocables
+## 21. Reglas de controladores invocables
 
 El resolver deberá validar:
 
@@ -658,7 +657,7 @@ No deberá considerar `__call()` como sustituto de `__invoke()`.
 
 ---
 
-# 22. Resolución de closures
+## 22. Resolución de closures
 
 Ejemplo:
 
@@ -679,7 +678,7 @@ new ControllerDefinition(
 
 ---
 
-# 23. ClosureControllerResolver
+## 23. ClosureControllerResolver
 
 ```php
 final class ClosureControllerResolver implements
@@ -721,7 +720,7 @@ final class ClosureControllerResolver implements
 
 ---
 
-# 24. Nombre de una closure
+## 24. Nombre de una closure
 
 El display name podrá construirse como:
 
@@ -745,7 +744,7 @@ private function displayName(
 
 ---
 
-# 25. Restricciones de closures
+## 25. Restricciones de closures
 
 Las closures:
 
@@ -762,7 +761,7 @@ VoltStack recomendará controladores invocables para aplicaciones compiladas.
 
 ---
 
-# 26. Resolución de servicios
+## 26. Resolución de servicios
 
 Una ruta podrá referirse a un servicio registrado.
 
@@ -783,7 +782,7 @@ new ControllerDefinition(
 
 ---
 
-# 27. ServiceControllerResolver
+## 27. ServiceControllerResolver
 
 ```php
 final class ServiceControllerResolver implements
@@ -851,7 +850,7 @@ final class ServiceControllerResolver implements
 
 ---
 
-# 28. ControllerServiceRegistry
+## 28. ControllerServiceRegistry
 
 ```php
 interface ControllerServiceRegistryInterface
@@ -885,7 +884,7 @@ final readonly class ControllerServiceDefinition
 
 ---
 
-# 29. Seguridad de servicios
+## 29. Seguridad de servicios
 
 No se deberá permitir que cualquier ID del Container sea ejecutable como controlador.
 
@@ -901,7 +900,7 @@ capaces de invocar servicios internos arbitrariamente.
 
 ---
 
-# 30. Resolución de aliases
+## 30. Resolución de aliases
 
 VoltStack podrá registrar aliases de controladores.
 
@@ -920,7 +919,7 @@ Route::get('/users/{user}', 'users.show');
 
 ---
 
-# 31. AliasControllerResolver
+## 31. AliasControllerResolver
 
 ```php
 final class AliasControllerResolver implements
@@ -967,7 +966,7 @@ final class AliasControllerResolver implements
 
 ---
 
-# 32. Prevención de alias circulares
+## 32. Prevención de alias circulares
 
 Ejemplo inválido:
 
@@ -988,7 +987,7 @@ El error deberá mostrar la cadena completa.
 
 ---
 
-# 33. Actions
+## 33. Actions
 
 Una Action podrá utilizarse directamente como controlador.
 
@@ -1011,7 +1010,7 @@ final class CreateUserAction
 
 ---
 
-# 34. ActionControllerResolver
+## 34. ActionControllerResolver
 
 El resolver de Actions podrá:
 
@@ -1040,7 +1039,7 @@ La invocación final seguirá utilizando `ControllerInvoker`.
 
 ---
 
-# 35. Convención de método para Actions
+## 35. Convención de método para Actions
 
 Orden sugerido:
 
@@ -1065,7 +1064,7 @@ final class CreateUserAction
 
 ---
 
-# 36. Resource Controllers
+## 36. Resource Controllers
 
 Un resource controller representa varios métodos convencionales.
 
@@ -1104,7 +1103,7 @@ No será responsable de mapear verbos HTTP a métodos de recurso.
 
 ---
 
-# 37. ResourceControllerResolver
+## 37. ResourceControllerResolver
 
 El resolver podrá aplicar validaciones adicionales:
 
@@ -1119,7 +1118,7 @@ Al final devolverá un `ResolvedController` compatible con clase y método.
 
 ---
 
-# 38. Page Controllers
+## 38. Page Controllers
 
 Los controladores de página estarán orientados al Runtime Volt.
 
@@ -1150,7 +1149,7 @@ No renderizará la página.
 
 ---
 
-# 39. Component Controllers
+## 39. Component Controllers
 
 Ejemplo:
 
@@ -1177,7 +1176,7 @@ El resolver podrá incluir:
 
 ---
 
-# 40. Resolución compilada
+## 40. Resolución compilada
 
 En producción, el framework podrá disponer de un plan compilado.
 
@@ -1201,7 +1200,7 @@ final readonly class ControllerResolutionPlan
 
 ---
 
-# 41. CompiledControllerResolver
+## 41. CompiledControllerResolver
 
 ```php
 final class CompiledControllerResolver implements
@@ -1256,7 +1255,7 @@ final class CompiledControllerResolver implements
 
 ---
 
-# 42. Ventajas de resolución compilada
+## 42. Ventajas de resolución compilada
 
 * Evita descubrir el resolver.
 * Evita validar repetidamente la clase.
@@ -1270,7 +1269,7 @@ final class CompiledControllerResolver implements
 
 ---
 
-# 43. Fallback dinámico
+## 43. Fallback dinámico
 
 Cuando no exista un plan compilado:
 
@@ -1292,7 +1291,7 @@ En ese modo, una definición no compilada producirá error.
 
 ---
 
-# 44. ControllerInspector
+## 44. ControllerInspector
 
 El inspector centralizará Reflection y validaciones estructurales.
 
@@ -1316,7 +1315,7 @@ interface ControllerInspectorInterface
 
 ---
 
-# 45. ControllerMethodInspection
+## 45. ControllerMethodInspection
 
 ```php
 final readonly class ControllerMethodInspection
@@ -1337,7 +1336,7 @@ El inspector podrá usar caché interna.
 
 ---
 
-# 46. Reglas de validación de clase
+## 46. Reglas de validación de clase
 
 La clase deberá:
 
@@ -1355,7 +1354,7 @@ La clase deberá:
 
 ---
 
-# 47. Reglas de validación de método
+## 47. Reglas de validación de método
 
 El método deberá:
 
@@ -1372,7 +1371,7 @@ El método deberá:
 
 ---
 
-# 48. Métodos mágicos bloqueados
+## 48. Métodos mágicos bloqueados
 
 ```text
 __construct
@@ -1401,7 +1400,7 @@ __invoke
 
 ---
 
-# 49. Atributo NotAction
+## 49. Atributo NotAction
 
 ```php
 #[Attribute(Attribute::TARGET_METHOD)]
@@ -1430,7 +1429,7 @@ Aunque el método sea público, el resolver deberá impedir que se ejecute como 
 
 ---
 
-# 50. Métodos heredados
+## 50. Métodos heredados
 
 Por defecto, VoltStack podrá permitir métodos heredados desde una clase base controlada.
 
@@ -1457,7 +1456,7 @@ La política será configurable.
 
 ---
 
-# 51. ControllerSecurityValidator
+## 51. ControllerSecurityValidator
 
 ```php
 interface ControllerSecurityValidatorInterface
@@ -1486,7 +1485,7 @@ interface ControllerSecurityValidatorInterface
 
 ---
 
-# 52. Namespaces permitidos
+## 52. Namespaces permitidos
 
 Configuración sugerida:
 
@@ -1509,7 +1508,7 @@ Esta restricción podrá desactivarse en desarrollo, pero será recomendada en p
 
 ---
 
-# 53. Resolución de métodos estáticos
+## 53. Resolución de métodos estáticos
 
 Los métodos estáticos no serán la opción recomendada.
 
@@ -1536,7 +1535,7 @@ La inyección de dependencias y el scope funcionan mejor con instancias.
 
 ---
 
-# 54. Controladores abstractos
+## 54. Controladores abstractos
 
 Una clase abstracta no podrá resolverse directamente.
 
@@ -1556,7 +1555,7 @@ AbstractControllerResolutionException
 
 ---
 
-# 55. Decoradores de controlador
+## 55. Decoradores de controlador
 
 El Container podrá resolver un controlador decorado.
 
@@ -1584,7 +1583,7 @@ Esta información podrá incluirse en atributos.
 
 ---
 
-# 56. Proxies
+## 56. Proxies
 
 El sistema podrá trabajar con proxies lazy.
 
@@ -1609,7 +1608,7 @@ interface ProxyClassResolverInterface
 
 ---
 
-# 57. ControllerFactory
+## 57. ControllerFactory
 
 Cuando una clase requiera construcción especializada, podrá registrarse una factory.
 
@@ -1635,7 +1634,7 @@ Casos:
 
 ---
 
-# 58. Binding contextual
+## 58. Binding contextual
 
 Ejemplo:
 
@@ -1649,7 +1648,7 @@ El resolver deberá iniciar la resolución con el contexto de la clase lógica p
 
 ---
 
-# 59. Dependencias de constructor
+## 59. Dependencias de constructor
 
 El resolver no analizará ni resolverá manualmente los argumentos del constructor.
 
@@ -1667,7 +1666,7 @@ Esto evita duplicar la lógica del IoC Container.
 
 ---
 
-# 60. Errores del Container
+## 60. Errores del Container
 
 Las excepciones del Container deberán enriquecerse con contexto de controlador.
 
@@ -1686,7 +1685,7 @@ El resolver deberá preservar la excepción original.
 
 ---
 
-# 61. Cache de resolución
+## 61. Cache de resolución
 
 La caché podrá almacenar:
 
@@ -1712,7 +1711,7 @@ No deberá almacenar directamente:
 
 ---
 
-# 62. ControllerResolutionCache
+## 62. ControllerResolutionCache
 
 ```php
 interface ControllerResolutionCacheInterface
@@ -1734,7 +1733,7 @@ interface ControllerResolutionCacheInterface
 
 ---
 
-# 63. Clave de caché
+## 63. Clave de caché
 
 La clave podrá construirse con:
 
@@ -1759,7 +1758,7 @@ $cacheKey = hash('xxh128', implode('|', [
 
 ---
 
-# 64. Invalidación
+## 64. Invalidación
 
 La caché deberá invalidarse cuando cambie:
 
@@ -1779,7 +1778,7 @@ En producción se regenerará durante deploy.
 
 ---
 
-# 65. Signature hash
+## 65. Signature hash
 
 El inspector podrá generar una firma basada en:
 
@@ -1796,7 +1795,7 @@ Esta firma permitirá detectar planes compilados obsoletos.
 
 ---
 
-# 66. Thread safety y procesos persistentes
+## 66. Thread safety y procesos persistentes
 
 Aunque PHP tradicionalmente ejecuta una petición por proceso, VoltStack deberá prepararse para runtimes persistentes y concurrencia controlada.
 
@@ -1812,7 +1811,7 @@ El resolver deberá:
 
 ---
 
-# 67. ControllerResolverRegistry
+## 67. ControllerResolverRegistry
 
 ```php
 interface ControllerResolverRegistryInterface
@@ -1837,7 +1836,7 @@ Los paquetes podrán añadir resolvers propios.
 
 ---
 
-# 68. Ejemplo de resolver personalizado
+## 68. Ejemplo de resolver personalizado
 
 ```php
 final class RemoteControllerResolver implements
@@ -1879,7 +1878,7 @@ final class RemoteControllerResolver implements
 
 ---
 
-# 69. Resolución por atributos
+## 69. Resolución por atributos
 
 Una clase podrá declarar metadata de controlador.
 
@@ -1906,7 +1905,7 @@ La metadata funcional completa será procesada posteriormente por `ControllerMet
 
 ---
 
-# 70. Separación entre resolución y metadata
+## 70. Separación entre resolución y metadata
 
 El resolver podrá leer metadata mínima para resolver.
 
@@ -1924,7 +1923,7 @@ Esto evita duplicar responsabilidades.
 
 ---
 
-# 71. ControllerDefinitionValidator
+## 71. ControllerDefinitionValidator
 
 Antes de elegir un resolver, se deberá validar la definición.
 
@@ -1951,7 +1950,7 @@ Validaciones:
 
 ---
 
-# 72. Formato de nombre de clase
+## 72. Formato de nombre de clase
 
 Se deberán rechazar nombres anómalos.
 
@@ -1971,7 +1970,7 @@ App\Http\Controllers\UserController::class
 
 ---
 
-# 73. Formato de método
+## 73. Formato de método
 
 El método deberá cumplir reglas de identificador PHP.
 
@@ -1986,7 +1985,7 @@ Además deberá pasar las reglas de seguridad del inspector.
 
 ---
 
-# 74. Controladores anónimos
+## 74. Controladores anónimos
 
 Las clases anónimas podrán funcionar en desarrollo:
 
@@ -2008,7 +2007,7 @@ Sin embargo:
 
 ---
 
-# 75. Resolución de callable objects
+## 75. Resolución de callable objects
 
 Un objeto invocable podrá aceptarse como target:
 
@@ -2030,7 +2029,7 @@ La referencia recomendada será la clase.
 
 ---
 
-# 76. Instancias explícitas
+## 76. Instancias explícitas
 
 Configuración:
 
@@ -2048,7 +2047,7 @@ Cuando esté habilitada, el resolver deberá validar:
 
 ---
 
-# 77. Resolución lazy
+## 77. Resolución lazy
 
 La creación de la instancia podrá diferirse hasta que sea necesaria.
 
@@ -2072,7 +2071,7 @@ La resolución lazy será útil cuando:
 
 ---
 
-# 78. Optimización futura: metadata antes de instancia
+## 78. Optimización futura: metadata antes de instancia
 
 En una versión avanzada, el pipeline podrá resolver metadata compilada antes de crear la instancia.
 
@@ -2092,7 +2091,7 @@ La arquitectura deberá permitir mover la etapa de creación sin rediseñar todo
 
 ---
 
-# 79. DisplayName
+## 79. DisplayName
 
 Todo controlador resuelto deberá tener un nombre legible.
 
@@ -2118,7 +2117,7 @@ El display name será utilizado en:
 
 ---
 
-# 80. ControllerIdentity
+## 80. ControllerIdentity
 
 Podrá existir una identidad estable separada del display name.
 
@@ -2146,7 +2145,7 @@ Esto facilitará métricas y caché.
 
 ---
 
-# 81. Eventos de resolución
+## 81. Eventos de resolución
 
 Eventos propuestos:
 
@@ -2167,7 +2166,7 @@ Los eventos detallados podrán desactivarse en producción.
 
 ---
 
-# 82. Observabilidad
+## 82. Observabilidad
 
 Métricas:
 
@@ -2195,7 +2194,7 @@ cache.hit
 
 ---
 
-# 83. Errores y excepciones
+## 83. Errores y excepciones
 
 Excepciones previstas:
 
@@ -2226,7 +2225,7 @@ StaleControllerResolutionPlanException
 
 ---
 
-# 84. Ejemplo de excepción descriptiva
+## 84. Ejemplo de excepción descriptiva
 
 ```text
 Unable to resolve controller.
@@ -2251,7 +2250,7 @@ En producción se ocultarán datos sensibles.
 
 ---
 
-# 85. ControllerResolutionException
+## 85. ControllerResolutionException
 
 ```php
 class ControllerResolutionException extends ControllerException
@@ -2275,7 +2274,7 @@ class ControllerResolutionException extends ControllerException
 
 ---
 
-# 86. Integración con debugging
+## 86. Integración con debugging
 
 La debug toolbar podrá mostrar:
 
@@ -2312,7 +2311,7 @@ Duration:
 
 ---
 
-# 87. Pruebas unitarias
+## 87. Pruebas unitarias
 
 Casos mínimos:
 
@@ -2341,7 +2340,7 @@ Casos mínimos:
 
 ---
 
-# 88. Pruebas de integración
+## 88. Pruebas de integración
 
 * Route Match → Definition → Resolver.
 * Resolver → Container.
@@ -2359,7 +2358,7 @@ Casos mínimos:
 
 ---
 
-# 89. Prueba de scope
+## 89. Prueba de scope
 
 ```php
 public function test_controller_instances_are_not_shared_between_requests(): void
@@ -2384,7 +2383,7 @@ public function test_controller_instances_are_not_shared_between_requests(): voi
 
 ---
 
-# 90. Prueba de seguridad
+## 90. Prueba de seguridad
 
 ```php
 public function test_magic_methods_cannot_be_resolved_as_actions(): void
@@ -2407,7 +2406,7 @@ public function test_magic_methods_cannot_be_resolved_as_actions(): void
 
 ---
 
-# 91. Benchmarks
+## 91. Benchmarks
 
 Escenarios:
 
@@ -2435,7 +2434,7 @@ Métricas:
 
 ---
 
-# 92. Configuración
+## 92. Configuración
 
 Archivo sugerido:
 
@@ -2485,7 +2484,7 @@ return [
 
 ---
 
-# 93. Registro en el Container
+## 93. Registro en el Container
 
 ```php
 $container->singleton(
@@ -2523,7 +2522,7 @@ Los resolvers especializados deberán ser stateless.
 
 ---
 
-# 94. Bootstrapping
+## 94. Bootstrapping
 
 Durante `register`:
 
@@ -2548,7 +2547,7 @@ Durante `boot`:
 
 ---
 
-# 95. Registry freezing
+## 95. Registry freezing
 
 En producción, los registries deberán volverse inmutables después del boot.
 
@@ -2568,7 +2567,7 @@ Esto mejora seguridad y concurrencia.
 
 ---
 
-# 96. Estructura de directorios
+## 96. Estructura de directorios
 
 ```text
 src/
@@ -2701,7 +2700,7 @@ src/
 
 ---
 
-# 97. Implementación mínima V1
+## 97. Implementación mínima V1
 
 La primera versión deberá incluir:
 
@@ -2737,7 +2736,7 @@ Podrán posponerse:
 
 ---
 
-# 98. Flujo completo de resolución
+## 98. Flujo completo de resolución
 
 ```text
 ControllerDefinition
@@ -2769,7 +2768,7 @@ Return to ResolveControllerStage
 
 ---
 
-# 99. Ejemplo completo
+## 99. Ejemplo completo
 
 Ruta:
 
@@ -2842,9 +2841,9 @@ new ResolvedController(
 
 ---
 
-# 100. Decisiones arquitectónicas
+## 100. Decisiones arquitectónicas
 
-## ADR-CTRL-RES-001
+### ADR-CTRL-RES-001
 
 **Decisión:** El resolver devolverá siempre un `ResolvedController`.
 
@@ -2852,7 +2851,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-002
+### ADR-CTRL-RES-002
 
 **Decisión:** La resolución se dividirá por estrategias especializadas.
 
@@ -2860,7 +2859,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-003
+### ADR-CTRL-RES-003
 
 **Decisión:** Las clases se resolverán mediante el Container.
 
@@ -2868,7 +2867,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-004
+### ADR-CTRL-RES-004
 
 **Decisión:** Los controladores serán request-scoped o transient por defecto.
 
@@ -2876,7 +2875,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-005
+### ADR-CTRL-RES-005
 
 **Decisión:** Solo los servicios registrados explícitamente podrán actuar como controladores.
 
@@ -2884,7 +2883,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-006
+### ADR-CTRL-RES-006
 
 **Decisión:** Solo `__invoke()` será aceptado como método mágico ejecutable.
 
@@ -2892,7 +2891,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-007
+### ADR-CTRL-RES-007
 
 **Decisión:** La resolución compilada tendrá prioridad sobre la dinámica.
 
@@ -2900,7 +2899,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-008
+### ADR-CTRL-RES-008
 
 **Decisión:** El resolver no resolverá argumentos del método.
 
@@ -2908,7 +2907,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-009
+### ADR-CTRL-RES-009
 
 **Decisión:** El resolver procesará únicamente metadata estructural mínima.
 
@@ -2916,7 +2915,7 @@ new ResolvedController(
 
 ---
 
-## ADR-CTRL-RES-010
+### ADR-CTRL-RES-010
 
 **Decisión:** Las instancias explícitas de controladores estarán deshabilitadas por defecto.
 
@@ -2924,7 +2923,7 @@ new ResolvedController(
 
 ---
 
-# 101. Criterios de aceptación
+## 101. Criterios de aceptación
 
 El sistema se considerará correctamente implementado cuando:
 
@@ -2952,7 +2951,7 @@ El sistema se considerará correctamente implementado cuando:
 
 ---
 
-# 102. Conclusión
+## 102. Conclusión
 
 El `ControllerResolver` de VoltStack será el componente encargado de transformar una definición declarativa en una unidad ejecutable, validada y contextualizada.
 

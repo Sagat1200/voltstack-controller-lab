@@ -1,6 +1,5 @@
-# 08_CONTROLLER_INVOKER.md
-
 # Sistema de invocación de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -21,7 +20,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define la arquitectura del `Controller Invoker` de VoltStack.
 
@@ -60,7 +59,7 @@ Su única función será invocar correctamente el callable asociado al controlad
 
 ---
 
-# 2. Posición dentro del flujo
+## 2. Posición dentro del flujo
 
 El flujo completo será:
 
@@ -106,7 +105,7 @@ ControllerInvoker
 
 ---
 
-# 3. Objetivos
+## 3. Objetivos
 
 El invoker deberá:
 
@@ -136,7 +135,7 @@ El invoker deberá:
 
 ---
 
-# 4. No responsabilidades
+## 4. No responsabilidades
 
 El `ControllerInvoker` no será responsable de determinar:
 
@@ -188,7 +187,7 @@ ResultNormalizationSystem
 
 ---
 
-# 5. Principios de diseño
+## 5. Principios de diseño
 
 El sistema seguirá estos principios:
 
@@ -213,7 +212,7 @@ El sistema seguirá estos principios:
 
 ---
 
-# 6. Arquitectura general
+## 6. Arquitectura general
 
 ```text
 ControllerInvocationTerminal
@@ -251,7 +250,7 @@ Raw Result
 
 ---
 
-# 7. Componentes fundamentales
+## 7. Componentes fundamentales
 
 El sistema estará compuesto por:
 
@@ -278,7 +277,7 @@ ControllerInvocationType
 
 ---
 
-# 8. Contrato principal
+## 8. Contrato principal
 
 ```php
 namespace VoltStack\Quantum\Controllers\Invocation\Contracts;
@@ -300,7 +299,7 @@ El resultado será `mixed` porque el controlador podrá devolver cualquier valor
 
 ---
 
-# 9. Firma alternativa mediante request object
+## 9. Firma alternativa mediante request object
 
 Para reducir el número de argumentos internos podrá utilizarse:
 
@@ -335,7 +334,7 @@ La API pública preferida será el objeto request.
 
 ---
 
-# 10. ControllerInvocationMode
+## 10. ControllerInvocationMode
 
 ```php
 enum ControllerInvocationMode: string
@@ -371,7 +370,7 @@ Debug
 
 ---
 
-# 11. Implementación principal
+## 11. Implementación principal
 
 ```php
 final class ControllerInvoker implements
@@ -453,7 +452,7 @@ final class ControllerInvoker implements
 
 ---
 
-# 12. ControllerInvocationType
+## 12. ControllerInvocationType
 
 ```php
 enum ControllerInvocationType: string
@@ -487,7 +486,7 @@ El invoker describe cómo será ejecutado.
 
 ---
 
-# 13. Mapeo entre resolución e invocación
+## 13. Mapeo entre resolución e invocación
 
 ```text
 ControllerResolutionType::ClassMethod
@@ -520,7 +519,7 @@ ControllerResolutionType::Compiled
 
 ---
 
-# 14. ControllerInvocationPlan
+## 14. ControllerInvocationPlan
 
 ```php
 final readonly class ControllerInvocationPlan
@@ -550,7 +549,7 @@ final readonly class ControllerInvocationPlan
 
 ---
 
-# 15. Responsabilidad del plan
+## 15. Responsabilidad del plan
 
 El plan describe de forma completa cómo ejecutar un controlador.
 
@@ -602,9 +601,9 @@ new ControllerInvocationPlan(
 
 ---
 
-# 16. Plan dinámico y plan compilado
+## 16. Plan dinámico y plan compilado
 
-## Plan dinámico
+### Plan dinámico
 
 Puede incluir:
 
@@ -614,7 +613,7 @@ Puede incluir:
 * Información derivada en runtime.
 * Metadata debug.
 
-## Plan compilado
+### Plan compilado
 
 Debe incluir únicamente información estable:
 
@@ -642,7 +641,7 @@ No deberá contener:
 
 ---
 
-# 17. CompiledControllerInvocationPlan
+## 17. CompiledControllerInvocationPlan
 
 ```php
 final readonly class CompiledControllerInvocationPlan
@@ -672,7 +671,7 @@ final readonly class CompiledControllerInvocationPlan
 
 ---
 
-# 18. Invocation Strategy
+## 18. Invocation Strategy
 
 Cada tipo de invocación será manejado por una estrategia.
 
@@ -697,7 +696,7 @@ interface ControllerInvocationStrategyInterface
 
 ---
 
-# 19. Estrategias iniciales
+## 19. Estrategias iniciales
 
 ```text
 CompiledControllerInvocationStrategy
@@ -715,7 +714,7 @@ CallableObjectInvocationStrategy
 
 ---
 
-# 20. Registry de estrategias
+## 20. Registry de estrategias
 
 ```php
 interface ControllerInvocationStrategyRegistryInterface
@@ -751,7 +750,7 @@ En producción deberá congelarse después del boot.
 
 ---
 
-# 21. ClassMethodInvocationStrategy
+## 21. ClassMethodInvocationStrategy
 
 Responsable de:
 
@@ -807,7 +806,7 @@ final class ClassMethodInvocationStrategy implements
 
 ---
 
-# 22. InvokableClassInvocationStrategy
+## 22. InvokableClassInvocationStrategy
 
 Ejemplo:
 
@@ -840,7 +839,7 @@ __invoke
 
 ---
 
-# 23. ClosureInvocationStrategy
+## 23. ClosureInvocationStrategy
 
 Ejemplo:
 
@@ -867,7 +866,7 @@ return ($plan->callable)(
 
 ---
 
-# 24. ServiceMethodInvocationStrategy
+## 24. ServiceMethodInvocationStrategy
 
 Permite invocar un servicio ya resuelto por el Container.
 
@@ -892,7 +891,7 @@ El invoker no resolverá directamente el servicio; deberá recibirlo desde el re
 
 ---
 
-# 25. ActionInvocationStrategy
+## 25. ActionInvocationStrategy
 
 Una Action puede usar distintos contratos.
 
@@ -938,7 +937,7 @@ El invoker no deberá buscar entre múltiples convenciones en cada petición.
 
 ---
 
-# 26. PageInvocationStrategy
+## 26. PageInvocationStrategy
 
 Una Page podrá representar una unidad de ejecución orientada a UI.
 
@@ -963,7 +962,7 @@ La estrategia de Page podrá agregar validaciones específicas, pero no renderiz
 
 ---
 
-# 27. ComponentInvocationStrategy
+## 27. ComponentInvocationStrategy
 
 Un componente podrá exponer acciones:
 
@@ -990,7 +989,7 @@ Esas responsabilidades pertenecen al sistema de componentes y al SPA Runtime.
 
 ---
 
-# 28. StaticMethodInvocationStrategy
+## 28. StaticMethodInvocationStrategy
 
 VoltStack podrá soportar métodos estáticos, pero no deberá promoverlos como opción principal.
 
@@ -1024,7 +1023,7 @@ Restricciones:
 
 ---
 
-# 29. CallableObjectInvocationStrategy
+## 29. CallableObjectInvocationStrategy
 
 Permite invocar objetos con:
 
@@ -1038,7 +1037,7 @@ Deberá utilizarse principalmente para integraciones y adaptadores.
 
 ---
 
-# 30. CompiledControllerInvocationStrategy
+## 30. CompiledControllerInvocationStrategy
 
 La estrategia compilada deberá evitar:
 
@@ -1064,7 +1063,7 @@ Para máxima optimización, VoltStack podrá generar invocadores especializados.
 
 ---
 
-# 31. Invocador compilado especializado
+## 31. Invocador compilado especializado
 
 Ejemplo generado:
 
@@ -1094,7 +1093,7 @@ y permite a OPcache optimizar una llamada estable.
 
 ---
 
-# 32. Contrato compilado
+## 32. Contrato compilado
 
 ```php
 interface CompiledControllerCallableInterface
@@ -1119,7 +1118,7 @@ interface CompiledStaticControllerCallableInterface
 
 ---
 
-# 33. Consideraciones sobre rendimiento
+## 33. Consideraciones sobre rendimiento
 
 La llamada:
 
@@ -1150,7 +1149,7 @@ El nivel 3 podrá añadirse después de obtener métricas reales.
 
 ---
 
-# 34. ControllerInvocationPlanResolver
+## 34. ControllerInvocationPlanResolver
 
 ```php
 interface ControllerInvocationPlanResolverInterface
@@ -1175,7 +1174,7 @@ Responsabilidades:
 
 ---
 
-# 35. Flujo del plan resolver
+## 35. Flujo del plan resolver
 
 ```text
 ControllerInvocationRequest
@@ -1199,7 +1198,7 @@ Return plan
 
 ---
 
-# 36. DynamicInvocationPlanFactory
+## 36. DynamicInvocationPlanFactory
 
 ```php
 interface DynamicInvocationPlanFactoryInterface
@@ -1220,7 +1219,7 @@ No deberá volver a inspeccionar la clase si la información ya está disponible
 
 ---
 
-# 37. Reutilización de ControllerResolutionPlan
+## 37. Reutilización de ControllerResolutionPlan
 
 El `ControllerResolver` ya produce:
 
@@ -1254,7 +1253,7 @@ No se deberá duplicar información sin necesidad.
 
 ---
 
-# 38. Argument Assembly
+## 38. Argument Assembly
 
 El invoker deberá convertir:
 
@@ -1278,7 +1277,7 @@ interface ControllerArgumentAssemblerInterface
 
 ---
 
-# 39. ControllerArgumentList
+## 39. ControllerArgumentList
 
 ```php
 final readonly class ControllerArgumentList
@@ -1314,7 +1313,7 @@ final readonly class ControllerArgumentList
 
 ---
 
-# 40. Argumentos posicionales
+## 40. Argumentos posicionales
 
 Por defecto, VoltStack utilizará argumentos posicionales.
 
@@ -1347,7 +1346,7 @@ $controller->show(
 
 ---
 
-# 41. Orden de argumentos
+## 41. Orden de argumentos
 
 El orden deberá provenir del:
 
@@ -1372,7 +1371,7 @@ $plan->parameterOrder = [
 
 ---
 
-# 42. Argumentos nombrados
+## 42. Argumentos nombrados
 
 PHP soporta argumentos nombrados:
 
@@ -1401,7 +1400,7 @@ Razones:
 
 ---
 
-# 43. Named argument mode
+## 43. Named argument mode
 
 ```php
 enum ControllerArgumentMode: string
@@ -1420,7 +1419,7 @@ public ControllerArgumentMode $argumentMode;
 
 ---
 
-# 44. Restricciones de named arguments
+## 44. Restricciones de named arguments
 
 En PHP:
 
@@ -1433,7 +1432,7 @@ El compiler deberá incluir los nombres en el hash de firma.
 
 ---
 
-# 45. Parámetros variádicos
+## 45. Parámetros variádicos
 
 Ejemplo:
 
@@ -1466,7 +1465,7 @@ El assembler producirá:
 
 ---
 
-# 46. VariadicParameterDefinition
+## 46. VariadicParameterDefinition
 
 ```php
 final readonly class VariadicParameterDefinition
@@ -1483,7 +1482,7 @@ final readonly class VariadicParameterDefinition
 
 ---
 
-# 47. Reglas variádicas
+## 47. Reglas variádicas
 
 El assembler deberá:
 
@@ -1497,7 +1496,7 @@ El assembler deberá:
 
 ---
 
-# 48. Parámetros opcionales
+## 48. Parámetros opcionales
 
 Ejemplo:
 
@@ -1519,7 +1518,7 @@ El invoker no deberá volver a aplicar valores predeterminados salvo como defens
 
 ---
 
-# 49. Parámetros omitidos
+## 49. Parámetros omitidos
 
 No se permitirá que el invoker omita parámetros requeridos silenciosamente.
 
@@ -1547,7 +1546,7 @@ App\Models\User
 
 ---
 
-# 50. Valores extra
+## 50. Valores extra
 
 Si el bag contiene valores que no pertenecen a la firma:
 
@@ -1573,7 +1572,7 @@ para planes compilados y desarrollo.
 
 ---
 
-# 51. Parámetros por referencia
+## 51. Parámetros por referencia
 
 Ejemplo:
 
@@ -1602,7 +1601,7 @@ UnsupportedControllerReferenceParameterException
 
 ---
 
-# 52. Retorno por referencia
+## 52. Retorno por referencia
 
 Los métodos que devuelven por referencia tampoco estarán soportados en V1.
 
@@ -1614,7 +1613,7 @@ El resolver o compiler deberá detectarlos antes de runtime.
 
 ---
 
-# 53. ControllerCallableValidator
+## 53. ControllerCallableValidator
 
 ```php
 interface ControllerCallableValidatorInterface
@@ -1629,7 +1628,7 @@ interface ControllerCallableValidatorInterface
 
 ---
 
-# 54. Validaciones estructurales
+## 54. Validaciones estructurales
 
 El validator deberá comprobar:
 
@@ -1651,7 +1650,7 @@ El validator deberá comprobar:
 
 ---
 
-# 55. Validación de tipos
+## 55. Validación de tipos
 
 El `Parameter Resolution Engine` es responsable principal de producir valores compatibles.
 
@@ -1671,7 +1670,7 @@ enum InvocationTypeValidationMode: string
 
 ---
 
-# 56. Basic type validation
+## 56. Basic type validation
 
 Validará:
 
@@ -1685,7 +1684,7 @@ No intentará coercionar valores.
 
 ---
 
-# 57. Strict type validation
+## 57. Strict type validation
 
 Además podrá validar:
 
@@ -1701,7 +1700,7 @@ El modo estricto podrá tener mayor costo y se recomienda en desarrollo o compil
 
 ---
 
-# 58. No coerción en el invoker
+## 58. No coerción en el invoker
 
 El invoker nunca deberá convertir:
 
@@ -1725,7 +1724,7 @@ Si llega un tipo incorrecto, el invoker deberá fallar.
 
 ---
 
-# 59. ControllerInvocationGuard
+## 59. ControllerInvocationGuard
 
 ```php
 interface ControllerInvocationGuardInterface
@@ -1749,7 +1748,7 @@ Responsabilidades:
 
 ---
 
-# 60. Estados de invocación
+## 60. Estados de invocación
 
 ```php
 enum ControllerInvocationStatus: string
@@ -1766,7 +1765,7 @@ enum ControllerInvocationStatus: string
 
 ---
 
-# 61. ControllerInvocationState
+## 61. ControllerInvocationState
 
 ```php
 final class ControllerInvocationState
@@ -1800,7 +1799,7 @@ ControllerExecution
 
 ---
 
-# 62. Doble invocación
+## 62. Doble invocación
 
 Por defecto:
 
@@ -1822,7 +1821,7 @@ y exista un interceptor autorizado que haya iniciado un nuevo intento.
 
 ---
 
-# 63. Retry permit
+## 63. Retry permit
 
 Se utilizará un objeto explícito:
 
@@ -1843,7 +1842,7 @@ El `RetryInterceptor` podrá adjuntarlo al execution state.
 
 ---
 
-# 64. Invocation attempt
+## 64. Invocation attempt
 
 ```php
 final readonly class ControllerInvocationAttempt
@@ -1863,7 +1862,7 @@ final readonly class ControllerInvocationAttempt
 
 ---
 
-# 65. Lifecycle
+## 65. Lifecycle
 
 ```php
 interface ControllerInvocationLifecycleInterface
@@ -1897,7 +1896,7 @@ interface ControllerInvocationLifecycleInterface
 
 ---
 
-# 66. Lifecycle responsibilities
+## 66. Lifecycle responsibilities
 
 El lifecycle deberá:
 
@@ -1918,7 +1917,7 @@ No deberá modificar el resultado.
 
 ---
 
-# 67. ControllerInvocationRecorder
+## 67. ControllerInvocationRecorder
 
 ```php
 interface ControllerInvocationRecorderInterface
@@ -1931,7 +1930,7 @@ interface ControllerInvocationRecorderInterface
 
 ---
 
-# 68. ControllerInvocationRecord
+## 68. ControllerInvocationRecord
 
 ```php
 final readonly class ControllerInvocationRecord
@@ -1959,7 +1958,7 @@ No deberá almacenar valores de argumentos.
 
 ---
 
-# 69. Excepciones del controlador
+## 69. Excepciones del controlador
 
 El invoker deberá propagar la excepción original.
 
@@ -1979,7 +1978,7 @@ porque eso podría ocultar el tipo real.
 
 ---
 
-# 70. Errores internos del invoker
+## 70. Errores internos del invoker
 
 Solo se utilizará una excepción de infraestructura cuando el fallo pertenezca al mecanismo de invocación.
 
@@ -1996,7 +1995,7 @@ Ejemplos:
 
 ---
 
-# 71. Enriquecimiento de excepciones
+## 71. Enriquecimiento de excepciones
 
 La información contextual deberá adjuntarse sin sustituir la excepción original.
 
@@ -2023,7 +2022,7 @@ $execution->attributes->set(
 
 ---
 
-# 72. Errores nativos de PHP
+## 72. Errores nativos de PHP
 
 Errores como:
 
@@ -2041,7 +2040,7 @@ El `Controller Exception System` decidirá la representación final.
 
 ---
 
-# 73. Async-like results
+## 73. Async-like results
 
 PHP no tiene un único modelo async estándar.
 
@@ -2069,7 +2068,7 @@ El normalizador decidirá cómo procesarlo.
 
 ---
 
-# 74. Awaitable detection
+## 74. Awaitable detection
 
 Podrá existir:
 
@@ -2096,7 +2095,7 @@ Esto mantiene el invoker neutral.
 
 ---
 
-# 75. Fiber support
+## 75. Fiber support
 
 Una `Fiber` no deberá iniciarse automáticamente salvo que el plan o runtime lo indique.
 
@@ -2110,7 +2109,7 @@ Esta capacidad se pospone para una versión avanzada.
 
 ---
 
-# 76. Generator support
+## 76. Generator support
 
 El invoker no deberá convertir un Generator a array.
 
@@ -2123,7 +2122,7 @@ Esto preserva:
 
 ---
 
-# 77. Result classification
+## 77. Result classification
 
 El lifecycle podrá registrar únicamente:
 
@@ -2145,7 +2144,7 @@ No deberá serializar ni inspeccionar profundamente el resultado.
 
 ---
 
-# 78. Invocation metadata
+## 78. Invocation metadata
 
 Keys propuestas:
 
@@ -2166,7 +2165,7 @@ Estas keys serán definidas mediante el `Metadata Engine`.
 
 ---
 
-# 79. ControllerInvocationMetadata
+## 79. ControllerInvocationMetadata
 
 ```php
 final readonly class ControllerInvocationMetadata
@@ -2213,7 +2212,7 @@ final readonly class ControllerInvocationMetadata
 
 ---
 
-# 80. Plan validation
+## 80. Plan validation
 
 ```php
 interface ControllerInvocationPlanValidatorInterface
@@ -2244,7 +2243,7 @@ InvocationScopeValidator
 
 ---
 
-# 81. Firma del controlador
+## 81. Firma del controlador
 
 La firma deberá representar:
 
@@ -2276,7 +2275,7 @@ App\Http\Controllers\UserController::show
 
 ---
 
-# 82. ControllerSignatureHasher
+## 82. ControllerSignatureHasher
 
 ```php
 interface ControllerSignatureHasherInterface
@@ -2291,7 +2290,7 @@ El hash permitirá detectar que un plan compilado ya no coincide con el código.
 
 ---
 
-# 83. Hash estable
+## 83. Hash estable
 
 El hash no deberá depender de:
 
@@ -2305,7 +2304,7 @@ Deberá depender de una representación normalizada de la firma.
 
 ---
 
-# 84. Compilador
+## 84. Compilador
 
 ```php
 interface ControllerInvocationCompilerInterface
@@ -2318,7 +2317,7 @@ interface ControllerInvocationCompilerInterface
 
 ---
 
-# 85. Compilation request
+## 85. Compilation request
 
 ```php
 final readonly class ControllerInvocationCompilationRequest
@@ -2336,7 +2335,7 @@ final readonly class ControllerInvocationCompilationRequest
 
 ---
 
-# 86. Flujo de compilación
+## 86. Flujo de compilación
 
 ```text
 ResolvedController
@@ -2364,7 +2363,7 @@ Register plan
 
 ---
 
-# 87. Formato de plan compilado
+## 87. Formato de plan compilado
 
 ```php
 <?php
@@ -2414,7 +2413,7 @@ return [
 
 ---
 
-# 88. Compiled plan registry
+## 88. Compiled plan registry
 
 ```php
 interface CompiledControllerInvocationRegistryInterface
@@ -2443,7 +2442,7 @@ En producción será inmutable.
 
 ---
 
-# 89. Compiled plan hydration
+## 89. Compiled plan hydration
 
 Un plan compilado no deberá contener una instancia del controlador.
 
@@ -2510,7 +2509,7 @@ $runtimePlan = new ControllerInvocationPlan(
 
 ---
 
-# 90. Plan cache
+## 90. Plan cache
 
 Niveles:
 
@@ -2523,7 +2522,7 @@ L4 Compiled PHP Cache
 
 ---
 
-# 91. L1 Execution Plan
+## 91. L1 Execution Plan
 
 El plan resuelto se almacenará en:
 
@@ -2535,7 +2534,7 @@ Esto evita resolverlo varias veces durante interceptores o retries.
 
 ---
 
-# 92. L2 Request Cache
+## 92. L2 Request Cache
 
 Útil cuando el mismo controlador es inspeccionado varias veces durante una petición.
 
@@ -2549,7 +2548,7 @@ La key deberá incluir:
 
 ---
 
-# 93. L3 Worker Cache
+## 93. L3 Worker Cache
 
 Podrá almacenar:
 
@@ -2570,7 +2569,7 @@ No podrá almacenar:
 
 ---
 
-# 94. L4 PHP compiled cache
+## 94. L4 PHP compiled cache
 
 Los archivos PHP podrán cargarse con:
 
@@ -2584,7 +2583,7 @@ No se recomienda serialización PHP de objetos arbitrarios.
 
 ---
 
-# 95. InvocationPlanCacheKey
+## 95. InvocationPlanCacheKey
 
 ```php
 final readonly class InvocationPlanCacheKey
@@ -2611,7 +2610,7 @@ final readonly class InvocationPlanCacheKey
 
 ---
 
-# 96. Invalidación
+## 96. Invalidación
 
 Un plan deberá invalidarse cuando cambie:
 
@@ -2637,7 +2636,7 @@ Un plan deberá invalidarse cuando cambie:
 
 ---
 
-# 97. Stale plan behavior
+## 97. Stale plan behavior
 
 En `Auto`:
 
@@ -2664,7 +2663,7 @@ Plan stale
 
 ---
 
-# 98. Compatibilidad con OPcache
+## 98. Compatibilidad con OPcache
 
 El sistema deberá favorecer:
 
@@ -2678,7 +2677,7 @@ El sistema deberá favorecer:
 
 ---
 
-# 99. Preloading
+## 99. Preloading
 
 En despliegues compatibles podrá generarse:
 
@@ -2694,7 +2693,7 @@ La integración real dependerá del sistema de bootstrap y despliegue.
 
 ---
 
-# 100. FrankenPHP
+## 100. FrankenPHP
 
 El invoker deberá ser seguro para workers persistentes.
 
@@ -2715,7 +2714,7 @@ Reglas:
 
 ---
 
-# 101. Controller instance scope
+## 101. Controller instance scope
 
 El invoker no determinará el scope del controlador.
 
@@ -2747,7 +2746,7 @@ ControllerInstanceMismatchException
 
 ---
 
-# 102. Singleton controller risks
+## 102. Singleton controller risks
 
 Si un controlador singleton contiene estado mutable:
 
@@ -2766,7 +2765,7 @@ El invoker no deberá limpiar internamente controladores mal diseñados.
 
 ---
 
-# 103. Invocation scope validation
+## 103. Invocation scope validation
 
 El invoker podrá consultar:
 
@@ -2797,7 +2796,7 @@ Singleton
 
 ---
 
-# 104. Static controller policy
+## 104. Static controller policy
 
 Configuración:
 
@@ -2809,7 +2808,7 @@ En modo estricto, una ruta hacia un método estático deberá rechazarse durante
 
 ---
 
-# 105. Visibility
+## 105. Visibility
 
 Solo métodos públicos podrán invocarse.
 
@@ -2831,7 +2830,7 @@ Razones:
 
 ---
 
-# 106. Magic methods
+## 106. Magic methods
 
 No se permitirán métodos mágicos como targets normales, excepto:
 
@@ -2854,7 +2853,7 @@ El método deberá existir explícitamente.
 
 ---
 
-# 107. Dynamic method names
+## 107. Dynamic method names
 
 Los nombres de métodos no deberán derivarse directamente de input del usuario.
 
@@ -2870,7 +2869,7 @@ El método deberá provenir de una definición de ruta validada o un registry se
 
 ---
 
-# 108. Callable security validator
+## 108. Callable security validator
 
 ```php
 interface ControllerCallableSecurityValidatorInterface
@@ -2898,7 +2897,7 @@ Validará:
 
 ---
 
-# 109. Namespace allowlist
+## 109. Namespace allowlist
 
 Configuración posible:
 
@@ -2918,7 +2917,7 @@ Configuración posible:
 
 ---
 
-# 110. Métodos bloqueados
+## 110. Métodos bloqueados
 
 Ejemplos:
 
@@ -2934,7 +2933,7 @@ La lista podrá configurarse.
 
 ---
 
-# 111. Parámetros sensibles
+## 111. Parámetros sensibles
 
 El invoker no deberá registrar valores de parámetros.
 
@@ -2958,7 +2957,7 @@ su nombre también podrá ocultarse en trazas detalladas.
 
 ---
 
-# 112. Resultados sensibles
+## 112. Resultados sensibles
 
 El invoker no deberá registrar el contenido del resultado.
 
@@ -2972,7 +2971,7 @@ y metadata segura.
 
 ---
 
-# 113. Observabilidad
+## 113. Observabilidad
 
 Métricas:
 
@@ -2995,7 +2994,7 @@ controller.invoke.stale_plan
 
 ---
 
-# 114. Tags recomendados
+## 114. Tags recomendados
 
 ```text
 controller.type
@@ -3020,7 +3019,7 @@ Evitar:
 
 ---
 
-# 115. Eventos
+## 115. Eventos
 
 ```text
 ControllerInvocationPreparing
@@ -3040,7 +3039,7 @@ ControllerInvocationRejected
 
 ---
 
-# 116. Eventos y rendimiento
+## 116. Eventos y rendimiento
 
 Los eventos detallados podrán desactivarse en producción.
 
@@ -3055,7 +3054,7 @@ o integrarse directamente con telemetría para evitar overhead adicional.
 
 ---
 
-# 117. Trace de invocación
+## 117. Trace de invocación
 
 Ejemplo:
 
@@ -3095,7 +3094,7 @@ succeeded
 
 ---
 
-# 118. Debug de parámetros
+## 118. Debug de parámetros
 
 En debug:
 
@@ -3128,7 +3127,7 @@ Arguments
 
 ---
 
-# 119. CLI
+## 119. CLI
 
 Comandos propuestos:
 
@@ -3156,7 +3155,7 @@ php volt controller:validate-invocations
 
 ---
 
-# 120. Ejemplo de CLI
+## 120. Ejemplo de CLI
 
 ```text
 Controller invocation plan
@@ -3198,7 +3197,7 @@ L3 hit
 
 ---
 
-# 121. Excepciones
+## 121. Excepciones
 
 ```text
 ControllerInvocationException
@@ -3236,7 +3235,7 @@ BlockedControllerMethodException
 
 ---
 
-# 122. Ejemplo de error de argumento
+## 122. Ejemplo de error de argumento
 
 ```text
 Controller invocation failed before execution.
@@ -3268,7 +3267,7 @@ compatible with the controller signature.
 
 ---
 
-# 123. Ejemplo de plan obsoleto
+## 123. Ejemplo de plan obsoleto
 
 ```text
 Compiled controller invocation plan is stale.
@@ -3291,7 +3290,7 @@ Rebuild the controller invocation cache.
 
 ---
 
-# 124. Configuración
+## 124. Configuración
 
 ```php
 return [
@@ -3392,7 +3391,7 @@ return [
 
 ---
 
-# 125. Registro en el Container
+## 125. Registro en el Container
 
 ```php
 $container->singleton(
@@ -3458,7 +3457,7 @@ $container->singleton(
 
 ---
 
-# 126. Registro de estrategias
+## 126. Registro de estrategias
 
 ```php
 $registry->register(
@@ -3500,7 +3499,7 @@ $registry->register(
 
 ---
 
-# 127. Bootstrapping
+## 127. Bootstrapping
 
 Durante `register`:
 
@@ -3526,7 +3525,7 @@ Durante `boot`:
 
 ---
 
-# 128. Extensión por paquetes
+## 128. Extensión por paquetes
 
 Un paquete podrá agregar una estrategia.
 
@@ -3551,7 +3550,7 @@ También podrá registrar un tipo custom mediante un identificador extensible en
 
 ---
 
-# 129. Estrategias personalizadas
+## 129. Estrategias personalizadas
 
 El enum nativo limita extensiones externas.
 
@@ -3581,7 +3580,7 @@ $plan->attributes['custom_type']
 
 ---
 
-# 130. Integración con ControllerInvocationTerminal
+## 130. Integración con ControllerInvocationTerminal
 
 ```php
 final class ControllerInvocationTerminal implements
@@ -3630,7 +3629,7 @@ final class ControllerInvocationTerminal implements
 
 ---
 
-# 131. Integración con ControllerExecution
+## 131. Integración con ControllerExecution
 
 Se añadirá:
 
@@ -3650,7 +3649,7 @@ $this->invocationState =
 
 ---
 
-# 132. Integración con interceptores
+## 132. Integración con interceptores
 
 El invoker será invocado únicamente desde el terminal.
 
@@ -3676,7 +3675,7 @@ Esto garantiza:
 
 ---
 
-# 133. RetryInterceptor integration
+## 133. RetryInterceptor integration
 
 El retry interceptor deberá solicitar un permiso:
 
@@ -3698,7 +3697,7 @@ Luego cada intento pasará nuevamente por el terminal.
 
 ---
 
-# 134. Short circuit
+## 134. Short circuit
 
 Si un interceptor devuelve un resultado sin invocar el terminal:
 
@@ -3717,7 +3716,7 @@ $execution->invocationState->status =
 
 ---
 
-# 135. Integración con Result Normalizer
+## 135. Integración con Result Normalizer
 
 El invoker devuelve:
 
@@ -3753,7 +3752,7 @@ JsonResponse
 
 ---
 
-# 136. Integración con Exception System
+## 136. Integración con Exception System
 
 Las excepciones atravesarán:
 
@@ -3776,7 +3775,7 @@ El invoker únicamente:
 
 ---
 
-# 137. Integración con Metadata Engine
+## 137. Integración con Metadata Engine
 
 Schemas iniciales:
 
@@ -3811,7 +3810,7 @@ new MetadataSchema(
 
 ---
 
-# 138. Estructura de directorios
+## 138. Estructura de directorios
 
 ```text
 src/
@@ -4003,7 +4002,7 @@ src/
 
 ---
 
-# 139. Implementación mínima V1
+## 139. Implementación mínima V1
 
 La V1 deberá incluir:
 
@@ -4063,7 +4062,7 @@ Podrán posponerse:
 
 ---
 
-# 140. Ejemplo completo
+## 140. Ejemplo completo
 
 Controlador:
 
@@ -4211,7 +4210,7 @@ JsonResponse
 
 ---
 
-# 141. Pruebas unitarias
+## 141. Pruebas unitarias
 
 Casos mínimos:
 
@@ -4248,7 +4247,7 @@ Casos mínimos:
 
 ---
 
-# 142. Pruebas de integración
+## 142. Pruebas de integración
 
 * ControllerResolver → ControllerInvoker.
 * ParameterEngine → ArgumentAssembler.
@@ -4270,7 +4269,7 @@ Casos mínimos:
 
 ---
 
-# 143. Prueba de invocación simple
+## 143. Prueba de invocación simple
 
 ```php
 public function test_it_invokes_a_class_method_controller(): void
@@ -4296,7 +4295,7 @@ public function test_it_invokes_a_class_method_controller(): void
 
 ---
 
-# 144. Prueba de variádicos
+## 144. Prueba de variádicos
 
 ```php
 public function test_it_expands_variadic_arguments(): void
@@ -4317,7 +4316,7 @@ public function test_it_expands_variadic_arguments(): void
 
 ---
 
-# 145. Prueba de doble invocación
+## 145. Prueba de doble invocación
 
 ```php
 public function test_it_rejects_accidental_double_invocation(): void
@@ -4336,7 +4335,7 @@ public function test_it_rejects_accidental_double_invocation(): void
 
 ---
 
-# 146. Prueba de excepción original
+## 146. Prueba de excepción original
 
 ```php
 public function test_it_preserves_controller_exception_type(): void
@@ -4355,7 +4354,7 @@ public function test_it_preserves_controller_exception_type(): void
 
 ---
 
-# 147. Prueba de aislamiento FrankenPHP
+## 147. Prueba de aislamiento FrankenPHP
 
 ```php
 public function test_invocation_state_is_not_shared_between_requests(): void
@@ -4381,7 +4380,7 @@ public function test_invocation_state_is_not_shared_between_requests(): void
 
 ---
 
-# 148. Benchmarks
+## 148. Benchmarks
 
 Escenarios:
 
@@ -4427,7 +4426,7 @@ Métricas:
 
 ---
 
-# 149. Objetivos de rendimiento
+## 149. Objetivos de rendimiento
 
 Metas conceptuales:
 
@@ -4454,9 +4453,9 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-# 150. Decisiones arquitectónicas
+## 150. Decisiones arquitectónicas
 
-## ADR-CTRL-INV-001
+### ADR-CTRL-INV-001
 
 **Decisión:** El invoker tendrá una única responsabilidad: ejecutar el controlador.
 
@@ -4464,7 +4463,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-002
+### ADR-CTRL-INV-002
 
 **Decisión:** Toda invocación partirá de un `ResolvedController`.
 
@@ -4472,7 +4471,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-003
+### ADR-CTRL-INV-003
 
 **Decisión:** El invoker recibirá un `ResolvedParameterBag`.
 
@@ -4480,7 +4479,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-004
+### ADR-CTRL-INV-004
 
 **Decisión:** La invocación utilizará estrategias especializadas.
 
@@ -4488,7 +4487,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-005
+### ADR-CTRL-INV-005
 
 **Decisión:** Los argumentos posicionales serán el modo predeterminado.
 
@@ -4496,7 +4495,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-006
+### ADR-CTRL-INV-006
 
 **Decisión:** El orden de argumentos procederá del plan de parámetros.
 
@@ -4504,7 +4503,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-007
+### ADR-CTRL-INV-007
 
 **Decisión:** El invoker no realizará coerción.
 
@@ -4512,7 +4511,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-008
+### ADR-CTRL-INV-008
 
 **Decisión:** Los parámetros por referencia no estarán soportados en V1.
 
@@ -4520,7 +4519,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-009
+### ADR-CTRL-INV-009
 
 **Decisión:** El resultado se devolverá sin normalización.
 
@@ -4528,7 +4527,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-010
+### ADR-CTRL-INV-010
 
 **Decisión:** Las excepciones del controlador conservarán su tipo original.
 
@@ -4536,7 +4535,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-011
+### ADR-CTRL-INV-011
 
 **Decisión:** La doble invocación será rechazada por defecto.
 
@@ -4544,7 +4543,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-012
+### ADR-CTRL-INV-012
 
 **Decisión:** Los retries requerirán un permiso explícito.
 
@@ -4552,7 +4551,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-013
+### ADR-CTRL-INV-013
 
 **Decisión:** Los métodos deberán ser públicos.
 
@@ -4560,7 +4559,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-014
+### ADR-CTRL-INV-014
 
 **Decisión:** No se utilizará magic method dispatch salvo `__invoke`.
 
@@ -4568,7 +4567,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-015
+### ADR-CTRL-INV-015
 
 **Decisión:** Los planes compilados no almacenarán instancias.
 
@@ -4576,7 +4575,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-016
+### ADR-CTRL-INV-016
 
 **Decisión:** El invoker utilizará planes compilados cuando estén disponibles.
 
@@ -4584,7 +4583,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-017
+### ADR-CTRL-INV-017
 
 **Decisión:** La generación de invocadores especializados será opcional.
 
@@ -4592,7 +4591,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-018
+### ADR-CTRL-INV-018
 
 **Decisión:** Generators, streams y awaitables no serán consumidos automáticamente.
 
@@ -4600,7 +4599,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-019
+### ADR-CTRL-INV-019
 
 **Decisión:** El registry de estrategias se congelará en producción.
 
@@ -4608,7 +4607,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-## ADR-CTRL-INV-020
+### ADR-CTRL-INV-020
 
 **Decisión:** El invoker no conservará estado entre requests.
 
@@ -4616,7 +4615,7 @@ Los objetivos numéricos deberán establecerse después de benchmarks reales.
 
 ---
 
-# 151. Criterios de aceptación
+## 151. Criterios de aceptación
 
 El sistema se considerará correctamente implementado cuando:
 
@@ -4665,7 +4664,7 @@ El sistema se considerará correctamente implementado cuando:
 
 ---
 
-# 152. Conclusión
+## 152. Conclusión
 
 El `Controller Invoker` será el componente final encargado de realizar la ejecución física de un controlador en VoltStack.
 

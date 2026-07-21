@@ -1,8 +1,7 @@
-# 00_CONTROLLER_PROJECT_CONTEXT.md
-
 # VoltStack Controller System
 
-## Project Context
+
+### Project Context
 
 **Versión del documento:** 1.0  
 **Estado:** Draft  
@@ -11,7 +10,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El sistema de controladores de VoltStack constituye la capa responsable de orquestar la ejecución de la lógica de aplicación entre el sistema de enrutamiento (Routing), el Http Kernel, el Contenedor de Dependencias (IoC Container), el Runtime SPA y el sistema de respuestas del framework.
 
@@ -21,11 +20,11 @@ El objetivo es ofrecer la simplicidad de desarrollo característica de Laravel, 
 
 ---
 
-# 2. Filosofía
+## 2. Filosofía
 
 El sistema de controladores se diseña bajo cinco principios fundamentales.
 
-## Developer Experience First
+### Developer Experience First
 
 El desarrollador debe escribir la menor cantidad de código posible.
 
@@ -47,7 +46,7 @@ Toda la resolución de dependencias deberá ocurrir automáticamente.
 
 ---
 
-## Convention over Configuration
+### Convention over Configuration
 
 El framework deberá inferir el mayor número posible de comportamientos.
 
@@ -62,7 +61,7 @@ Por ejemplo:
 
 ---
 
-## Arquitectura desacoplada
+### Arquitectura desacoplada
 
 Ningún componente del sistema deberá depender directamente de otro.
 
@@ -88,7 +87,7 @@ Toda comunicación se realizará mediante contratos (Contracts) y servicios del 
 
 ---
 
-## Extensibilidad
+### Extensibilidad
 
 Cada parte del sistema deberá poder reemplazarse completamente.
 
@@ -118,7 +117,7 @@ Lo mismo aplica para:
 
 ---
 
-## Alto rendimiento
+### Alto rendimiento
 
 El sistema deberá minimizar Reflection durante Runtime.
 
@@ -133,7 +132,7 @@ Siempre que sea posible deberá utilizar:
 
 ---
 
-# 3. Objetivos
+## 3. Objetivos
 
 El sistema busca proporcionar:
 
@@ -152,7 +151,7 @@ Todo utilizando una única arquitectura.
 
 ---
 
-# 4. Alcance
+## 4. Alcance
 
 El módulo Controller será responsable de:
 
@@ -178,7 +177,7 @@ Estas responsabilidades pertenecen a otros módulos del framework.
 
 ---
 
-# 5. Integración con el Framework
+## 5. Integración con el Framework
 
 El sistema Controller interactúa con prácticamente todos los subsistemas de VoltStack.
 
@@ -215,11 +214,11 @@ Http Response
 
 ---
 
-# 6. Integración con Quantum Modules
+## 6. Integración con Quantum Modules
 
 El sistema Controller deberá integrarse de forma nativa con:
 
-## Routing
+### Routing
 
 - Route Metadata
 - Route Parameters
@@ -228,7 +227,7 @@ El sistema Controller deberá integrarse de forma nativa con:
 
 ---
 
-## Container
+### Container
 
 Resolución automática de:
 
@@ -241,7 +240,7 @@ Resolución automática de:
 
 ---
 
-## Http
+### Http
 
 Integración con:
 
@@ -254,7 +253,7 @@ Integración con:
 
 ---
 
-## Validation
+### Validation
 
 Integración automática con:
 
@@ -264,7 +263,7 @@ Integración automática con:
 
 ---
 
-## Authorization
+### Authorization
 
 Integración con:
 
@@ -275,7 +274,7 @@ Integración con:
 
 ---
 
-## Authentication
+### Authentication
 
 Resolución automática de:
 
@@ -285,7 +284,7 @@ User $user
 
 ---
 
-## Views
+### Views
 
 Soporte para:
 
@@ -303,13 +302,13 @@ Fragments
 
 ---
 
-## Events
+### Events
 
 Disparo automático de eventos durante el ciclo de vida.
 
 ---
 
-## Cache
+### Cache
 
 Metadata Cache
 
@@ -321,7 +320,7 @@ Controller Cache
 
 ---
 
-## Logging
+### Logging
 
 Registro automático de:
 
@@ -332,11 +331,11 @@ Registro automático de:
 
 ---
 
-# 7. Tipos de Controladores
+## 7. Tipos de Controladores
 
 VoltStack soportará múltiples especializaciones.
 
-## Standard Controller
+### Standard Controller
 
 ```php
 class UserController
@@ -346,7 +345,7 @@ class UserController
 
 ---
 
-## Invokable Controller
+### Invokable Controller
 
 ```php
 class DashboardController
@@ -359,7 +358,7 @@ class DashboardController
 
 ---
 
-## Resource Controller
+### Resource Controller
 
 ```php
 class UserController
@@ -378,7 +377,7 @@ class UserController
 
 ---
 
-## Action Controller
+### Action Controller
 
 ```php
 class CreateUserAction
@@ -391,71 +390,71 @@ class CreateUserAction
 
 ---
 
-## API Controller
+### API Controller
 
 Especializado en respuestas JSON.
 
 ---
 
-## Page Controller
+### Page Controller
 
 Especializado para Volt Runtime.
 
 ---
 
-## Component Controller
+### Component Controller
 
 Especializado para renderizar componentes.
 
 ---
 
-## SPA Controller
+### SPA Controller
 
 Especializado para navegación reactiva.
 
 ---
 
-## Stream Controller
+### Stream Controller
 
 Especializado para Streaming HTTP.
 
 ---
 
-# 8. Principios de Diseño
+## 8. Principios de Diseño
 
 Todos los controladores deberán cumplir los siguientes principios.
 
-## Stateless
+### Stateless
 
 No deberán mantener estado interno.
 
 ---
 
-## Request Scoped
+### Request Scoped
 
 Cada petición genera una instancia nueva.
 
 ---
 
-## Dependency Injection
+### Dependency Injection
 
 Toda dependencia será inyectada automáticamente.
 
 ---
 
-## Testable
+### Testable
 
 No deberán depender de estado global.
 
 ---
 
-## Replaceable
+### Replaceable
 
 Todo controlador puede ser sustituido mediante contratos.
 
 ---
 
-# 9. Integración con el Runtime SPA
+## 9. Integración con el Runtime SPA
 
 El Controller System será completamente consciente del Runtime Reactivo.
 
@@ -481,7 +480,7 @@ El Dispatcher seleccionará automáticamente el tipo de respuesta apropiado.
 
 ---
 
-# 10. Compatibilidad
+## 10. Compatibilidad
 
 El sistema será compatible con:
 
@@ -497,7 +496,7 @@ El sistema será compatible con:
 
 ---
 
-# 11. Objetivos de Rendimiento
+## 11. Objetivos de Rendimiento
 
 El sistema deberá minimizar:
 
@@ -517,7 +516,7 @@ Mediante:
 
 ---
 
-# 12. Extensibilidad
+## 12. Extensibilidad
 
 Todo el sistema será extensible mediante contratos.
 
@@ -536,7 +535,7 @@ Sin modificar el núcleo del framework.
 
 ---
 
-# 13. Relación con otros módulos
+## 13. Relación con otros módulos
 
 El sistema Controller depende de:
 
@@ -562,9 +561,9 @@ Y será utilizado por:
 
 ---
 
-# 14. Roadmap
+## 14. Roadmap
 
-## V1
+### V1
 
 - Standard Controllers
 - Invokable Controllers
@@ -575,7 +574,7 @@ Y será utilizado por:
 
 ---
 
-## V2
+### V2
 
 - Attributes
 - Action Controllers
@@ -585,7 +584,7 @@ Y será utilizado por:
 
 ---
 
-## V3
+### V3
 
 - Page Controllers
 - Component Controllers
@@ -594,7 +593,7 @@ Y será utilizado por:
 
 ---
 
-## V4
+### V4
 
 - Async Controllers
 - Fiber Controllers
@@ -604,7 +603,7 @@ Y será utilizado por:
 
 ---
 
-# 15. Conclusión
+## 15. Conclusión
 
 El sistema de controladores de VoltStack no será únicamente un mecanismo para ejecutar métodos asociados a una ruta, sino una capa de orquestación desacoplada y altamente extensible que actuará como puente entre el Router, el Kernel, el Contenedor de Dependencias, el Runtime SPA y el sistema de respuestas del framework.
 

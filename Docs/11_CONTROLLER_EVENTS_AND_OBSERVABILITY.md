@@ -1,6 +1,5 @@
-# CONTROLLER_EVENTS_AND_OBSERVABILITY.md
+# Sistema de eventos y observabilidad de controladores en VoltStack
 
-## Sistema de eventos y observabilidad de controladores en VoltStack
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Controller Events and Observability System** es el subsistema responsable de observar, registrar y exponer el comportamiento del pipeline completo de controladores de VoltStack.
 
@@ -40,7 +39,7 @@ Su función será describir qué ocurrió, cuándo ocurrió y cuánto costó.
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Proporcionar una infraestructura transversal de eventos, métricas, tracing, logging y profiling para toda ejecución de controlador.
 
@@ -58,7 +57,7 @@ ControllerExecution
 
 ---
 
-# 3. Problema arquitectónico
+## 3. Problema arquitectónico
 
 Sin una capa unificada de observabilidad, cada módulo podría registrar información de manera diferente.
 
@@ -78,7 +77,7 @@ El sistema deberá definir una única convención transversal.
 
 ---
 
-# 4. Principios arquitectónicos
+## 4. Principios arquitectónicos
 
 El sistema seguirá estos principios:
 
@@ -98,7 +97,7 @@ El sistema seguirá estos principios:
 
 ---
 
-# 5. No responsabilidades
+## 5. No responsabilidades
 
 El sistema no deberá:
 
@@ -117,7 +116,7 @@ VoltStack deberá generar señales y delegar su exportación.
 
 ---
 
-# 6. Posición dentro del pipeline
+## 6. Posición dentro del pipeline
 
 ```text
 ControllerExecutionManager
@@ -137,7 +136,7 @@ Todos los motores del pipeline podrán emitir señales mediante contratos compar
 
 ---
 
-# 7. Arquitectura general
+## 7. Arquitectura general
 
 ```text
 Execution Signal
@@ -164,7 +163,7 @@ ObservabilityPipeline
 
 ---
 
-# 8. Componentes principales
+## 8. Componentes principales
 
 ```text
 ControllerObservabilityManager
@@ -188,7 +187,7 @@ CompiledObservabilityPlan
 
 ---
 
-# 9. ControllerObservabilityManager
+## 9. ControllerObservabilityManager
 
 Punto de entrada principal.
 
@@ -217,7 +216,7 @@ final class ControllerObservabilityManager
 
 ---
 
-# 10. Responsabilidades del Manager
+## 10. Responsabilidades del Manager
 
 El Manager deberá:
 
@@ -236,7 +235,7 @@ El Manager deberá:
 
 ---
 
-# 11. ControllerObservabilitySignal
+## 11. ControllerObservabilitySignal
 
 Contrato base de señal.
 
@@ -255,7 +254,7 @@ interface ControllerObservabilitySignal
 
 ---
 
-# 12. ObservabilitySignalCategory
+## 12. ObservabilitySignalCategory
 
 ```php
 enum ObservabilitySignalCategory: string
@@ -278,7 +277,7 @@ enum ObservabilitySignalCategory: string
 
 ---
 
-# 13. ObservabilityContext
+## 13. ObservabilityContext
 
 Representa el contexto común de todas las señales.
 
@@ -299,7 +298,7 @@ final readonly class ObservabilityContext
 
 ---
 
-# 14. CorrelationContext
+## 14. CorrelationContext
 
 Contiene identificadores relacionados.
 
@@ -321,7 +320,7 @@ final readonly class CorrelationContext
 
 ---
 
-# 15. Identificadores
+## 15. Identificadores
 
 VoltStack distinguirá:
 
@@ -340,7 +339,7 @@ No deberán utilizarse como equivalentes.
 
 ---
 
-# 16. Request ID
+## 16. Request ID
 
 Identifica la petición o mensaje de entrada.
 
@@ -356,7 +355,7 @@ Los IDs externos deberán validarse antes de reutilizarlos.
 
 ---
 
-# 17. Execution ID
+## 17. Execution ID
 
 Identifica una ejecución concreta del lifecycle.
 
@@ -369,7 +368,7 @@ Un mismo Request podrá originar:
 
 ---
 
-# 18. Trace ID
+## 18. Trace ID
 
 Agrupa operaciones causales distribuidas.
 
@@ -385,7 +384,7 @@ Deberá propagarse a:
 
 ---
 
-# 19. Span ID
+## 19. Span ID
 
 Identifica una operación dentro del trace.
 
@@ -393,7 +392,7 @@ Cada fase relevante podrá tener su propio span.
 
 ---
 
-# 20. Correlation ID validation
+## 20. Correlation ID validation
 
 El sistema deberá impedir:
 
@@ -405,7 +404,7 @@ El sistema deberá impedir:
 
 ---
 
-# 21. ObservabilityPolicy
+## 21. ObservabilityPolicy
 
 ```php
 final readonly class ObservabilityPolicy
@@ -428,7 +427,7 @@ final readonly class ObservabilityPolicy
 
 ---
 
-# 22. Policy resolution
+## 22. Policy resolution
 
 La política podrá resolverse según:
 
@@ -443,7 +442,7 @@ La política podrá resolverse según:
 
 ---
 
-# 23. Metadata keys
+## 23. Metadata keys
 
 ```text
 observability.enabled
@@ -461,7 +460,7 @@ observability.exporters
 
 ---
 
-# 24. Attributes potenciales
+## 24. Attributes potenciales
 
 ```php
 #[Observed]
@@ -478,7 +477,7 @@ El módulo consumirá metadata ya resuelta.
 
 ---
 
-# 25. Catálogo oficial de eventos
+## 25. Catálogo oficial de eventos
 
 Los eventos oficiales deberán utilizar nombres estables y versionables.
 
@@ -502,7 +501,7 @@ controllers.execution.completed
 
 ---
 
-# 26. Eventos de lifecycle
+## 26. Eventos de lifecycle
 
 ```text
 controllers.execution.created
@@ -515,7 +514,7 @@ controllers.execution.terminated
 
 ---
 
-# 27. Eventos de resolución
+## 27. Eventos de resolución
 
 ```text
 controllers.route.prepared
@@ -530,7 +529,7 @@ controllers.interceptors.resolved
 
 ---
 
-# 28. Eventos de interceptores
+## 28. Eventos de interceptores
 
 ```text
 controllers.interceptors.pipeline_started
@@ -543,7 +542,7 @@ controllers.interceptors.pipeline_failed
 
 ---
 
-# 29. Eventos de invocación
+## 29. Eventos de invocación
 
 ```text
 controllers.invocation.started
@@ -554,7 +553,7 @@ controllers.invocation.skipped
 
 ---
 
-# 30. Eventos de transformación
+## 30. Eventos de transformación
 
 ```text
 controllers.transformation.started
@@ -565,7 +564,7 @@ controllers.transformation.failed
 
 ---
 
-# 31. Eventos de transporte
+## 31. Eventos de transporte
 
 ```text
 controllers.transport.started
@@ -580,7 +579,7 @@ controllers.transport.client_disconnected
 
 ---
 
-# 32. Eventos de short-circuit
+## 32. Eventos de short-circuit
 
 ```text
 controllers.execution.short_circuit_detected
@@ -590,7 +589,7 @@ controllers.execution.short_circuit_completed
 
 ---
 
-# 33. Eventos de cancelación
+## 33. Eventos de cancelación
 
 ```text
 controllers.execution.cancellation_requested
@@ -601,7 +600,7 @@ controllers.execution.cancellation_ignored
 
 ---
 
-# 34. Eventos de excepciones
+## 34. Eventos de excepciones
 
 ```text
 controllers.exception.captured
@@ -615,7 +614,7 @@ controllers.exception.failed
 
 ---
 
-# 35. Eventos de recursos
+## 35. Eventos de recursos
 
 ```text
 controllers.resource.acquired
@@ -627,7 +626,7 @@ controllers.resource.leak_detected
 
 ---
 
-# 36. Eventos de cleanup
+## 36. Eventos de cleanup
 
 ```text
 controllers.cleanup.started
@@ -638,7 +637,7 @@ controllers.cleanup.completed
 
 ---
 
-# 37. Eventos de Worker
+## 37. Eventos de Worker
 
 ```text
 controllers.worker.health_evaluated
@@ -650,7 +649,7 @@ controllers.worker.termination_requested
 
 ---
 
-# 38. Eventos de profiling
+## 38. Eventos de profiling
 
 ```text
 controllers.profile.started
@@ -661,7 +660,7 @@ controllers.profile.threshold_exceeded
 
 ---
 
-# 39. Contrato de eventos
+## 39. Contrato de eventos
 
 ```php
 interface ControllerEventInterface
@@ -680,7 +679,7 @@ interface ControllerEventInterface
 
 ---
 
-# 40. Event versioning
+## 40. Event versioning
 
 Los eventos deberán incluir versión.
 
@@ -694,7 +693,7 @@ La versión cambiará cuando exista una modificación incompatible del payload.
 
 ---
 
-# 41. Payload base
+## 41. Payload base
 
 Todos los eventos podrán incluir:
 
@@ -715,7 +714,7 @@ controller
 
 ---
 
-# 42. Payload mínimo
+## 42. Payload mínimo
 
 Los eventos de alta frecuencia deberán utilizar payloads pequeños.
 
@@ -731,7 +730,7 @@ No se deberá serializar automáticamente:
 
 ---
 
-# 43. Event dispatcher
+## 43. Event dispatcher
 
 ```php
 interface ControllerEventDispatcherInterface
@@ -744,7 +743,7 @@ interface ControllerEventDispatcherInterface
 
 ---
 
-# 44. Event listeners
+## 44. Event listeners
 
 Los listeners se clasificarán como:
 
@@ -762,7 +761,7 @@ La V1 podrá implementar sincronía y buffering local.
 
 ---
 
-# 45. Listeners síncronos
+## 45. Listeners síncronos
 
 Solo deberán usarse cuando:
 
@@ -773,7 +772,7 @@ Solo deberán usarse cuando:
 
 ---
 
-# 46. Listeners diferidos
+## 46. Listeners diferidos
 
 Podrán ejecutarse al finalizar la petición.
 
@@ -786,7 +785,7 @@ Ejemplos:
 
 ---
 
-# 47. Listener failure policy
+## 47. Listener failure policy
 
 Un listener de observabilidad que falle:
 
@@ -798,7 +797,7 @@ Un listener de observabilidad que falle:
 
 ---
 
-# 48. Event ordering
+## 48. Event ordering
 
 Los eventos de una misma ejecución deberán conservar orden lógico.
 
@@ -815,7 +814,7 @@ En exportación asíncrona podrán llegar fuera de orden, por lo que deberán in
 
 ---
 
-# 49. EventSequence
+## 49. EventSequence
 
 ```php
 final class EventSequence
@@ -832,7 +831,7 @@ sequence
 
 ---
 
-# 50. Métricas
+## 50. Métricas
 
 VoltStack deberá soportar:
 
@@ -845,7 +844,7 @@ VoltStack deberá soportar:
 
 ---
 
-# 51. Metric contract
+## 51. Metric contract
 
 ```php
 interface ControllerMetricRecorderInterface
@@ -866,7 +865,7 @@ interface ControllerMetricRecorderInterface
 
 ---
 
-# 52. Convención de métricas
+## 52. Convención de métricas
 
 ```text
 voltstack.controllers.<metric>
@@ -883,7 +882,7 @@ voltstack.controllers.cleanup.failures
 
 ---
 
-# 53. Métricas principales
+## 53. Métricas principales
 
 ```text
 voltstack.controllers.execution.total
@@ -897,7 +896,7 @@ voltstack.controllers.execution.short_circuited
 
 ---
 
-# 54. Métricas de resolución
+## 54. Métricas de resolución
 
 ```text
 voltstack.controllers.resolution.controller.duration
@@ -910,7 +909,7 @@ voltstack.controllers.resolution.cache_misses
 
 ---
 
-# 55. Métricas de invocación
+## 55. Métricas de invocación
 
 ```text
 voltstack.controllers.invocation.total
@@ -922,7 +921,7 @@ voltstack.controllers.invocation.retry
 
 ---
 
-# 56. Métricas de transformación
+## 56. Métricas de transformación
 
 ```text
 voltstack.controllers.transformation.total
@@ -935,7 +934,7 @@ voltstack.controllers.transformation.dynamic_plan
 
 ---
 
-# 57. Métricas de transporte
+## 57. Métricas de transporte
 
 ```text
 voltstack.controllers.transport.total
@@ -948,7 +947,7 @@ voltstack.controllers.transport.streaming
 
 ---
 
-# 58. Métricas de recursos
+## 58. Métricas de recursos
 
 ```text
 voltstack.controllers.resources.acquired
@@ -960,7 +959,7 @@ voltstack.controllers.resources.release_failed
 
 ---
 
-# 59. Métricas de cleanup
+## 59. Métricas de cleanup
 
 ```text
 voltstack.controllers.cleanup.duration
@@ -970,7 +969,7 @@ voltstack.controllers.cleanup.partial
 
 ---
 
-# 60. Métricas de Workers
+## 60. Métricas de Workers
 
 ```text
 voltstack.controllers.worker.reused
@@ -982,7 +981,7 @@ voltstack.controllers.worker.memory_after_execution
 
 ---
 
-# 61. Cardinalidad
+## 61. Cardinalidad
 
 El sistema deberá controlar la cardinalidad de labels.
 
@@ -998,7 +997,7 @@ No deberán utilizarse como labels no acotados:
 
 ---
 
-# 62. Labels recomendados
+## 62. Labels recomendados
 
 ```text
 route
@@ -1018,7 +1017,7 @@ Siempre que sus valores sean acotados.
 
 ---
 
-# 63. CardinalityGuard
+## 63. CardinalityGuard
 
 ```php
 interface CardinalityGuardInterface
@@ -1032,7 +1031,7 @@ interface CardinalityGuardInterface
 
 ---
 
-# 64. Tracing
+## 64. Tracing
 
 Cada ejecución tendrá un span raíz:
 
@@ -1042,7 +1041,7 @@ voltstack.controller.execution
 
 ---
 
-# 65. Span raíz
+## 65. Span raíz
 
 Atributos recomendados:
 
@@ -1061,7 +1060,7 @@ No deberá incluir datos sensibles.
 
 ---
 
-# 66. Spans por fase
+## 66. Spans por fase
 
 ```text
 voltstack.controller.resolve
@@ -1077,7 +1076,7 @@ voltstack.controller.exception
 
 ---
 
-# 67. Span contract
+## 67. Span contract
 
 ```php
 interface ControllerTraceRecorderInterface
@@ -1097,7 +1096,7 @@ interface ControllerTraceRecorderInterface
 
 ---
 
-# 68. SpanStatus
+## 68. SpanStatus
 
 ```php
 enum SpanStatus: string
@@ -1111,7 +1110,7 @@ enum SpanStatus: string
 
 ---
 
-# 69. Span events
+## 69. Span events
 
 Dentro de un span podrán registrarse:
 
@@ -1127,7 +1126,7 @@ exception
 
 ---
 
-# 70. Exception recording
+## 70. Exception recording
 
 Las excepciones podrán registrarse en spans con:
 
@@ -1142,7 +1141,7 @@ El mensaje podrá sanitizarse según política.
 
 ---
 
-# 71. Trace propagation
+## 71. Trace propagation
 
 La propagación deberá soportar:
 
@@ -1157,7 +1156,7 @@ La propagación deberá soportar:
 
 ---
 
-# 72. OpenTelemetry
+## 72. OpenTelemetry
 
 VoltStack deberá proporcionar una integración opcional con OpenTelemetry.
 
@@ -1178,7 +1177,7 @@ La arquitectura interna no dependerá directamente del SDK.
 
 ---
 
-# 73. OpenTelemetry adapter
+## 73. OpenTelemetry adapter
 
 ```php
 interface OpenTelemetryControllerAdapterInterface
@@ -1199,7 +1198,7 @@ interface OpenTelemetryControllerAdapterInterface
 
 ---
 
-# 74. Logging integration
+## 74. Logging integration
 
 El sistema deberá enriquecer logs con contexto.
 
@@ -1215,7 +1214,7 @@ interface ControllerLogContextEnricherInterface
 
 ---
 
-# 75. Log context estándar
+## 75. Log context estándar
 
 ```text
 request_id
@@ -1232,7 +1231,7 @@ tenant_reference
 
 ---
 
-# 76. Structured logging
+## 76. Structured logging
 
 Los logs oficiales deberán ser estructurados.
 
@@ -1251,7 +1250,7 @@ Ejemplo conceptual:
 
 ---
 
-# 77. Logging levels
+## 77. Logging levels
 
 ```text
 Debug:
@@ -1278,7 +1277,7 @@ Emergency:
 
 ---
 
-# 78. Logging duplication
+## 78. Logging duplication
 
 El sistema deberá evitar registrar la misma excepción múltiples veces en:
 
@@ -1296,7 +1295,7 @@ exception.logged
 
 ---
 
-# 79. Timeline
+## 79. Timeline
 
 El timeline representa el orden detallado de eventos de una ejecución.
 
@@ -1320,7 +1319,7 @@ interface ControllerTimelineRecorderInterface
 
 ---
 
-# 80. Timeline vs tracing
+## 80. Timeline vs tracing
 
 El timeline es una representación local y detallada de la ejecución.
 
@@ -1330,7 +1329,7 @@ Ambos pueden compartir datos, pero no son equivalentes.
 
 ---
 
-# 81. Timeline estándar
+## 81. Timeline estándar
 
 ```text
 0.000 execution.created
@@ -1348,7 +1347,7 @@ Ambos pueden compartir datos, pero no son equivalentes.
 
 ---
 
-# 82. Timeline production policy
+## 82. Timeline production policy
 
 En producción podrá:
 
@@ -1360,7 +1359,7 @@ En producción podrá:
 
 ---
 
-# 83. Profiling
+## 83. Profiling
 
 El profiler medirá consumo de recursos.
 
@@ -1384,7 +1383,7 @@ interface ControllerProfilerInterface
 
 ---
 
-# 84. ProfileSnapshot
+## 84. ProfileSnapshot
 
 Podrá registrar:
 
@@ -1401,7 +1400,7 @@ Podrá registrar:
 
 ---
 
-# 85. ControllerProfile
+## 85. ControllerProfile
 
 ```php
 final readonly class ControllerProfile
@@ -1421,7 +1420,7 @@ final readonly class ControllerProfile
 
 ---
 
-# 86. Profiler modes
+## 86. Profiler modes
 
 ```php
 enum ProfilingMode: string
@@ -1436,7 +1435,7 @@ enum ProfilingMode: string
 
 ---
 
-# 87. Slow execution detection
+## 87. Slow execution detection
 
 ```php
 final readonly class SlowExecutionPolicy
@@ -1453,7 +1452,7 @@ final readonly class SlowExecutionPolicy
 
 ---
 
-# 88. Slow events
+## 88. Slow events
 
 ```text
 controllers.execution.slow
@@ -1464,7 +1463,7 @@ controllers.transport.slow
 
 ---
 
-# 89. Thresholds
+## 89. Thresholds
 
 Los thresholds podrán definirse por:
 
@@ -1477,7 +1476,7 @@ Los thresholds podrán definirse por:
 
 ---
 
-# 90. Diagnostic collector
+## 90. Diagnostic collector
 
 ```php
 interface ControllerDiagnosticCollectorInterface
@@ -1490,7 +1489,7 @@ interface ControllerDiagnosticCollectorInterface
 
 ---
 
-# 91. ControllerDiagnosticReport
+## 91. ControllerDiagnosticReport
 
 ```php
 final readonly class ControllerDiagnosticReport
@@ -1509,7 +1508,7 @@ final readonly class ControllerDiagnosticReport
 
 ---
 
-# 92. Diagnósticos posibles
+## 92. Diagnósticos posibles
 
 * doble transición;
 * fase inesperadamente lenta;
@@ -1525,7 +1524,7 @@ final readonly class ControllerDiagnosticReport
 
 ---
 
-# 93. Observability overhead
+## 93. Observability overhead
 
 El sistema deberá medir su propio coste.
 
@@ -1544,7 +1543,7 @@ voltstack.controllers.observability.export_failures
 
 ---
 
-# 94. Sampling
+## 94. Sampling
 
 El sampling decide qué señales conservar.
 
@@ -1560,7 +1559,7 @@ interface SamplingPolicyInterface
 
 ---
 
-# 95. Sampling strategies
+## 95. Sampling strategies
 
 ```text
 AlwaysSample
@@ -1576,13 +1575,13 @@ AdaptiveSample
 
 ---
 
-# 96. Error-biased sampling
+## 96. Error-biased sampling
 
 Los errores deberán conservarse con mayor probabilidad que ejecuciones exitosas.
 
 ---
 
-# 97. Latency-biased sampling
+## 97. Latency-biased sampling
 
 Las ejecuciones lentas podrán conservar traces completos aunque la ejecución normal no haya sido seleccionada inicialmente.
 
@@ -1590,7 +1589,7 @@ Esto requiere buffering temporal hasta completion.
 
 ---
 
-# 98. Tail sampling
+## 98. Tail sampling
 
 El sistema podrá implementar tail sampling básico:
 
@@ -1606,13 +1605,13 @@ Execution completes
 
 ---
 
-# 99. Sampling consistency
+## 99. Sampling consistency
 
 Una decisión de sampling deberá propagarse a subspans para evitar traces fragmentados.
 
 ---
 
-# 100. Sanitización
+## 100. Sanitización
 
 Toda señal deberá pasar por sanitización.
 
@@ -1628,7 +1627,7 @@ interface ObservabilitySanitizerInterface
 
 ---
 
-# 101. Sanitizers iniciales
+## 101. Sanitizers iniciales
 
 ```text
 HeaderObservabilitySanitizer
@@ -1642,7 +1641,7 @@ CustomAttributeSanitizer
 
 ---
 
-# 102. Datos sensibles
+## 102. Datos sensibles
 
 No deberán registrarse automáticamente:
 
@@ -1659,7 +1658,7 @@ No deberán registrarse automáticamente:
 
 ---
 
-# 103. Controller arguments
+## 103. Controller arguments
 
 Por defecto solo podrá registrarse:
 
@@ -1672,7 +1671,7 @@ No sus valores.
 
 ---
 
-# 104. Result observability
+## 104. Result observability
 
 Del resultado podrá registrarse:
 
@@ -1687,7 +1686,7 @@ No el contenido.
 
 ---
 
-# 105. Tenant and user data
+## 105. Tenant and user data
 
 Podrán registrarse identificadores opacos o hashes controlados.
 
@@ -1695,7 +1694,7 @@ No deberán utilizarse como labels de alta cardinalidad.
 
 ---
 
-# 106. Observability Registry
+## 106. Observability Registry
 
 ```php
 interface ControllerObservabilityRegistryInterface
@@ -1718,7 +1717,7 @@ interface ControllerObservabilityRegistryInterface
 
 ---
 
-# 107. Exporters
+## 107. Exporters
 
 ```text
 LogExporter
@@ -1731,7 +1730,7 @@ CompositeExporter
 
 ---
 
-# 108. Exporter contract
+## 108. Exporter contract
 
 ```php
 interface ObservabilityExporterInterface
@@ -1751,7 +1750,7 @@ interface ObservabilityExporterInterface
 
 ---
 
-# 109. Buffered exporters
+## 109. Buffered exporters
 
 Los exporters podrán acumular señales request-scoped y enviarlas durante finalización.
 
@@ -1759,7 +1758,7 @@ Nunca deberán conservar referencias al Request después del reset.
 
 ---
 
-# 110. Backpressure de observabilidad
+## 110. Backpressure de observabilidad
 
 Si un exporter no puede procesar señales:
 
@@ -1770,7 +1769,7 @@ Si un exporter no puede procesar señales:
 
 ---
 
-# 111. SignalPriority
+## 111. SignalPriority
 
 ```php
 enum SignalPriority: int
@@ -1785,7 +1784,7 @@ enum SignalPriority: int
 
 ---
 
-# 112. Drop policy
+## 112. Drop policy
 
 Ante saturación se descartarán primero:
 
@@ -1799,7 +1798,7 @@ Nunca se descartarán silenciosamente errores críticos sin registrar al menos u
 
 ---
 
-# 113. Compilación
+## 113. Compilación
 
 El sistema podrá compilar la política de observabilidad aplicable a cada ruta.
 
@@ -1826,7 +1825,7 @@ final readonly class CompiledControllerObservabilityPlan
 
 ---
 
-# 114. ObservabilityCompiler
+## 114. ObservabilityCompiler
 
 ```php
 interface ControllerObservabilityCompilerInterface
@@ -1837,7 +1836,7 @@ interface ControllerObservabilityCompilerInterface
 
 ---
 
-# 115. Compiler inputs
+## 115. Compiler inputs
 
 * configuración;
 * metadata;
@@ -1851,7 +1850,7 @@ interface ControllerObservabilityCompilerInterface
 
 ---
 
-# 116. Cache multinivel
+## 116. Cache multinivel
 
 ```text
 L1 Execution signals
@@ -1862,7 +1861,7 @@ L4 Compiled plans
 
 ---
 
-# 117. L1 Execution
+## 117. L1 Execution
 
 Contendrá:
 
@@ -1875,7 +1874,7 @@ Contendrá:
 
 ---
 
-# 118. L2 Request
+## 118. L2 Request
 
 Podrá contener:
 
@@ -1886,7 +1885,7 @@ Podrá contener:
 
 ---
 
-# 119. L3 Worker
+## 119. L3 Worker
 
 Podrá almacenar:
 
@@ -1898,7 +1897,7 @@ Podrá almacenar:
 
 ---
 
-# 120. L4 Compiled
+## 120. L4 Compiled
 
 Artefactos PHP para:
 
@@ -1911,7 +1910,7 @@ Artefactos PHP para:
 
 ---
 
-# 121. Worker safety
+## 121. Worker safety
 
 En Workers persistentes deberán resetearse:
 
@@ -1926,7 +1925,7 @@ En Workers persistentes deberán resetearse:
 
 ---
 
-# 122. Observability resetter
+## 122. Observability resetter
 
 ```php
 interface ControllerObservabilityResetterInterface
@@ -1937,7 +1936,7 @@ interface ControllerObservabilityResetterInterface
 
 ---
 
-# 123. Leaks de contexto
+## 123. Leaks de contexto
 
 El sistema deberá detectar:
 
@@ -1950,7 +1949,7 @@ El sistema deberá detectar:
 
 ---
 
-# 124. Integración con Lifecycle
+## 124. Integración con Lifecycle
 
 El lifecycle será la principal fuente de señales.
 
@@ -1965,7 +1964,7 @@ La instrumentación deberá concentrarse en phase handlers y state transitions.
 
 ---
 
-# 125. Integración con Exceptions
+## 125. Integración con Exceptions
 
 El sistema de excepciones deberá:
 
@@ -1978,7 +1977,7 @@ El sistema de excepciones deberá:
 
 ---
 
-# 126. Integración con Transport
+## 126. Integración con Transport
 
 El transporte deberá registrar:
 
@@ -1995,7 +1994,7 @@ No deberá registrar cuerpos.
 
 ---
 
-# 127. Integración con Metadata Engine
+## 127. Integración con Metadata Engine
 
 Metadata podrá definir:
 
@@ -2010,7 +2009,7 @@ La observabilidad no leerá atributos mediante reflexión.
 
 ---
 
-# 128. Integración con Routing
+## 128. Integración con Routing
 
 La ruta deberá proporcionar nombres estables para métricas.
 
@@ -2028,7 +2027,7 @@ No:
 
 ---
 
-# 129. Integración con subrequests
+## 129. Integración con subrequests
 
 Los subrequests deberán:
 
@@ -2040,7 +2039,7 @@ Los subrequests deberán:
 
 ---
 
-# 130. Integración con SPA
+## 130. Integración con SPA
 
 Podrán propagarse:
 
@@ -2055,7 +2054,7 @@ Nunca deberán exponerse detalles internos sensibles.
 
 ---
 
-# 131. Integración con streaming
+## 131. Integración con streaming
 
 Para streams largos deberán registrarse:
 
@@ -2069,7 +2068,7 @@ Para streams largos deberán registrarse:
 
 ---
 
-# 132. Time to first byte
+## 132. Time to first byte
 
 Métrica:
 
@@ -2079,7 +2078,7 @@ voltstack.controllers.transport.time_to_first_byte
 
 ---
 
-# 133. Long-lived streams
+## 133. Long-lived streams
 
 En streams largos, la telemetría no deberá esperar indefinidamente al cierre para exportar toda señal.
 
@@ -2087,7 +2086,7 @@ Podrán emitirse snapshots periódicos limitados.
 
 ---
 
-# 134. Health checks
+## 134. Health checks
 
 El sistema podrá exponer diagnóstico interno sobre:
 
@@ -2101,7 +2100,7 @@ El sistema podrá exponer diagnóstico interno sobre:
 
 ---
 
-# 135. Testing
+## 135. Testing
 
 El módulo incluirá:
 
@@ -2118,7 +2117,7 @@ ControllerObservabilityAssertions
 
 ---
 
-# 136. Assertions
+## 136. Assertions
 
 ```php
 ControllerObservabilityAssert::eventDispatched(
@@ -2140,7 +2139,7 @@ ControllerObservabilityAssert::traceCompleted();
 
 ---
 
-# 137. Casos de prueba
+## 137. Casos de prueba
 
 * ejecución normal;
 * ejecución fallida;
@@ -2161,7 +2160,7 @@ ControllerObservabilityAssert::traceCompleted();
 
 ---
 
-# 138. Benchmarks
+## 138. Benchmarks
 
 ```text
 Observability disabled
@@ -2178,7 +2177,7 @@ Streaming execution
 
 ---
 
-# 139. Performance targets
+## 139. Performance targets
 
 Los objetivos deberán definirse mediante benchmarks.
 
@@ -2195,7 +2194,7 @@ La arquitectura deberá minimizar:
 
 ---
 
-# 140. No-op implementations
+## 140. No-op implementations
 
 Cuando una capacidad esté deshabilitada se utilizarán implementaciones no-op.
 
@@ -2211,7 +2210,7 @@ Esto evita condicionales repetidos en todo el pipeline.
 
 ---
 
-# 141. Lazy attributes
+## 141. Lazy attributes
 
 Los atributos costosos podrán calcularse mediante closures diferidas.
 
@@ -2226,7 +2225,7 @@ Solo deberán evaluarse si la señal será exportada.
 
 ---
 
-# 142. Estructura de directorios
+## 142. Estructura de directorios
 
 ```text
 src/
@@ -2355,7 +2354,7 @@ src/
 
 ---
 
-# 143. Configuración
+## 143. Configuración
 
 ```php
 // config/controller_observability.php
@@ -2430,7 +2429,7 @@ return [
 
 ---
 
-# 144. Service Provider
+## 144. Service Provider
 
 ```php
 final class ControllerObservabilityServiceProvider
@@ -2469,7 +2468,7 @@ final class ControllerObservabilityServiceProvider
 
 ---
 
-# 145. Integración con State Machine
+## 145. Integración con State Machine
 
 Cada transición podrá producir una señal.
 
@@ -2489,7 +2488,7 @@ La máquina de estados seguirá siendo la fuente de verdad funcional.
 
 ---
 
-# 146. Integración con phase handlers
+## 146. Integración con phase handlers
 
 Cada phase handler deberá instrumentar:
 
@@ -2505,7 +2504,7 @@ No deberá repetir instrumentación interna de los engines delegados cuando esto
 
 ---
 
-# 147. Jerarquía de spans
+## 147. Jerarquía de spans
 
 ```text
 controller.execution
@@ -2523,7 +2522,7 @@ controller.execution
 
 ---
 
-# 148. Evitar duplicación
+## 148. Evitar duplicación
 
 Cada operación deberá tener un propietario de instrumentación.
 
@@ -2542,7 +2541,7 @@ Transport:
 
 ---
 
-# 149. ADR-001
+## 149. ADR-001
 
 **Los eventos, métricas, traces, logs y perfiles serán señales diferentes.**
 
@@ -2550,13 +2549,13 @@ No deberán tratarse como representaciones equivalentes.
 
 ---
 
-# 150. ADR-002
+## 150. ADR-002
 
 **El lifecycle será la fuente principal de señales de ejecución.**
 
 ---
 
-# 151. ADR-003
+## 151. ADR-003
 
 **Los eventos describirán hechos ya ocurridos.**
 
@@ -2564,109 +2563,109 @@ No se utilizarán para decidir lógica funcional del controlador.
 
 ---
 
-# 152. ADR-004
+## 152. ADR-004
 
 **La instrumentación no deberá modificar respuestas ni excepciones.**
 
 ---
 
-# 153. ADR-005
+## 153. ADR-005
 
 **Los eventos oficiales tendrán nombres y versiones estables.**
 
 ---
 
-# 154. ADR-006
+## 154. ADR-006
 
 **Las métricas utilizarán labels de cardinalidad controlada.**
 
 ---
 
-# 155. ADR-007
+## 155. ADR-007
 
 **Los IDs de ejecución no se utilizarán como labels de métricas.**
 
 ---
 
-# 156. ADR-008
+## 156. ADR-008
 
 **Cada ejecución tendrá un Trace ID y un Execution ID diferenciados.**
 
 ---
 
-# 157. ADR-009
+## 157. ADR-009
 
 **Los subrequests crearán spans y ejecuciones hijas.**
 
 ---
 
-# 158. ADR-010
+## 158. ADR-010
 
 **La información sensible será eliminada antes de exportar.**
 
 ---
 
-# 159. ADR-011
+## 159. ADR-011
 
 **OpenTelemetry será una integración, no una dependencia del núcleo.**
 
 ---
 
-# 160. ADR-012
+## 160. ADR-012
 
 **Los exporters no críticos no deberán bloquear la respuesta indefinidamente.**
 
 ---
 
-# 161. ADR-013
+## 161. ADR-013
 
 **Los errores de observabilidad no reemplazarán errores de aplicación.**
 
 ---
 
-# 162. ADR-014
+## 162. ADR-014
 
 **El timeline local y el tracing distribuido serán sistemas relacionados, pero distintos.**
 
 ---
 
-# 163. ADR-015
+## 163. ADR-015
 
 **El profiling completo estará deshabilitado por defecto en producción.**
 
 ---
 
-# 164. ADR-016
+## 164. ADR-016
 
 **La decisión de sampling se propagará a spans hijos.**
 
 ---
 
-# 165. ADR-017
+## 165. ADR-017
 
 **Los errores y ejecuciones lentas podrán retenerse mediante tail sampling.**
 
 ---
 
-# 166. ADR-018
+## 166. ADR-018
 
 **El sistema medirá su propio overhead.**
 
 ---
 
-# 167. ADR-019
+## 167. ADR-019
 
 **Los registries de observabilidad se congelarán después del bootstrap.**
 
 ---
 
-# 168. ADR-020
+## 168. ADR-020
 
 **Todo contexto request-scoped de observabilidad deberá resetearse en Workers persistentes.**
 
 ---
 
-# 169. Implementación V1
+## 169. Implementación V1
 
 La V1 deberá incluir:
 
@@ -2692,7 +2691,7 @@ La V1 deberá incluir:
 
 ---
 
-# 170. Fuera de V1
+## 170. Fuera de V1
 
 Se aplazarán:
 
@@ -2707,7 +2706,7 @@ Se aplazarán:
 
 ---
 
-# 171. Roadmap V2
+## 171. Roadmap V2
 
 Podrá incluir:
 
@@ -2724,7 +2723,7 @@ Podrá incluir:
 
 ---
 
-# 172. Roadmap V3
+## 172. Roadmap V3
 
 Podrá incorporar:
 
@@ -2738,7 +2737,7 @@ Podrá incorporar:
 
 ---
 
-# 173. Flujo completo de observabilidad
+## 173. Flujo completo de observabilidad
 
 ```text
 Controller execution starts
@@ -2776,7 +2775,7 @@ Reset request-scoped observability
 
 ---
 
-# 174. Resultado arquitectónico
+## 174. Resultado arquitectónico
 
 Con este sistema, VoltStack dispondrá de una única capa coherente para observar todo el pipeline de controladores.
 
@@ -2795,7 +2794,7 @@ La arquitectura permitirá responder preguntas como:
 
 ---
 
-# 175. Conclusión
+## 175. Conclusión
 
 El **Controller Events and Observability System** convierte el lifecycle de controladores en un flujo medible, trazable y diagnosticable.
 
@@ -2815,7 +2814,7 @@ Esto proporciona a VoltStack una infraestructura preparada para desarrollo local
 
 ---
 
-# 176. Próximo documento recomendado
+## 176. Próximo documento recomendado
 
 Con el pipeline funcional y su observabilidad definidos, el siguiente documento recomendado es:
 

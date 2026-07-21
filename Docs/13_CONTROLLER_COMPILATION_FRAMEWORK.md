@@ -1,6 +1,5 @@
-# CONTROLLER_COMPILATION_FRAMEWORK.md
+# Framework de compilación del subsistema Controllers de VoltStack
 
-## Framework de compilación del subsistema Controllers de VoltStack
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
@@ -10,7 +9,7 @@
 
 ---
 
-# 1. Introducción
+## 1. Introducción
 
 El **Controller Compilation Framework** es la infraestructura central responsable de compilar, almacenar, validar y cargar todos los planes necesarios para ejecutar controladores sin reconstruir dinámicamente su arquitectura durante cada petición.
 
@@ -47,7 +46,7 @@ Este documento unifica esas capacidades.
 
 ---
 
-# 2. Objetivo principal
+## 2. Objetivo principal
 
 Convertir la definición dinámica de una ejecución de controlador en un conjunto reproducible de artefactos PHP optimizados.
 
@@ -82,7 +81,7 @@ Runtime Execution
 
 ---
 
-# 3. Resultado esperado
+## 3. Resultado esperado
 
 Para cada controlador o ruta compilable, VoltStack podrá generar un grafo de artefactos como:
 
@@ -113,7 +112,7 @@ La ejecución podrá cargar estos planes directamente sin:
 
 ---
 
-# 4. Principios arquitectónicos
+## 4. Principios arquitectónicos
 
 El framework seguirá estos principios:
 
@@ -133,7 +132,7 @@ El framework seguirá estos principios:
 
 ---
 
-# 5. No responsabilidades
+## 5. No responsabilidades
 
 El framework no deberá:
 
@@ -149,7 +148,7 @@ El framework no deberá:
 
 ---
 
-# 6. Diferencia entre compilación y caché
+## 6. Diferencia entre compilación y caché
 
 La compilación transforma definiciones de alto nivel en planes ejecutables.
 
@@ -167,7 +166,7 @@ Ambos conceptos estarán integrados, pero serán independientes.
 
 ---
 
-# 7. Arquitectura general
+## 7. Arquitectura general
 
 ```text
 CompilationRequest
@@ -205,7 +204,7 @@ Artifact Manifest
 
 ---
 
-# 8. Componentes principales
+## 8. Componentes principales
 
 ```text
 ControllerCompilationManager
@@ -236,7 +235,7 @@ CompilationDiagnostics
 
 ---
 
-# 9. ControllerCompilationManager
+## 9. ControllerCompilationManager
 
 Punto de entrada principal.
 
@@ -264,7 +263,7 @@ final class ControllerCompilationManager
 
 ---
 
-# 10. Responsabilidades del Manager
+## 10. Responsabilidades del Manager
 
 El Manager deberá:
 
@@ -283,7 +282,7 @@ El Manager deberá:
 
 ---
 
-# 11. ControllerCompilationRequest
+## 11. ControllerCompilationRequest
 
 ```php
 final readonly class ControllerCompilationRequest
@@ -300,7 +299,7 @@ final readonly class ControllerCompilationRequest
 
 ---
 
-# 12. ControllerCompilationTarget
+## 12. ControllerCompilationTarget
 
 Podrá representar:
 
@@ -318,7 +317,7 @@ enum ControllerCompilationTargetType: string
 
 ---
 
-# 13. CompilationMode
+## 13. CompilationMode
 
 ```php
 enum CompilationMode: string
@@ -334,7 +333,7 @@ enum CompilationMode: string
 
 ---
 
-# 14. CompilationOptions
+## 14. CompilationOptions
 
 ```php
 final readonly class CompilationOptions
@@ -355,7 +354,7 @@ final readonly class CompilationOptions
 
 ---
 
-# 15. CompilationContext
+## 15. CompilationContext
 
 ```php
 final readonly class CompilationContext
@@ -376,7 +375,7 @@ final readonly class CompilationContext
 
 ---
 
-# 16. FrozenRegistrySet
+## 16. FrozenRegistrySet
 
 La compilación solo podrá ejecutarse sobre registries estables.
 
@@ -401,7 +400,7 @@ final readonly class FrozenRegistrySet
 
 ---
 
-# 17. Requisito de freeze
+## 17. Requisito de freeze
 
 Antes de compilar:
 
@@ -425,7 +424,7 @@ Modificar un registry congelado deberá producir un error.
 
 ---
 
-# 18. CompiledArtifactInterface
+## 18. CompiledArtifactInterface
 
 Contrato común de todos los artefactos.
 
@@ -453,7 +452,7 @@ interface CompiledArtifactInterface
 
 ---
 
-# 19. CompiledArtifactId
+## 19. CompiledArtifactId
 
 ```php
 final readonly class CompiledArtifactId
@@ -480,7 +479,7 @@ controllers:App\Http\OrderController::show:invocation
 
 ---
 
-# 20. CompiledArtifactType
+## 20. CompiledArtifactType
 
 ```php
 enum CompiledArtifactType: string
@@ -503,7 +502,7 @@ enum CompiledArtifactType: string
 
 ---
 
-# 21. Artefactos oficiales
+## 21. Artefactos oficiales
 
 ```text
 CompiledControllerResolutionPlan
@@ -521,7 +520,7 @@ CompiledControllerExecutionBundle
 
 ---
 
-# 22. ArtifactCompilerInterface
+## 22. ArtifactCompilerInterface
 
 ```php
 interface ArtifactCompilerInterface
@@ -548,7 +547,7 @@ interface ArtifactCompilerInterface
 
 ---
 
-# 23. Specialized compilers
+## 23. Specialized compilers
 
 ```text
 ControllerResolutionCompiler
@@ -566,7 +565,7 @@ ControllerExecutionBundleCompiler
 
 ---
 
-# 24. Compiler Registry
+## 24. Compiler Registry
 
 ```php
 interface ControllerCompilerRegistryInterface
@@ -587,7 +586,7 @@ interface ControllerCompilerRegistryInterface
 
 ---
 
-# 25. Orden de compilación
+## 25. Orden de compilación
 
 Orden base:
 
@@ -613,7 +612,7 @@ El orden real será determinado por el grafo de dependencias.
 
 ---
 
-# 26. CompilationUnit
+## 26. CompilationUnit
 
 Representa una unidad compilable.
 
@@ -633,7 +632,7 @@ final readonly class CompilationUnit
 
 ---
 
-# 27. CompilationUnitId
+## 27. CompilationUnitId
 
 Normalmente se basará en:
 
@@ -646,7 +645,7 @@ Normalmente se basará en:
 
 ---
 
-# 28. Variantes de compilación
+## 28. Variantes de compilación
 
 Una misma acción podrá producir artefactos diferentes según:
 
@@ -660,7 +659,7 @@ Una misma acción podrá producir artefactos diferentes según:
 
 ---
 
-# 29. ArtifactDependency
+## 29. ArtifactDependency
 
 ```php
 final readonly class ArtifactDependency
@@ -677,7 +676,7 @@ final readonly class ArtifactDependency
 
 ---
 
-# 30. ArtifactDependencyType
+## 30. ArtifactDependencyType
 
 ```php
 enum ArtifactDependencyType: string
@@ -700,7 +699,7 @@ enum ArtifactDependencyType: string
 
 ---
 
-# 31. Grafo de dependencias
+## 31. Grafo de dependencias
 
 ```php
 interface ArtifactDependencyGraphInterface
@@ -724,7 +723,7 @@ interface ArtifactDependencyGraphInterface
 
 ---
 
-# 32. Ciclos
+## 32. Ciclos
 
 Un ciclo entre artefactos deberá considerarse error de compilación.
 
@@ -742,7 +741,7 @@ El compiler deberá mostrar la cadena completa del ciclo.
 
 ---
 
-# 33. ArtifactFingerprint
+## 33. ArtifactFingerprint
 
 Representa el contenido lógico y las dependencias de un artefacto.
 
@@ -759,7 +758,7 @@ final readonly class ArtifactFingerprint
 
 ---
 
-# 34. Generación del fingerprint
+## 34. Generación del fingerprint
 
 Podrá considerar:
 
@@ -774,7 +773,7 @@ Podrá considerar:
 
 ---
 
-# 35. Determinismo
+## 35. Determinismo
 
 Dos compilaciones con los mismos inputs deberán producir:
 
@@ -793,7 +792,7 @@ No deberán incluirse directamente:
 
 ---
 
-# 36. ArtifactSignature
+## 36. ArtifactSignature
 
 La firma valida integridad y compatibilidad.
 
@@ -812,7 +811,7 @@ final readonly class ArtifactSignature
 
 ---
 
-# 37. Diferencia entre fingerprint y signature
+## 37. Diferencia entre fingerprint y signature
 
 ```text
 Fingerprint
@@ -824,7 +823,7 @@ Signature
 
 ---
 
-# 38. Artifact metadata
+## 38. Artifact metadata
 
 Podrá contener:
 
@@ -846,7 +845,7 @@ debug_symbols
 
 ---
 
-# 39. CompiledControllerResolutionPlan
+## 39. CompiledControllerResolutionPlan
 
 Contendrá:
 
@@ -862,7 +861,7 @@ Contendrá:
 
 ---
 
-# 40. CompiledControllerMetadataPlan
+## 40. CompiledControllerMetadataPlan
 
 Contendrá:
 
@@ -875,7 +874,7 @@ Contendrá:
 
 ---
 
-# 41. CompiledParameterResolutionPlan
+## 41. CompiledParameterResolutionPlan
 
 Contendrá una lista ordenada de parámetros.
 
@@ -898,7 +897,7 @@ final readonly class CompiledParameterDefinition
 
 ---
 
-# 42. CompiledInterceptorPlan
+## 42. CompiledInterceptorPlan
 
 Contendrá:
 
@@ -913,7 +912,7 @@ Contendrá:
 
 ---
 
-# 43. CompiledControllerInvocationPlan
+## 43. CompiledControllerInvocationPlan
 
 Contendrá:
 
@@ -927,7 +926,7 @@ Contendrá:
 
 ---
 
-# 44. CompiledTransformationPlan
+## 44. CompiledTransformationPlan
 
 Contendrá:
 
@@ -942,7 +941,7 @@ Contendrá:
 
 ---
 
-# 45. CompiledTransportPlan
+## 45. CompiledTransportPlan
 
 Contendrá:
 
@@ -958,7 +957,7 @@ Contendrá:
 
 ---
 
-# 46. CompiledExceptionHandlingPlan
+## 46. CompiledExceptionHandlingPlan
 
 Contendrá:
 
@@ -973,7 +972,7 @@ Contendrá:
 
 ---
 
-# 47. CompiledLifecyclePlan
+## 47. CompiledLifecyclePlan
 
 Contendrá:
 
@@ -989,7 +988,7 @@ Contendrá:
 
 ---
 
-# 48. CompiledControllerObservabilityPlan
+## 48. CompiledControllerObservabilityPlan
 
 Contendrá:
 
@@ -1005,7 +1004,7 @@ Contendrá:
 
 ---
 
-# 49. CompiledControllerExecutionBundle
+## 49. CompiledControllerExecutionBundle
 
 Artefacto raíz consumido por runtime.
 
@@ -1035,7 +1034,7 @@ final readonly class CompiledControllerExecutionBundle
 
 ---
 
-# 50. Bundle linking
+## 50. Bundle linking
 
 El bundle no deberá duplicar necesariamente todo el contenido.
 
@@ -1052,7 +1051,7 @@ ExecutionBundle
 
 ---
 
-# 51. Artifact Linker
+## 51. Artifact Linker
 
 ```php
 interface ArtifactLinkerInterface
@@ -1066,7 +1065,7 @@ interface ArtifactLinkerInterface
 
 ---
 
-# 52. Compartición de artefactos
+## 52. Compartición de artefactos
 
 Podrán compartirse:
 
@@ -1082,7 +1081,7 @@ Esto reduce duplicación en disco y memoria.
 
 ---
 
-# 53. ArtifactValidator
+## 53. ArtifactValidator
 
 ```php
 interface CompiledArtifactValidatorInterface
@@ -1096,7 +1095,7 @@ interface CompiledArtifactValidatorInterface
 
 ---
 
-# 54. Validaciones
+## 54. Validaciones
 
 El validator deberá comprobar:
 
@@ -1114,7 +1113,7 @@ El validator deberá comprobar:
 
 ---
 
-# 55. Strict mode
+## 55. Strict mode
 
 En `strict = true`:
 
@@ -1128,7 +1127,7 @@ Este modo será recomendado en producción.
 
 ---
 
-# 56. Fallback dinámico
+## 56. Fallback dinámico
 
 En modo no estricto:
 
@@ -1149,7 +1148,7 @@ El fallback deberá ser observable.
 
 ---
 
-# 57. ArtifactStore
+## 57. ArtifactStore
 
 ```php
 interface CompiledArtifactStoreInterface
@@ -1174,7 +1173,7 @@ interface CompiledArtifactStoreInterface
 
 ---
 
-# 58. Implementaciones del Store
+## 58. Implementaciones del Store
 
 ```text
 PhpFileArtifactStore
@@ -1188,7 +1187,7 @@ La V1 utilizará principalmente archivos PHP.
 
 ---
 
-# 59. Formato PHP
+## 59. Formato PHP
 
 Un artefacto podrá almacenarse como:
 
@@ -1213,7 +1212,7 @@ Ventajas:
 
 ---
 
-# 60. Restricciones del formato
+## 60. Restricciones del formato
 
 Los artefactos no deberán contener:
 
@@ -1236,7 +1235,7 @@ Deberán utilizar:
 
 ---
 
-# 61. ArtifactSerializer
+## 61. ArtifactSerializer
 
 Aunque PHP sea el formato principal, existirá una abstracción.
 
@@ -1259,7 +1258,7 @@ PhpArtifactSerializer
 
 ---
 
-# 62. ArtifactWriter
+## 62. ArtifactWriter
 
 ```php
 interface CompiledArtifactWriterInterface
@@ -1273,7 +1272,7 @@ interface CompiledArtifactWriterInterface
 
 ---
 
-# 63. Escritura atómica
+## 63. Escritura atómica
 
 El proceso recomendado:
 
@@ -1297,7 +1296,7 @@ Nunca se sobrescribirá directamente un artefacto activo.
 
 ---
 
-# 64. Artifact paths
+## 64. Artifact paths
 
 Estructura sugerida:
 
@@ -1328,7 +1327,7 @@ storage/framework/controllers/
 
 ---
 
-# 65. Build ID
+## 65. Build ID
 
 Cada compilación desplegable tendrá un ID.
 
@@ -1344,7 +1343,7 @@ final readonly class CompilationBuildId
 
 ---
 
-# 66. Artifact Manifest
+## 66. Artifact Manifest
 
 El manifest será el índice de un build.
 
@@ -1367,7 +1366,7 @@ final readonly class ControllerArtifactManifest
 
 ---
 
-# 67. Route map
+## 67. Route map
 
 Permitirá resolver rápidamente:
 
@@ -1386,7 +1385,7 @@ return [
 
 ---
 
-# 68. ArtifactLoader
+## 68. ArtifactLoader
 
 ```php
 interface CompiledArtifactLoaderInterface
@@ -1404,7 +1403,7 @@ interface CompiledArtifactLoaderInterface
 
 ---
 
-# 69. Runtime load path
+## 69. Runtime load path
 
 ```text
 RouteMatch
@@ -1434,7 +1433,7 @@ Worker Cache
 
 ---
 
-# 70. Cache hierarchy
+## 70. Cache hierarchy
 
 El framework utilizará:
 
@@ -1449,7 +1448,7 @@ L5 OPcache
 
 ---
 
-# 71. L0 Local references
+## 71. L0 Local references
 
 Referencias locales dentro del pipeline actual.
 
@@ -1463,7 +1462,7 @@ Evita búsquedas repetidas dentro de una ejecución.
 
 ---
 
-# 72. L1 Execution cache
+## 72. L1 Execution cache
 
 Almacena resultados derivados del bundle durante una ejecución.
 
@@ -1478,7 +1477,7 @@ Se destruye al terminar.
 
 ---
 
-# 73. L2 Request cache
+## 73. L2 Request cache
 
 Puede compartirse con subrequests controlados.
 
@@ -1486,7 +1485,7 @@ No deberá sobrevivir a la petición.
 
 ---
 
-# 74. L3 Worker cache
+## 74. L3 Worker cache
 
 Almacena artefactos inmutables cargados.
 
@@ -1507,13 +1506,13 @@ interface WorkerArtifactCacheInterface
 
 ---
 
-# 75. L4 Artifact store
+## 75. L4 Artifact store
 
 Archivos PHP persistentes generados por el compiler.
 
 ---
 
-# 76. L5 OPcache
+## 76. L5 OPcache
 
 OPcache almacena el bytecode de los archivos PHP de artefactos.
 
@@ -1521,7 +1520,7 @@ El framework no controlará internamente su implementación, pero generará arte
 
 ---
 
-# 77. Cache keys
+## 77. Cache keys
 
 Una key deberá incluir:
 
@@ -1535,7 +1534,7 @@ Nunca se basará únicamente en nombre de clase.
 
 ---
 
-# 78. Cache invalidation
+## 78. Cache invalidation
 
 La invalidación podrá ocurrir por:
 
@@ -1551,7 +1550,7 @@ La invalidación podrá ocurrir por:
 
 ---
 
-# 79. ArtifactInvalidator
+## 79. ArtifactInvalidator
 
 ```php
 interface CompiledArtifactInvalidatorInterface
@@ -1569,7 +1568,7 @@ interface CompiledArtifactInvalidatorInterface
 
 ---
 
-# 80. Invalidación transitiva
+## 80. Invalidación transitiva
 
 Si cambia un Parameter Resolver:
 
@@ -1590,7 +1589,7 @@ Todos los dependientes deberán invalidarse.
 
 ---
 
-# 81. DependencyChangeSet
+## 81. DependencyChangeSet
 
 ```php
 final readonly class DependencyChangeSet
@@ -1606,7 +1605,7 @@ final readonly class DependencyChangeSet
 
 ---
 
-# 82. Incremental compilation
+## 82. Incremental compilation
 
 ```text
 Read previous manifest
@@ -1629,7 +1628,7 @@ Reuse unchanged artifacts
 
 ---
 
-# 83. Reutilización entre builds
+## 83. Reutilización entre builds
 
 Los artefactos inmutables sin cambios podrán:
 
@@ -1640,7 +1639,7 @@ Los artefactos inmutables sin cambios podrán:
 
 ---
 
-# 84. Content-addressed storage futuro
+## 84. Content-addressed storage futuro
 
 Un artefacto podrá almacenarse por fingerprint:
 
@@ -1654,7 +1653,7 @@ No será obligatorio en V1.
 
 ---
 
-# 85. Warmup
+## 85. Warmup
 
 El warmup carga o compila artefactos antes del tráfico.
 
@@ -1670,7 +1669,7 @@ interface ControllerCompilationWarmupManagerInterface
 
 ---
 
-# 86. WarmupPolicy
+## 86. WarmupPolicy
 
 ```php
 final readonly class WarmupPolicy
@@ -1688,7 +1687,7 @@ final readonly class WarmupPolicy
 
 ---
 
-# 87. Tipos de warmup
+## 87. Tipos de warmup
 
 ```text
 Validation warmup
@@ -1700,7 +1699,7 @@ Worker-local warmup
 
 ---
 
-# 88. Hot routes
+## 88. Hot routes
 
 Podrán definirse mediante:
 
@@ -1712,7 +1711,7 @@ Podrán definirse mediante:
 
 ---
 
-# 89. Preload
+## 89. Preload
 
 VoltStack podrá generar un archivo compatible con `opcache.preload`.
 
@@ -1726,7 +1725,7 @@ require __DIR__.'/artifacts/observability/default.php';
 
 ---
 
-# 90. Preload policy
+## 90. Preload policy
 
 No todos los bundles deberán preloaded.
 
@@ -1741,7 +1740,7 @@ Se priorizarán:
 
 ---
 
-# 91. Riesgo de preload excesivo
+## 91. Riesgo de preload excesivo
 
 Preload indiscriminado puede:
 
@@ -1754,7 +1753,7 @@ Por ello deberá existir presupuesto de memoria.
 
 ---
 
-# 92. PreloadBudget
+## 92. PreloadBudget
 
 ```php
 final readonly class PreloadBudget
@@ -1769,7 +1768,7 @@ final readonly class PreloadBudget
 
 ---
 
-# 93. FrankenPHP integration
+## 93. FrankenPHP integration
 
 En FrankenPHP:
 
@@ -1795,7 +1794,7 @@ Detect build change
 
 ---
 
-# 94. Artifact immutability in Workers
+## 94. Artifact immutability in Workers
 
 Un Worker no deberá mezclar artefactos de diferentes builds dentro de una misma ejecución.
 
@@ -1809,7 +1808,7 @@ estable desde inicio hasta cleanup.
 
 ---
 
-# 95. Build pinning
+## 95. Build pinning
 
 ```php
 final readonly class ExecutionBuildReference
@@ -1824,7 +1823,7 @@ final readonly class ExecutionBuildReference
 
 ---
 
-# 96. Despliegues atómicos
+## 96. Despliegues atómicos
 
 Proceso:
 
@@ -1852,7 +1851,7 @@ Restart or recycle Workers
 
 ---
 
-# 97. DeploymentArtifactManager
+## 97. DeploymentArtifactManager
 
 ```php
 interface ControllerArtifactDeploymentManagerInterface
@@ -1871,7 +1870,7 @@ interface ControllerArtifactDeploymentManagerInterface
 
 ---
 
-# 98. Rollback
+## 98. Rollback
 
 Un build anterior no deberá eliminarse inmediatamente.
 
@@ -1885,7 +1884,7 @@ last known good build
 
 ---
 
-# 99. Garbage collection
+## 99. Garbage collection
 
 ```php
 interface ArtifactGarbageCollectorInterface
@@ -1898,7 +1897,7 @@ interface ArtifactGarbageCollectorInterface
 
 ---
 
-# 100. Retention policy
+## 100. Retention policy
 
 Podrá conservar:
 
@@ -1910,7 +1909,7 @@ Podrá conservar:
 
 ---
 
-# 101. Desarrollo
+## 101. Desarrollo
 
 En desarrollo se favorecerá:
 
@@ -1923,7 +1922,7 @@ En desarrollo se favorecerá:
 
 ---
 
-# 102. Producción
+## 102. Producción
 
 En producción se favorecerá:
 
@@ -1938,7 +1937,7 @@ En producción se favorecerá:
 
 ---
 
-# 103. Runtime compilation
+## 103. Runtime compilation
 
 La compilación durante una petición estará deshabilitada por defecto en producción.
 
@@ -1952,7 +1951,7 @@ Razones:
 
 ---
 
-# 104. Compilation lock
+## 104. Compilation lock
 
 Para procesos de desarrollo o CLI:
 
@@ -1969,7 +1968,7 @@ Evitará compilaciones concurrentes sobre el mismo workspace.
 
 ---
 
-# 105. Workspace
+## 105. Workspace
 
 Cada compilación utilizará un directorio temporal aislado.
 
@@ -1986,7 +1985,7 @@ final readonly class CompilationWorkspace
 
 ---
 
-# 106. Compilation pipeline
+## 106. Compilation pipeline
 
 ```text
 Initialize
@@ -2016,7 +2015,7 @@ Finalize
 
 ---
 
-# 107. Compilation stages
+## 107. Compilation stages
 
 ```text
 InitializeCompilationStage
@@ -2036,7 +2035,7 @@ FinalizeCompilationStage
 
 ---
 
-# 108. CompilationResult
+## 108. CompilationResult
 
 ```php
 final readonly class ControllerCompilationResult
@@ -2056,7 +2055,7 @@ final readonly class ControllerCompilationResult
 
 ---
 
-# 109. CompilationStatus
+## 109. CompilationStatus
 
 ```php
 enum CompilationStatus: string
@@ -2071,7 +2070,7 @@ enum CompilationStatus: string
 
 ---
 
-# 110. CompilationDiagnostics
+## 110. CompilationDiagnostics
 
 Podrá incluir:
 
@@ -2088,7 +2087,7 @@ Podrá incluir:
 
 ---
 
-# 111. Source maps
+## 111. Source maps
 
 En Debug podrán generarse referencias entre artefactos y fuentes.
 
@@ -2106,7 +2105,7 @@ final readonly class ArtifactSourceMap
 
 ---
 
-# 112. Debugging
+## 112. Debugging
 
 Comandos potenciales:
 
@@ -2126,7 +2125,7 @@ volt controllers:rollback
 
 ---
 
-# 113. Artifact inspector
+## 113. Artifact inspector
 
 ```php
 interface CompiledArtifactInspectorInterface
@@ -2139,7 +2138,7 @@ interface CompiledArtifactInspectorInterface
 
 ---
 
-# 114. Inspection report
+## 114. Inspection report
 
 Podrá mostrar:
 
@@ -2157,7 +2156,7 @@ Podrá mostrar:
 
 ---
 
-# 115. Diff de artefactos
+## 115. Diff de artefactos
 
 El sistema podrá comparar:
 
@@ -2176,7 +2175,7 @@ y mostrar:
 
 ---
 
-# 116. Observabilidad de compilación
+## 116. Observabilidad de compilación
 
 Eventos:
 
@@ -2195,7 +2194,7 @@ controllers.compilation.completed
 
 ---
 
-# 117. Métricas de compilación
+## 117. Métricas de compilación
 
 ```text
 voltstack.controllers.compilation.duration
@@ -2210,7 +2209,7 @@ voltstack.controllers.compilation.warmup_duration
 
 ---
 
-# 118. Runtime metrics
+## 118. Runtime metrics
 
 ```text
 voltstack.controllers.compiled_bundle.hit
@@ -2223,7 +2222,7 @@ voltstack.controllers.worker_artifact_cache.size
 
 ---
 
-# 119. Tracing
+## 119. Tracing
 
 Spans:
 
@@ -2240,7 +2239,7 @@ controllers.compile.warmup
 
 ---
 
-# 120. Seguridad
+## 120. Seguridad
 
 Los archivos generados deberán:
 
@@ -2254,7 +2253,7 @@ Los archivos generados deberán:
 
 ---
 
-# 121. Code generation safety
+## 121. Code generation safety
 
 El serializer deberá escapar correctamente:
 
@@ -2268,7 +2267,7 @@ Se favorecerá `var_export` controlado o un generador AST seguro.
 
 ---
 
-# 122. Artifact trust model
+## 122. Artifact trust model
 
 En producción solo se cargarán artefactos:
 
@@ -2280,7 +2279,7 @@ En producción solo se cargarán artefactos:
 
 ---
 
-# 123. Firma criptográfica opcional
+## 123. Firma criptográfica opcional
 
 En despliegues distribuidos podrá añadirse firma criptográfica del manifest.
 
@@ -2301,7 +2300,7 @@ No será obligatoria en V1.
 
 ---
 
-# 124. Errores y excepciones
+## 124. Errores y excepciones
 
 Excepciones principales:
 
@@ -2321,7 +2320,7 @@ RuntimeProfileMismatchException
 
 ---
 
-# 125. Error handling durante runtime
+## 125. Error handling durante runtime
 
 Si falla la carga:
 
@@ -2337,7 +2336,7 @@ Validation failure
 
 ---
 
-# 126. Error handling durante build
+## 126. Error handling durante build
 
 Una compilación fallida no deberá modificar el build activo.
 
@@ -2345,7 +2344,7 @@ El workspace fallido podrá conservarse temporalmente para diagnóstico.
 
 ---
 
-# 127. Testing
+## 127. Testing
 
 El módulo incluirá:
 
@@ -2362,7 +2361,7 @@ CompiledArtifactAssertions
 
 ---
 
-# 128. Assertions
+## 128. Assertions
 
 ```php
 CompiledArtifactAssert::type(
@@ -2390,7 +2389,7 @@ CompilationAssert::reused(
 
 ---
 
-# 129. Casos de prueba
+## 129. Casos de prueba
 
 * compilación completa;
 * compilación incremental;
@@ -2415,7 +2414,7 @@ CompilationAssert::reused(
 
 ---
 
-# 130. Benchmarks
+## 130. Benchmarks
 
 ```text
 Dynamic controller execution
@@ -2433,7 +2432,7 @@ FrankenPHP repeated execution
 
 ---
 
-# 131. Objetivos de rendimiento
+## 131. Objetivos de rendimiento
 
 La arquitectura buscará:
 
@@ -2449,7 +2448,7 @@ Los objetivos numéricos deberán establecerse mediante benchmarks reales.
 
 ---
 
-# 132. Estructura de directorios
+## 132. Estructura de directorios
 
 ```text
 src/
@@ -2632,7 +2631,7 @@ src/
 
 ---
 
-# 133. Configuración
+## 133. Configuración
 
 ```php
 // config/controller_compilation.php
@@ -2710,7 +2709,7 @@ return [
 
 ---
 
-# 134. Service Provider
+## 134. Service Provider
 
 ```php
 final class ControllerCompilationServiceProvider
@@ -2749,7 +2748,7 @@ final class ControllerCompilationServiceProvider
 
 ---
 
-# 135. Integración con Routing
+## 135. Integración con Routing
 
 Routing deberá producir una firma estable de ruta.
 
@@ -2763,7 +2762,7 @@ Esta firma permitirá obtener directamente el bundle compilado.
 
 ---
 
-# 136. Integración con ControllerExecutionManager
+## 136. Integración con ControllerExecutionManager
 
 ```php
 $bundle = $compiledBundleLoader->loadBundleFor(
@@ -2779,7 +2778,7 @@ $execution = $executionFactory->create(
 
 ---
 
-# 137. Integración con Metadata Engine
+## 137. Integración con Metadata Engine
 
 El Metadata Engine será responsable de producir metadata estable y compilable.
 
@@ -2787,7 +2786,7 @@ La compilación no deberá volver a interpretar atributos fuera del Metadata Eng
 
 ---
 
-# 138. Integración con Exception Handling
+## 138. Integración con Exception Handling
 
 Los fallos de carga o validación serán enviados al sistema de excepciones.
 
@@ -2803,7 +2802,7 @@ según su origen.
 
 ---
 
-# 139. Integración con Observability
+## 139. Integración con Observability
 
 La ejecución deberá registrar:
 
@@ -2817,7 +2816,7 @@ La ejecución deberá registrar:
 
 ---
 
-# 140. Integración con FrankenPHP
+## 140. Integración con FrankenPHP
 
 La estrategia recomendada será:
 
@@ -2831,157 +2830,157 @@ Serve using immutable artifacts
 
 ---
 
-# 141. ADR-001
+## 141. ADR-001
 
 **Todos los planes compilados implementarán un contrato común de artefacto.**
 
 ---
 
-# 142. ADR-002
+## 142. ADR-002
 
 **Los compiladores especializados compartirán infraestructura de almacenamiento, invalidación y carga.**
 
 ---
 
-# 143. ADR-003
+## 143. ADR-003
 
 **La compilación no modificará la semántica funcional del pipeline.**
 
 ---
 
-# 144. ADR-004
+## 144. ADR-004
 
 **Los artefactos serán inmutables y libres de estado request-scoped.**
 
 ---
 
-# 145. ADR-005
+## 145. ADR-005
 
 **El artefacto raíz de runtime será `CompiledControllerExecutionBundle`.**
 
 ---
 
-# 146. ADR-006
+## 146. ADR-006
 
 **La invalidación será dependency-aware y transitiva.**
 
 ---
 
-# 147. ADR-007
+## 147. ADR-007
 
 **Los fingerprints deberán ser deterministas.**
 
 ---
 
-# 148. ADR-008
+## 148. ADR-008
 
 **La firma se utilizará para validar integridad y compatibilidad.**
 
 ---
 
-# 149. ADR-009
+## 149. ADR-009
 
 **Los registries deberán estar congelados antes de compilar.**
 
 ---
 
-# 150. ADR-010
+## 150. ADR-010
 
 **El formato oficial V1 será PHP cargable mediante `require`.**
 
 ---
 
-# 151. ADR-011
+## 151. ADR-011
 
 **Los artefactos se escribirán de forma atómica.**
 
 ---
 
-# 152. ADR-012
+## 152. ADR-012
 
 **Cada despliegue utilizará un build inmutable y versionado.**
 
 ---
 
-# 153. ADR-013
+## 153. ADR-013
 
 **Cada ejecución quedará fijada a un único build.**
 
 ---
 
-# 154. ADR-014
+## 154. ADR-014
 
 **En producción no se compilará durante la petición.**
 
 ---
 
-# 155. ADR-015
+## 155. ADR-015
 
 **El modo estricto no permitirá fallback dinámico silencioso.**
 
 ---
 
-# 156. ADR-016
+## 156. ADR-016
 
 **El Worker cache solo almacenará objetos inmutables.**
 
 ---
 
-# 157. ADR-017
+## 157. ADR-017
 
 **OPcache será una capa complementaria, no una abstracción interna del framework.**
 
 ---
 
-# 158. ADR-018
+## 158. ADR-018
 
 **Warmup y preload serán capacidades independientes.**
 
 ---
 
-# 159. ADR-019
+## 159. ADR-019
 
 **La activación de builds será atómica y reversible.**
 
 ---
 
-# 160. ADR-020
+## 160. ADR-020
 
 **Los artefactos anteriores se conservarán temporalmente para rollback.**
 
 ---
 
-# 161. ADR-021
+## 161. ADR-021
 
 **Los source maps y debug symbols estarán separados del artefacto funcional.**
 
 ---
 
-# 162. ADR-022
+## 162. ADR-022
 
 **Los artefactos compartidos podrán referenciarse para reducir duplicación.**
 
 ---
 
-# 163. ADR-023
+## 163. ADR-023
 
 **Los ciclos de dependencias serán errores de compilación.**
 
 ---
 
-# 164. ADR-024
+## 164. ADR-024
 
 **El runtime no mezclará artefactos pertenecientes a builds diferentes.**
 
 ---
 
-# 165. ADR-025
+## 165. ADR-025
 
 **El sistema medirá cache hits, misses y fallback dinámico.**
 
 ---
 
-# 166. Implementación V1
+## 166. Implementación V1
 
 La V1 deberá incluir:
 
@@ -3011,7 +3010,7 @@ La V1 deberá incluir:
 
 ---
 
-# 167. Fuera de V1
+## 167. Fuera de V1
 
 Se aplazarán:
 
@@ -3026,7 +3025,7 @@ Se aplazarán:
 
 ---
 
-# 168. Roadmap V2
+## 168. Roadmap V2
 
 Podrá incluir:
 
@@ -3042,7 +3041,7 @@ Podrá incluir:
 
 ---
 
-# 169. Roadmap V3
+## 169. Roadmap V3
 
 Podrá incorporar:
 
@@ -3057,7 +3056,7 @@ Podrá incorporar:
 
 ---
 
-# 170. Flujo de compilación completo
+## 170. Flujo de compilación completo
 
 ```text
 Application definitions
@@ -3104,7 +3103,7 @@ Activate build
 
 ---
 
-# 171. Flujo de runtime compilado
+## 171. Flujo de runtime compilado
 
 ```text
 Route matched
@@ -3139,7 +3138,7 @@ Worker cache
 
 ---
 
-# 172. Flujo de invalidación incremental
+## 172. Flujo de invalidación incremental
 
 ```text
 Source or configuration changed
@@ -3165,7 +3164,7 @@ Generate new build
 
 ---
 
-# 173. Beneficios arquitectónicos
+## 173. Beneficios arquitectónicos
 
 Este framework proporciona:
 
@@ -3184,7 +3183,7 @@ Este framework proporciona:
 
 ---
 
-# 174. Conclusión
+## 174. Conclusión
 
 El **Controller Compilation Framework** convierte toda la arquitectura del subsistema Controllers en un conjunto coherente de artefactos compilados, versionados e inmutables.
 
@@ -3210,4 +3209,3 @@ Este bundle permitirá al runtime ejecutar un controlador utilizando planes prev
 Con ello, VoltStack podrá mantener una arquitectura altamente extensible durante desarrollo y una ruta de ejecución mínima, estable y optimizada en producción.
 
 ---
-

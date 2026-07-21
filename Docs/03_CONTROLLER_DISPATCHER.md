@@ -1,6 +1,5 @@
-# 03_CONTROLLER_DISPATCHER.md
-
 # Dispatcher y motor de ejecución de controladores de VoltStack
+
 
 **Versión:** 1.0
 **Estado:** Draft
@@ -9,7 +8,7 @@
 
 ---
 
-# 1. Propósito
+## 1. Propósito
 
 Este documento define el `ControllerDispatcher`, el `ControllerExecutionPipeline`, las etapas de ejecución y el objeto `ControllerExecution` del sistema de controladores de VoltStack.
 
@@ -47,7 +46,7 @@ Este diseño permite incorporar nuevas capacidades sin modificar el dispatcher n
 
 ---
 
-# 2. Objetivos
+## 2. Objetivos
 
 El sistema deberá:
 
@@ -67,7 +66,7 @@ El sistema deberá:
 
 ---
 
-# 3. Posición dentro del framework
+## 3. Posición dentro del framework
 
 El dispatcher se ejecutará después de que el router haya encontrado una ruta y después del middleware externo correspondiente.
 
@@ -103,7 +102,7 @@ Recibirá una definición de controlador previamente asociada al `RouteMatch`.
 
 ---
 
-# 4. Arquitectura general
+## 4. Arquitectura general
 
 ```text
 ┌─────────────────────────┐
@@ -143,7 +142,7 @@ Recibirá una definición de controlador previamente asociada al `RouteMatch`.
 
 ---
 
-# 5. ControllerDispatcher
+## 5. ControllerDispatcher
 
 El `ControllerDispatcher` será la fachada principal del motor de ejecución.
 
@@ -201,7 +200,7 @@ final class ControllerDispatcher implements ControllerDispatcherInterface
 
 ---
 
-# 6. Responsabilidades del dispatcher
+## 6. Responsabilidades del dispatcher
 
 El dispatcher deberá:
 
@@ -227,7 +226,7 @@ No deberá:
 
 ---
 
-# 7. ControllerExecution
+## 7. ControllerExecution
 
 `ControllerExecution` representa el estado completo de una ejecución de controlador.
 
@@ -260,7 +259,7 @@ final class ControllerExecution
 
 ---
 
-# 8. Mutabilidad controlada
+## 8. Mutabilidad controlada
 
 `ControllerExecution` será mutable únicamente durante el pipeline.
 
@@ -278,7 +277,7 @@ Sin embargo, deberán aplicarse reglas estrictas:
 
 ---
 
-# 9. Estado de ejecución
+## 9. Estado de ejecución
 
 ```php
 enum ControllerExecutionState: string
@@ -310,7 +309,7 @@ La transición de estado deberá validarse.
 
 ---
 
-# 10. Transiciones válidas
+## 10. Transiciones válidas
 
 ```text
 Created
@@ -364,7 +363,7 @@ También podrá existir finalización anticipada cuando una etapa produzca una r
 
 ---
 
-# 11. ControllerExecutionFactory
+## 11. ControllerExecutionFactory
 
 El factory será responsable de construir el objeto de ejecución.
 
@@ -416,7 +415,7 @@ El `executionId` permitirá correlacionar:
 
 ---
 
-# 12. ControllerExecutionPipeline
+## 12. ControllerExecutionPipeline
 
 El pipeline ejecutará una colección ordenada de etapas.
 
@@ -464,7 +463,7 @@ final class ControllerExecutionPipeline implements
 
 ---
 
-# 13. Contrato de etapa
+## 13. Contrato de etapa
 
 ```php
 interface ControllerExecutionStageInterface
@@ -490,9 +489,9 @@ Una etapa podrá:
 
 ---
 
-# 14. Tipos de etapa
+## 14. Tipos de etapa
 
-## 14.1 Etapas lineales
+### 14.1 Etapas lineales
 
 Ejecutan una operación y continúan.
 
@@ -507,7 +506,7 @@ public function handle(
 }
 ```
 
-## 14.2 Etapas envolventes
+### 14.2 Etapas envolventes
 
 Ejecutan lógica antes y después del siguiente stage.
 
@@ -527,7 +526,7 @@ public function handle(
 }
 ```
 
-## 14.3 Etapas terminales
+### 14.3 Etapas terminales
 
 Producen un resultado sin ejecutar etapas posteriores.
 
@@ -542,7 +541,7 @@ public function handle(
 }
 ```
 
-## 14.4 Etapas condicionales
+### 14.4 Etapas condicionales
 
 Solo actúan cuando se cumple cierta condición.
 
@@ -554,7 +553,7 @@ if (! $execution->metadata->transactional) {
 
 ---
 
-# 15. Pipeline predeterminado
+## 15. Pipeline predeterminado
 
 Orden inicial:
 
@@ -580,7 +579,7 @@ Las etapas de observabilidad podrán rodear total o parcialmente este pipeline.
 
 ---
 
-# 16. InitializeExecutionStage
+## 16. InitializeExecutionStage
 
 Responsabilidades:
 
@@ -614,7 +613,7 @@ final class InitializeExecutionStage implements
 
 ---
 
-# 17. ResolveControllerStage
+## 17. ResolveControllerStage
 
 Esta etapa utilizará el `ControllerResolver`.
 
@@ -668,7 +667,7 @@ $execution->controller instanceof ResolvedController
 
 ---
 
-# 18. InjectControllerContextStage
+## 18. InjectControllerContextStage
 
 Esta etapa asignará el contexto de ejecución a controladores que lo soporten.
 
@@ -716,7 +715,7 @@ La liberación se realizará posteriormente en el finalizer.
 
 ---
 
-# 19. ResolveControllerMetadataStage
+## 19. ResolveControllerMetadataStage
 
 Responsabilidades:
 
@@ -743,7 +742,7 @@ $execution->state =
 
 ---
 
-# 20. ResolveArgumentsStage
+## 20. ResolveArgumentsStage
 
 Esta etapa resolverá todos los argumentos requeridos.
 
@@ -791,7 +790,7 @@ final class ResolveArgumentsStage implements
 
 ---
 
-# 21. ResolveControllerMiddlewareStage
+## 21. ResolveControllerMiddlewareStage
 
 Esta etapa obtendrá el middleware asociado al controlador.
 
@@ -820,7 +819,7 @@ Solo producirá una lista normalizada y ordenada.
 
 ---
 
-# 22. ResolveInterceptorsStage
+## 22. ResolveInterceptorsStage
 
 Esta etapa resolverá interceptores declarativos y globales.
 
@@ -849,7 +848,7 @@ Posibles interceptores:
 
 ---
 
-# 23. AuthorizationStage
+## 23. AuthorizationStage
 
 La autorización declarativa deberá ejecutarse después de resolver argumentos, ya que puede depender de ellos.
 
@@ -893,7 +892,7 @@ Una denegación deberá lanzar una excepción de autorización.
 
 ---
 
-# 24. ValidationStage
+## 24. ValidationStage
 
 La validación declarativa también podrá depender de los argumentos resueltos.
 
@@ -918,7 +917,7 @@ Al finalizar, podrá:
 
 ---
 
-# 25. ControllerMiddlewareStage
+## 25. ControllerMiddlewareStage
 
 Esta etapa ejecutará el middleware específico del controlador reutilizando el pipeline general.
 
@@ -955,7 +954,7 @@ El middleware podrá devolver una respuesta anticipada.
 
 ---
 
-# 26. ControllerInterceptorsStage
+## 26. ControllerInterceptorsStage
 
 Esta etapa envolverá la invocación con interceptores.
 
@@ -989,7 +988,7 @@ Los interceptores operarán sobre la invocación concreta, no directamente sobre
 
 ---
 
-# 27. InvokeControllerStage
+## 27. InvokeControllerStage
 
 Esta etapa será la responsable de ejecutar el método.
 
@@ -1043,7 +1042,7 @@ final class InvokeControllerStage implements
 
 ---
 
-# 28. NormalizeControllerResultStage
+## 28. NormalizeControllerResultStage
 
 Esta etapa convertirá el resultado en una respuesta.
 
@@ -1085,7 +1084,7 @@ Si una etapa previa ya produjo una respuesta, no deberá normalizarse de nuevo.
 
 ---
 
-# 29. FinalizeControllerResponseStage
+## 29. FinalizeControllerResponseStage
 
 Esta etapa aplicará transformaciones finales controladas.
 
@@ -1111,7 +1110,7 @@ No deberá emitir la respuesta.
 
 ---
 
-# 30. CompleteExecutionStage
+## 30. CompleteExecutionStage
 
 Esta etapa marcará la ejecución como finalizada.
 
@@ -1153,7 +1152,7 @@ final class CompleteExecutionStage implements
 
 ---
 
-# 31. Short-circuiting
+## 31. Short-circuiting
 
 Una etapa podrá detener la ejecución produciendo directamente una respuesta.
 
@@ -1183,7 +1182,7 @@ if ($cached = $this->cache->find($execution)) {
 
 ---
 
-# 32. Reglas de short-circuiting
+## 32. Reglas de short-circuiting
 
 Cuando una etapa produzca una respuesta anticipada:
 
@@ -1199,7 +1198,7 @@ El pipeline podrá distinguir etapas que siempre deben ejecutarse.
 
 ---
 
-# 33. Etapas garantizadas
+## 33. Etapas garantizadas
 
 Algunas etapas deberán ejecutarse incluso después de un short-circuit:
 
@@ -1215,7 +1214,7 @@ Para ello se utilizarán etapas envolventes o un finalizer externo al pipeline.
 
 ---
 
-# 34. Manejo de excepciones
+## 34. Manejo de excepciones
 
 El dispatcher deberá preservar la excepción original.
 
@@ -1242,7 +1241,7 @@ El sistema no deberá envolver toda excepción indiscriminadamente si esto pierd
 
 ---
 
-# 35. Enriquecimiento de excepciones
+## 35. Enriquecimiento de excepciones
 
 En lugar de reemplazar siempre la excepción, se podrá añadir contexto mediante una interfaz.
 
@@ -1274,7 +1273,7 @@ Información disponible:
 
 ---
 
-# 36. ErrorBoundaryStage
+## 36. ErrorBoundaryStage
 
 Opcionalmente podrá existir una etapa envolvente que capture excepciones traducibles a respuesta.
 
@@ -1318,7 +1317,7 @@ La política general deberá coordinarse con el Exception Handler del framework.
 
 ---
 
-# 37. Relación con el Exception Handler
+## 37. Relación con el Exception Handler
 
 Se recomienda:
 
@@ -1334,7 +1333,7 @@ El pipeline no deberá duplicar completamente el manejo global de excepciones.
 
 ---
 
-# 38. ControllerExecutionFinalizer
+## 38. ControllerExecutionFinalizer
 
 El finalizer será responsable de verificar, devolver y liberar la ejecución.
 
@@ -1396,7 +1395,7 @@ final class ControllerExecutionFinalizer implements
 
 ---
 
-# 39. Liberación obligatoria
+## 39. Liberación obligatoria
 
 La liberación deberá realizarse dentro de `finally`.
 
@@ -1412,7 +1411,7 @@ Esto garantiza limpieza cuando:
 
 ---
 
-# 40. Recursos liberables
+## 40. Recursos liberables
 
 El finalizer podrá liberar:
 
@@ -1434,7 +1433,7 @@ Esto es especialmente importante para FrankenPHP.
 
 ---
 
-# 41. Prioridades de etapas
+## 41. Prioridades de etapas
 
 Las etapas usarán prioridades explícitas.
 
@@ -1462,7 +1461,7 @@ La colección será ordenada de mayor a menor prioridad.
 
 ---
 
-# 42. Posiciones semánticas
+## 42. Posiciones semánticas
 
 Además de prioridad numérica, podrá soportarse posicionamiento declarativo.
 
@@ -1485,7 +1484,7 @@ Reglas:
 
 ---
 
-# 43. StageRegistry
+## 43. StageRegistry
 
 ```php
 interface ControllerExecutionStageRegistryInterface
@@ -1513,7 +1512,7 @@ interface ControllerExecutionStageRegistryInterface
 
 ---
 
-# 44. Extensión desde paquetes
+## 44. Extensión desde paquetes
 
 Ejemplo:
 
@@ -1542,7 +1541,7 @@ Los paquetes no deberán modificar directamente el dispatcher.
 
 ---
 
-# 45. Compilación del pipeline
+## 45. Compilación del pipeline
 
 En producción, el pipeline podrá compilarse como una lista ordenada.
 
@@ -1568,7 +1567,7 @@ El framework no deberá ordenar etapas por petición.
 
 ---
 
-# 46. CompiledControllerExecutionPlan
+## 46. CompiledControllerExecutionPlan
 
 Además del pipeline global, cada controlador podrá tener un plan compilado.
 
@@ -1599,7 +1598,7 @@ o en la ubicación general de caché compilada de VoltStack.
 
 ---
 
-# 47. Modo dinámico
+## 47. Modo dinámico
 
 Durante desarrollo:
 
@@ -1624,7 +1623,7 @@ Ventajas:
 
 ---
 
-# 48. Modo compilado
+## 48. Modo compilado
 
 En producción:
 
@@ -1652,7 +1651,7 @@ Ventajas:
 
 ---
 
-# 49. Equivalencia funcional
+## 49. Equivalencia funcional
 
 El modo dinámico y el compilado deberán producir:
 
@@ -1668,7 +1667,7 @@ La compilación solo podrá optimizar, no cambiar semántica.
 
 ---
 
-# 50. Soporte para closures
+## 50. Soporte para closures
 
 Las closures podrán ejecutarse mediante el mismo pipeline.
 
@@ -1698,7 +1697,7 @@ Limitaciones:
 
 ---
 
-# 51. Soporte para controladores invocables
+## 51. Soporte para controladores invocables
 
 ```php
 Route::get('/dashboard', DashboardController::class);
@@ -1722,7 +1721,7 @@ No requerirá una etapa especial; será una variante de `ResolvedController`.
 
 ---
 
-# 52. Soporte para Actions
+## 52. Soporte para Actions
 
 ```php
 Route::post('/users', CreateUserAction::class);
@@ -1740,7 +1739,7 @@ La ejecución seguirá utilizando el mismo invoker.
 
 ---
 
-# 53. Soporte para Page Controllers
+## 53. Soporte para Page Controllers
 
 ```php
 #[Page('dashboard')]
@@ -1759,7 +1758,7 @@ El plan compilado podrá seleccionar directamente el normalizador Volt o SPA.
 
 ---
 
-# 54. Soporte para API Controllers
+## 54. Soporte para API Controllers
 
 Las rutas API podrán incluir metadata:
 
@@ -1783,7 +1782,7 @@ Cambiarán:
 
 ---
 
-# 55. Soporte para streaming
+## 55. Soporte para streaming
 
 Los controladores streaming podrán devolver:
 
@@ -1802,7 +1801,7 @@ La liberación de recursos deberá considerar que algunos recursos permanecen ac
 
 ---
 
-# 56. Finalización diferida para streams
+## 56. Finalización diferida para streams
 
 En respuestas streaming, parte de la limpieza podrá diferirse hasta cerrar el stream.
 
@@ -1826,7 +1825,7 @@ Solo los recursos indispensables para el stream.
 
 ---
 
-# 57. Soporte futuro para async y Fibers
+## 57. Soporte futuro para async y Fibers
 
 La separación entre dispatcher, stages e invoker permitirá agregar:
 
@@ -1855,9 +1854,9 @@ No formará parte de V1.
 
 ---
 
-# 58. Middleware vs stages vs interceptores
+## 58. Middleware vs stages vs interceptores
 
-## Stage
+### Stage
 
 Forma parte del motor interno de ejecución.
 
@@ -1867,7 +1866,7 @@ Ejemplos:
 * Resolver argumentos.
 * Normalizar respuesta.
 
-## Middleware
+### Middleware
 
 Opera principalmente sobre request y response.
 
@@ -1879,7 +1878,7 @@ Ejemplos:
 * Locale.
 * Maintenance.
 
-## Interceptor
+### Interceptor
 
 Rodea la invocación concreta.
 
@@ -1901,7 +1900,7 @@ No usar interceptores para buscar rutas.
 
 ---
 
-# 59. Eventos del dispatcher
+## 59. Eventos del dispatcher
 
 Eventos propuestos:
 
@@ -1922,7 +1921,7 @@ Los eventos de stage detallados podrán desactivarse en producción para reducir
 
 ---
 
-# 60. Observabilidad
+## 60. Observabilidad
 
 Métricas:
 
@@ -1955,7 +1954,7 @@ transport.type
 
 ---
 
-# 61. Timings
+## 61. Timings
 
 El execution podrá registrar tiempos por stage.
 
@@ -1979,7 +1978,7 @@ En producción, podrá utilizarse una implementación ligera o muestreo.
 
 ---
 
-# 62. Debugging
+## 62. Debugging
 
 La debug toolbar podrá mostrar:
 
@@ -2014,7 +2013,7 @@ Los valores sensibles deberán ocultarse.
 
 ---
 
-# 63. Seguridad
+## 63. Seguridad
 
 El dispatcher deberá:
 
@@ -2035,7 +2034,7 @@ El dispatcher deberá:
 
 ---
 
-# 64. Protección contra doble dispatch
+## 64. Protección contra doble dispatch
 
 Una misma ejecución no podrá procesarse dos veces.
 
@@ -2058,7 +2057,7 @@ Esto evita:
 
 ---
 
-# 65. Protección contra doble invocación
+## 65. Protección contra doble invocación
 
 `InvokeControllerStage` deberá verificar:
 
@@ -2078,7 +2077,7 @@ como verificación interna adicional.
 
 ---
 
-# 66. Compatibilidad con FrankenPHP
+## 66. Compatibilidad con FrankenPHP
 
 El dispatcher deberá asumir que el proceso continuará después de la respuesta.
 
@@ -2097,7 +2096,7 @@ Reglas:
 
 ---
 
-# 67. Reset de servicios
+## 67. Reset de servicios
 
 Servicios request-scoped que implementen:
 
@@ -2123,7 +2122,7 @@ Esto deberá integrarse con el bootstrap y runtime de FrankenPHP.
 
 ---
 
-# 68. Configuración
+## 68. Configuración
 
 Archivo sugerido:
 
@@ -2174,7 +2173,7 @@ return [
 
 ---
 
-# 69. Registro en el contenedor
+## 69. Registro en el contenedor
 
 ```php
 $container->singleton(
@@ -2207,7 +2206,7 @@ Las etapas podrán ser singletons siempre que sean stateless.
 
 ---
 
-# 70. Integración con Routing
+## 70. Integración con Routing
 
 El router producirá o recuperará una definición.
 
@@ -2231,7 +2230,7 @@ Routing no deberá conocer las etapas internas.
 
 ---
 
-# 71. Integración con HttpKernel
+## 71. Integración con HttpKernel
 
 Flujo:
 
@@ -2261,7 +2260,7 @@ final class HttpKernel
 
 ---
 
-# 72. Integración con el runtime SPA
+## 72. Integración con el runtime SPA
 
 El `ControllerContext` incluirá información como:
 
@@ -2283,7 +2282,7 @@ El dispatcher seguirá devolviendo `ResponseInterface`.
 
 ---
 
-# 73. Integración con testing
+## 73. Integración con testing
 
 El módulo Testing deberá proporcionar:
 
@@ -2314,7 +2313,7 @@ expect($result)
 
 ---
 
-# 74. Pruebas unitarias
+## 74. Pruebas unitarias
 
 Casos mínimos:
 
@@ -2336,7 +2335,7 @@ Casos mínimos:
 
 ---
 
-# 75. Pruebas de integración
+## 75. Pruebas de integración
 
 * Routing → Dispatcher.
 * Dispatcher → Resolver.
@@ -2353,7 +2352,7 @@ Casos mínimos:
 
 ---
 
-# 76. Prueba de contaminación entre peticiones
+## 76. Prueba de contaminación entre peticiones
 
 ```php
 public function test_controller_context_is_not_shared_between_requests(): void
@@ -2375,7 +2374,7 @@ La prueba deberá ejecutar ambas peticiones en el mismo proceso y reutilizando e
 
 ---
 
-# 77. Benchmark inicial
+## 77. Benchmark inicial
 
 Escenarios:
 
@@ -2401,7 +2400,7 @@ Mediciones:
 
 ---
 
-# 78. Estructura de directorios
+## 78. Estructura de directorios
 
 ```text
 src/
@@ -2488,7 +2487,7 @@ src/
 
 ---
 
-# 79. Implementación mínima V1
+## 79. Implementación mínima V1
 
 La V1 deberá incluir:
 
@@ -2524,7 +2523,7 @@ Podrán posponerse:
 
 ---
 
-# 80. Ejemplo completo de dispatch
+## 80. Ejemplo completo de dispatch
 
 ```php
 $definition = new ControllerDefinition(
@@ -2579,7 +2578,7 @@ CompleteExecutionStage
 
 ---
 
-# 81. Ejemplo de extensión
+## 81. Ejemplo de extensión
 
 Paquete empresarial:
 
@@ -2622,9 +2621,9 @@ $controllers->stages()->add(
 
 ---
 
-# 82. Decisiones arquitectónicas
+## 82. Decisiones arquitectónicas
 
-## ADR-CTRL-DISP-001
+### ADR-CTRL-DISP-001
 
 **Decisión:** El dispatcher será una fachada pequeña.
 
@@ -2632,7 +2631,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-002
+### ADR-CTRL-DISP-002
 
 **Decisión:** La ejecución se modelará mediante `ControllerExecution`.
 
@@ -2640,7 +2639,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-003
+### ADR-CTRL-DISP-003
 
 **Decisión:** La lógica se dividirá en stages.
 
@@ -2648,7 +2647,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-004
+### ADR-CTRL-DISP-004
 
 **Decisión:** Los stages podrán rodear la ejecución.
 
@@ -2656,7 +2655,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-005
+### ADR-CTRL-DISP-005
 
 **Decisión:** Se permitirá short-circuiting controlado.
 
@@ -2664,7 +2663,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-006
+### ADR-CTRL-DISP-006
 
 **Decisión:** La limpieza se realizará en `finally`.
 
@@ -2672,7 +2671,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-007
+### ADR-CTRL-DISP-007
 
 **Decisión:** El orden de stages será explícito y compilable.
 
@@ -2680,7 +2679,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-008
+### ADR-CTRL-DISP-008
 
 **Decisión:** El modo compilado será equivalente al dinámico.
 
@@ -2688,7 +2687,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-009
+### ADR-CTRL-DISP-009
 
 **Decisión:** Middleware, stages e interceptores serán conceptos separados.
 
@@ -2696,7 +2695,7 @@ $controllers->stages()->add(
 
 ---
 
-## ADR-CTRL-DISP-010
+### ADR-CTRL-DISP-010
 
 **Decisión:** El dispatcher siempre devolverá `ResponseInterface`.
 
@@ -2704,7 +2703,7 @@ $controllers->stages()->add(
 
 ---
 
-# 83. Criterios de aceptación
+## 83. Criterios de aceptación
 
 El dispatcher se considerará correctamente implementado cuando:
 
@@ -2731,7 +2730,7 @@ El dispatcher se considerará correctamente implementado cuando:
 
 ---
 
-# 84. Conclusión
+## 84. Conclusión
 
 El `ControllerDispatcher` de VoltStack no será una clase encargada de ejecutar directamente métodos de controlador.
 
