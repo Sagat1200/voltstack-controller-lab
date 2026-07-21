@@ -24753,3 +24753,2750 @@ Entrega 20
 - Distributed tracing security
 - Security context governance
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 20 de varias
+**Cobertura:** Secciones **1901–2000**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 19`
+
+---
+
+# 1901. Security Context Architecture
+
+VoltStack deberá incorporar una arquitectura formal para construir, proteger, propagar, atenuar y validar contextos de seguridad.
+
+El contexto de seguridad deberá representar, como mínimo:
+
+* identidad autenticada;
+* actor real;
+* subject efectivo;
+* tenant;
+* sesión;
+* cliente;
+* workload;
+* nivel de assurance;
+* scopes;
+* roles;
+* delegaciones;
+* restricciones;
+* origen de confianza;
+* vigencia;
+* evidencia de autenticación.
+
+---
+
+# 1902. Security context security goals
+
+La arquitectura deberá garantizar:
+
+* integridad;
+* autenticidad;
+* mínima propagación;
+* aislamiento multi-tenant;
+* conservación de provenance;
+* resistencia a replay;
+* expiración;
+* atenuación de privilegios;
+* validación por frontera;
+* auditabilidad;
+* compatibilidad síncrona y asíncrona.
+
+---
+
+# 1903. Security context threat model
+
+El modelo deberá considerar:
+
+* headers falsificados;
+* identidad inyectada por proxies;
+* pérdida de actor original;
+* confusión actor-subject;
+* tenant swapping;
+* propagación excesiva de privilegios;
+* replay de contextos;
+* contextos expirados;
+* manipulación en colas;
+* trust boundary bypass;
+* suplantación de gateway;
+* uso de metadata no autenticada;
+* contaminación de contextos entre requests;
+* exposición de claims sensibles;
+* propagación transitive trust.
+
+---
+
+# 1904. Security context pipeline
+
+```text
+Authentication Evidence
+        ↓
+Identity Resolution
+        ↓
+Security Context Construction
+        ↓
+Policy-Based Attenuation
+        ↓
+Cryptographic Protection
+        ↓
+Boundary Propagation
+        ↓
+Receiving-Side Validation
+        ↓
+Local Authorization Context
+        ↓
+Audit and Trace Correlation
+```
+
+---
+
+# 1905. SecurityContext
+
+```php
+final readonly class SecurityContext
+{
+    public function __construct(
+        public string $contextId,
+        public IdentityIdentifier|string $subject,
+        public IdentityIdentifier|string $actor,
+        public string $tenantId,
+        public ?string $sessionId,
+        public ?string $clientId,
+        public ?string $workloadId,
+        public AuthenticationAssuranceLevel $assurance,
+        public array $scopes,
+        public array $roles,
+        public array $restrictions,
+        public array $delegationChain,
+        public SecurityContextProvenance $provenance,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1906. SecurityContextProvenance
+
+```php
+final readonly class SecurityContextProvenance
+{
+    public function __construct(
+        public string $issuer,
+        public SecurityContextSource $source,
+        public array $authenticationMethods,
+        public ?string $gatewayId,
+        public ?string $originService,
+        public array $evidenceReferences,
+    ) {
+    }
+}
+```
+
+---
+
+# 1907. SecurityContextSource
+
+```php
+enum SecurityContextSource: string
+{
+    case DirectAuthentication = 'direct_authentication';
+    case Session = 'session';
+    case ApiToken = 'api_token';
+    case GatewayAssertion = 'gateway_assertion';
+    case ServiceIdentity = 'service_identity';
+    case Delegated = 'delegated';
+    case Impersonated = 'impersonated';
+    case QueueEnvelope = 'queue_envelope';
+    case ScheduledExecution = 'scheduled_execution';
+    case SystemOperation = 'system_operation';
+}
+```
+
+---
+
+# 1908. Context immutability
+
+Una vez creado, el contexto deberá ser inmutable.
+
+Cualquier reducción, transformación o delegación deberá producir una nueva instancia.
+
+---
+
+# 1909. Context identity separation
+
+El contexto deberá distinguir siempre:
+
+* actor;
+* subject;
+* client;
+* workload;
+* tenant.
+
+Estos valores no deberán colapsarse en un único identificador genérico.
+
+---
+
+# 1910. Actor identity
+
+El actor representa quién ejecuta realmente la acción.
+
+Ejemplos:
+
+* usuario;
+* administrador;
+* servicio;
+* job;
+* agente automatizado;
+* soporte técnico.
+
+---
+
+# 1911. Subject identity
+
+El subject representa la identidad o recurso en cuyo nombre se actúa.
+
+En una operación ordinaria, actor y subject pueden ser iguales.
+
+---
+
+# 1912. Actor-subject preservation
+
+En delegación o impersonación, ambos deberán mantenerse durante toda la cadena.
+
+---
+
+# 1913. Effective identity
+
+VoltStack podrá calcular una identidad efectiva para simplificar policies, pero no deberá eliminar actor ni subject originales.
+
+---
+
+# 1914. SecurityContextFactory
+
+```php
+interface SecurityContextFactoryInterface
+{
+    public function create(
+        AuthenticationResult $authentication,
+        SecurityContextCreationContext $context
+    ): SecurityContext;
+}
+```
+
+---
+
+# 1915. Security context creation policy
+
+La creación deberá resolver:
+
+* subject;
+* actor;
+* tenant;
+* authentication assurance;
+* sesión;
+* cliente;
+* workload;
+* scopes;
+* restricciones;
+* vigencia;
+* provenance.
+
+---
+
+# 1916. Context creation from sessions
+
+Un contexto derivado de sesión deberá validar:
+
+* estado;
+* expiración;
+* credential version;
+* authorization version;
+* tenant;
+* device binding;
+* anomaly state.
+
+---
+
+# 1917. Context creation from access tokens
+
+Un contexto derivado de token deberá validar:
+
+* issuer;
+* audience;
+* scopes;
+* sender constraints;
+* subject;
+* actor;
+* tenant;
+* expiration;
+* revocation.
+
+---
+
+# 1918. Context creation from mTLS
+
+El certificado cliente deberá mapearse a:
+
+* workload;
+* service;
+* client;
+* tenant;
+* trust domain;
+* assurance.
+
+---
+
+# 1919. AuthorizationContext
+
+```php
+final readonly class AuthorizationContext
+{
+    public function __construct(
+        public SecurityContext $security,
+        public string $resourceType,
+        public ?string $resourceId,
+        public string $action,
+        public array $environment,
+        public array $runtimeRestrictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1920. Authorization context integrity
+
+El contexto utilizado por el motor de autorización deberá derivarse de fuentes validadas y no de parámetros libres del Controller.
+
+---
+
+# 1921. Route-derived authorization metadata
+
+La acción y el tipo de recurso podrán resolverse desde metadata compilada de ruta.
+
+```php
+#[Authorize(
+    action: 'invoice.approve',
+    resource: 'invoice',
+)]
+```
+
+---
+
+# 1922. Request-derived resource identifiers
+
+Los IDs de recursos podrán originarse en parámetros de ruta, pero deberán validarse contra:
+
+* tenant;
+* ownership;
+* tipo esperado;
+* policy;
+* scope.
+
+---
+
+# 1923. RequestIdentityEnvelope
+
+```php
+final readonly class RequestIdentityEnvelope
+{
+    public function __construct(
+        public string $envelopeId,
+        public SecurityContext $context,
+        public string $requestId,
+        public string $method,
+        public string $target,
+        public DateTimeImmutable $createdAt,
+        public DateTimeImmutable $expiresAt,
+        public string $nonce,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1924. Identity envelope purpose
+
+El envelope deberá proteger la identidad cuando atraviese una frontera donde headers ordinarios no sean confiables.
+
+---
+
+# 1925. Signed security contexts
+
+Los contextos propagados deberán firmarse o autenticarse criptográficamente cuando no viajen dentro de un canal que proporcione identidad end-to-end suficiente.
+
+---
+
+# 1926. SecurityContextSigner
+
+```php
+interface SecurityContextSignerInterface
+{
+    public function sign(
+        SecurityContext $context,
+        SecurityContextSigningContext $signingContext
+    ): SignedSecurityContext;
+
+    public function verify(
+        SignedSecurityContext $context,
+        SecurityContextVerificationContext $verificationContext
+    ): SecurityContextVerificationResult;
+}
+```
+
+---
+
+# 1927. SignedSecurityContext
+
+```php
+final readonly class SignedSecurityContext
+{
+    public function __construct(
+        public string $payload,
+        public string $format,
+        public string $issuer,
+        public string $audience,
+        public string $keyId,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $contextId,
+        public string $nonce,
+        public string $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1928. Context serialization format
+
+El formato deberá:
+
+* ser canónico;
+* versionarse;
+* limitar tamaño;
+* evitar serialización PHP nativa;
+* soportar validación estricta;
+* mantener tipos explícitos;
+* rechazar campos desconocidos según profile.
+
+---
+
+# 1929. Context format versioning
+
+Toda representación propagada deberá incluir versión de esquema.
+
+---
+
+# 1930. Context claim allowlist
+
+Solo deberán propagarse campos incluidos en una allowlist para la frontera específica.
+
+---
+
+# 1931. Sensitive context data
+
+No deberán propagarse salvo necesidad:
+
+* credenciales;
+* secretos;
+* factores MFA;
+* hashes;
+* información personal extensa;
+* atributos administrativos innecesarios;
+* evidencia biométrica.
+
+---
+
+# 1932. SecurityContextPropagationPolicy
+
+```php
+interface SecurityContextPropagationPolicyInterface
+{
+    public function evaluate(
+        SecurityContext $context,
+        SecurityBoundary $boundary
+    ): SecurityContextPropagationDecision;
+}
+```
+
+---
+
+# 1933. SecurityContextPropagationDecision
+
+```php
+final readonly class SecurityContextPropagationDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $includedFields,
+        public array $removedScopes,
+        public array $addedRestrictions,
+        public DateInterval $maximumLifetime,
+        public bool $signatureRequired,
+        public bool $encryptionRequired,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1934. SecurityBoundary
+
+```php
+final readonly class SecurityBoundary
+{
+    public function __construct(
+        public string $sourceService,
+        public string $destinationService,
+        public string $sourceTrustDomain,
+        public string $destinationTrustDomain,
+        public string $environment,
+        public string $tenantId,
+        public SecurityBoundaryType $type,
+    ) {
+    }
+}
+```
+
+---
+
+# 1935. SecurityBoundaryType
+
+```php
+enum SecurityBoundaryType: string
+{
+    case InProcess = 'in_process';
+    case InternalService = 'internal_service';
+    case ExternalService = 'external_service';
+    case Queue = 'queue';
+    case EventBus = 'event_bus';
+    case Scheduler = 'scheduler';
+    case Gateway = 'gateway';
+    case CrossTenant = 'cross_tenant';
+    case CrossRegion = 'cross_region';
+}
+```
+
+---
+
+# 1936. Boundary-specific validation
+
+Cada receptor deberá reevaluar el contexto según su propia frontera y no asumir que la validación previa es suficiente.
+
+---
+
+# 1937. Context attenuation
+
+Propagar un contexto deberá reducir privilegios por defecto.
+
+---
+
+# 1938. SecurityContextAttenuator
+
+```php
+interface SecurityContextAttenuatorInterface
+{
+    public function attenuate(
+        SecurityContext $context,
+        ContextAttenuationPolicy $policy
+    ): SecurityContext;
+}
+```
+
+---
+
+# 1939. ContextAttenuationPolicy
+
+```php
+final readonly class ContextAttenuationPolicy
+{
+    public function __construct(
+        public array $allowedScopes,
+        public array $allowedRoles,
+        public array $requiredRestrictions,
+        public array $allowedAudiences,
+        public DateInterval $maximumLifetime,
+        public int $maximumDelegationDepth,
+    ) {
+    }
+}
+```
+
+---
+
+# 1940. Attenuation invariants
+
+La atenuación no deberá:
+
+* agregar scopes;
+* elevar assurance;
+* ampliar audiences;
+* extender expiration;
+* remover restricciones;
+* eliminar provenance.
+
+---
+
+# 1941. No privilege amplification
+
+Un servicio downstream no deberá recibir más autoridad que la poseída por el contexto upstream y la permitida por su policy local.
+
+---
+
+# 1942. Context audience restriction
+
+Todo contexto propagado deberá declarar destinatario específico.
+
+---
+
+# 1943. Context target binding
+
+El envelope podrá ligarse a:
+
+* service ID;
+* endpoint;
+* HTTP method;
+* queue;
+* topic;
+* job type;
+* operation.
+
+---
+
+# 1944. Context freshness
+
+Los contextos propagados deberán tener vida corta.
+
+---
+
+# 1945. SecurityContextLifetimePolicy
+
+```php
+final readonly class SecurityContextLifetimePolicy
+{
+    public function __construct(
+        public DateInterval $maximumLifetime,
+        public DateInterval $maximumClockSkew,
+        public bool $singleUseRequired,
+        public bool $renewalAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 1946. Context renewal
+
+La renovación deberá reconstruir el contexto desde evidencia vigente y no limitarse a cambiar la fecha de expiración.
+
+---
+
+# 1947. Stale authorization prevention
+
+Un contexto deberá invalidarse cuando cambien:
+
+* permisos;
+* roles;
+* tenant membership;
+* credential version;
+* session state;
+* risk status;
+* account state.
+
+---
+
+# 1948. Authorization version binding
+
+El contexto podrá incluir la versión de autorización utilizada al crearse.
+
+---
+
+# 1949. Context replay protection
+
+Los contextos sensibles deberán incluir:
+
+* context ID;
+* nonce;
+* issue time;
+* expiration;
+* audience;
+* request binding.
+
+---
+
+# 1950. SecurityContextReplayRegistry
+
+```php
+interface SecurityContextReplayRegistryInterface
+{
+    public function consume(
+        string $contextId,
+        string $nonce,
+        string $audience,
+        DateTimeImmutable $expiresAt
+    ): SecurityContextReplayResult;
+}
+```
+
+---
+
+# 1951. Single-use contexts
+
+Deberán considerarse para:
+
+* operaciones privilegiadas;
+* approvals;
+* cambios de credenciales;
+* recuperación;
+* ejecución de comandos críticos;
+* workflows financieros.
+
+---
+
+# 1952. Context reuse policy
+
+Los contextos reutilizables deberán limitarse por:
+
+* vida;
+* audience;
+* method;
+* operation;
+* resource;
+* session;
+* sender.
+
+---
+
+# 1953. Trusted proxy identity
+
+VoltStack no deberá confiar automáticamente en headers de identidad añadidos por proxies.
+
+---
+
+# 1954. TrustedProxyDefinition
+
+```php
+final readonly class TrustedProxyDefinition
+{
+    public function __construct(
+        public string $proxyId,
+        public array $networkRanges,
+        public array $allowedHeaders,
+        public CertificateReference|JsonWebKey $verificationCredential,
+        public TrustedProxyState $state,
+        public array $allowedDestinations,
+    ) {
+    }
+}
+```
+
+---
+
+# 1955. TrustedProxyState
+
+```php
+enum TrustedProxyState: string
+{
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1956. Proxy identity header sanitation
+
+Antes de aceptar una request desde un proxy confiable, el proxy deberá eliminar cualquier header de identidad enviado por el cliente.
+
+---
+
+# 1957. Direct access protection
+
+El servicio deberá rechazar headers de identidad cuando la request no provenga del proxy autorizado.
+
+---
+
+# 1958. Gateway identity assertions
+
+Los gateways deberán emitir assertions firmadas y ligadas al request.
+
+---
+
+# 1959. GatewayIdentityAssertion
+
+```php
+final readonly class GatewayIdentityAssertion
+{
+    public function __construct(
+        public string $assertionId,
+        public string $gatewayId,
+        public SecurityContext $context,
+        public string $requestMethod,
+        public string $requestTarget,
+        public string $bodyDigest,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $nonce,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1960. Gateway assertion verification
+
+El backend deberá validar:
+
+* gateway;
+* firma;
+* key state;
+* audience;
+* método;
+* target;
+* body digest;
+* timestamp;
+* nonce;
+* tenant;
+* contexto.
+
+---
+
+# 1961. Header-based identity limitations
+
+Los headers podrán transportar assertions, pero su seguridad dependerá de la firma y del canal, no del nombre del header.
+
+---
+
+# 1962. Service-to-service context propagation
+
+Entre servicios deberá propagarse únicamente la información necesaria para la operación downstream.
+
+---
+
+# 1963. Service actor preservation
+
+Cuando un servicio actúe en nombre de un usuario, el contexto deberá conservar:
+
+* user subject;
+* calling service actor;
+* original actor cuando exista;
+* delegation chain.
+
+---
+
+# 1964. Service identity addition
+
+Cada salto deberá añadir su propia identidad como actor actual o elemento de la cadena, sin eliminar actores previos.
+
+---
+
+# 1965. DelegationChainEntry
+
+```php
+final readonly class DelegationChainEntry
+{
+    public function __construct(
+        public IdentityIdentifier|string $delegator,
+        public IdentityIdentifier|string $delegate,
+        public string $serviceId,
+        public array $scopes,
+        public array $resources,
+        public DateTimeImmutable $delegatedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1966. Delegation chain integrity
+
+La cadena deberá protegerse criptográficamente para impedir:
+
+* eliminación de saltos;
+* inserción;
+* reordenamiento;
+* cambio de scopes;
+* cambio de recursos.
+
+---
+
+# 1967. Delegation depth enforcement
+
+Cada servicio deberá validar la profundidad antes de aceptar o continuar una delegación.
+
+---
+
+# 1968. Delegation provenance
+
+La cadena deberá permitir determinar:
+
+* quién inició;
+* qué servicios intervinieron;
+* qué privilegios se redujeron;
+* qué operación se solicitó;
+* cuándo ocurrió cada salto.
+
+---
+
+# 1969. Context propagation over HTTP
+
+La propagación HTTP podrá usar:
+
+* sender-constrained token;
+* signed identity envelope;
+* mTLS plus signed context;
+* token exchange;
+* gateway assertion.
+
+---
+
+# 1970. Context propagation over RPC
+
+Los protocolos RPC deberán utilizar metadata protegida y contracts tipados.
+
+---
+
+# 1971. Context propagation over message brokers
+
+Los mensajes asíncronos deberán incluir un envelope de seguridad independiente del envelope de negocio.
+
+---
+
+# 1972. AsyncSecurityEnvelope
+
+```php
+final readonly class AsyncSecurityEnvelope
+{
+    public function __construct(
+        public string $envelopeId,
+        public SecurityContext $context,
+        public string $messageId,
+        public string $destination,
+        public string $messageType,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $payloadDigest,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1973. Async context lifetime
+
+La expiración deberá considerar:
+
+* delay;
+* retry;
+* dead-letter queues;
+* scheduling;
+* offline consumers.
+
+No deberá asignarse una vida ilimitada por conveniencia.
+
+---
+
+# 1974. Expired async contexts
+
+Cuando un mensaje llegue con contexto expirado, el consumidor deberá:
+
+* rechazarlo;
+* reautorizarlo;
+* moverlo a quarantine;
+* solicitar nueva autorización;
+
+según la policy.
+
+---
+
+# 1975. Async authorization reevaluation
+
+Para operaciones sensibles, el consumidor deberá reevaluar permisos en el momento de ejecución.
+
+---
+
+# 1976. Queue identity architecture
+
+Cada job deberá tener identidad de ejecución explícita.
+
+---
+
+# 1977. JobExecutionIdentity
+
+```php
+final readonly class JobExecutionIdentity
+{
+    public function __construct(
+        public string $jobId,
+        public JobIdentityType $type,
+        public IdentityIdentifier|string $initiator,
+        public IdentityIdentifier|string $executor,
+        public string $tenantId,
+        public array $scopes,
+        public array $restrictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1978. JobIdentityType
+
+```php
+enum JobIdentityType: string
+{
+    case UserInitiated = 'user_initiated';
+    case ServiceInitiated = 'service_initiated';
+    case Scheduled = 'scheduled';
+    case SystemMaintenance = 'system_maintenance';
+    case EventTriggered = 'event_triggered';
+    case Administrative = 'administrative';
+}
+```
+
+---
+
+# 1979. Job initiator and executor
+
+El job deberá distinguir:
+
+* quién solicitó;
+* qué worker ejecutó;
+* bajo qué servicio;
+* para qué tenant;
+* con qué autoridad.
+
+---
+
+# 1980. Job identity attenuation
+
+Un job no deberá heredar automáticamente todos los permisos interactivos del usuario iniciador.
+
+---
+
+# 1981. JobAuthorizationPolicy
+
+```php
+interface JobAuthorizationPolicyInterface
+{
+    public function evaluate(
+        JobExecutionIdentity $identity,
+        JobDefinition $job,
+        JobExecutionContext $context
+    ): JobAuthorizationDecision;
+}
+```
+
+---
+
+# 1982. Delayed job authorization
+
+Cuando exista un retraso significativo, deberán reevaluarse:
+
+* account state;
+* tenant membership;
+* role;
+* resource ownership;
+* approval state;
+* policy version.
+
+---
+
+# 1983. Job payload identity protection
+
+El contexto de identidad no deberá almacenarse como array PHP libre ni mezclarse sin firma con el payload.
+
+---
+
+# 1984. Job retry identity
+
+Cada retry deberá conservar el contexto original y registrar el intento actual.
+
+---
+
+# 1985. Dead-letter queue security
+
+Los mensajes enviados a DLQ deberán conservar:
+
+* contexto;
+* motivo;
+* historial;
+* integridad;
+* clasificación.
+
+El acceso a la DLQ deberá estar restringido.
+
+---
+
+# 1986. Scheduled task identities
+
+Las tareas programadas deberán ejecutar bajo identidades de sistema específicas y no bajo una identidad global omnipotente.
+
+---
+
+# 1987. ScheduledTaskIdentity
+
+```php
+final readonly class ScheduledTaskIdentity
+{
+    public function __construct(
+        public string $taskId,
+        public string $serviceIdentityId,
+        public string $tenantScope,
+        public array $allowedOperations,
+        public array $allowedResources,
+        public ScheduledTaskState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1988. ScheduledTaskState
+
+```php
+enum ScheduledTaskState: string
+{
+    case Active = 'active';
+    case Paused = 'paused';
+    case Restricted = 'restricted';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1989. Scheduled task tenant scope
+
+Una tarea podrá ser:
+
+* global control plane;
+* single tenant;
+* tenant batch;
+* shard-specific;
+* region-specific.
+
+El alcance deberá declararse explícitamente.
+
+---
+
+# 1990. Event consumer identities
+
+Cada consumidor de eventos deberá poseer identidad propia y autorización por topic y event type.
+
+---
+
+# 1991. EventConsumerIdentity
+
+```php
+final readonly class EventConsumerIdentity
+{
+    public function __construct(
+        public string $consumerId,
+        public string $serviceIdentityId,
+        public array $allowedTopics,
+        public array $allowedEventTypes,
+        public array $tenantScopes,
+        public EventConsumerState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1992. Event authenticity
+
+El consumidor deberá validar:
+
+* producer;
+* event signature;
+* schema;
+* topic;
+* event type;
+* tenant;
+* freshness;
+* replay;
+* payload digest.
+
+---
+
+# 1993. Event actor propagation
+
+Los eventos derivados de una acción de usuario deberán conservar actor y subject cuando sean relevantes para auditoría o autorización.
+
+---
+
+# 1994. Event context minimization
+
+Los eventos de dominio no deberán transformarse en contenedores completos de identidad.
+
+Solo deberá propagarse la información necesaria.
+
+---
+
+# 1995. Distributed tracing security
+
+Las trazas distribuidas deberán correlacionar operaciones sin exponer secretos ni claims sensibles.
+
+---
+
+# 1996. SecurityTraceContext
+
+```php
+final readonly class SecurityTraceContext
+{
+    public function __construct(
+        public string $traceId,
+        public string $spanId,
+        public string $securityContextId,
+        public string $tenantId,
+        public ?string $subjectReference,
+        public ?string $actorReference,
+        public string $classification,
+    ) {
+    }
+}
+```
+
+---
+
+# 1997. Trace identity minimization
+
+Las trazas deberán utilizar identificadores opacos o pseudónimos cuando no sea necesario incluir identidades directas.
+
+---
+
+# 1998. Security context governance
+
+VoltStack deberá mantener políticas e inventario sobre:
+
+* issuers;
+* formatos;
+* audiences;
+* trust boundaries;
+* propagation rules;
+* maximum lifetimes;
+* delegation depth;
+* queue identities;
+* scheduled identities;
+* trusted proxies;
+* gateway assertions;
+* exceptions.
+
+---
+
+# 1999. Security context audit events
+
+Eventos recomendados:
+
+* `SecurityContextCreated`;
+* `SecurityContextAttenuated`;
+* `SecurityContextPropagated`;
+* `SecurityContextPropagationDenied`;
+* `SecurityContextValidated`;
+* `SecurityContextValidationFailed`;
+* `SecurityContextExpired`;
+* `SecurityContextReplayDetected`;
+* `GatewayIdentityAssertionAccepted`;
+* `GatewayIdentityAssertionRejected`;
+* `TrustedProxyIdentityAccepted`;
+* `UntrustedIdentityHeaderDetected`;
+* `DelegationChainExtended`;
+* `DelegationChainRejected`;
+* `AsyncSecurityEnvelopeCreated`;
+* `AsyncSecurityEnvelopeRejected`;
+* `JobIdentityCreated`;
+* `JobAuthorizationDenied`;
+* `ScheduledTaskIdentityUsed`;
+* `EventConsumerIdentityRejected`.
+
+---
+
+# 2000. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Security Context Architecture
+Security Context Immutability
+Actor and Subject Separation
+Security Context Provenance
+Authorization Context Integrity
+Request Identity Envelopes
+Signed Security Contexts
+Canonical Context Serialization
+Context Claim Allowlists
+Security Context Propagation Policies
+Security Boundaries
+Context Attenuation
+No Privilege Amplification
+Audience and Target Binding
+Context Freshness
+Authorization Version Binding
+Context Replay Protection
+Trusted Proxy Identity
+Gateway Identity Assertions
+Gateway Assertion Request Binding
+Service-to-Service Identity Propagation
+Delegation Chain Propagation
+Delegation Chain Integrity
+HTTP and RPC Context Propagation
+Async Security Envelopes
+Queue and Job Identities
+Delayed Authorization Reevaluation
+Job Retry Identity
+Dead-Letter Queue Security
+Scheduled Task Identities
+Event Consumer Identities
+Event Authenticity
+Distributed Tracing Security
+Security Context Governance
+Security Context Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 21
+
+- Identity-aware messaging architecture
+- Secure command envelopes
+- Secure event envelopes
+- Message producer identities
+- Message consumer authorization
+- Topic and queue authorization
+- Message integrity
+- Message confidentiality
+- Message signatures
+- Message replay prevention
+- Message ordering security
+- Idempotency architecture
+- Poison message handling
+- Dead-letter security
+- Delayed message authorization
+- Cross-tenant message isolation
+- Event provenance
+- Event chain integrity
+- Messaging incident response
+- Messaging security governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 21 de varias
+**Cobertura:** Secciones **2001–2100**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 20`
+
+---
+
+# 2001. Identity-Aware Messaging Architecture
+
+VoltStack deberá incorporar una arquitectura de mensajería consciente de identidad para commands, events, jobs, notifications y mensajes de integración.
+
+La arquitectura deberá asegurar que cada mensaje pueda asociarse con:
+
+* producer;
+* initiator;
+* actor;
+* subject;
+* tenant;
+* workload;
+* service;
+* trust domain;
+* authorization context;
+* security policy;
+* provenance.
+
+---
+
+# 2002. Messaging security goals
+
+La arquitectura deberá garantizar:
+
+* autenticidad del productor;
+* integridad del mensaje;
+* confidencialidad cuando corresponda;
+* autorización por destino;
+* aislamiento multi-tenant;
+* resistencia a replay;
+* idempotencia;
+* trazabilidad;
+* propagación mínima de identidad;
+* validación por consumidor;
+* recuperación segura.
+
+---
+
+# 2003. Messaging threat model
+
+El modelo deberá considerar:
+
+* mensajes falsificados;
+* producer spoofing;
+* modificación de payload;
+* replay;
+* duplicate delivery;
+* queue poisoning;
+* cross-tenant routing;
+* topic injection;
+* consumer impersonation;
+* unauthorized subscription;
+* metadata manipulation;
+* reordering malicioso;
+* delayed privilege abuse;
+* exposure en dead-letter queues;
+* signature stripping;
+* downgrade a mensajes no firmados;
+* event-chain tampering.
+
+---
+
+# 2004. Messaging security pipeline
+
+```text
+Business Operation
+        ↓
+Producer Identity Resolution
+        ↓
+Message Authorization
+        ↓
+Security Envelope Construction
+        ↓
+Payload Digest / Encryption
+        ↓
+Signature
+        ↓
+Broker Publication
+        ↓
+Consumer Identity Validation
+        ↓
+Envelope Verification
+        ↓
+Replay and Idempotency Checks
+        ↓
+Consumer Authorization
+        ↓
+Business Handler
+```
+
+---
+
+# 2005. SecureMessagingService
+
+```php
+interface SecureMessagingServiceInterface
+{
+    public function publish(
+        SecureMessage $message,
+        MessagePublicationContext $context
+    ): MessagePublicationResult;
+
+    public function consume(
+        ReceivedMessage $message,
+        MessageConsumptionContext $context
+    ): MessageConsumptionResult;
+}
+```
+
+---
+
+# 2006. SecureMessage
+
+```php
+final readonly class SecureMessage
+{
+    public function __construct(
+        public string $messageId,
+        public string $messageType,
+        public string $destination,
+        public string $tenantId,
+        public MessagePayload $payload,
+        public MessageSecurityEnvelope $security,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2007. MessagePayload
+
+```php
+final readonly class MessagePayload
+{
+    public function __construct(
+        public string $contentType,
+        public string $schemaId,
+        public int $schemaVersion,
+        public string $encodedPayload,
+        public string $digest,
+        public MessageClassification $classification,
+    ) {
+    }
+}
+```
+
+---
+
+# 2008. MessageClassification
+
+```php
+enum MessageClassification: string
+{
+    case Public = 'public';
+    case Internal = 'internal';
+    case Sensitive = 'sensitive';
+    case Restricted = 'restricted';
+    case Privileged = 'privileged';
+}
+```
+
+---
+
+# 2009. Message category separation
+
+VoltStack deberá distinguir al menos:
+
+* commands;
+* domain events;
+* integration events;
+* jobs;
+* notifications;
+* control messages;
+* security events.
+
+Cada categoría deberá tener políticas propias.
+
+---
+
+# 2010. MessageCategory
+
+```php
+enum MessageCategory: string
+{
+    case Command = 'command';
+    case DomainEvent = 'domain_event';
+    case IntegrationEvent = 'integration_event';
+    case Job = 'job';
+    case Notification = 'notification';
+    case Control = 'control';
+    case Security = 'security';
+}
+```
+
+---
+
+# 2011. Command versus event semantics
+
+Un command representa una intención dirigida.
+
+Un event representa un hecho ocurrido.
+
+La arquitectura de seguridad deberá impedir tratar events como commands implícitos sin autorización adicional.
+
+---
+
+# 2012. Secure command envelopes
+
+Todo command sensible deberá incluir un envelope de seguridad verificable.
+
+---
+
+# 2013. SecureCommandEnvelope
+
+```php
+final readonly class SecureCommandEnvelope
+{
+    public function __construct(
+        public string $commandId,
+        public string $commandType,
+        public string $targetService,
+        public string $targetOperation,
+        public SecurityContext $securityContext,
+        public string $payloadDigest,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $nonce,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 2014. Command authorization
+
+Antes de publicar un command deberá validarse:
+
+* producer identity;
+* initiator;
+* tenant;
+* target service;
+* target operation;
+* scopes;
+* resource;
+* business policy;
+* command lifetime.
+
+---
+
+# 2015. CommandPublicationPolicy
+
+```php
+interface CommandPublicationPolicyInterface
+{
+    public function evaluate(
+        SecureCommandEnvelope $command,
+        MessagePublicationContext $context
+    ): CommandPublicationDecision;
+}
+```
+
+---
+
+# 2016. CommandPublicationDecision
+
+```php
+final readonly class CommandPublicationDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $requiredScopes,
+        public array $addedRestrictions,
+        public DateInterval $maximumLifetime,
+        public bool $encryptionRequired,
+        public bool $singleUseRequired,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 2017. Command target binding
+
+Un command deberá ligarse explícitamente a:
+
+* service;
+* operation;
+* resource;
+* tenant;
+* destination;
+* schema version.
+
+---
+
+# 2018. Command replay protection
+
+Los commands sensibles deberán ser single-use o utilizar controles equivalentes.
+
+---
+
+# 2019. CommandReplayRegistry
+
+```php
+interface CommandReplayRegistryInterface
+{
+    public function consume(
+        string $commandId,
+        string $targetService,
+        DateTimeImmutable $expiresAt
+    ): CommandReplayResult;
+}
+```
+
+---
+
+# 2020. Command expiration
+
+Un command expirado no deberá ejecutarse salvo que una policy explícita permita reautorización.
+
+---
+
+# 2021. Secure event envelopes
+
+Los events deberán incluir metadata de autenticidad y provenance.
+
+---
+
+# 2022. SecureEventEnvelope
+
+```php
+final readonly class SecureEventEnvelope
+{
+    public function __construct(
+        public string $eventId,
+        public string $eventType,
+        public string $producerId,
+        public string $tenantId,
+        public ?SecurityContext $originatingContext,
+        public string $payloadDigest,
+        public DateTimeImmutable $occurredAt,
+        public DateTimeImmutable $publishedAt,
+        public EventProvenance $provenance,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 2023. EventProvenance
+
+```php
+final readonly class EventProvenance
+{
+    public function __construct(
+        public string $originService,
+        public string $originInstance,
+        public string $trustDomain,
+        public ?string $correlationId,
+        public ?string $causationId,
+        public array $parentEventIds,
+        public array $evidenceReferences,
+    ) {
+    }
+}
+```
+
+---
+
+# 2024. Event origin integrity
+
+El origin de un event deberá derivarse de credenciales del productor y no de un campo de payload controlado por la aplicación.
+
+---
+
+# 2025. Message producer identity
+
+Todo productor deberá poseer identidad registrada.
+
+---
+
+# 2026. MessageProducerIdentity
+
+```php
+final readonly class MessageProducerIdentity
+{
+    public function __construct(
+        public string $producerId,
+        public string $serviceIdentityId,
+        public string $tenantScope,
+        public array $allowedDestinations,
+        public array $allowedMessageTypes,
+        public MessageProducerState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2027. MessageProducerState
+
+```php
+enum MessageProducerState: string
+{
+    case Active = 'active';
+    case Restricted = 'restricted';
+    case Suspended = 'suspended';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 2028. Producer authentication
+
+El broker o gateway de mensajería deberá autenticar productores mediante:
+
+* mTLS;
+* workload identity;
+* sender-constrained token;
+* signed request;
+* short-lived service credential.
+
+---
+
+# 2029. Producer authorization
+
+Un productor no deberá publicar libremente en cualquier destination.
+
+---
+
+# 2030. ProducerAuthorizationPolicy
+
+```php
+interface ProducerAuthorizationPolicyInterface
+{
+    public function evaluate(
+        MessageProducerIdentity $producer,
+        MessagePublicationRequest $request
+    ): ProducerAuthorizationDecision;
+}
+```
+
+---
+
+# 2031. Producer destination restrictions
+
+La policy deberá limitar:
+
+* queues;
+* topics;
+* exchanges;
+* partitions;
+* tenant namespaces;
+* message types;
+* schema versions.
+
+---
+
+# 2032. Producer spoofing prevention
+
+El valor `producerId` deberá ser establecido o validado por infraestructura confiable.
+
+---
+
+# 2033. Message consumer identity
+
+Todo consumidor deberá poseer identidad propia.
+
+---
+
+# 2034. MessageConsumerIdentity
+
+```php
+final readonly class MessageConsumerIdentity
+{
+    public function __construct(
+        public string $consumerId,
+        public string $serviceIdentityId,
+        public array $subscriptions,
+        public array $allowedMessageTypes,
+        public array $tenantScopes,
+        public MessageConsumerState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2035. MessageConsumerState
+
+```php
+enum MessageConsumerState: string
+{
+    case Active = 'active';
+    case Paused = 'paused';
+    case Restricted = 'restricted';
+    case Suspended = 'suspended';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 2036. Consumer authentication
+
+El broker deberá autenticar al consumidor antes de permitir:
+
+* subscription;
+* read;
+* acknowledge;
+* reject;
+* dead-letter access;
+* replay.
+
+---
+
+# 2037. Consumer authorization
+
+Un consumidor deberá autorizarse por:
+
+* destination;
+* message type;
+* tenant;
+* schema;
+* operation;
+* classification.
+
+---
+
+# 2038. ConsumerAuthorizationPolicy
+
+```php
+interface ConsumerAuthorizationPolicyInterface
+{
+    public function evaluate(
+        MessageConsumerIdentity $consumer,
+        ReceivedMessageMetadata $message
+    ): ConsumerAuthorizationDecision;
+}
+```
+
+---
+
+# 2039. Consumer least privilege
+
+El consumidor deberá recibir únicamente mensajes necesarios para su función.
+
+---
+
+# 2040. Topic and queue authorization
+
+VoltStack deberá modelar autorización por recursos de mensajería.
+
+---
+
+# 2041. MessagingDestination
+
+```php
+final readonly class MessagingDestination
+{
+    public function __construct(
+        public string $destinationId,
+        public MessagingDestinationType $type,
+        public string $tenantScope,
+        public MessageClassification $maximumClassification,
+        public array $allowedProducers,
+        public array $allowedConsumers,
+        public MessagingDestinationState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2042. MessagingDestinationType
+
+```php
+enum MessagingDestinationType: string
+{
+    case Queue = 'queue';
+    case Topic = 'topic';
+    case Exchange = 'exchange';
+    case Stream = 'stream';
+    case DeadLetterQueue = 'dead_letter_queue';
+    case ControlChannel = 'control_channel';
+}
+```
+
+---
+
+# 2043. MessagingDestinationState
+
+```php
+enum MessagingDestinationState: string
+{
+    case Provisioning = 'provisioning';
+    case Active = 'active';
+    case Restricted = 'restricted';
+    case Quarantined = 'quarantined';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 2044. Destination naming
+
+Los nombres deberán:
+
+* evitar colisiones;
+* incluir environment;
+* incluir tenant scope cuando corresponda;
+* impedir injection;
+* usar formatos canónicos;
+* evitar confiar en nombres suministrados libremente.
+
+---
+
+# 2045. Dynamic destination creation
+
+La creación dinámica de queues o topics deberá requerir policy y límites explícitos.
+
+---
+
+# 2046. Wildcard subscription restrictions
+
+Las subscriptions con wildcards deberán:
+
+* restringirse;
+* auditarse;
+* limitarse por namespace;
+* prohibirse para datos privilegiados cuando sea viable.
+
+---
+
+# 2047. Cross-tenant subscription prohibition
+
+Un consumidor single-tenant no deberá suscribirse a destinos de otros tenants.
+
+---
+
+# 2048. Message integrity
+
+Cada mensaje deberá protegerse contra modificación.
+
+---
+
+# 2049. Payload digest
+
+El digest deberá calcularse sobre una representación canónica o sobre bytes exactos claramente definidos.
+
+---
+
+# 2050. MessageDigestService
+
+```php
+interface MessageDigestServiceInterface
+{
+    public function digest(
+        string $payload,
+        MessageDigestProfile $profile
+    ): string;
+
+    public function verify(
+        string $payload,
+        string $expectedDigest,
+        MessageDigestProfile $profile
+    ): bool;
+}
+```
+
+---
+
+# 2051. Metadata integrity
+
+La protección deberá cubrir también metadata crítica:
+
+* message ID;
+* type;
+* producer;
+* tenant;
+* destination;
+* timestamps;
+* schema;
+* classification;
+* causation ID.
+
+---
+
+# 2052. Message signatures
+
+Los mensajes que atraviesen trust boundaries deberán firmarse.
+
+---
+
+# 2053. MessageSigner
+
+```php
+interface MessageSignerInterface
+{
+    public function sign(
+        MessageSigningInput $input,
+        MessageSigningContext $context
+    ): MessageSignature;
+
+    public function verify(
+        MessageSigningInput $input,
+        MessageSignature $signature,
+        MessageVerificationContext $context
+    ): MessageSignatureVerificationResult;
+}
+```
+
+---
+
+# 2054. MessageSigningInput
+
+```php
+final readonly class MessageSigningInput
+{
+    public function __construct(
+        public string $messageId,
+        public string $messageType,
+        public string $destination,
+        public string $tenantId,
+        public string $payloadDigest,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2055. MessageSignature
+
+```php
+final readonly class MessageSignature
+{
+    public function __construct(
+        public string $algorithm,
+        public string $keyId,
+        public string $signature,
+        public DateTimeImmutable $signedAt,
+        public string $profileId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2056. Signature key resolution
+
+El consumidor deberá resolver claves desde una fuente confiable y validar:
+
+* issuer;
+* key ID;
+* algorithm;
+* key state;
+* rotation status;
+* compromise status.
+
+---
+
+# 2057. Signature downgrade prevention
+
+Un destination configurado para mensajes firmados no deberá aceptar mensajes unsigned.
+
+---
+
+# 2058. Message confidentiality
+
+Los mensajes sensibles deberán cifrarse cuando el broker o la infraestructura no proporcionen protección end-to-end suficiente.
+
+---
+
+# 2059. MessageEncryptionService
+
+```php
+interface MessageEncryptionServiceInterface
+{
+    public function encrypt(
+        MessagePayload $payload,
+        MessageEncryptionContext $context
+    ): EncryptedMessagePayload;
+
+    public function decrypt(
+        EncryptedMessagePayload $payload,
+        MessageDecryptionContext $context
+    ): MessagePayload;
+}
+```
+
+---
+
+# 2060. EncryptedMessagePayload
+
+```php
+final readonly class EncryptedMessagePayload
+{
+    public function __construct(
+        public string $algorithm,
+        public string $keyReference,
+        public string $ciphertext,
+        public string $nonce,
+        public string $authenticationTag,
+        public array $associatedData,
+    ) {
+    }
+}
+```
+
+---
+
+# 2061. Associated data
+
+El cifrado deberá autenticar metadata crítica mediante associated data.
+
+---
+
+# 2062. Per-message data keys
+
+Para mensajes de alta sensibilidad podrá utilizarse un DEK único por mensaje protegido mediante envelope encryption.
+
+---
+
+# 2063. Broker confidentiality limitations
+
+TLS entre cliente y broker no protege necesariamente el mensaje:
+
+* dentro del broker;
+* en storage;
+* en replicas;
+* en backups;
+* frente a administradores del broker.
+
+---
+
+# 2064. End-to-end encryption
+
+Cuando sea requerido, solo productores y consumidores autorizados deberán poder descifrar el payload.
+
+---
+
+# 2065. Consumer group key access
+
+Los permisos criptográficos deberán alinearse con consumer groups y tenant scope.
+
+---
+
+# 2066. Message replay prevention
+
+VoltStack deberá detectar reenvío no autorizado del mismo mensaje.
+
+---
+
+# 2067. MessageReplayRegistry
+
+```php
+interface MessageReplayRegistryInterface
+{
+    public function register(
+        string $messageId,
+        string $destination,
+        string $consumerId,
+        DateTimeImmutable $expiresAt
+    ): MessageReplayResult;
+}
+```
+
+---
+
+# 2068. Replay versus redelivery
+
+La arquitectura deberá distinguir:
+
+* redelivery legítima;
+* retry;
+* consumer failover;
+* manual replay autorizado;
+* replay malicioso.
+
+---
+
+# 2069. Replay decision inputs
+
+La decisión deberá considerar:
+
+* message ID;
+* delivery attempt;
+* broker metadata;
+* producer;
+* destination;
+* signature;
+* expiration;
+* prior processing state.
+
+---
+
+# 2070. Manual replay authorization
+
+Reprocesar mensajes históricos deberá requerir:
+
+* autorización;
+* rango definido;
+* justificación;
+* actor;
+* tenant;
+* dry-run cuando aplique;
+* auditoría.
+
+---
+
+# 2071. Message ordering security
+
+El orden deberá protegerse cuando afecte seguridad o integridad de negocio.
+
+---
+
+# 2072. SequenceNumber
+
+```php
+final readonly class SequenceNumber
+{
+    public function __construct(
+        public string $streamId,
+        public int $sequence,
+        public string $producerId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2073. Sequence validation
+
+El consumidor podrá detectar:
+
+* gaps;
+* duplicates;
+* rollback;
+* out-of-order messages;
+* producer reset.
+
+---
+
+# 2074. Ordering trust scope
+
+El orden deberá definirse por:
+
+* aggregate;
+* tenant;
+* partition;
+* stream;
+* producer;
+* resource.
+
+---
+
+# 2075. Ordering attack prevention
+
+No deberá confiarse en sequence numbers no autenticados.
+
+---
+
+# 2076. Idempotency architecture
+
+Los consumidores deberán diseñarse para soportar entrega at-least-once.
+
+---
+
+# 2077. IdempotencyKey
+
+```php
+final readonly class IdempotencyKey
+{
+    public function __construct(
+        public string $key,
+        public string $operation,
+        public string $tenantId,
+        public string $producerId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2078. IdempotencyRegistry
+
+```php
+interface IdempotencyRegistryInterface
+{
+    public function begin(
+        IdempotencyKey $key,
+        DateTimeImmutable $expiresAt
+    ): IdempotencyBeginResult;
+
+    public function complete(
+        IdempotencyKey $key,
+        string $resultDigest
+    ): void;
+
+    public function fail(
+        IdempotencyKey $key,
+        string $failureCode
+    ): void;
+}
+```
+
+---
+
+# 2079. Idempotency scope
+
+La key deberá ligarse a:
+
+* operation;
+* tenant;
+* producer;
+* target resource;
+* message type.
+
+---
+
+# 2080. Idempotency retention
+
+La retención deberá superar la ventana máxima de redelivery esperada.
+
+---
+
+# 2081. Exactly-once claims
+
+VoltStack no deberá asumir exactly-once delivery como garantía universal.
+
+La consistencia deberá construirse con:
+
+* idempotencia;
+* transactions;
+* outbox;
+* inbox;
+* deduplication;
+* reconciliation.
+
+---
+
+# 2082. Secure outbox pattern
+
+El outbox deberá persistir:
+
+* business change;
+* message metadata;
+* security metadata;
+* payload digest;
+* publication state;
+
+dentro de una frontera transaccional apropiada.
+
+---
+
+# 2083. OutboxMessageRecord
+
+```php
+final readonly class OutboxMessageRecord
+{
+    public function __construct(
+        public string $outboxId,
+        public string $aggregateId,
+        public SecureMessage $message,
+        public OutboxMessageState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $publishedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2084. Secure inbox pattern
+
+El consumidor deberá registrar mensajes procesados antes o junto con efectos de negocio críticos.
+
+---
+
+# 2085. InboxMessageRecord
+
+```php
+final readonly class InboxMessageRecord
+{
+    public function __construct(
+        public string $messageId,
+        public string $consumerId,
+        public string $tenantId,
+        public InboxMessageState $state,
+        public DateTimeImmutable $receivedAt,
+        public ?DateTimeImmutable $processedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2086. Poison message detection
+
+Un poison message es aquel que falla repetidamente de forma no transitoria.
+
+---
+
+# 2087. PoisonMessageAssessment
+
+```php
+final readonly class PoisonMessageAssessment
+{
+    public function __construct(
+        public bool $poison,
+        public PoisonMessageReason $reason,
+        public int $failureCount,
+        public array $evidence,
+        public PoisonMessageAction $recommendedAction,
+    ) {
+    }
+}
+```
+
+---
+
+# 2088. PoisonMessageReason
+
+```php
+enum PoisonMessageReason: string
+{
+    case InvalidSchema = 'invalid_schema';
+    case InvalidSignature = 'invalid_signature';
+    case UnauthorizedProducer = 'unauthorized_producer';
+    case DecryptionFailure = 'decryption_failure';
+    case UnsupportedVersion = 'unsupported_version';
+    case PersistentBusinessFailure = 'persistent_business_failure';
+    case MaliciousPayload = 'malicious_payload';
+}
+```
+
+---
+
+# 2089. PoisonMessageAction
+
+```php
+enum PoisonMessageAction: string
+{
+    case Retry = 'retry';
+    case Quarantine = 'quarantine';
+    case DeadLetter = 'dead_letter';
+    case Discard = 'discard';
+    case Escalate = 'escalate';
+}
+```
+
+---
+
+# 2090. Retry policy
+
+Los retries deberán distinguir fallos:
+
+* transitorios;
+* permanentes;
+* de seguridad;
+* de autorización;
+* de schema;
+* de dependencia.
+
+Los fallos de firma o tenant no deberán resolverse mediante retries indefinidos.
+
+---
+
+# 2091. Dead-letter queue security
+
+Las DLQs deberán considerarse repositorios de datos sensibles.
+
+---
+
+# 2092. DeadLetterRecord
+
+```php
+final readonly class DeadLetterRecord
+{
+    public function __construct(
+        public string $deadLetterId,
+        public SecureMessage $originalMessage,
+        public string $consumerId,
+        public string $failureCode,
+        public array $failureMetadata,
+        public DateTimeImmutable $failedAt,
+        public DeadLetterState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2093. DeadLetterState
+
+```php
+enum DeadLetterState: string
+{
+    case Quarantined = 'quarantined';
+    case UnderReview = 'under_review';
+    case ApprovedForReplay = 'approved_for_replay';
+    case Replayed = 'replayed';
+    case Discarded = 'discarded';
+    case Archived = 'archived';
+}
+```
+
+---
+
+# 2094. DLQ access controls
+
+El acceso deberá limitarse por:
+
+* role;
+* tenant;
+* classification;
+* operation;
+* approval;
+* incident;
+* environment.
+
+---
+
+# 2095. DLQ payload handling
+
+Las interfaces administrativas deberán:
+
+* redactar secretos;
+* evitar renderizado inseguro;
+* limitar descargas;
+* registrar lecturas;
+* impedir ejecución accidental;
+* mostrar provenance.
+
+---
+
+# 2096. Delayed message authorization
+
+Un mensaje válido al publicarse puede dejar de estar autorizado al ejecutarse.
+
+---
+
+# 2097. DelayedAuthorizationPolicy
+
+```php
+interface DelayedAuthorizationPolicyInterface
+{
+    public function requiresReevaluation(
+        SecureMessage $message,
+        MessageConsumptionContext $context
+    ): bool;
+}
+```
+
+---
+
+# 2098. Authorization reevaluation triggers
+
+Se deberá reevaluar cuando:
+
+* expiró el contexto;
+* cambió la policy;
+* cambió el tenant membership;
+* cambió el resource owner;
+* fue revocada la delegación;
+* cambió el riesgo;
+* pasó una ventana temporal significativa;
+* el mensaje proviene de DLQ o replay manual.
+
+---
+
+# 2099. Delayed command rejection
+
+Si la autorización ya no es válida, el command deberá:
+
+* rechazarse;
+* registrarse;
+* notificarse;
+* enviarse a una cola de revisión;
+
+sin ejecutar efectos parciales.
+
+---
+
+# 2100. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity-Aware Messaging Architecture
+Messaging Security Pipeline
+Secure Command Envelopes
+Command Publication Authorization
+Command Target Binding
+Command Replay Protection
+Secure Event Envelopes
+Event Provenance
+Producer Identities
+Producer Authentication
+Producer Destination Authorization
+Consumer Identities
+Consumer Authentication
+Consumer Authorization
+Topic and Queue Authorization
+Destination Isolation
+Cross-Tenant Subscription Protection
+Message Integrity
+Payload and Metadata Digests
+Message Signatures
+Signature Downgrade Prevention
+Message Confidentiality
+End-to-End Encryption
+Per-Message Data Keys
+Message Replay Prevention
+Replay versus Redelivery
+Manual Replay Authorization
+Message Ordering Security
+Sequence Validation
+Idempotency Architecture
+Secure Outbox Pattern
+Secure Inbox Pattern
+Poison Message Detection
+Security-Aware Retry Policies
+Dead-Letter Queue Security
+DLQ Access Governance
+Delayed Message Authorization
+Runtime Authorization Reevaluation
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 22
+
+- Cross-tenant messaging isolation
+- Tenant-bound destinations
+- Tenant-aware partitioning
+- Cross-tenant event routing
+- Shared broker security
+- Messaging namespace policies
+- Broker credential isolation
+- Broker administration security
+- Event chain integrity
+- Event hash chains
+- Event provenance verification
+- Event sourcing security
+- Event store access control
+- Event redaction
+- Crypto-shredding
+- Event replay governance
+- Messaging incident response
+- Broker compromise response
+- Messaging observability
+- Messaging security governance
+```
