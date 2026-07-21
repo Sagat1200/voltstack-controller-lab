@@ -27217,3 +27217,2376 @@ Stateful and Stateless Session Models
 Idle and Absolute Timeouts
 Concurrent Session Control Foundations
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 6 de varias
+**Cobertura:** Secciones **501–600**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 5`
+
+---
+
+# 501. Session Validation Pipeline
+
+Toda petición autenticada mediante sesión deberá atravesar una validación completa antes de reconstruir el `IdentityContext`.
+
+```text
+Incoming Request
+      ↓
+Session Credential Extraction
+      ↓
+Cookie Security Validation
+      ↓
+Session Identifier Parsing
+      ↓
+Session Store Lookup
+      ↓
+Lifecycle Validation
+      ↓
+Expiration Validation
+      ↓
+Credential Version Validation
+      ↓
+Authorization Version Validation
+      ↓
+Tenant Binding Validation
+      ↓
+Device and Risk Evaluation
+      ↓
+Activity Update
+      ↓
+Identity Context Reconstruction
+```
+
+---
+
+# 502. Session validation principle
+
+La existencia de un identificador válido no implica que la sesión siga siendo confiable.
+
+---
+
+# 503. SessionValidator
+
+```php
+interface SessionValidatorInterface
+{
+    public function validate(
+        PresentedSessionCredential $credential,
+        SessionValidationContext $context
+    ): SessionValidationResult;
+}
+```
+
+---
+
+# 504. PresentedSessionCredential
+
+```php
+final readonly class PresentedSessionCredential
+{
+    public function __construct(
+        public SensitiveValue $identifier,
+        public SessionTransport $transport,
+        public string $cookieName,
+    ) {
+    }
+}
+```
+
+---
+
+# 505. SessionTransport
+
+```php
+enum SessionTransport: string
+{
+    case SecureCookie = 'secure_cookie';
+    case AuthorizationHeader = 'authorization_header';
+    case DeviceCredential = 'device_credential';
+}
+```
+
+---
+
+# 506. Query-string sessions prohibition
+
+VoltStack no deberá aceptar identificadores de sesión desde:
+
+* query strings;
+* fragments;
+* URL paths;
+* formularios ocultos;
+
+salvo protocolos legacy explícitamente aislados y deshabilitados por defecto.
+
+---
+
+# 507. SessionValidationContext
+
+```php
+final readonly class SessionValidationContext
+{
+    public function __construct(
+        public RequestFingerprint $request,
+        public RouteAuthenticationMetadata $route,
+        public ?string $expectedTenantId,
+        public DateTimeImmutable $now,
+    ) {
+    }
+}
+```
+
+---
+
+# 508. SessionValidationResult
+
+```php
+final readonly class SessionValidationResult
+{
+    public function __construct(
+        public SessionValidationStatus $status,
+        public ?SessionRecord $session,
+        public ?IdentityContext $identity,
+        public array $securityEvents,
+        public bool $rotateRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 509. SessionValidationStatus
+
+```php
+enum SessionValidationStatus: string
+{
+    case Valid = 'valid';
+    case Missing = 'missing';
+    case Invalid = 'invalid';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Suspended = 'suspended';
+    case ContextMismatch = 'context_mismatch';
+    case ReauthenticationRequired = 'reauthentication_required';
+    case RiskRejected = 'risk_rejected';
+}
+```
+
+---
+
+# 510. Generic invalid-session behavior
+
+La respuesta externa no deberá revelar si la sesión:
+
+* no existe;
+* expiró;
+* fue revocada;
+* pertenece a otro tenant;
+* fue reemplazada;
+* falló por riesgo.
+
+---
+
+# 511. Session lifecycle states
+
+```php
+enum SessionLifecycleState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Restricted = 'restricted';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Expired = 'expired';
+    case Replaced = 'replaced';
+}
+```
+
+---
+
+# 512. Pending session
+
+Una sesión `Pending` podrá existir durante:
+
+* MFA incompleto;
+* verificación de dispositivo;
+* bootstrap;
+* recuperación;
+* consentimiento requerido.
+
+---
+
+# 513. Pending session restrictions
+
+No deberá acceder a Controllers ordinarios autenticados.
+
+Solo podrá acceder a rutas explícitamente autorizadas para completar el flujo.
+
+---
+
+# 514. Active session
+
+Una sesión `Active` será elegible para reconstruir un contexto autenticado completo.
+
+---
+
+# 515. Restricted session
+
+Una sesión `Restricted` tendrá una lista explícita de capacidades permitidas.
+
+---
+
+# 516. RestrictedSessionCapabilities
+
+```php
+final readonly class RestrictedSessionCapabilities
+{
+    public function __construct(
+        public array $allowedRouteNames,
+        public array $allowedOperations,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 517. Suspended session
+
+Una sesión podrá suspenderse temporalmente por:
+
+* riesgo;
+* investigación;
+* dispositivo comprometido;
+* anomalía;
+* acción administrativa.
+
+---
+
+# 518. Revoked session
+
+Una sesión revocada deberá rechazarse permanentemente.
+
+---
+
+# 519. Expired session
+
+La expiración deberá establecerse de forma explícita y auditable.
+
+---
+
+# 520. Replaced session
+
+Una sesión rotada podrá conservar un registro `Replaced` para detectar reutilización del identificador anterior.
+
+---
+
+# 521. Session state transition rules
+
+```text
+Pending → Active
+Pending → Revoked
+Active → Restricted
+Active → Suspended
+Active → Replaced
+Active → Revoked
+Active → Expired
+Restricted → Active
+Restricted → Revoked
+Suspended → Active
+Suspended → Revoked
+```
+
+Las transiciones deberán ejecutarse mediante servicios controlados.
+
+---
+
+# 522. Session state machine
+
+```php
+interface SessionStateMachineInterface
+{
+    public function transition(
+        SessionRecord $session,
+        SessionLifecycleState $target,
+        SessionTransitionContext $context
+    ): SessionRecord;
+}
+```
+
+---
+
+# 523. Illegal transitions
+
+No se permitirá:
+
+* reactivar una sesión revocada;
+* volver a activar una sesión expirada;
+* convertir una sesión reemplazada en activa;
+* omitir auditoría en transiciones administrativas.
+
+---
+
+# 524. Session expiration validation
+
+La validación deberá comprobar:
+
+* idle expiration;
+* absolute expiration;
+* policy expiration;
+* credential expiration;
+* emergency invalidation.
+
+---
+
+# 525. Server-side expiration authority
+
+La fecha almacenada en cliente nunca será fuente de verdad para la expiración.
+
+---
+
+# 526. Idle activity update
+
+La actualización de `lastActivityAt` deberá ser:
+
+* limitada;
+* atómica;
+* tolerante a concurrencia;
+* no ejecutada en cada request innecesariamente.
+
+---
+
+# 527. Activity write throttling
+
+VoltStack podrá actualizar actividad solo cuando haya transcurrido un intervalo mínimo.
+
+```php
+final readonly class SessionActivityPolicy
+{
+    public function __construct(
+        public int $minimumWriteIntervalSeconds,
+        public array $ignoredRequestTypes,
+    ) {
+    }
+}
+```
+
+---
+
+# 528. Absolute expiration enforcement
+
+La expiración absoluta deberá aplicarse aunque existan requests concurrentes o refreshes.
+
+---
+
+# 529. Session revocation architecture
+
+La revocación deberá ser una operación centralizada, auditable y propagable entre nodos.
+
+---
+
+# 530. SessionRevocationService
+
+```php
+interface SessionRevocationServiceInterface
+{
+    public function revoke(
+        SessionIdentifier $session,
+        SessionRevocationReason $reason,
+        RevocationContext $context
+    ): SessionRevocationResult;
+
+    public function revokeAll(
+        IdentityIdentifier $identity,
+        SessionRevocationFilter $filter,
+        SessionRevocationReason $reason
+    ): BulkSessionRevocationResult;
+}
+```
+
+---
+
+# 531. SessionRevocationReason
+
+```php
+enum SessionRevocationReason: string
+{
+    case UserLogout = 'user_logout';
+    case GlobalLogout = 'global_logout';
+    case PasswordChanged = 'password_changed';
+    case CredentialCompromised = 'credential_compromised';
+    case MfaChanged = 'mfa_changed';
+    case DeviceLost = 'device_lost';
+    case RiskDetected = 'risk_detected';
+    case AdministrativeAction = 'administrative_action';
+    case AccountSuspended = 'account_suspended';
+    case TokenReplay = 'token_replay';
+    case SecurityIncident = 'security_incident';
+}
+```
+
+---
+
+# 532. Revocation context
+
+```php
+final readonly class RevocationContext
+{
+    public function __construct(
+        public IdentityIdentifier $actor,
+        public DateTimeImmutable $occurredAt,
+        public ?string $incidentId,
+        public ?string $reasonDetail,
+    ) {
+    }
+}
+```
+
+---
+
+# 533. Revocation propagation
+
+En despliegues distribuidos, la revocación deberá propagarse mediante:
+
+* store compartido;
+* eventos;
+* invalidation bus;
+* cache eviction;
+* revocation registry.
+
+---
+
+# 534. Revocation latency
+
+Los perfiles de seguridad deberán definir el máximo retraso aceptable.
+
+---
+
+# 535. Fail-closed revocation
+
+En operaciones críticas, si no puede confirmarse el estado de revocación, la sesión deberá rechazarse.
+
+---
+
+# 536. Global logout
+
+El logout global deberá invalidar todas las sesiones elegibles de una identidad.
+
+---
+
+# 537. Global logout filters
+
+La política podrá excluir o incluir:
+
+* sesión actual;
+* sesiones de servicio;
+* sesiones administrativas;
+* dispositivos administrados;
+* impersonaciones;
+* tokens persistentes.
+
+---
+
+# 538. SessionRevocationFilter
+
+```php
+final readonly class SessionRevocationFilter
+{
+    public function __construct(
+        public bool $includeCurrent,
+        public array $sessionTypes,
+        public ?string $tenantId,
+        public ?DateTimeImmutable $issuedBefore,
+    ) {
+    }
+}
+```
+
+---
+
+# 539. Logout semantics
+
+Logout deberá significar más que borrar una cookie.
+
+---
+
+# 540. Logout flow
+
+```text
+Authenticated Request
+      ↓
+Validate Session
+      ↓
+Revoke Server-Side Session
+      ↓
+Revoke or Detach Persistent Tokens
+      ↓
+Invalidate CSRF State
+      ↓
+Expire Client Cookie
+      ↓
+Audit
+      ↓
+Return Safe Response
+```
+
+---
+
+# 541. Cookie deletion
+
+La cookie deberá eliminarse usando los mismos atributos relevantes con los que fue emitida:
+
+* name;
+* path;
+* domain;
+* secure context.
+
+---
+
+# 542. Logout idempotency
+
+Repetir logout deberá ser seguro y producir una respuesta consistente.
+
+---
+
+# 543. Logout CSRF protection
+
+El endpoint de logout deberá protegerse contra logout CSRF cuando la aplicación lo requiera.
+
+---
+
+# 544. GET logout prohibition
+
+Logout mediante `GET` deberá evitarse por defecto.
+
+---
+
+# 545. Post-logout redirect
+
+El redirect deberá pasar por la política de redirects seguros.
+
+---
+
+# 546. Logout event
+
+```php
+final readonly class SessionLoggedOut
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public SessionIdentifier $session,
+        public SessionRevocationReason $reason,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 547. Concurrent session management
+
+El usuario deberá poder revisar y administrar sesiones activas.
+
+---
+
+# 548. Session inventory
+
+```php
+final readonly class SessionInventoryItem
+{
+    public function __construct(
+        public string $displayId,
+        public SessionType $type,
+        public SessionLifecycleState $state,
+        public DateTimeImmutable $createdAt,
+        public DateTimeImmutable $lastActivityAt,
+        public ?string $deviceName,
+        public ?string $approximateLocation,
+        public bool $current,
+        public AuthenticationAssuranceLevel $assurance,
+    ) {
+    }
+}
+```
+
+---
+
+# 549. Inventory data minimization
+
+El inventario no deberá exponer:
+
+* session ID real;
+* IP completa por defecto;
+* fingerprint interno;
+* tokens;
+* cookie values;
+* datos de red precisos innecesarios.
+
+---
+
+# 550. Session display identifier
+
+El `displayId` deberá ser un identificador seguro separado del session ID autenticante.
+
+---
+
+# 551. Session device inventory
+
+Cada sesión podrá asociarse a un dispositivo reconocido.
+
+---
+
+# 552. SessionDeviceBinding
+
+```php
+final readonly class SessionDeviceBinding
+{
+    public function __construct(
+        public string $sessionId,
+        public ?DeviceIdentifier $device,
+        public DeviceBindingStrength $strength,
+        public DateTimeImmutable $boundAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 553. DeviceBindingStrength
+
+```php
+enum DeviceBindingStrength: string
+{
+    case None = 'none';
+    case Observed = 'observed';
+    case CookieBound = 'cookie_bound';
+    case Cryptographic = 'cryptographic';
+    case Managed = 'managed';
+}
+```
+
+---
+
+# 554. Passive binding limitations
+
+Un user agent o IP no constituye una vinculación criptográfica.
+
+---
+
+# 555. IP binding risks
+
+Vincular estrictamente una sesión a IP puede causar problemas por:
+
+* redes móviles;
+* NAT;
+* proxies;
+* IPv6 privacy addresses;
+* roaming;
+* VPN;
+* cambios corporativos.
+
+---
+
+# 556. Recommended IP usage
+
+La IP deberá utilizarse como señal de riesgo, no como identidad rígida por defecto.
+
+---
+
+# 557. User-Agent binding risks
+
+El User-Agent puede:
+
+* cambiar;
+* falsificarse;
+* reducirse por privacidad;
+* ser idéntico en muchos dispositivos.
+
+---
+
+# 558. Request fingerprint
+
+```php
+final readonly class RequestFingerprint
+{
+    public function __construct(
+        public ?string $ipPrefix,
+        public ?string $userAgentFamily,
+        public ?string $deviceCookieId,
+        public ?string $tlsFingerprint,
+        public ?string $clientInstanceId,
+    ) {
+    }
+}
+```
+
+---
+
+# 559. Fingerprint classification
+
+Cada señal deberá marcarse como:
+
+* stable;
+* semi-stable;
+* volatile;
+* untrusted;
+* privacy-sensitive.
+
+---
+
+# 560. Binding mismatch response
+
+Un cambio de fingerprint podrá provocar:
+
+* continuar;
+* elevar riesgo;
+* requerir step-up;
+* rotar sesión;
+* restringir;
+* revocar.
+
+---
+
+# 561. Cryptographic session binding
+
+VoltStack podrá soportar sesiones vinculadas a una clave del cliente.
+
+---
+
+# 562. Proof-of-possession session
+
+```php
+final readonly class ProofOfPossessionSessionBinding
+{
+    public function __construct(
+        public string $publicKeyThumbprint,
+        public string $algorithm,
+        public DateTimeImmutable $boundAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 563. Proof-of-possession benefits
+
+Reduce el valor de un session ID robado al requerir prueba adicional de clave.
+
+---
+
+# 564. Proof-of-possession limitations
+
+Puede aumentar:
+
+* complejidad;
+* incompatibilidad;
+* problemas de recuperación;
+* dependencia del cliente;
+* costo operacional.
+
+---
+
+# 565. Credential versioning
+
+La identidad deberá mantener una versión de credenciales.
+
+---
+
+# 566. CredentialVersion
+
+```php
+final readonly class CredentialVersion
+{
+    public function __construct(
+        public int $value,
+        public DateTimeImmutable $updatedAt,
+        public CredentialVersionReason $reason,
+    ) {
+    }
+}
+```
+
+---
+
+# 567. CredentialVersionReason
+
+```php
+enum CredentialVersionReason: string
+{
+    case PasswordChanged = 'password_changed';
+    case PasswordReset = 'password_reset';
+    case MfaChanged = 'mfa_changed';
+    case PasskeyRevoked = 'passkey_revoked';
+    case RecoveryCompleted = 'recovery_completed';
+    case SecurityIncident = 'security_incident';
+}
+```
+
+---
+
+# 568. Credential version validation
+
+La versión almacenada en sesión deberá compararse con la versión actual de la identidad.
+
+---
+
+# 569. Version mismatch
+
+Una discrepancia podrá:
+
+* revocar la sesión;
+* exigir reautenticación;
+* restringir operaciones;
+* permitir continuidad limitada según política.
+
+---
+
+# 570. Authorization versioning
+
+La sesión deberá poder detectar cambios en:
+
+* roles;
+* permisos;
+* tenant membership;
+* policies;
+* resource scopes;
+* account status.
+
+---
+
+# 571. AuthorizationVersion
+
+```php
+final readonly class AuthorizationVersion
+{
+    public function __construct(
+        public int $value,
+        public DateTimeImmutable $updatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 572. Authorization cache invalidation
+
+Los permisos derivados dentro de la sesión deberán invalidarse cuando cambie la versión.
+
+---
+
+# 573. Stale authorization prevention
+
+Una sesión no deberá conservar privilegios indefinidamente después de:
+
+* quitar un rol;
+* eliminar tenant membership;
+* revocar una policy;
+* cambiar resource scope.
+
+---
+
+# 574. Authorization refresh strategy
+
+El framework podrá:
+
+* reconstruir contexto;
+* invalidar cache;
+* rotar sesión;
+* revocar;
+* exigir nueva autenticación para cambios sensibles.
+
+---
+
+# 575. Session refresh
+
+Session refresh significa renovar estado de sesión sin repetir necesariamente la autenticación primaria.
+
+---
+
+# 576. Refresh eligibility
+
+Solo una sesión:
+
+* activa;
+* no expirada;
+* no revocada;
+* compatible con policy;
+* sin riesgo crítico;
+
+podrá renovarse.
+
+---
+
+# 577. Refresh operation
+
+```php
+interface SessionRefreshServiceInterface
+{
+    public function refresh(
+        SessionRecord $session,
+        SessionRefreshContext $context
+    ): SessionRefreshResult;
+}
+```
+
+---
+
+# 578. Refresh rotation
+
+La renovación deberá rotar el identificador cuando el perfil lo requiera.
+
+---
+
+# 579. Refresh does not reset absolute lifetime
+
+La renovación no deberá extender la expiración absoluta más allá de la política original, salvo reautenticación explícita.
+
+---
+
+# 580. Remember-Me Architecture
+
+“Remember me” no deberá significar una sesión ordinaria de duración indefinida.
+
+---
+
+# 581. Persistent login model
+
+VoltStack deberá separar:
+
+* sesión interactiva corta;
+* credential persistente de reautenticación;
+* nueva sesión emitida después de validar esa credential.
+
+---
+
+# 582. PersistentLoginToken
+
+```php
+final readonly class PersistentLoginToken
+{
+    public function __construct(
+        public string $tokenId,
+        public string $familyId,
+        public IdentityIdentifier $identity,
+        public string $secretDigest,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public PersistentTokenState $state,
+        public ?string $deviceId,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 583. PersistentTokenState
+
+```php
+enum PersistentTokenState: string
+{
+    case Active = 'active';
+    case Rotated = 'rotated';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 584. Persistent token properties
+
+El token deberá ser:
+
+* aleatorio;
+* opaco;
+* de alta entropía;
+* revocable;
+* rotatable;
+* vinculado a una familia;
+* almacenado de forma derivada.
+
+---
+
+# 585. Selector-validator split
+
+El token podrá representarse mediante:
+
+```text
+selector.validator
+```
+
+Donde:
+
+* el selector permite lookup;
+* el validator actúa como secreto;
+* solo se almacena su digest.
+
+---
+
+# 586. Persistent cookie profile
+
+La cookie deberá ser:
+
+* `Secure`;
+* `HttpOnly`;
+* `SameSite` apropiado;
+* scope reducido;
+* separada de la cookie de sesión;
+* revocable.
+
+---
+
+# 587. Remember-me authentication strength
+
+Una sesión creada desde persistent login deberá iniciar con menor freshness que una autenticación interactiva reciente.
+
+---
+
+# 588. Sensitive route step-up
+
+Las operaciones sensibles deberán exigir nueva autenticación aunque la sesión provenga de remember-me.
+
+---
+
+# 589. Persistent token rotation
+
+Cada uso válido deberá emitir un nuevo token y retirar el anterior.
+
+---
+
+# 590. Token family
+
+Una familia representa la cadena de rotaciones derivadas de un mismo enrolamiento persistente.
+
+---
+
+# 591. PersistentTokenFamily
+
+```php
+final readonly class PersistentTokenFamily
+{
+    public function __construct(
+        public string $familyId,
+        public IdentityIdentifier $identity,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $revokedAt,
+        public PersistentTokenFamilyState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 592. PersistentTokenFamilyState
+
+```php
+enum PersistentTokenFamilyState: string
+{
+    case Active = 'active';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 593. Rotation transaction
+
+El uso deberá ejecutar atómicamente:
+
+```text
+Validate Current Token
+      ↓
+Mark Current as Rotated
+      ↓
+Create Successor Token
+      ↓
+Issue New Session
+      ↓
+Issue New Persistent Cookie
+```
+
+---
+
+# 594. Refresh token reuse detection
+
+Si un token marcado como `Rotated` vuelve a utilizarse, deberá considerarse replay.
+
+---
+
+# 595. Family revocation on replay
+
+Ante reuse confirmado deberá:
+
+* marcar la familia como comprometida;
+* revocar tokens descendientes;
+* revocar sesiones asociadas según política;
+* elevar riesgo;
+* notificar al usuario;
+* generar incidente.
+
+---
+
+# 596. Concurrent request tolerance
+
+El diseño deberá diferenciar entre:
+
+* race legítimo;
+* retry de red;
+* replay malicioso.
+
+---
+
+# 597. Rotation grace record
+
+Podrá conservarse una ventana muy corta de idempotencia vinculada al mismo request context.
+
+No deberá permitir emitir múltiples descendientes válidos.
+
+---
+
+# 598. Session anomaly detection
+
+El motor deberá evaluar anomalías como:
+
+* cambio abrupto de geografía;
+* uso simultáneo incompatible;
+* token reutilizado;
+* dispositivo comprometido;
+* user agent imposible;
+* velocidad anormal;
+* sesión antigua reactivada;
+* sesión reemplazada reutilizada.
+
+---
+
+# 599. SessionAnomalyEngine
+
+```php
+interface SessionAnomalyEngineInterface
+{
+    public function assess(
+        SessionRecord $session,
+        SessionValidationContext $context
+    ): SessionAnomalyAssessment;
+}
+```
+
+Las acciones posibles incluirán:
+
+* permitir;
+* rotar;
+* requerir step-up;
+* restringir;
+* suspender;
+* revocar;
+* abrir incidente.
+
+---
+
+# 600. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Session Validation Pipeline
+Explicit Session Lifecycle States
+Session State Transitions
+Idle and Absolute Expiration Enforcement
+Distributed Session Revocation
+Global Logout
+Secure Logout Semantics
+Concurrent Session Inventory
+Device and Request Binding
+IP and User-Agent Risk Treatment
+Proof-of-Possession Session Foundations
+Credential Versioning
+Authorization Versioning
+Stale Privilege Prevention
+Session Refresh
+Remember-Me Architecture
+Persistent Login Tokens
+Token Families
+Rotation and Replay Detection
+Session Anomaly Detection
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 7 de varias
+**Cobertura:** Secciones **601–700**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 6`
+
+---
+
+# 601. OAuth 2.0 Security Architecture
+
+OAuth 2.0 permitirá que una aplicación obtenga acceso limitado a recursos protegidos en nombre de:
+
+* un usuario;
+* una organización;
+* un tenant;
+* un servicio;
+* una workload identity.
+
+OAuth no deberá utilizarse como autenticación de usuario por sí solo.
+
+Para autenticación federada deberá combinarse con OpenID Connect u otro protocolo de identidad explícito.
+
+---
+
+# 602. OAuth security goals
+
+El subsistema deberá garantizar:
+
+* autorización delegada;
+* minimización de privilegios;
+* vinculación de tokens;
+* protección contra replay;
+* validación estricta de redirect URIs;
+* separación entre clientes;
+* aislamiento multi-tenant;
+* revocación;
+* trazabilidad;
+* compatibilidad con clientes públicos y confidenciales.
+
+---
+
+# 603. OAuth threat model
+
+El modelo deberá considerar:
+
+* authorization code interception;
+* authorization code injection;
+* token theft;
+* token replay;
+* redirect URI manipulation;
+* mix-up attacks;
+* CSRF;
+* open redirects;
+* malicious clients;
+* client impersonation;
+* scope escalation;
+* audience confusion;
+* refresh token theft;
+* downgrade;
+* consent phishing;
+* device code abuse.
+
+---
+
+# 604. OAuth actors
+
+```php
+enum OAuthActorRole: string
+{
+    case ResourceOwner = 'resource_owner';
+    case Client = 'client';
+    case AuthorizationServer = 'authorization_server';
+    case ResourceServer = 'resource_server';
+}
+```
+
+---
+
+# 605. Authorization server boundary
+
+El Authorization Server deberá ser responsable de:
+
+* autenticación del usuario;
+* consentimiento;
+* autorización;
+* emisión de códigos;
+* emisión de tokens;
+* refresh;
+* revocación;
+* introspection;
+* metadata.
+
+---
+
+# 606. Resource server boundary
+
+El Resource Server deberá:
+
+* validar tokens;
+* validar audience;
+* validar scopes;
+* validar sender constraint;
+* aplicar autorización;
+* rechazar tokens expirados o revocados.
+
+---
+
+# 607. OAuth client types
+
+```php
+enum OAuthClientType: string
+{
+    case Public = 'public';
+    case Confidential = 'confidential';
+}
+```
+
+---
+
+# 608. Public clients
+
+Los clientes públicos no podrán mantener un secreto de forma confiable.
+
+Ejemplos:
+
+* SPA;
+* aplicación móvil;
+* aplicación desktop;
+* CLI distribuido.
+
+---
+
+# 609. Confidential clients
+
+Los clientes confidenciales podrán autenticarse mediante:
+
+* client secret;
+* private key JWT;
+* mTLS;
+* mecanismo equivalente.
+
+---
+
+# 610. OAuthClient
+
+```php
+final readonly class OAuthClient
+{
+    public function __construct(
+        public string $clientId,
+        public OAuthClientType $type,
+        public string $displayName,
+        public array $redirectUris,
+        public array $allowedGrantTypes,
+        public array $allowedScopes,
+        public array $allowedAudiences,
+        public OAuthClientStatus $status,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 611. OAuthClientStatus
+
+```php
+enum OAuthClientStatus: string
+{
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 612. Client registration
+
+El registro deberá validar:
+
+* ownership;
+* redirect URIs;
+* application type;
+* contacts;
+* scopes solicitados;
+* tenant;
+* grant types;
+* token endpoint auth method.
+
+---
+
+# 613. Dynamic client registration
+
+Solo deberá habilitarse con política explícita y controles estrictos.
+
+---
+
+# 614. Client metadata immutability
+
+Los cambios críticos deberán versionarse y auditarse.
+
+---
+
+# 615. Authorization grant types
+
+VoltStack podrá soportar:
+
+* Authorization Code;
+* Client Credentials;
+* Device Authorization;
+* Token Exchange;
+* Refresh Token.
+
+---
+
+# 616. Deprecated grant types
+
+Deberán deshabilitarse por defecto:
+
+* Implicit Grant;
+* Resource Owner Password Credentials.
+
+---
+
+# 617. Authorization Code flow
+
+El Authorization Code será el flujo principal para aplicaciones interactivas.
+
+```text
+Client
+  ↓ Authorization Request
+Authorization Server
+  ↓ User Authentication
+  ↓ Consent
+  ↓ Authorization Code
+Client
+  ↓ Code + PKCE Verifier
+Token Endpoint
+  ↓ Access Token
+  ↓ Optional Refresh Token
+```
+
+---
+
+# 618. AuthorizationRequest
+
+```php
+final readonly class AuthorizationRequest
+{
+    public function __construct(
+        public string $clientId,
+        public string $redirectUri,
+        public array $scopes,
+        public string $state,
+        public string $responseType,
+        public ?string $codeChallenge,
+        public ?string $codeChallengeMethod,
+        public ?string $nonce,
+        public ?string $audience,
+    ) {
+    }
+}
+```
+
+---
+
+# 619. Authorization request validation
+
+Se deberá validar antes de iniciar autenticación:
+
+* client;
+* status;
+* redirect URI;
+* response type;
+* grant type;
+* scopes;
+* PKCE;
+* audience;
+* tenant;
+* request object cuando exista.
+
+---
+
+# 620. Redirect URI exact matching
+
+La URI deberá coincidir exactamente con una URI registrada.
+
+---
+
+# 621. Redirect URI normalization prohibition
+
+No deberán realizarse normalizaciones permisivas que cambien la semántica.
+
+---
+
+# 622. Redirect URI restrictions
+
+No deberán permitirse:
+
+* fragments;
+* wildcards generales;
+* credenciales embebidas;
+* esquemas inseguros;
+* open redirects;
+* hosts no registrados.
+
+---
+
+# 623. Localhost redirects
+
+Para aplicaciones nativas podrán permitirse loopback redirects con reglas específicas.
+
+---
+
+# 624. Custom URI schemes
+
+Los custom schemes deberán seguir políticas estrictas y preferir esquemas reclamados de forma verificable cuando sea posible.
+
+---
+
+# 625. State parameter
+
+`state` deberá proteger la correlación del flujo y reducir CSRF.
+
+---
+
+# 626. State generation
+
+Deberá ser:
+
+* aleatorio;
+* opaco;
+* de alta entropía;
+* de un solo uso;
+* vinculado a sesión;
+* temporal.
+
+---
+
+# 627. State storage
+
+El cliente deberá correlacionarlo con el flujo iniciado.
+
+El Authorization Server también podrá mantener binding adicional.
+
+---
+
+# 628. State mismatch
+
+Un mismatch deberá cancelar completamente el flujo.
+
+---
+
+# 629. PKCE
+
+PKCE deberá ser obligatorio para clientes públicos y recomendado para todos los clientes.
+
+---
+
+# 630. Code challenge methods
+
+VoltStack deberá permitir:
+
+```php
+enum PkceCodeChallengeMethod: string
+{
+    case S256 = 'S256';
+}
+```
+
+El método `plain` deberá deshabilitarse por defecto.
+
+---
+
+# 631. Code verifier
+
+El verifier deberá:
+
+* ser aleatorio;
+* poseer suficiente entropía;
+* respetar longitud permitida;
+* nunca enviarse en la autorización inicial.
+
+---
+
+# 632. Code challenge binding
+
+El authorization code deberá vincularse al challenge emitido.
+
+---
+
+# 633. AuthorizationCode
+
+```php
+final readonly class AuthorizationCode
+{
+    public function __construct(
+        public string $id,
+        public string $secretDigest,
+        public string $clientId,
+        public string $redirectUri,
+        public IdentityIdentifier $subject,
+        public array $scopes,
+        public ?string $codeChallenge,
+        public ?string $codeChallengeMethod,
+        public DateTimeImmutable $expiresAt,
+        public bool $consumed,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 634. Authorization code properties
+
+El código deberá ser:
+
+* opaco;
+* temporal;
+* de un solo uso;
+* vinculado a client;
+* vinculado a redirect URI;
+* vinculado a PKCE;
+* vinculado a subject;
+* vinculado a tenant;
+* vinculado a scopes.
+
+---
+
+# 635. Authorization code storage
+
+Se deberá almacenar solo una representación derivada cuando sea posible.
+
+---
+
+# 636. Code consumption
+
+El consumo deberá ser atómico.
+
+---
+
+# 637. Code replay
+
+Reutilizar un code consumido deberá generar un evento de seguridad.
+
+---
+
+# 638. Code lifetime
+
+La vida útil deberá ser corta.
+
+---
+
+# 639. Token endpoint
+
+El endpoint deberá aceptar únicamente:
+
+* TLS;
+* métodos permitidos;
+* content type esperado;
+* client authentication cuando aplique;
+* parámetros estrictamente validados.
+
+---
+
+# 640. TokenRequest
+
+```php
+final readonly class TokenRequest
+{
+    public function __construct(
+        public OAuthGrantType $grantType,
+        public string $clientId,
+        public ?SensitiveValue $clientCredential,
+        public ?SensitiveValue $authorizationCode,
+        public ?SensitiveValue $codeVerifier,
+        public ?SensitiveValue $refreshToken,
+        public array $requestedScopes,
+    ) {
+    }
+}
+```
+
+---
+
+# 641. OAuthGrantType
+
+```php
+enum OAuthGrantType: string
+{
+    case AuthorizationCode = 'authorization_code';
+    case RefreshToken = 'refresh_token';
+    case ClientCredentials = 'client_credentials';
+    case DeviceCode = 'urn:ietf:params:oauth:grant-type:device_code';
+    case TokenExchange = 'urn:ietf:params:oauth:grant-type:token-exchange';
+}
+```
+
+---
+
+# 642. Client authentication
+
+Clientes confidenciales deberán autenticarse en el token endpoint.
+
+---
+
+# 643. ClientSecretBasic
+
+Podrá soportarse para compatibilidad controlada.
+
+---
+
+# 644. Client secret storage
+
+Los secretos deberán almacenarse:
+
+* como digest;
+* en secret manager;
+* con versionado;
+* con rotación;
+* con auditoría.
+
+---
+
+# 645. Private key JWT
+
+Deberá preferirse para clientes confidenciales de alto valor.
+
+---
+
+# 646. Client assertion validation
+
+Se deberá validar:
+
+* issuer;
+* subject;
+* audience;
+* expiration;
+* issued-at;
+* JWT ID;
+* signature;
+* key status;
+* replay.
+
+---
+
+# 647. Client assertion replay registry
+
+```php
+interface ClientAssertionReplayRegistryInterface
+{
+    public function consume(
+        string $clientId,
+        string $jwtId,
+        DateTimeImmutable $expiresAt
+    ): bool;
+}
+```
+
+---
+
+# 648. mTLS client authentication
+
+VoltStack podrá soportar autenticación del cliente mediante certificado TLS.
+
+---
+
+# 649. Client authentication downgrade
+
+Un cliente registrado con método fuerte no deberá usar silenciosamente uno más débil.
+
+---
+
+# 650. Access token
+
+```php
+final readonly class AccessToken
+{
+    public function __construct(
+        public string $tokenId,
+        public string $issuer,
+        public string $subject,
+        public array $audiences,
+        public array $scopes,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $clientId,
+        public ?string $tenantId,
+        public ?SenderConstraint $senderConstraint,
+    ) {
+    }
+}
+```
+
+---
+
+# 651. Access token formats
+
+VoltStack podrá soportar:
+
+* opaque tokens;
+* JWT access tokens.
+
+---
+
+# 652. Opaque token advantages
+
+Ventajas:
+
+* revocación inmediata;
+* menor exposición;
+* introspection central;
+* claims dinámicos;
+* menor riesgo de uso fuera de contexto.
+
+---
+
+# 653. JWT access token advantages
+
+Ventajas:
+
+* validación local;
+* menor dependencia en tiempo de request;
+* escalabilidad;
+* interoperabilidad.
+
+---
+
+# 654. JWT access token risks
+
+Riesgos:
+
+* revocación difícil;
+* claims obsoletos;
+* exposición de metadata;
+* confusion entre tipos de token;
+* dependencia de claves.
+
+---
+
+# 655. Access token type separation
+
+Los access tokens deberán distinguirse claramente de:
+
+* ID tokens;
+* refresh tokens;
+* authorization codes;
+* session tokens.
+
+---
+
+# 656. typ header
+
+Los JWT deberán usar un `typ` explícito cuando el perfil lo requiera.
+
+---
+
+# 657. Token issuer validation
+
+El Resource Server deberá validar el issuer exacto esperado.
+
+---
+
+# 658. Audience validation
+
+Un token deberá ser válido únicamente para audiences autorizados.
+
+---
+
+# 659. Audience confusion prevention
+
+Un servicio no deberá aceptar un token emitido para otro recurso.
+
+---
+
+# 660. Scope model
+
+Los scopes deberán representar privilegios delegados de forma clara y limitada.
+
+---
+
+# 661. Scope naming
+
+Ejemplo:
+
+```text
+profile.read
+billing.read
+billing.write
+files.download
+tenant.admin
+```
+
+---
+
+# 662. Scope hierarchy
+
+Las jerarquías implícitas deberán evitarse o documentarse claramente.
+
+---
+
+# 663. ScopeRegistry
+
+```php
+interface OAuthScopeRegistryInterface
+{
+    public function resolve(string $scope): OAuthScopeDefinition;
+
+    public function validateForClient(
+        string $clientId,
+        array $scopes
+    ): ScopeValidationResult;
+}
+```
+
+---
+
+# 664. OAuthScopeDefinition
+
+```php
+final readonly class OAuthScopeDefinition
+{
+    public function __construct(
+        public string $name,
+        public string $description,
+        public bool $requiresConsent,
+        public bool $highRisk,
+        public array $allowedAudiences,
+    ) {
+    }
+}
+```
+
+---
+
+# 665. Scope minimization
+
+Solo deberán emitirse scopes:
+
+* solicitados;
+* permitidos al client;
+* autorizados por el usuario;
+* compatibles con la policy;
+* compatibles con el audience.
+
+---
+
+# 666. Incremental authorization
+
+VoltStack podrá solicitar scopes adicionales solo cuando sean necesarios.
+
+---
+
+# 667. Consent architecture
+
+El consentimiento deberá ser:
+
+* comprensible;
+* específico;
+* vinculado al client;
+* vinculado a scopes;
+* revocable;
+* auditable.
+
+---
+
+# 668. ConsentRecord
+
+```php
+final readonly class ConsentRecord
+{
+    public function __construct(
+        public string $consentId,
+        public IdentityIdentifier $subject,
+        public string $clientId,
+        public array $scopes,
+        public array $audiences,
+        public DateTimeImmutable $grantedAt,
+        public ?DateTimeImmutable $expiresAt,
+        public ConsentStatus $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 669. ConsentStatus
+
+```php
+enum ConsentStatus: string
+{
+    case Active = 'active';
+    case Revoked = 'revoked';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 670. First-party clients
+
+El consentimiento podrá omitirse solo para clientes first-party explícitamente confiables y gobernados.
+
+---
+
+# 671. Administrative consent
+
+En entornos empresariales podrá existir consentimiento otorgado por administrador.
+
+---
+
+# 672. Consent phishing protection
+
+La interfaz deberá mostrar claramente:
+
+* nombre del client;
+* publisher;
+* scopes;
+* tenant;
+* destino de los datos;
+* riesgos.
+
+---
+
+# 673. Refresh tokens
+
+Los refresh tokens deberán tratarse como credenciales de alta sensibilidad.
+
+---
+
+# 674. RefreshToken
+
+```php
+final readonly class RefreshToken
+{
+    public function __construct(
+        public string $tokenId,
+        public string $familyId,
+        public string $secretDigest,
+        public string $clientId,
+        public IdentityIdentifier $subject,
+        public array $scopes,
+        public array $audiences,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public RefreshTokenState $state,
+        public ?string $tenantId,
+        public ?SenderConstraint $senderConstraint,
+    ) {
+    }
+}
+```
+
+---
+
+# 675. RefreshTokenState
+
+```php
+enum RefreshTokenState: string
+{
+    case Active = 'active';
+    case Rotated = 'rotated';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 676. Refresh token rotation
+
+Los refresh tokens deberán rotarse en clientes públicos.
+
+---
+
+# 677. Refresh token family
+
+Una familia deberá permitir detectar reuse.
+
+---
+
+# 678. Refresh token replay
+
+Ante reuse confirmado deberá:
+
+* revocarse la familia;
+* invalidar descendientes;
+* elevar riesgo;
+* notificar;
+* registrar incidente.
+
+---
+
+# 679. Refresh token scope
+
+Un refresh no deberá ampliar scopes.
+
+---
+
+# 680. Refresh token audience
+
+El refresh no deberá producir tokens para audiences no autorizados originalmente.
+
+---
+
+# 681. Refresh token expiration
+
+Deberán existir:
+
+* expiración absoluta;
+* posible expiración por inactividad;
+* revocación administrativa;
+* revocación por consentimiento.
+
+---
+
+# 682. Token introspection
+
+Los tokens opacos deberán poder validarse mediante introspection.
+
+---
+
+# 683. TokenIntrospectionService
+
+```php
+interface TokenIntrospectionServiceInterface
+{
+    public function introspect(
+        SensitiveValue $token,
+        IntrospectionClientContext $client
+    ): TokenIntrospectionResult;
+}
+```
+
+---
+
+# 684. TokenIntrospectionResult
+
+```php
+final readonly class TokenIntrospectionResult
+{
+    public function __construct(
+        public bool $active,
+        public ?string $subject,
+        public array $scopes,
+        public array $audiences,
+        public ?DateTimeImmutable $expiresAt,
+        public ?string $clientId,
+        public ?string $tenantId,
+        public ?SenderConstraint $senderConstraint,
+    ) {
+    }
+}
+```
+
+---
+
+# 685. Introspection authorization
+
+Solo Resource Servers autorizados deberán poder consultar tokens relevantes.
+
+---
+
+# 686. Introspection minimization
+
+La respuesta deberá exponer únicamente claims necesarios.
+
+---
+
+# 687. Token revocation
+
+VoltStack deberá ofrecer revocación para:
+
+* access tokens cuando aplique;
+* refresh tokens;
+* token families;
+* consent;
+* client sessions.
+
+---
+
+# 688. TokenRevocationService
+
+```php
+interface TokenRevocationServiceInterface
+{
+    public function revoke(
+        SensitiveValue $token,
+        TokenRevocationContext $context
+    ): TokenRevocationResult;
+}
+```
+
+---
+
+# 689. Revocation endpoint privacy
+
+El endpoint deberá responder de forma idempotente y evitar revelar si el token existía.
+
+---
+
+# 690. Sender-constrained tokens
+
+Un token podrá vincularse criptográficamente al cliente que lo presenta.
+
+---
+
+# 691. SenderConstraint
+
+```php
+final readonly class SenderConstraint
+{
+    public function __construct(
+        public SenderConstraintType $type,
+        public string $thumbprint,
+    ) {
+    }
+}
+```
+
+---
+
+# 692. SenderConstraintType
+
+```php
+enum SenderConstraintType: string
+{
+    case Dpop = 'dpop';
+    case MutualTls = 'mutual_tls';
+}
+```
+
+---
+
+# 693. DPoP
+
+DPoP permitirá vincular el token a una clave pública controlada por el cliente.
+
+---
+
+# 694. DPoP proof validation
+
+Se deberá validar:
+
+* signature;
+* public key;
+* HTTP method;
+* target URI;
+* issued-at;
+* JWT ID;
+* token hash cuando aplique;
+* replay.
+
+---
+
+# 695. DPoP replay registry
+
+```php
+interface DpopReplayRegistryInterface
+{
+    public function consume(
+        string $thumbprint,
+        string $jwtId,
+        DateTimeImmutable $expiresAt
+    ): bool;
+}
+```
+
+---
+
+# 696. mTLS-bound tokens
+
+Los tokens vinculados a mTLS deberán verificar el certificado presentado por el cliente.
+
+---
+
+# 697. OAuth mix-up prevention
+
+Se deberá validar estrictamente:
+
+* issuer;
+* authorization endpoint;
+* token endpoint;
+* client;
+* state;
+* redirect URI;
+* metadata del proveedor.
+
+---
+
+# 698. Native application security
+
+Aplicaciones nativas deberán usar:
+
+* Authorization Code;
+* PKCE;
+* external user agent;
+* redirect seguro;
+* no embedded browser;
+* almacenamiento protegido.
+
+---
+
+# 699. OAuth security events
+
+Eventos recomendados:
+
+* `OAuthAuthorizationRequested`;
+* `OAuthConsentGranted`;
+* `OAuthConsentRevoked`;
+* `AuthorizationCodeIssued`;
+* `AuthorizationCodeReplayed`;
+* `AccessTokenIssued`;
+* `RefreshTokenRotated`;
+* `RefreshTokenReused`;
+* `TokenRevoked`;
+* `ClientAuthenticationFailed`;
+* `DpopReplayDetected`;
+* `OAuthMixUpDetected`.
+
+---
+
+# 700. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+OAuth 2.0 Security Architecture
+Authorization Server and Resource Server Boundaries
+Public and Confidential Clients
+Authorization Code Flow
+Strict Redirect URI Validation
+State Protection
+PKCE
+Authorization Code Binding
+Token Endpoint Security
+Client Authentication
+Private Key JWT
+mTLS Client Authentication
+Opaque and JWT Access Tokens
+Issuer and Audience Validation
+Scope Design
+Consent Architecture
+Refresh Token Rotation
+Token Families
+Replay Detection
+Token Introspection
+Token Revocation
+Sender-Constrained Tokens
+DPoP
+mTLS-Bound Tokens
+OAuth Mix-Up Prevention
+Native Application Security
+```
+
