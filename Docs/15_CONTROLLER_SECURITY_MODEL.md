@@ -23863,3 +23863,3357 @@ Email Verification Foundations
 Magic Link Security Foundations
 ```
 
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 3 de varias
+**Cobertura:** Secciones **201–300**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 2`
+
+---
+
+# 201. One-Time Password Architecture
+
+Los códigos de un solo uso son credenciales temporales diseñadas para autenticar una operación o identidad durante una ventana limitada.
+
+VoltStack distinguirá entre:
+
+* códigos enviados por canal;
+* códigos generados por autenticador;
+* códigos basados en tiempo;
+* códigos basados en contador;
+* códigos de recuperación;
+* códigos de aprobación transaccional.
+
+---
+
+# 202. OTP security goals
+
+El subsistema OTP deberá garantizar:
+
+* alta entropía suficiente;
+* expiración corta;
+* consumo único;
+* limitación de intentos;
+* vinculación a identidad;
+* vinculación a propósito;
+* resistencia a replay;
+* auditoría;
+* aislamiento multi-tenant.
+
+---
+
+# 203. OTP threat model
+
+El modelo deberá considerar:
+
+* adivinación;
+* interceptación;
+* SIM swapping;
+* compromiso del correo;
+* replay;
+* race conditions;
+* brute force distribuido;
+* social engineering;
+* MFA fatigue;
+* redirección de mensajes;
+* abuso de recuperación.
+
+---
+
+# 204. OtpType
+
+```php
+enum OtpType: string
+{
+    case Email = 'email';
+    case Sms = 'sms';
+    case Totp = 'totp';
+    case Hotp = 'hotp';
+    case Recovery = 'recovery';
+    case Transaction = 'transaction';
+}
+```
+
+---
+
+# 205. OtpPurpose
+
+```php
+enum OtpPurpose: string
+{
+    case Login = 'login';
+    case StepUp = 'step_up';
+    case PasswordReset = 'password_reset';
+    case EmailVerification = 'email_verification';
+    case PhoneVerification = 'phone_verification';
+    case TransactionApproval = 'transaction_approval';
+    case MfaEnrollment = 'mfa_enrollment';
+    case AccountRecovery = 'account_recovery';
+}
+```
+
+---
+
+# 206. OtpChallenge
+
+```php
+final readonly class OtpChallenge
+{
+    public function __construct(
+        public string $challengeId,
+        public IdentityIdentifier $identity,
+        public OtpType $type,
+        public OtpPurpose $purpose,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public int $maximumAttempts,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 207. OTP challenge binding
+
+Todo código deberá vincularse al menos a:
+
+* challenge;
+* identidad;
+* propósito;
+* expiración;
+* tenant cuando aplique.
+
+---
+
+# 208. Contextual binding
+
+Los perfiles de alto riesgo podrán añadir vinculación a:
+
+* sesión;
+* dispositivo;
+* operación;
+* monto;
+* destinatario;
+* recurso;
+* request ID.
+
+---
+
+# 209. OTP generation
+
+Los códigos deberán generarse mediante un CSPRNG cuando no deriven de un algoritmo estandarizado como TOTP u HOTP.
+
+---
+
+# 210. Numeric OTP length
+
+Los códigos numéricos deberán poseer suficiente longitud según:
+
+* vida útil;
+* límites de intentos;
+* riesgo;
+* canal;
+* propósito.
+
+---
+
+# 211. Short code risk
+
+Un código corto solo será aceptable cuando se combine con:
+
+* expiración reducida;
+* pocos intentos;
+* rate limiting;
+* challenge específico;
+* detección de abuso.
+
+---
+
+# 212. Alphanumeric OTP
+
+Los códigos alfanuméricos podrán utilizarse para aumentar entropía sin incrementar demasiado la longitud.
+
+---
+
+# 213. Human-readable alphabet
+
+El alfabeto podrá excluir caracteres ambiguos como:
+
+* `0` y `O`;
+* `1`, `I` y `l`;
+* caracteres visualmente similares.
+
+---
+
+# 214. OtpGenerator
+
+```php
+interface OtpGeneratorInterface
+{
+    public function generate(
+        OtpGenerationPolicy $policy
+    ): GeneratedOtp;
+}
+```
+
+---
+
+# 215. OtpGenerationPolicy
+
+```php
+final readonly class OtpGenerationPolicy
+{
+    public function __construct(
+        public int $length,
+        public OtpAlphabet $alphabet,
+        public int $lifetimeSeconds,
+        public int $maximumAttempts,
+        public bool $singleUse,
+    ) {
+    }
+}
+```
+
+---
+
+# 216. GeneratedOtp
+
+```php
+final class GeneratedOtp
+{
+    public function __construct(
+        public readonly OtpChallenge $challenge,
+        private SensitiveValue $code,
+    ) {
+    }
+
+    public function reveal(
+        SensitiveValueAccessToken $token
+    ): string {
+        return $this->code->reveal($token);
+    }
+}
+```
+
+---
+
+# 217. OTP storage
+
+Los códigos enviados por canal no deberán almacenarse en texto plano.
+
+---
+
+# 218. OTP verifier representation
+
+Se almacenará una representación derivada mediante:
+
+* hash resistente;
+* HMAC con clave segregada;
+* derivación específica de OTP.
+
+---
+
+# 219. OtpSecretHasher
+
+```php
+interface OtpSecretHasherInterface
+{
+    public function derive(
+        SensitiveValue $code,
+        OtpChallenge $challenge
+    ): OtpVerificationSecret;
+
+    public function verify(
+        SensitiveValue $candidate,
+        OtpVerificationSecret $stored,
+        OtpChallenge $challenge
+    ): bool;
+}
+```
+
+---
+
+# 220. OTP comparison
+
+La comparación deberá ser resistente a timing attacks.
+
+---
+
+# 221. Atomic OTP consumption
+
+El consumo deberá ser atómico.
+
+Dos requests simultáneos no podrán validar exitosamente el mismo código de un solo uso.
+
+---
+
+# 222. OtpChallengeStore
+
+```php
+interface OtpChallengeStoreInterface
+{
+    public function issue(
+        OtpChallenge $challenge,
+        OtpVerificationSecret $secret
+    ): void;
+
+    public function verifyAndConsume(
+        string $challengeId,
+        SensitiveValue $candidate
+    ): OtpConsumptionResult;
+}
+```
+
+---
+
+# 223. OtpConsumptionResult
+
+```php
+enum OtpConsumptionResult: string
+{
+    case Valid = 'valid';
+    case Invalid = 'invalid';
+    case Expired = 'expired';
+    case Consumed = 'consumed';
+    case AttemptsExceeded = 'attempts_exceeded';
+    case ContextMismatch = 'context_mismatch';
+    case NotFound = 'not_found';
+}
+```
+
+---
+
+# 224. Attempt counting
+
+Cada intento inválido deberá incrementar un contador atómico asociado al challenge.
+
+---
+
+# 225. Maximum attempts
+
+Al alcanzar el máximo permitido, el challenge deberá invalidarse.
+
+---
+
+# 226. OTP rate limiting
+
+Deberán aplicarse límites separados para:
+
+* emisión;
+* reenvío;
+* validación;
+* identidad;
+* IP;
+* dispositivo;
+* tenant;
+* canal.
+
+---
+
+# 227. Resend behavior
+
+Solicitar un nuevo código podrá:
+
+* invalidar el anterior;
+* reutilizar el mismo challenge con nueva versión;
+* mantener una ventana controlada.
+
+La política deberá ser explícita.
+
+---
+
+# 228. Recommended resend policy
+
+Por defecto, emitir un nuevo código deberá invalidar los anteriores para el mismo propósito.
+
+---
+
+# 229. OTP response privacy
+
+La respuesta externa no deberá revelar si:
+
+* el email existe;
+* el teléfono existe;
+* el canal está registrado;
+* el código fue enviado realmente.
+
+---
+
+# 230. Email OTP
+
+Los OTP por correo dependen de la seguridad de la cuenta de email del usuario.
+
+---
+
+# 231. Email OTP assurance
+
+Un OTP por email deberá considerarse un factor de posesión de assurance limitado.
+
+No deberá clasificarse automáticamente como phishing-resistant.
+
+---
+
+# 232. Email delivery security
+
+La entrega deberá usar:
+
+* proveedor autenticado;
+* TLS cuando esté disponible;
+* plantillas controladas;
+* links y códigos sin datos sensibles adicionales;
+* anti-abuse.
+
+---
+
+# 233. Email OTP content
+
+El mensaje deberá indicar:
+
+* propósito;
+* expiración;
+* contexto básico;
+* advertencia de no compartir;
+* canal para reportar actividad no reconocida.
+
+---
+
+# 234. OTP code in email subject
+
+El código no deberá colocarse en el subject por defecto, debido a exposición en:
+
+* notificaciones;
+* previews;
+* logs del cliente;
+* dispositivos bloqueados.
+
+---
+
+# 235. Email OTP and magic links
+
+Email OTP y magic link deberán tratarse como mecanismos distintos, aunque compartan canal.
+
+---
+
+# 236. SMS OTP
+
+Los OTP por SMS deberán considerarse vulnerables a:
+
+* SIM swapping;
+* interceptación;
+* redirección;
+* malware;
+* recuperación insegura del operador.
+
+---
+
+# 237. SMS assurance ceiling
+
+El assurance resultante deberá limitarse y no considerarse resistente al phishing.
+
+---
+
+# 238. SMS fallback policy
+
+SMS no deberá ser el único mecanismo de recuperación para cuentas de alto valor.
+
+---
+
+# 239. Phone number change
+
+Cambiar el número registrado deberá requerir:
+
+* autenticación reciente;
+* factor adicional;
+* notificación al canal anterior;
+* ventana de observación cuando el riesgo lo justifique.
+
+---
+
+# 240. SMS content minimization
+
+El mensaje no deberá incluir:
+
+* contraseña;
+* nombre completo innecesario;
+* información financiera;
+* datos del tenant;
+* enlaces inseguros.
+
+---
+
+# 241. OTP delivery provider abstraction
+
+```php
+interface OtpDeliveryProviderInterface
+{
+    public function supports(
+        OtpDeliveryChannel $channel
+    ): bool;
+
+    public function deliver(
+        OtpDeliveryMessage $message
+    ): OtpDeliveryResult;
+}
+```
+
+---
+
+# 242. Delivery result confidentiality
+
+Un error del proveedor no deberá exponer detalles internos al usuario.
+
+---
+
+# 243. Delivery telemetry
+
+Se deberán registrar:
+
+* intento;
+* provider;
+* resultado;
+* latencia;
+* throttling;
+* error clasificado.
+
+Nunca el código completo.
+
+---
+
+# 244. TOTP Architecture
+
+TOTP genera códigos derivados de:
+
+* secreto compartido;
+* tiempo;
+* algoritmo;
+* intervalo.
+
+---
+
+# 245. TotpCredential
+
+```php
+final class TotpCredential
+{
+    public function __construct(
+        public readonly string $credentialId,
+        private SensitiveValue $secret,
+        public readonly TotpProfile $profile,
+        public readonly DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 246. TotpProfile
+
+```php
+final readonly class TotpProfile
+{
+    public function __construct(
+        public TotpAlgorithm $algorithm,
+        public int $digits,
+        public int $periodSeconds,
+        public int $allowedPastWindows,
+        public int $allowedFutureWindows,
+    ) {
+    }
+}
+```
+
+---
+
+# 247. TotpAlgorithm
+
+```php
+enum TotpAlgorithm: string
+{
+    case Sha1 = 'sha1';
+    case Sha256 = 'sha256';
+    case Sha512 = 'sha512';
+}
+```
+
+---
+
+# 248. TOTP interoperability
+
+El soporte de algoritmos deberá considerar compatibilidad con autenticadores existentes.
+
+---
+
+# 249. TOTP secret generation
+
+El secreto deberá generarse mediante un CSPRNG y poseer entropía suficiente.
+
+---
+
+# 250. TOTP secret storage
+
+El secreto deberá:
+
+* cifrarse en reposo;
+* protegerse con clave segregada;
+* no aparecer en logs;
+* no serializarse;
+* estar aislado por tenant.
+
+---
+
+# 251. TOTP secret access
+
+Solo el verificador MFA deberá poder descifrarlo.
+
+---
+
+# 252. TOTP enrollment
+
+El proceso de enrolamiento deberá incluir:
+
+```text
+Authenticated Session
+      ↓
+Fresh Authentication
+      ↓
+Secret Generation
+      ↓
+Provisioning Presentation
+      ↓
+User Scans or Enters Secret
+      ↓
+Verification Code
+      ↓
+Enrollment Commit
+      ↓
+Recovery Codes
+      ↓
+Notification
+```
+
+---
+
+# 253. Provisional enrollment
+
+El secreto no deberá activarse hasta que el usuario demuestre que puede generar un código válido.
+
+---
+
+# 254. Provisioning URI
+
+La URI de aprovisionamiento deberá construirse mediante un builder estructurado.
+
+---
+
+# 255. TotpProvisioningUriBuilder
+
+```php
+interface TotpProvisioningUriBuilderInterface
+{
+    public function build(
+        TotpEnrollment $enrollment
+    ): SensitiveProvisioningUri;
+}
+```
+
+---
+
+# 256. QR code security
+
+El QR contiene el secreto TOTP y deberá tratarse como material sensible.
+
+---
+
+# 257. QR exposure restrictions
+
+La pantalla de enrolamiento deberá:
+
+* usar `no-store`;
+* impedir caching compartido;
+* aplicar CSP estricta;
+* evitar recursos de terceros;
+* limitar referrer;
+* expirar.
+
+---
+
+# 258. Re-display prohibition
+
+Después de completar el enrolamiento, el secreto no deberá volver a mostrarse normalmente.
+
+---
+
+# 259. TOTP verification
+
+```php
+interface TotpVerifierInterface
+{
+    public function verify(
+        TotpCredential $credential,
+        SensitiveValue $candidate,
+        DateTimeImmutable $now
+    ): TotpVerificationResult;
+}
+```
+
+---
+
+# 260. TOTP clock window
+
+La ventana permitida deberá ser pequeña.
+
+Ventanas amplias aumentan la posibilidad de replay y adivinación.
+
+---
+
+# 261. TOTP replay protection
+
+Un código aceptado no deberá volver a aceptarse dentro de la misma ventana cuando el perfil exija protección fuerte.
+
+---
+
+# 262. TOTP usage registry
+
+```php
+interface TotpUsageRegistryInterface
+{
+    public function consume(
+        string $credentialId,
+        int $timeStep
+    ): TotpUsageResult;
+}
+```
+
+---
+
+# 263. Distributed TOTP replay protection
+
+En despliegues multinodo, el registro de consumo deberá ser distribuido y atómico.
+
+---
+
+# 264. Clock synchronization
+
+Los nodos deberán mantener sincronización horaria confiable.
+
+---
+
+# 265. Clock drift handling
+
+La corrección de drift no deberá ampliar permanentemente la ventana de aceptación.
+
+---
+
+# 266. HOTP Architecture
+
+HOTP deriva códigos de:
+
+* secreto;
+* contador;
+* algoritmo.
+
+---
+
+# 267. HotpCredential
+
+```php
+final class HotpCredential
+{
+    public function __construct(
+        public readonly string $credentialId,
+        private SensitiveValue $secret,
+        public readonly int $counter,
+        public readonly HotpProfile $profile,
+    ) {
+    }
+}
+```
+
+---
+
+# 268. HOTP counter updates
+
+El contador deberá actualizarse atómicamente después de una verificación válida.
+
+---
+
+# 269. HOTP look-ahead window
+
+La ventana de búsqueda futura deberá mantenerse limitada.
+
+---
+
+# 270. HOTP resynchronization
+
+La resincronización deberá requerir un flujo específico y auditado.
+
+---
+
+# 271. Recovery Codes
+
+Los códigos de recuperación son credenciales de emergencia.
+
+---
+
+# 272. RecoveryCodeSet
+
+```php
+final readonly class RecoveryCodeSet
+{
+    public function __construct(
+        public string $setId,
+        public IdentityIdentifier $identity,
+        public array $codeReferences,
+        public DateTimeImmutable $issuedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 273. Recovery code generation
+
+Los códigos deberán:
+
+* ser aleatorios;
+* tener alta entropía;
+* ser independientes;
+* ser de un solo uso;
+* poseer formato humano razonable.
+
+---
+
+# 274. Recovery code storage
+
+Los códigos se almacenarán únicamente como representaciones derivadas verificables.
+
+---
+
+# 275. Recovery code display
+
+Solo deberán mostrarse una vez, inmediatamente después de generarse.
+
+---
+
+# 276. Recovery code delivery
+
+El usuario deberá poder:
+
+* descargarlos;
+* imprimirlos;
+* copiarlos;
+* confirmar que los guardó.
+
+La descarga deberá usar un response profile sensible.
+
+---
+
+# 277. Recovery code regeneration
+
+Generar un nuevo set deberá invalidar todo el set anterior.
+
+---
+
+# 278. Recovery code use
+
+El uso deberá:
+
+* consumir el código;
+* generar evento;
+* notificar al usuario;
+* elevar el riesgo de la sesión;
+* recomendar regeneración.
+
+---
+
+# 279. Recovery code assurance
+
+Un recovery code podrá autenticar, pero deberá marcar la sesión como recuperada mediante un factor de emergencia.
+
+---
+
+# 280. Post-recovery restrictions
+
+Después de usar un recovery code, ciertas operaciones podrán requerir:
+
+* factor adicional;
+* espera;
+* autenticación reciente;
+* revisión manual;
+* reconfiguración MFA.
+
+---
+
+# 281. MFA Enrollment Architecture
+
+MFA enrollment es una operación de seguridad de alto impacto.
+
+---
+
+# 282. MfaEnrollmentService
+
+```php
+interface MfaEnrollmentServiceInterface
+{
+    public function begin(
+        IdentityContext $identity,
+        AuthenticationMethod $method
+    ): MfaEnrollmentChallenge;
+
+    public function complete(
+        MfaEnrollmentCompletion $completion
+    ): MfaEnrollmentResult;
+}
+```
+
+---
+
+# 283. Enrollment prerequisites
+
+El enrolamiento deberá requerir:
+
+* sesión autenticada;
+* autenticación reciente;
+* nivel de assurance suficiente;
+* riesgo aceptable;
+* identidad activa.
+
+---
+
+# 284. Factor replacement
+
+Reemplazar un factor existente deberá ser más estricto que añadir uno adicional.
+
+---
+
+# 285. Existing factor confirmation
+
+Cuando sea posible, el usuario deberá confirmar un factor ya registrado antes de eliminarlo o sustituirlo.
+
+---
+
+# 286. MFA method registry
+
+```php
+interface MfaMethodRegistryInterface
+{
+    public function register(
+        MfaMethodDefinition $definition
+    ): void;
+
+    public function resolve(
+        AuthenticationMethod $method
+    ): MfaMethodDefinition;
+}
+```
+
+---
+
+# 287. MfaMethodDefinition
+
+```php
+final readonly class MfaMethodDefinition
+{
+    public function __construct(
+        public AuthenticationMethod $method,
+        public AuthenticationFactorCategory $category,
+        public AuthenticationStrength $strength,
+        public bool $phishingResistant,
+        public bool $hardwareBound,
+    ) {
+    }
+}
+```
+
+---
+
+# 288. Factor independence
+
+Dos mecanismos no deberán contarse automáticamente como dos factores si dependen del mismo canal o dispositivo comprometible.
+
+---
+
+# 289. Non-independent examples
+
+Podrán no considerarse independientes:
+
+* contraseña y PIN almacenados en el mismo gestor comprometido;
+* email OTP y magic link enviados al mismo buzón;
+* SMS OTP y recuperación vía el mismo número;
+* dos aplicaciones dentro del mismo dispositivo comprometido.
+
+---
+
+# 290. MFA policy engine
+
+```php
+interface MfaPolicyEngineInterface
+{
+    public function evaluate(
+        IdentityContext $identity,
+        MfaRequirementContext $context
+    ): MfaPolicyDecision;
+}
+```
+
+---
+
+# 291. MFA requirements
+
+La política podrá exigir:
+
+* número de factores;
+* categorías independientes;
+* strength mínimo;
+* factor phishing-resistant;
+* hardware binding;
+* freshness;
+* dispositivo administrado.
+
+---
+
+# 292. MfaRequirement
+
+```php
+final readonly class MfaRequirement
+{
+    public function __construct(
+        public int $minimumFactors,
+        public AuthenticationStrength $minimumStrength,
+        public bool $requireIndependentFactors,
+        public bool $requirePhishingResistant,
+        public int $freshnessSeconds,
+    ) {
+    }
+}
+```
+
+---
+
+# 293. MFA verification flow
+
+```text
+Primary Authentication
+      ↓
+Resolve MFA Requirement
+      ↓
+Select Eligible Factors
+      ↓
+Issue Challenge
+      ↓
+Verify Factor
+      ↓
+Check Replay
+      ↓
+Risk Reassessment
+      ↓
+Elevate Authentication State
+      ↓
+Rotate Session
+```
+
+---
+
+# 294. MFA fatigue protection
+
+Los sistemas de aprobación push deberán protegerse contra solicitudes repetidas.
+
+---
+
+# 295. Push approval limitations
+
+Una aprobación simple de “Aceptar” podrá ser vulnerable a fatiga y consentimiento accidental.
+
+---
+
+# 296. Number matching
+
+Cuando exista push MFA, deberá preferirse:
+
+* number matching;
+* contexto visible;
+* ubicación aproximada;
+* dispositivo solicitante;
+* operación solicitada.
+
+---
+
+# 297. Challenge frequency limits
+
+Se deberán limitar:
+
+* cantidad de prompts;
+* reintentos;
+* prompts por sesión;
+* prompts por identidad;
+* prompts por dispositivo.
+
+---
+
+# 298. Suspicious MFA denial
+
+Rechazos repetidos o reportes de “no fui yo” deberán:
+
+* elevar riesgo;
+* cerrar el flujo;
+* revocar desafíos;
+* alertar;
+* considerar bloqueo temporal.
+
+---
+
+# 299. WebAuthn and Passkey Foundations
+
+WebAuthn y passkeys permiten autenticación basada en criptografía de clave pública.
+
+El servidor almacena una clave pública, mientras el autenticador conserva la clave privada.
+
+---
+
+# 300. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+One-Time Password Architecture
+OTP Challenge Binding
+Secure OTP Generation and Storage
+Atomic OTP Consumption
+Email OTP Security
+SMS OTP Risk Model
+TOTP Architecture
+TOTP Enrollment and Verification
+TOTP Replay Protection
+HOTP Architecture
+Recovery Code Security
+MFA Enrollment
+Factor Independence
+MFA Policy Engine
+MFA Verification Flow
+MFA Fatigue Protection
+Push Approval Restrictions
+WebAuthn and Passkey Foundations
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 4 de varias
+**Cobertura:** Secciones **301–400**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 3`
+
+---
+
+# 301. WebAuthn Security Architecture
+
+WebAuthn permitirá autenticar usuarios mediante credenciales criptográficas asociadas a un autenticador.
+
+La arquitectura deberá separar:
+
+* Relying Party;
+* navegador o cliente;
+* autenticador;
+* credential store;
+* ceremony state;
+* identity provider;
+* policy engine;
+* verifier.
+
+---
+
+# 302. WebAuthn trust model
+
+```text
+User
+  ↓
+Browser / Client
+  ↓
+WebAuthn API
+  ↓
+Authenticator
+  ↓
+Public-Key Credential
+  ↓
+VoltStack Relying Party
+```
+
+El servidor confiará únicamente en evidencia criptográfica validada.
+
+---
+
+# 303. WebAuthn security goals
+
+El subsistema deberá garantizar:
+
+* resistencia al phishing;
+* vinculación al origen;
+* vinculación al RP ID;
+* resistencia a replay;
+* autenticación mediante clave pública;
+* protección del challenge;
+* aislamiento de credenciales;
+* validación estricta de la ceremonia;
+* revocación y auditoría.
+
+---
+
+# 304. WebAuthn threat model
+
+El modelo deberá considerar:
+
+* phishing;
+* origin spoofing;
+* RP ID confusion;
+* replay;
+* challenge substitution;
+* credential substitution;
+* cloned authenticators;
+* counter rollback;
+* malicious client data;
+* attestation abuse;
+* user handle confusion;
+* tenant confusion;
+* downgrade a métodos débiles.
+
+---
+
+# 305. WebAuthnRelyingParty
+
+```php
+final readonly class WebAuthnRelyingParty
+{
+    public function __construct(
+        public string $id,
+        public string $name,
+        public array $allowedOrigins,
+        public WebAuthnPolicyProfile $policy,
+    ) {
+    }
+}
+```
+
+---
+
+# 306. Relying Party ID
+
+El RP ID deberá ser un dominio registrable válido o un subdominio permitido.
+
+No deberá derivarse directamente de un `Host` no validado.
+
+---
+
+# 307. RP ID resolution
+
+```php
+interface RelyingPartyResolverInterface
+{
+    public function resolve(
+        AuthenticationSecurityContext $context
+    ): WebAuthnRelyingParty;
+}
+```
+
+---
+
+# 308. Multi-tenant RP model
+
+VoltStack deberá soportar al menos dos estrategias:
+
+* RP compartido para todos los tenants;
+* RP separado por dominio de tenant.
+
+La estrategia deberá configurarse explícitamente.
+
+---
+
+# 309. Shared RP risk
+
+Cuando múltiples tenants compartan RP ID, la credencial deberá vincularse además al tenant dentro del modelo interno.
+
+---
+
+# 310. Per-tenant RP risk
+
+Los dominios personalizados deberán validarse antes de poder utilizarse como RP ID.
+
+---
+
+# 311. Allowed origins
+
+Toda ceremonia deberá validar el origen exacto contra un registry confiable.
+
+---
+
+# 312. Origin registry
+
+```php
+interface WebAuthnOriginRegistryInterface
+{
+    public function isAllowed(
+        string $origin,
+        WebAuthnRelyingParty $relyingParty
+    ): bool;
+}
+```
+
+---
+
+# 313. Origin normalization
+
+Los origins deberán normalizarse considerando:
+
+* scheme;
+* host;
+* port;
+* punycode;
+* lowercase;
+* default ports;
+* ausencia de path;
+* ausencia de fragment.
+
+---
+
+# 314. HTTPS requirement
+
+Las ceremonias WebAuthn deberán ejecutarse sobre HTTPS, salvo excepciones estrictamente limitadas para desarrollo local.
+
+---
+
+# 315. Local development exception
+
+La excepción de localhost no deberá trasladarse a producción.
+
+---
+
+# 316. WebAuthnPolicyProfile
+
+```php
+final readonly class WebAuthnPolicyProfile
+{
+    public function __construct(
+        public UserVerificationRequirement $userVerification,
+        public ResidentKeyRequirement $residentKey,
+        public AttestationConveyancePreference $attestation,
+        public AuthenticatorAttachmentPreference $attachment,
+        public bool $requireDiscoverableCredential,
+        public bool $requireBackupEligibility,
+    ) {
+    }
+}
+```
+
+---
+
+# 317. UserVerificationRequirement
+
+```php
+enum UserVerificationRequirement: string
+{
+    case Required = 'required';
+    case Preferred = 'preferred';
+    case Discouraged = 'discouraged';
+}
+```
+
+---
+
+# 318. ResidentKeyRequirement
+
+```php
+enum ResidentKeyRequirement: string
+{
+    case Required = 'required';
+    case Preferred = 'preferred';
+    case Discouraged = 'discouraged';
+}
+```
+
+---
+
+# 319. AuthenticatorAttachmentPreference
+
+```php
+enum AuthenticatorAttachmentPreference: string
+{
+    case Platform = 'platform';
+    case CrossPlatform = 'cross_platform';
+    case Any = 'any';
+}
+```
+
+---
+
+# 320. AttestationConveyancePreference
+
+```php
+enum AttestationConveyancePreference: string
+{
+    case None = 'none';
+    case Indirect = 'indirect';
+    case Direct = 'direct';
+    case Enterprise = 'enterprise';
+}
+```
+
+---
+
+# 321. Ceremony separation
+
+VoltStack deberá diferenciar claramente:
+
+* registration ceremony;
+* authentication ceremony.
+
+---
+
+# 322. Registration ceremony
+
+La ceremonia de registro crea una nueva credencial pública vinculada a una identidad.
+
+---
+
+# 323. Authentication ceremony
+
+La ceremonia de autenticación demuestra control sobre una credencial previamente registrada.
+
+---
+
+# 324. WebAuthn challenge
+
+```php
+final readonly class WebAuthnChallenge
+{
+    public function __construct(
+        public string $id,
+        public SensitiveValue $value,
+        public WebAuthnCeremonyType $type,
+        public IdentityIdentifier $identity,
+        public string $relyingPartyId,
+        public DateTimeImmutable $expiresAt,
+        public ?string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 325. WebAuthnCeremonyType
+
+```php
+enum WebAuthnCeremonyType: string
+{
+    case Registration = 'registration';
+    case Authentication = 'authentication';
+}
+```
+
+---
+
+# 326. Challenge generation
+
+El challenge deberá:
+
+* usar CSPRNG;
+* tener alta entropía;
+* ser único;
+* expirar rápidamente;
+* vincularse a ceremonia;
+* vincularse a RP;
+* vincularse a identidad cuando aplique.
+
+---
+
+# 327. Challenge storage
+
+El challenge completo podrá almacenarse cifrado o como estado seguro de corta duración.
+
+---
+
+# 328. Challenge consumption
+
+Un challenge válido deberá consumirse atómicamente después de completar la ceremonia.
+
+---
+
+# 329. Challenge reuse
+
+Un challenge no podrá reutilizarse en:
+
+* otra ceremonia;
+* otro RP;
+* otra identidad;
+* otro tenant;
+* otro propósito.
+
+---
+
+# 330. WebAuthnCeremonyStore
+
+```php
+interface WebAuthnCeremonyStoreInterface
+{
+    public function issue(
+        WebAuthnChallenge $challenge,
+        WebAuthnCeremonyState $state
+    ): void;
+
+    public function consume(
+        string $challengeId
+    ): WebAuthnCeremonyState;
+}
+```
+
+---
+
+# 331. Ceremony state
+
+El estado podrá incluir:
+
+* RP ID;
+* allowed origins;
+* user verification requirement;
+* excluded credentials;
+* allowed credentials;
+* timeout;
+* extensions;
+* identity;
+* tenant;
+* policy version.
+
+---
+
+# 332. Registration options builder
+
+```php
+interface PublicKeyCreationOptionsBuilderInterface
+{
+    public function build(
+        WebAuthnRegistrationContext $context
+    ): PublicKeyCredentialCreationOptions;
+}
+```
+
+---
+
+# 333. Registration prerequisites
+
+Registrar una credencial deberá requerir:
+
+* sesión autenticada;
+* autenticación reciente;
+* identidad activa;
+* riesgo aceptable;
+* autorización para administrar factores.
+
+---
+
+# 334. Registration step-up
+
+Para añadir una passkey a una cuenta existente deberá exigirse step-up cuando el riesgo lo justifique.
+
+---
+
+# 335. User entity
+
+```php
+final readonly class WebAuthnUserEntity
+{
+    public function __construct(
+        public string $id,
+        public string $name,
+        public string $displayName,
+    ) {
+    }
+}
+```
+
+---
+
+# 336. User entity ID
+
+El `id` deberá ser:
+
+* opaco;
+* estable;
+* no derivado del email;
+* no reciclable;
+* limitado en tamaño;
+* independiente del display name.
+
+---
+
+# 337. User handle privacy
+
+El user handle no deberá revelar información personal innecesaria.
+
+---
+
+# 338. User name mutability
+
+El username mostrado al autenticador podrá cambiar sin alterar el identificador interno.
+
+---
+
+# 339. Credential parameters
+
+VoltStack deberá publicar únicamente algoritmos criptográficos permitidos.
+
+---
+
+# 340. PublicKeyCredentialParametersRegistry
+
+```php
+interface PublicKeyCredentialParametersRegistryInterface
+{
+    public function allowedAlgorithms(
+        WebAuthnPolicyProfile $profile
+    ): array;
+}
+```
+
+---
+
+# 341. Supported algorithms
+
+El framework deberá priorizar algoritmos modernos y ampliamente soportados.
+
+---
+
+# 342. Algorithm downgrade
+
+No deberán aceptarse algoritmos no anunciados durante la ceremonia.
+
+---
+
+# 343. Exclude credentials
+
+Durante el registro podrán enviarse credenciales existentes para evitar duplicados.
+
+---
+
+# 344. Credential exclusion privacy
+
+La lista de exclusión deberá limitarse a la identidad autenticada y no revelar credenciales de otros usuarios.
+
+---
+
+# 345. Authenticator selection
+
+La política podrá solicitar:
+
+* autenticador de plataforma;
+* llave física;
+* resident key;
+* user verification;
+* passkey sincronizable.
+
+---
+
+# 346. Timeout
+
+El timeout del cliente no sustituye la expiración del challenge en el servidor.
+
+---
+
+# 347. Registration response parser
+
+```php
+interface WebAuthnRegistrationResponseParserInterface
+{
+    public function parse(
+        array $payload
+    ): ParsedRegistrationResponse;
+}
+```
+
+---
+
+# 348. ClientDataJSON validation
+
+Deberán validarse:
+
+* estructura JSON;
+* tipo;
+* challenge;
+* origin;
+* crossOrigin;
+* token binding cuando exista.
+
+---
+
+# 349. Client data type
+
+Para registro deberá esperarse:
+
+```text
+webauthn.create
+```
+
+---
+
+# 350. Challenge comparison
+
+La comparación deberá hacerse sobre los bytes decodificados de forma segura.
+
+---
+
+# 351. Origin validation
+
+El origin recibido deberá coincidir exactamente con uno permitido.
+
+---
+
+# 352. Cross-origin registration
+
+El registro cross-origin deberá rechazarse salvo protocolo y política explícitamente soportados.
+
+---
+
+# 353. AuthenticatorData
+
+```php
+final readonly class AuthenticatorData
+{
+    public function __construct(
+        public string $rpIdHash,
+        public bool $userPresent,
+        public bool $userVerified,
+        public bool $backupEligible,
+        public bool $backupState,
+        public int $signatureCounter,
+        public ?AttestedCredentialData $attestedCredentialData,
+        public array $extensions,
+    ) {
+    }
+}
+```
+
+---
+
+# 354. RP ID hash validation
+
+El hash del RP ID deberá coincidir con el RP esperado.
+
+---
+
+# 355. User presence
+
+La bandera de presencia deberá validarse cuando la política lo requiera.
+
+---
+
+# 356. User verification
+
+Cuando la política exija verificación, `userVerified` deberá ser verdadero.
+
+---
+
+# 357. AttestedCredentialData
+
+```php
+final readonly class AttestedCredentialData
+{
+    public function __construct(
+        public string $aaguid,
+        public string $credentialId,
+        public PublicKeyMaterial $publicKey,
+    ) {
+    }
+}
+```
+
+---
+
+# 358. Credential ID uniqueness
+
+El credential ID deberá ser único dentro del registry de credenciales aplicable.
+
+---
+
+# 359. Credential collision
+
+Una colisión deberá considerarse un evento de alta severidad.
+
+---
+
+# 360. Public key validation
+
+La clave pública deberá:
+
+* usar algoritmo permitido;
+* poseer parámetros válidos;
+* cumplir longitud;
+* no contener puntos inválidos;
+* no usar formatos ambiguos.
+
+---
+
+# 361. Attestation Object
+
+El objeto de attestation deberá analizarse mediante parsers estrictos y limitados.
+
+---
+
+# 362. Attestation verifier
+
+```php
+interface AttestationVerifierInterface
+{
+    public function verify(
+        ParsedAttestationObject $attestation,
+        WebAuthnRegistrationContext $context
+    ): AttestationVerificationResult;
+}
+```
+
+---
+
+# 363. Attestation policy
+
+Por defecto, las aplicaciones generales deberán preferir `none` salvo necesidad real.
+
+---
+
+# 364. Direct attestation
+
+La attestation directa podrá aumentar:
+
+* control empresarial;
+* trazabilidad de autenticador;
+* privacidad;
+* complejidad;
+* dependencia de metadata.
+
+---
+
+# 365. Enterprise attestation
+
+Solo deberá habilitarse en entornos administrados y con consentimiento o base legal apropiada.
+
+---
+
+# 366. AAGUID handling
+
+El AAGUID podrá utilizarse para:
+
+* metadata;
+* policy;
+* detección de autenticadores;
+* posture empresarial.
+
+No deberá asumirse como prueba suficiente de seguridad por sí solo.
+
+---
+
+# 367. Metadata service
+
+```php
+interface AuthenticatorMetadataProviderInterface
+{
+    public function lookup(
+        string $aaguid
+    ): ?AuthenticatorMetadata;
+}
+```
+
+---
+
+# 368. Metadata trust
+
+La metadata externa deberá:
+
+* verificarse;
+* actualizarse;
+* versionarse;
+* manejar expiración;
+* tratarse como señal adicional.
+
+---
+
+# 369. Attestation trust anchors
+
+Los trust anchors deberán gestionarse mediante un registry controlado.
+
+---
+
+# 370. Attestation revocation
+
+El sistema deberá poder rechazar autenticadores revocados o comprometidos.
+
+---
+
+# 371. Registration verification result
+
+```php
+final readonly class WebAuthnRegistrationResult
+{
+    public function __construct(
+        public bool $valid,
+        public ?WebAuthnCredential $credential,
+        public array $warnings,
+        public array $securityEvents,
+    ) {
+    }
+}
+```
+
+---
+
+# 372. WebAuthnCredential
+
+```php
+final readonly class WebAuthnCredential
+{
+    public function __construct(
+        public string $credentialId,
+        public IdentityIdentifier $identity,
+        public string $relyingPartyId,
+        public PublicKeyMaterial $publicKey,
+        public int $signatureCounter,
+        public bool $discoverable,
+        public bool $backupEligible,
+        public bool $backupState,
+        public string $aaguid,
+        public DateTimeImmutable $createdAt,
+        public WebAuthnCredentialStatus $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 373. WebAuthnCredentialStatus
+
+```php
+enum WebAuthnCredentialStatus: string
+{
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Lost = 'lost';
+}
+```
+
+---
+
+# 374. Credential nickname
+
+El usuario podrá asignar un nombre descriptivo como:
+
+* teléfono personal;
+* laptop de trabajo;
+* llave física principal.
+
+El nickname no formará parte de la identidad criptográfica.
+
+---
+
+# 375. Credential registration commit
+
+La credencial solo deberá persistirse después de completar todas las validaciones.
+
+---
+
+# 376. Registration transaction
+
+El commit deberá incluir atómicamente:
+
+* credential;
+* identity binding;
+* tenant binding;
+* audit record;
+* ceremony consumption;
+* factor enrollment.
+
+---
+
+# 377. Authentication options builder
+
+```php
+interface PublicKeyRequestOptionsBuilderInterface
+{
+    public function build(
+        WebAuthnAuthenticationContext $context
+    ): PublicKeyCredentialRequestOptions;
+}
+```
+
+---
+
+# 378. AllowCredentials
+
+Para autenticación identificada podrá enviarse una lista de credenciales permitidas.
+
+---
+
+# 379. Discoverable authentication
+
+Para passkeys descubribles podrá omitirse `allowCredentials`.
+
+---
+
+# 380. Username-less authentication
+
+La autenticación sin username deberá resolver la identidad mediante:
+
+* credential ID;
+* user handle;
+* RP ID;
+* tenant context.
+
+---
+
+# 381. Authentication response parser
+
+```php
+interface WebAuthnAuthenticationResponseParserInterface
+{
+    public function parse(
+        array $payload
+    ): ParsedAuthenticationResponse;
+}
+```
+
+---
+
+# 382. Authentication client data type
+
+Durante autenticación deberá esperarse:
+
+```text
+webauthn.get
+```
+
+---
+
+# 383. Assertion verification
+
+La assertion deberá validar:
+
+* challenge;
+* origin;
+* RP ID hash;
+* user presence;
+* user verification;
+* credential;
+* signature;
+* counter;
+* extensions.
+
+---
+
+# 384. Assertion verifier
+
+```php
+interface WebAuthnAssertionVerifierInterface
+{
+    public function verify(
+        ParsedAuthenticationResponse $response,
+        WebAuthnAuthenticationContext $context
+    ): WebAuthnAuthenticationResult;
+}
+```
+
+---
+
+# 385. Credential lookup
+
+El credential ID deberá resolverse en un registry aislado por RP y tenant.
+
+---
+
+# 386. Unknown credential
+
+Una credencial desconocida deberá producir una respuesta externa genérica.
+
+---
+
+# 387. User handle validation
+
+Cuando se reciba user handle deberá coincidir con la identidad vinculada a la credencial.
+
+---
+
+# 388. Signature verification
+
+La firma deberá verificarse sobre:
+
+```text
+authenticatorData
++
+SHA-256(clientDataJSON)
+```
+
+usando la clave pública registrada.
+
+---
+
+# 389. Invalid signature
+
+Una firma inválida deberá:
+
+* rechazar la autenticación;
+* incrementar señales de riesgo;
+* generar evento;
+* no revelar detalles criptográficos.
+
+---
+
+# 390. Signature counter
+
+El contador podrá ayudar a detectar clonación, pero no todos los autenticadores lo incrementan.
+
+---
+
+# 391. Counter evaluation
+
+VoltStack deberá distinguir:
+
+* contador incrementado;
+* contador sin soporte;
+* contador sin cambio;
+* contador reducido;
+* contador inconsistente.
+
+---
+
+# 392. Counter rollback
+
+Un rollback podrá indicar:
+
+* clonación;
+* restauración;
+* sincronización;
+* comportamiento del proveedor;
+* error de implementación.
+
+---
+
+# 393. Counter policy
+
+El rollback no deberá producir siempre bloqueo inmediato.
+
+La decisión dependerá de:
+
+* tipo de autenticador;
+* backup state;
+* metadata;
+* historial;
+* riesgo;
+* política del tenant.
+
+---
+
+# 394. Passkey synchronization
+
+Las passkeys sincronizadas pueden existir en múltiples dispositivos bajo el ecosistema del proveedor.
+
+---
+
+# 395. Backup eligibility
+
+La bandera de elegibilidad indicará si la credencial puede respaldarse o sincronizarse.
+
+---
+
+# 396. Backup state
+
+La bandera de estado podrá indicar que la credencial fue respaldada.
+
+---
+
+# 397. Synced passkey assurance
+
+Una passkey sincronizada podrá ser resistente al phishing, aunque no necesariamente hardware-bound a un único dispositivo.
+
+---
+
+# 398. Credential revocation
+
+El usuario y los administradores autorizados deberán poder:
+
+* suspender;
+* revocar;
+* marcar como perdida;
+* marcar como comprometida;
+* eliminar una credencial.
+
+---
+
+# 399. Phishing-resistant authentication policy
+
+VoltStack deberá permitir declarar:
+
+```php
+#[RequiresAuthentication(
+    assurance: AuthenticationAssuranceLevel::Aal2,
+    phishingResistant: true
+)]
+public function changePayoutAccount(): Response
+{
+}
+```
+
+La política deberá aceptar únicamente métodos que cumplan la propiedad requerida.
+
+---
+
+# 400. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+WebAuthn Security Architecture
+Relying Party Model
+Origin and RP ID Validation
+Multi-Tenant RP Strategies
+WebAuthn Policy Profiles
+Registration Ceremonies
+Authentication Ceremonies
+Challenge Generation and Binding
+ClientDataJSON Validation
+Authenticator Data Validation
+User Presence and Verification
+Attestation Policy
+Authenticator Metadata
+Credential Registration
+Discoverable Credentials
+Username-less Authentication
+Assertion Verification
+Signature Counter Evaluation
+Passkey Synchronization
+Backup Eligibility and State
+Credential Revocation
+Phishing-Resistant Route Policies
+```
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 5 de varias
+**Cobertura:** Secciones **401–500**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 4`
+
+---
+
+# 401. Passkey Lifecycle Management
+
+Las passkeys deberán administrarse como credenciales completas con:
+
+* creación;
+* identificación;
+* clasificación;
+* uso;
+* actualización;
+* suspensión;
+* revocación;
+* recuperación;
+* auditoría.
+
+Una credencial WebAuthn no deberá tratarse como un simple registro de clave pública.
+
+---
+
+# 402. Credential lifecycle states
+
+```php
+enum PasskeyLifecycleState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Lost = 'lost';
+    case Compromised = 'compromised';
+    case Revoked = 'revoked';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 403. Pending credentials
+
+Una credencial permanecerá en estado `Pending` durante la ceremonia de registro.
+
+No podrá utilizarse para autenticación hasta que:
+
+* se valide la attestation cuando corresponda;
+* se verifique la primera assertion requerida;
+* se consuma el challenge;
+* se complete la transacción de enrolamiento.
+
+---
+
+# 404. Active credentials
+
+Solo una credencial `Active` podrá participar normalmente en autenticación.
+
+---
+
+# 405. Suspended credentials
+
+La suspensión permitirá deshabilitar temporalmente una credencial sin eliminar su historial.
+
+---
+
+# 406. Lost credentials
+
+Una credencial marcada como perdida deberá:
+
+* dejar de ser elegible;
+* generar un evento de seguridad;
+* incrementar el riesgo de sesiones relacionadas;
+* activar recomendaciones de recuperación.
+
+---
+
+# 407. Compromised credentials
+
+Una passkey comprometida deberá considerarse no confiable incluso si su firma sigue siendo criptográficamente válida.
+
+---
+
+# 408. Revoked credentials
+
+Una credencial revocada no deberá reactivarse mediante una operación ordinaria.
+
+---
+
+# 409. Retired credentials
+
+El estado `Retired` podrá utilizarse cuando una credencial sea reemplazada de forma controlada.
+
+---
+
+# 410. Passkey inventory
+
+VoltStack deberá exponer un inventario seguro de credenciales por identidad.
+
+---
+
+# 411. PasskeyInventoryItem
+
+```php
+final readonly class PasskeyInventoryItem
+{
+    public function __construct(
+        public string $credentialId,
+        public string $displayName,
+        public PasskeyLifecycleState $state,
+        public AuthenticatorAttachmentPreference $attachment,
+        public bool $discoverable,
+        public bool $backupEligible,
+        public bool $backupState,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $lastUsedAt,
+        public ?string $lastKnownDevice,
+    ) {
+    }
+}
+```
+
+---
+
+# 412. Inventory privacy
+
+El inventario no deberá exponer:
+
+* clave pública completa;
+* AAGUID innecesario;
+* datos de attestation detallados;
+* identificadores internos del proveedor;
+* metadata sensible del dispositivo.
+
+---
+
+# 413. Credential naming
+
+Los usuarios podrán asignar nombres descriptivos a sus passkeys.
+
+---
+
+# 414. Default credential names
+
+Cuando no exista un nombre explícito, el framework podrá generar uno aproximado a partir de:
+
+* tipo de autenticador;
+* plataforma;
+* fecha;
+* contexto del enrolamiento.
+
+---
+
+# 415. Name sanitization
+
+Los nombres de credenciales deberán:
+
+* validarse;
+* limitar longitud;
+* evitar HTML;
+* evitar caracteres de control;
+* almacenarse como texto plano seguro.
+
+---
+
+# 416. Duplicate names
+
+Se podrán permitir nombres duplicados, pero el UI deberá mostrar información adicional para distinguir credenciales.
+
+---
+
+# 417. Last-used tracking
+
+El sistema podrá registrar la última utilización para ayudar al usuario a identificar credenciales activas.
+
+---
+
+# 418. Usage tracking privacy
+
+El tracking no deberá convertirse en un mecanismo invasivo de seguimiento de dispositivos.
+
+---
+
+# 419. Credential management authorization
+
+Administrar passkeys deberá requerir:
+
+* sesión autenticada;
+* autenticación reciente;
+* assurance suficiente;
+* autorización explícita;
+* riesgo aceptable.
+
+---
+
+# 420. CredentialManagementService
+
+```php
+interface CredentialManagementServiceInterface
+{
+    public function list(
+        IdentityContext $identity
+    ): array;
+
+    public function rename(
+        IdentityContext $identity,
+        string $credentialId,
+        string $name
+    ): CredentialManagementResult;
+
+    public function revoke(
+        IdentityContext $identity,
+        string $credentialId
+    ): CredentialManagementResult;
+}
+```
+
+---
+
+# 421. Deletion semantics
+
+Eliminar una credencial desde el UI deberá traducirse internamente a una revocación auditable.
+
+---
+
+# 422. Hard deletion
+
+La eliminación física podrá realizarse después del periodo de retención definido.
+
+---
+
+# 423. Self-lockout protection
+
+Antes de revocar una credencial, el sistema deberá comprobar si quedará al menos un método de recuperación viable.
+
+---
+
+# 424. Last-factor removal
+
+Eliminar el último factor fuerte deberá requerir:
+
+* factor alternativo;
+* recuperación verificada;
+* intervención administrativa controlada;
+* o confirmación reforzada según política.
+
+---
+
+# 425. Factor replacement
+
+El reemplazo de passkey deberá ejecutarse como:
+
+```text
+Fresh Authentication
+      ↓
+Register New Credential
+      ↓
+Verify New Credential
+      ↓
+Activate New Credential
+      ↓
+Retire or Revoke Old Credential
+      ↓
+Rotate Session
+      ↓
+Notify User
+```
+
+---
+
+# 426. Replace-before-remove
+
+VoltStack deberá preferir registrar primero la nueva credencial antes de retirar la anterior.
+
+---
+
+# 427. Credential replacement transaction
+
+La operación deberá mantener consistencia si falla cualquiera de las etapas.
+
+---
+
+# 428. Authenticator policy changes
+
+Si una credencial deja de cumplir una nueva política, podrá:
+
+* permanecer temporalmente;
+* requerir reemplazo;
+* restringirse a operaciones de bajo riesgo;
+* suspenderse.
+
+---
+
+# 429. Credential policy evaluator
+
+```php
+interface WebAuthnCredentialPolicyEvaluatorInterface
+{
+    public function evaluate(
+        WebAuthnCredential $credential,
+        WebAuthnPolicyProfile $targetPolicy
+    ): CredentialPolicyAssessment;
+}
+```
+
+---
+
+# 430. Credential inventory events
+
+Eventos recomendados:
+
+* `PasskeyRegistered`;
+* `PasskeyRenamed`;
+* `PasskeySuspended`;
+* `PasskeyRevoked`;
+* `PasskeyMarkedLost`;
+* `PasskeyMarkedCompromised`;
+* `PasskeyReplaced`.
+
+---
+
+# 431. Recovery after passkey loss
+
+La pérdida de una passkey deberá activar un flujo separado del login ordinario.
+
+---
+
+# 432. Recovery options
+
+La recuperación podrá apoyarse en:
+
+* otra passkey;
+* recovery codes;
+* factor MFA alternativo;
+* identidad federada confiable;
+* soporte administrativo;
+* verificación manual.
+
+---
+
+# 433. Recovery assurance
+
+El assurance resultante dependerá del método utilizado.
+
+---
+
+# 434. Low-assurance recovery
+
+Una recuperación de assurance bajo deberá producir una sesión restringida.
+
+---
+
+# 435. Restricted recovery session
+
+```php
+final readonly class RestrictedRecoverySessionPolicy
+{
+    public function __construct(
+        public int $lifetimeSeconds,
+        public array $allowedOperations,
+        public bool $requirePasskeyEnrollment,
+        public bool $blockSensitiveChanges,
+    ) {
+    }
+}
+```
+
+---
+
+# 436. Post-recovery restrictions
+
+Una sesión recuperada podrá impedir temporalmente:
+
+* cambio de email;
+* retiro de fondos;
+* modificación de métodos de pago;
+* eliminación de cuenta;
+* nueva impersonación;
+* creación de API keys.
+
+---
+
+# 437. Mandatory credential re-enrollment
+
+Después de perder todas las passkeys, el sistema podrá exigir enrolar una nueva antes de restaurar acceso completo.
+
+---
+
+# 438. Recovery notifications
+
+Se deberá notificar:
+
+* inicio de recuperación;
+* finalización;
+* cambios de factores;
+* revocación de credenciales.
+
+---
+
+# 439. Recovery abuse protection
+
+Los flujos deberán protegerse contra:
+
+* account takeover;
+* social engineering;
+* SIM swapping;
+* abuso del soporte;
+* enumeración;
+* automatización.
+
+---
+
+# 440. Passwordless Account Bootstrap
+
+VoltStack deberá soportar creación de cuentas sin contraseña.
+
+---
+
+# 441. Bootstrap methods
+
+El bootstrap podrá realizarse mediante:
+
+* passkey;
+* invitación firmada;
+* magic link;
+* identidad federada;
+* dispositivo administrado;
+* provisioning empresarial.
+
+---
+
+# 442. Bootstrap identity binding
+
+La identidad deberá verificarse antes de activar la cuenta.
+
+---
+
+# 443. Passwordless bootstrap flow
+
+```text
+Registration Intent
+      ↓
+Identity Claim Verification
+      ↓
+Risk Evaluation
+      ↓
+WebAuthn Registration
+      ↓
+Credential Verification
+      ↓
+Recovery Method Setup
+      ↓
+Account Activation
+      ↓
+Session Creation
+```
+
+---
+
+# 444. Incomplete bootstrap
+
+Una cuenta incompleta deberá permanecer en estado `Pending`.
+
+---
+
+# 445. Bootstrap timeout
+
+El proceso deberá expirar y limpiar estado provisional.
+
+---
+
+# 446. Passwordless-only accounts
+
+Una cuenta podrá operar sin contraseña almacenada.
+
+---
+
+# 447. Authentication method declaration
+
+El perfil de identidad deberá indicar explícitamente si la contraseña existe.
+
+---
+
+# 448. Credential capability profile
+
+```php
+final readonly class IdentityCredentialProfile
+{
+    public function __construct(
+        public bool $hasPassword,
+        public bool $hasPasskey,
+        public bool $hasRecoveryCodes,
+        public bool $hasFederatedIdentity,
+        public array $activeMethods,
+    ) {
+    }
+}
+```
+
+---
+
+# 449. Password fallback prohibition
+
+Una cuenta passwordless no deberá crear silenciosamente una contraseña como fallback.
+
+---
+
+# 450. Password enrollment
+
+Añadir una contraseña a una cuenta passwordless será una operación de seguridad de alto impacto.
+
+---
+
+# 451. Passwordless recovery
+
+El sistema deberá exigir al menos un mecanismo de recuperación compatible con la política.
+
+---
+
+# 452. Recovery method independence
+
+El mecanismo de recuperación no deberá depender completamente del mismo dispositivo que contiene la única passkey.
+
+---
+
+# 453. Method downgrade prevention
+
+VoltStack deberá impedir que un atacante degrade una cuenta desde un método fuerte a uno débil.
+
+---
+
+# 454. Authentication downgrade examples
+
+Ataques posibles:
+
+* cambiar passkey por SMS;
+* habilitar contraseña débil;
+* eliminar MFA;
+* añadir email no verificado;
+* cambiar recovery channel;
+* forzar login por legacy API.
+
+---
+
+# 455. AuthenticationMethodPolicy
+
+```php
+final readonly class AuthenticationMethodPolicy
+{
+    public function __construct(
+        public array $allowedMethods,
+        public array $deprecatedMethods,
+        public AuthenticationStrength $minimumStrength,
+        public bool $preventDowngrade,
+    ) {
+    }
+}
+```
+
+---
+
+# 456. Downgrade evaluation
+
+Una transición deberá comparar:
+
+* assurance actual;
+* assurance objetivo;
+* factor independence;
+* resistencia al phishing;
+* hardware binding;
+* recuperación disponible.
+
+---
+
+# 457. Downgrade authorization
+
+Una reducción deliberada deberá requerir:
+
+* autenticación fuerte y reciente;
+* explicación;
+* confirmación;
+* notificación;
+* auditoría.
+
+---
+
+# 458. Legacy client restrictions
+
+Clientes antiguos no deberán forzar métodos menos seguros para toda la cuenta.
+
+---
+
+# 459. Per-client method policy
+
+La política podrá permitir métodos específicos por:
+
+* canal;
+* aplicación;
+* tenant;
+* route group;
+* device posture.
+
+---
+
+# 460. Session Security Architecture
+
+Una sesión representa continuidad autenticada entre múltiples requests.
+
+No deberá confundirse con la identidad misma.
+
+---
+
+# 461. Session trust model
+
+```text
+Authentication Result
+      ↓
+Session Issuance
+      ↓
+Session Identifier
+      ↓
+Client Storage
+      ↓
+Request Presentation
+      ↓
+Session Lookup
+      ↓
+Security Validation
+      ↓
+Identity Context
+```
+
+---
+
+# 462. Session security goals
+
+El sistema deberá proteger contra:
+
+* fixation;
+* hijacking;
+* replay;
+* leakage;
+* privilege persistence;
+* stale authorization;
+* tenant confusion;
+* session cloning;
+* session store compromise.
+
+---
+
+# 463. Session types
+
+```php
+enum SessionType: string
+{
+    case Browser = 'browser';
+    case ApiInteractive = 'api_interactive';
+    case Recovery = 'recovery';
+    case Impersonation = 'impersonation';
+    case Administrative = 'administrative';
+    case DeviceBound = 'device_bound';
+}
+```
+
+---
+
+# 464. SessionRecord
+
+```php
+final readonly class SessionRecord
+{
+    public function __construct(
+        public SessionIdentifier $id,
+        public IdentityIdentifier $identity,
+        public SessionType $type,
+        public AuthenticationState $authentication,
+        public SessionLifecycleState $state,
+        public DateTimeImmutable $createdAt,
+        public DateTimeImmutable $lastActivityAt,
+        public DateTimeImmutable $idleExpiresAt,
+        public DateTimeImmutable $absoluteExpiresAt,
+        public ?string $tenantId,
+        public int $credentialVersion,
+        public int $authorizationVersion,
+    ) {
+    }
+}
+```
+
+---
+
+# 465. SessionIdentifier
+
+```php
+final readonly class SessionIdentifier
+{
+    public function __construct(
+        public string $publicId,
+        public string $lookupDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 466. Session ID generation
+
+El identificador deberá:
+
+* generarse con CSPRNG;
+* poseer alta entropía;
+* ser opaco;
+* no contener user ID;
+* no contener tenant ID;
+* no ser secuencial;
+* no ser predecible.
+
+---
+
+# 467. Session ID storage
+
+El cliente recibirá el valor opaco.
+
+El servidor podrá almacenar únicamente un digest de lookup cuando el diseño lo permita.
+
+---
+
+# 468. Session ID hashing
+
+El digest deberá usar una función adecuada para búsquedas rápidas y resistencia ante exposición de la base de sesiones.
+
+---
+
+# 469. Session ID secrecy
+
+El session ID deberá tratarse como bearer credential.
+
+---
+
+# 470. Session identifier exposure
+
+No deberá aparecer en:
+
+* URLs;
+* logs;
+* analytics;
+* referrers;
+* HTML;
+* errores;
+* traces.
+
+---
+
+# 471. Cookie transport
+
+Las sesiones web deberán transportarse mediante cookies seguras.
+
+---
+
+# 472. Session cookie profile
+
+```php
+final readonly class SessionCookieProfile
+{
+    public function __construct(
+        public string $name,
+        public bool $secure,
+        public bool $httpOnly,
+        public SameSitePolicy $sameSite,
+        public string $path,
+        public ?string $domain,
+        public bool $hostPrefix,
+    ) {
+    }
+}
+```
+
+---
+
+# 473. Host-prefixed session cookies
+
+Cuando sea posible, la cookie deberá usar prefijo:
+
+```text
+__Host-
+```
+
+---
+
+# 474. Domain-scoped session risk
+
+Las cookies compartidas entre subdominios aumentan la superficie de ataque.
+
+---
+
+# 475. Session creation
+
+Una sesión solo deberá crearse después de una autenticación válida.
+
+---
+
+# 476. SessionIssuer
+
+```php
+interface SessionIssuerInterface
+{
+    public function issue(
+        AuthenticationResult $authentication,
+        SessionIssueContext $context
+    ): IssuedSession;
+}
+```
+
+---
+
+# 477. SessionIssueContext
+
+```php
+final readonly class SessionIssueContext
+{
+    public function __construct(
+        public SessionType $type,
+        public RequestFingerprint $request,
+        public ?DeviceIdentifier $device,
+        public ?string $tenantId,
+        public SessionPolicy $policy,
+    ) {
+    }
+}
+```
+
+---
+
+# 478. Session fixation protection
+
+Toda autenticación exitosa deberá emitir un nuevo session ID.
+
+---
+
+# 479. Pre-authentication sessions
+
+Los datos almacenados antes del login deberán migrarse cuidadosamente a la nueva sesión.
+
+---
+
+# 480. Session data migration
+
+Solo deberán transferirse atributos permitidos como:
+
+* locale;
+* UI preferences;
+* CSRF flow state;
+* carrito anónimo cuando esté autorizado.
+
+---
+
+# 481. Unsafe pre-auth data
+
+No deberán migrarse automáticamente:
+
+* identity claims;
+* authorization state;
+* MFA status;
+* tenant privileges;
+* impersonation state.
+
+---
+
+# 482. Session rotation
+
+La sesión deberá rotarse ante eventos relevantes.
+
+---
+
+# 483. Session rotation triggers
+
+Se deberá rotar cuando ocurra:
+
+* login;
+* step-up;
+* cambio de contraseña;
+* cambio de MFA;
+* inicio de impersonación;
+* fin de impersonación;
+* cambio de tenant sensible;
+* elevación administrativa;
+* recuperación.
+
+---
+
+# 484. SessionRotator
+
+```php
+interface SessionRotatorInterface
+{
+    public function rotate(
+        SessionRecord $current,
+        SessionRotationReason $reason
+    ): RotatedSession;
+}
+```
+
+---
+
+# 485. SessionRotationReason
+
+```php
+enum SessionRotationReason: string
+{
+    case Authentication = 'authentication';
+    case StepUp = 'step_up';
+    case CredentialChange = 'credential_change';
+    case PrivilegeChange = 'privilege_change';
+    case TenantSwitch = 'tenant_switch';
+    case ImpersonationStart = 'impersonation_start';
+    case ImpersonationEnd = 'impersonation_end';
+    case RiskResponse = 'risk_response';
+}
+```
+
+---
+
+# 486. Rotation transaction
+
+La rotación deberá:
+
+* crear nuevo ID;
+* invalidar el anterior;
+* transferir datos permitidos;
+* preservar audit linkage;
+* emitir nueva cookie.
+
+---
+
+# 487. Rotation grace window
+
+Una ventana mínima podrá tolerarse para requests concurrentes legítimos.
+
+---
+
+# 488. Grace window restrictions
+
+La ventana deberá:
+
+* ser corta;
+* permitir transición única;
+* evitar reutilización prolongada;
+* registrar uso del identificador anterior.
+
+---
+
+# 489. Session store
+
+```php
+interface SessionStoreInterface
+{
+    public function create(SessionRecord $session): void;
+
+    public function find(SessionIdentifier $id): ?SessionRecord;
+
+    public function update(SessionRecord $session): void;
+
+    public function revoke(
+        SessionIdentifier $id,
+        SessionRevocationReason $reason
+    ): void;
+}
+```
+
+---
+
+# 490. Session store security
+
+El store deberá proporcionar:
+
+* acceso autenticado;
+* cifrado en tránsito;
+* aislamiento;
+* expiración;
+* atomicidad;
+* protección contra enumeración;
+* auditoría.
+
+---
+
+# 491. Centralized versus stateless sessions
+
+VoltStack podrá soportar:
+
+* sesiones stateful;
+* tokens de sesión firmados;
+* modelos híbridos.
+
+---
+
+# 492. Stateful session advantages
+
+Ventajas:
+
+* revocación inmediata;
+* menor exposición de datos;
+* control de concurrencia;
+* actualización centralizada;
+* gestión de riesgo.
+
+---
+
+# 493. Stateless session risks
+
+Riesgos:
+
+* revocación compleja;
+* claims obsoletos;
+* payload expuesto;
+* mayor dependencia de claves;
+* replay hasta expiración.
+
+---
+
+# 494. Default session model
+
+Para aplicaciones web interactivas, VoltStack deberá preferir sesiones stateful con identificador opaco.
+
+---
+
+# 495. SessionPolicy
+
+```php
+final readonly class SessionPolicy
+{
+    public function __construct(
+        public int $idleTimeoutSeconds,
+        public int $absoluteTimeoutSeconds,
+        public int $rotationIntervalSeconds,
+        public int $maximumConcurrentSessions,
+        public bool $bindDevice,
+        public bool $revokeOnCredentialChange,
+    ) {
+    }
+}
+```
+
+---
+
+# 496. Idle timeout
+
+La expiración por inactividad deberá basarse en actividad válida y controlada.
+
+---
+
+# 497. Activity refresh
+
+No todo request deberá renovar la actividad.
+
+Podrán excluirse:
+
+* polling automático;
+* assets;
+* health checks;
+* background requests;
+* telemetry.
+
+---
+
+# 498. Absolute timeout
+
+Toda sesión deberá tener una expiración absoluta que no pueda extenderse indefinidamente mediante actividad.
+
+---
+
+# 499. Concurrent session controls
+
+El sistema podrá limitar sesiones por:
+
+* identidad;
+* tipo;
+* dispositivo;
+* tenant;
+* assurance;
+* perfil.
+
+La política deberá definir si al exceder el límite se rechaza la nueva sesión o se revoca la más antigua.
+
+---
+
+# 500. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Passkey Lifecycle Management
+Credential Inventory
+Credential Naming
+Factor Revocation and Replacement
+Self-Lockout Protection
+Recovery After Passkey Loss
+Restricted Recovery Sessions
+Passwordless Account Bootstrap
+Passwordless-Only Accounts
+Authentication Downgrade Prevention
+Session Security Architecture
+Session Types
+Opaque Session Identifiers
+Secure Session Cookies
+Session Creation
+Session Fixation Protection
+Session Rotation
+Session Store Security
+Stateful and Stateless Session Models
+Idle and Absolute Timeouts
+Concurrent Session Control Foundations
+```
