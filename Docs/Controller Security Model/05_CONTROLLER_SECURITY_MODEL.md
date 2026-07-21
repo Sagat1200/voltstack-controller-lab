@@ -12295,3 +12295,12461 @@ Entrega 11
 - Provisioning health monitoring
 - Disaster recovery for identity provisioning
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 11 de varias
+**Cobertura:** Secciones **1001–1100**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 10`
+
+---
+
+# 1001. Directory Synchronization Architecture
+
+VoltStack deberá soportar sincronización de directorios externos para mantener consistencia entre:
+
+* proveedores de identidad;
+* directorios corporativos;
+* plataformas HRIS;
+* servicios SCIM;
+* bases de empleados;
+* sistemas IAM;
+* estructuras organizacionales;
+* identidades locales.
+
+La sincronización deberá considerarse un subsistema de identidad independiente y no una simple importación de registros.
+
+---
+
+# 1002. Synchronization security goals
+
+El subsistema deberá garantizar:
+
+* reconciliación determinista;
+* aislamiento por tenant;
+* idempotencia;
+* trazabilidad;
+* control de conflictos;
+* prevención de borrados masivos accidentales;
+* recuperación ante fallos;
+* revocación oportuna;
+* consistencia eventual controlada;
+* protección de atributos locales.
+
+---
+
+# 1003. Directory synchronization threat model
+
+El modelo deberá considerar:
+
+* fuente externa comprometida;
+* cursor manipulado;
+* replay de cambios;
+* borrados masivos;
+* corrupción de jerarquías;
+* duplicación de identidades;
+* cross-tenant contamination;
+* escalamiento mediante grupos;
+* modificación de atributos protegidos;
+* drift silencioso;
+* pérdida de cambios;
+* sincronización parcial;
+* rollback incompleto;
+* inconsistencia entre nodos.
+
+---
+
+# 1004. Synchronization architectural components
+
+```text
+External Directory
+      ↓
+Directory Connector
+      ↓
+Authentication and Transport Security
+      ↓
+Change Enumeration
+      ↓
+Checkpoint Validation
+      ↓
+Normalization
+      ↓
+Identity Correlation
+      ↓
+Attribute Ownership Resolution
+      ↓
+Conflict Resolution
+      ↓
+Provisioning Commands
+      ↓
+Lifecycle Side Effects
+      ↓
+Checkpoint Commit
+      ↓
+Audit and Health Metrics
+```
+
+---
+
+# 1005. DirectoryConnector
+
+```php
+interface DirectoryConnectorInterface
+{
+    public function capabilities(): DirectoryConnectorCapabilities;
+
+    public function fetchFullSnapshot(
+        DirectorySyncContext $context
+    ): DirectorySnapshot;
+
+    public function fetchChanges(
+        DirectorySyncCursor $cursor,
+        DirectorySyncContext $context
+    ): DirectoryChangeBatch;
+}
+```
+
+---
+
+# 1006. DirectoryConnectorCapabilities
+
+```php
+final readonly class DirectoryConnectorCapabilities
+{
+    public function __construct(
+        public bool $supportsIncrementalSync,
+        public bool $supportsDeletions,
+        public bool $supportsGroups,
+        public bool $supportsNestedGroups,
+        public bool $supportsManagerHierarchy,
+        public bool $supportsStableChangeTokens,
+        public bool $supportsSnapshotVersioning,
+    ) {
+    }
+}
+```
+
+---
+
+# 1007. Directory source definition
+
+```php
+final readonly class DirectorySourceDefinition
+{
+    public function __construct(
+        public string $sourceId,
+        public string $tenantId,
+        public DirectorySourceType $type,
+        public DirectorySourceStatus $status,
+        public DirectoryTrustLevel $trustLevel,
+        public DirectorySyncMode $syncMode,
+        public array $enabledResourceTypes,
+    ) {
+    }
+}
+```
+
+---
+
+# 1008. DirectorySourceType
+
+```php
+enum DirectorySourceType: string
+{
+    case Scim = 'scim';
+    case Ldap = 'ldap';
+    case ActiveDirectory = 'active_directory';
+    case CloudDirectory = 'cloud_directory';
+    case Hris = 'hris';
+    case Custom = 'custom';
+}
+```
+
+---
+
+# 1009. DirectorySourceStatus
+
+```php
+enum DirectorySourceStatus: string
+{
+    case Active = 'active';
+    case Paused = 'paused';
+    case Suspended = 'suspended';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1010. DirectoryTrustLevel
+
+```php
+enum DirectoryTrustLevel: string
+{
+    case Informational = 'informational';
+    case Authoritative = 'authoritative';
+    case SharedAuthority = 'shared_authority';
+    case Restricted = 'restricted';
+}
+```
+
+---
+
+# 1011. Full synchronization
+
+Una sincronización completa deberá enumerar el estado total conocido de una fuente.
+
+---
+
+# 1012. Full sync use cases
+
+Deberá utilizarse para:
+
+* carga inicial;
+* recuperación después de pérdida de cursor;
+* auditoría de consistencia;
+* reconciliación periódica;
+* migraciones;
+* cambio de connector;
+* investigación de drift.
+
+---
+
+# 1013. Full sync safeguards
+
+Una sincronización completa deberá aplicar:
+
+* snapshot ID;
+* tenant binding;
+* límites de volumen;
+* detección de cambios anómalos;
+* dry-run opcional;
+* confirmación para operaciones destructivas;
+* commit por fases.
+
+---
+
+# 1014. Incremental synchronization
+
+La sincronización incremental deberá procesar únicamente cambios desde un checkpoint confiable.
+
+---
+
+# 1015. Incremental change types
+
+```php
+enum DirectoryChangeType: string
+{
+    case Created = 'created';
+    case Updated = 'updated';
+    case Deleted = 'deleted';
+    case Activated = 'activated';
+    case Deactivated = 'deactivated';
+    case MembershipAdded = 'membership_added';
+    case MembershipRemoved = 'membership_removed';
+    case Moved = 'moved';
+}
+```
+
+---
+
+# 1016. DirectoryChange
+
+```php
+final readonly class DirectoryChange
+{
+    public function __construct(
+        public string $changeId,
+        public DirectoryChangeType $type,
+        public string $resourceType,
+        public string $externalResourceId,
+        public mixed $payload,
+        public DateTimeImmutable $occurredAt,
+        public ?string $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 1017. Change ordering
+
+Cuando la fuente proporcione orden causal, VoltStack deberá preservarlo.
+
+---
+
+# 1018. Out-of-order changes
+
+El sistema deberá detectar cambios:
+
+* anteriores al estado actual;
+* duplicados;
+* incompatibles con la versión;
+* recibidos fuera de secuencia;
+* referidos a recursos aún inexistentes.
+
+---
+
+# 1019. DirectorySyncCursor
+
+```php
+final readonly class DirectorySyncCursor
+{
+    public function __construct(
+        public string $sourceId,
+        public string $tenantId,
+        public SensitiveValue $cursorValue,
+        public DateTimeImmutable $issuedAt,
+        public ?DateTimeImmutable $expiresAt,
+        public string $integrityDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 1020. Cursor integrity
+
+Los cursores deberán:
+
+* almacenarse de forma protegida;
+* vincularse a source y tenant;
+* poseer integrity check;
+* no ser manipulables por clientes;
+* rotarse cuando corresponda.
+
+---
+
+# 1021. Cursor loss
+
+Si el cursor se pierde o invalida, VoltStack deberá:
+
+* detener incremental sync;
+* evitar asumir continuidad;
+* ejecutar full reconciliation;
+* generar evento;
+* reconstruir checkpoint.
+
+---
+
+# 1022. Change tokens
+
+Una fuente podrá emitir change tokens opacos.
+
+VoltStack no deberá interpretar su estructura interna.
+
+---
+
+# 1023. DirectorySyncCheckpoint
+
+```php
+final readonly class DirectorySyncCheckpoint
+{
+    public function __construct(
+        public string $checkpointId,
+        public string $sourceId,
+        public string $tenantId,
+        public ?DirectorySyncCursor $cursor,
+        public DateTimeImmutable $startedAt,
+        public ?DateTimeImmutable $completedAt,
+        public DirectorySyncCheckpointState $state,
+        public int $processedChanges,
+        public int $failedChanges,
+    ) {
+    }
+}
+```
+
+---
+
+# 1024. DirectorySyncCheckpointState
+
+```php
+enum DirectorySyncCheckpointState: string
+{
+    case Started = 'started';
+    case Applying = 'applying';
+    case Completed = 'completed';
+    case Failed = 'failed';
+    case RolledBack = 'rolled_back';
+    case Superseded = 'superseded';
+}
+```
+
+---
+
+# 1025. Checkpoint commit rule
+
+El cursor nuevo no deberá persistirse como definitivo hasta que el batch haya sido aplicado correctamente.
+
+---
+
+# 1026. At-least-once delivery
+
+VoltStack deberá diseñarse para tolerar que un cambio sea recibido más de una vez.
+
+---
+
+# 1027. Change idempotency
+
+```php
+interface DirectoryChangeLedgerInterface
+{
+    public function hasProcessed(
+        string $sourceId,
+        string $changeId
+    ): bool;
+
+    public function markProcessed(
+        string $sourceId,
+        string $changeId,
+        DateTimeImmutable $processedAt
+    ): void;
+}
+```
+
+---
+
+# 1028. Batch processing
+
+```php
+final readonly class DirectoryChangeBatch
+{
+    public function __construct(
+        public array $changes,
+        public ?DirectorySyncCursor $nextCursor,
+        public bool $hasMore,
+        public ?string $snapshotVersion,
+    ) {
+    }
+}
+```
+
+---
+
+# 1029. Batch atomicity
+
+La estrategia deberá declararse como:
+
+* transacción completa;
+* transacción por recurso;
+* transacción por subgrupo;
+* best effort controlado.
+
+---
+
+# 1030. Partial batch failure
+
+Ante fallo parcial, el sistema deberá evitar avanzar el checkpoint sobre cambios no aplicados.
+
+---
+
+# 1031. Retry policy
+
+```php
+final readonly class DirectorySyncRetryPolicy
+{
+    public function __construct(
+        public int $maximumAttempts,
+        public int $initialDelayMilliseconds,
+        public int $maximumDelayMilliseconds,
+        public bool $useExponentialBackoff,
+        public bool $useJitter,
+    ) {
+    }
+}
+```
+
+---
+
+# 1032. Poison change handling
+
+Un cambio que falla repetidamente deberá:
+
+* aislarse;
+* enviarse a dead-letter storage;
+* no bloquear indefinidamente todo el directorio;
+* generar alerta;
+* requerir resolución.
+
+---
+
+# 1033. Identity reconciliation
+
+La reconciliación determinará qué identidad local corresponde a un recurso externo.
+
+---
+
+# 1034. IdentityReconciliationService
+
+```php
+interface IdentityReconciliationServiceInterface
+{
+    public function reconcile(
+        ExternalDirectoryResource $resource,
+        IdentityReconciliationContext $context
+    ): IdentityReconciliationResult;
+}
+```
+
+---
+
+# 1035. Correlation priorities
+
+La correlación deberá priorizar:
+
+1. vínculo persistente existente;
+2. source ID más external ID;
+3. identificador estable del proveedor;
+4. identidad federada conocida;
+5. regla administrativa explícita;
+6. revisión manual.
+
+---
+
+# 1036. Email correlation restrictions
+
+El email no deberá ser un criterio automático suficiente para fusionar identidades.
+
+---
+
+# 1037. IdentityReconciliationResult
+
+```php
+final readonly class IdentityReconciliationResult
+{
+    public function __construct(
+        public IdentityReconciliationStatus $status,
+        public ?IdentityIdentifier $identity,
+        public array $conflicts,
+        public bool $requiresReview,
+    ) {
+    }
+}
+```
+
+---
+
+# 1038. IdentityReconciliationStatus
+
+```php
+enum IdentityReconciliationStatus: string
+{
+    case Matched = 'matched';
+    case NewIdentity = 'new_identity';
+    case Ambiguous = 'ambiguous';
+    case Conflict = 'conflict';
+    case Rejected = 'rejected';
+}
+```
+
+---
+
+# 1039. Source-of-truth policies
+
+VoltStack deberá definir qué sistema es autoridad para cada tipo de dato.
+
+---
+
+# 1040. AttributeAuthority
+
+```php
+final readonly class AttributeAuthority
+{
+    public function __construct(
+        public string $attribute,
+        public string $sourceId,
+        public AttributeAuthorityMode $mode,
+        public int $priority,
+    ) {
+    }
+}
+```
+
+---
+
+# 1041. AttributeAuthorityMode
+
+```php
+enum AttributeAuthorityMode: string
+{
+    case Authoritative = 'authoritative';
+    case Preferred = 'preferred';
+    case Shared = 'shared';
+    case LocalOnly = 'local_only';
+    case ExternalReadOnly = 'external_read_only';
+}
+```
+
+---
+
+# 1042. Attribute ownership
+
+Cada atributo deberá registrar:
+
+* fuente propietaria;
+* último escritor;
+* versión;
+* fecha de modificación;
+* política;
+* estado de conflicto.
+
+---
+
+# 1043. AttributeOwnershipRecord
+
+```php
+final readonly class AttributeOwnershipRecord
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public string $attribute,
+        public string $ownerSource,
+        public string $lastWriter,
+        public int $version,
+        public DateTimeImmutable $updatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1044. Protected local fields
+
+Los siguientes datos no deberán sobrescribirse sin política explícita:
+
+* credenciales;
+* MFA;
+* passkeys;
+* recovery methods;
+* security flags;
+* local legal holds;
+* break-glass status;
+* internal risk classification.
+
+---
+
+# 1045. Field-level conflict resolution
+
+```php
+interface AttributeConflictResolverInterface
+{
+    public function resolve(
+        AttributeConflict $conflict,
+        AttributeConflictPolicy $policy
+    ): AttributeConflictResolution;
+}
+```
+
+---
+
+# 1046. AttributeConflict
+
+```php
+final readonly class AttributeConflict
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public string $attribute,
+        public mixed $localValue,
+        public mixed $externalValue,
+        public string $externalSource,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1047. Conflict resolution strategies
+
+```php
+enum AttributeConflictStrategy: string
+{
+    case ExternalWins = 'external_wins';
+    case LocalWins = 'local_wins';
+    case HighestPrioritySourceWins = 'highest_priority_source_wins';
+    case LatestVersionWins = 'latest_version_wins';
+    case Merge = 'merge';
+    case ManualReview = 'manual_review';
+    case RejectChange = 'reject_change';
+}
+```
+
+---
+
+# 1048. Latest-write limitations
+
+“Última escritura gana” no deberá usarse para atributos críticos sin versionado y autoridad explícita.
+
+---
+
+# 1049. Merge policies
+
+La combinación deberá ser semántica y específica por tipo de atributo.
+
+Ejemplos:
+
+* teléfonos;
+* direcciones;
+* aliases;
+* grupos;
+* entitlements.
+
+---
+
+# 1050. Conflict auditability
+
+Toda resolución automática deberá registrar:
+
+* valores considerados;
+* fuentes;
+* política aplicada;
+* resultado;
+* versión resultante.
+
+---
+
+# 1051. Tombstones
+
+Un tombstone representa la desaparición lógica de un recurso externo.
+
+---
+
+# 1052. DirectoryTombstone
+
+```php
+final readonly class DirectoryTombstone
+{
+    public function __construct(
+        public string $sourceId,
+        public string $externalResourceId,
+        public string $resourceType,
+        public DateTimeImmutable $deletedAt,
+        public string $deletionVersion,
+        public TombstoneState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1053. TombstoneState
+
+```php
+enum TombstoneState: string
+{
+    case Observed = 'observed';
+    case Applied = 'applied';
+    case Reverted = 'reverted';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 1054. Tombstone retention
+
+Los tombstones deberán conservarse durante un periodo suficiente para:
+
+* evitar recreación accidental;
+* detectar replay;
+* soportar reprovisioning;
+* reconciliar borrados tardíos;
+* auditar.
+
+---
+
+# 1055. Soft delete
+
+El soft delete deberá preservar el registro local y bloquear acceso.
+
+---
+
+# 1056. Hard delete
+
+El hard delete deberá quedar reservado para:
+
+* políticas legales;
+* retención concluida;
+* anonimización;
+* datos no sujetos a conservación;
+* aprobación administrativa.
+
+---
+
+# 1057. Delete mapping policy
+
+Una eliminación externa no deberá traducirse automáticamente en hard delete local.
+
+---
+
+# 1058. Deletion safety threshold
+
+VoltStack deberá detectar un volumen de eliminaciones superior al patrón esperado.
+
+---
+
+# 1059. Mass deletion protection
+
+```php
+final readonly class MassDeletionProtectionPolicy
+{
+    public function __construct(
+        public int $maximumAbsoluteDeletes,
+        public float $maximumPercentage,
+        public bool $requireApproval,
+        public bool $pauseOnThreshold,
+    ) {
+    }
+}
+```
+
+---
+
+# 1060. Destructive sync pause
+
+Al superar el umbral, el sync deberá:
+
+* pausar;
+* no avanzar cursor;
+* generar alerta crítica;
+* producir preview;
+* requerir aprobación.
+
+---
+
+# 1061. Reprovisioning
+
+Una identidad previamente desactivada podrá reaparecer en la fuente.
+
+---
+
+# 1062. Reprovisioning policy
+
+La política deberá decidir si:
+
+* reactiva la identidad existente;
+* crea nueva membresía;
+* conserva historial;
+* exige revisión;
+* bloquea por tombstone;
+* restaura grupos administrados.
+
+---
+
+# 1063. Identity continuity
+
+Cuando el identificador externo estable sea el mismo, deberá preferirse continuidad controlada sobre crear identidades duplicadas.
+
+---
+
+# 1064. Reprovisioning security review
+
+Deberá requerirse revisión adicional si la identidad previa fue marcada como:
+
+* comprometida;
+* despedida por causa;
+* bloqueada legalmente;
+* revocada administrativamente;
+* objeto de incidente.
+
+---
+
+# 1065. Orphan identity detection
+
+Una identidad huérfana existe cuando conserva estado local pero ya no está respaldada por una fuente esperada.
+
+---
+
+# 1066. OrphanIdentityDetector
+
+```php
+interface OrphanIdentityDetectorInterface
+{
+    public function detect(
+        string $tenantId,
+        string $sourceId,
+        DirectorySnapshot $snapshot
+    ): array;
+}
+```
+
+---
+
+# 1067. Orphan classifications
+
+```php
+enum OrphanIdentityStatus: string
+{
+    case Suspected = 'suspected';
+    case Confirmed = 'confirmed';
+    case Exempt = 'exempt';
+    case Remediated = 'remediated';
+}
+```
+
+---
+
+# 1068. Orphan grace period
+
+Una identidad no deberá desactivarse por una única ausencia temporal sin considerar:
+
+* full snapshot completo;
+* errores de fuente;
+* filtros;
+* paginación;
+* grace period;
+* excepciones.
+
+---
+
+# 1069. Stale account detection
+
+Una cuenta stale podrá identificarse por:
+
+* ausencia prolongada de sync;
+* falta de login;
+* membership expirada;
+* fuente retirada;
+* manager inválido;
+* status inconsistente.
+
+---
+
+# 1070. StaleAccountAssessment
+
+```php
+final readonly class StaleAccountAssessment
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public StaleAccountRiskLevel $risk,
+        public array $signals,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1071. Stale account remediation
+
+Las acciones podrán incluir:
+
+* notificar;
+* restringir;
+* requerir recertificación;
+* desactivar;
+* revocar sesiones;
+* eliminar memberships;
+* enviar a revisión.
+
+---
+
+# 1072. Manager hierarchy synchronization
+
+VoltStack podrá sincronizar relaciones de manager-subordinate.
+
+---
+
+# 1073. ManagerRelationship
+
+```php
+final readonly class ManagerRelationship
+{
+    public function __construct(
+        public IdentityIdentifier $employee,
+        public IdentityIdentifier $manager,
+        public string $sourceId,
+        public DateTimeImmutable $effectiveAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1074. Manager hierarchy validation
+
+Deberá impedirse:
+
+* auto-referencia;
+* ciclos;
+* manager inexistente;
+* relación cross-tenant;
+* manager desactivado según política;
+* profundidad no acotada.
+
+---
+
+# 1075. Manager hierarchy security use
+
+Una relación de manager no deberá otorgar automáticamente privilegios sensibles.
+
+---
+
+# 1076. Approval chain derivation
+
+Cuando se use para aprobaciones, la jerarquía deberá:
+
+* congelarse por versión;
+* auditarse;
+* validar vigencia;
+* permitir excepciones;
+* detectar conflictos de interés.
+
+---
+
+# 1077. Nested group synchronization
+
+VoltStack podrá sincronizar grupos que contienen otros grupos.
+
+---
+
+# 1078. Group graph model
+
+```php
+final readonly class DirectoryGroupEdge
+{
+    public function __construct(
+        public string $parentGroupId,
+        public string $childGroupId,
+        public string $sourceId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1079. Cyclic group protection
+
+El sistema deberá detectar ciclos antes de persistir relaciones.
+
+---
+
+# 1080. Group cycle detection
+
+```php
+interface GroupCycleDetectorInterface
+{
+    public function detect(
+        string $parentGroupId,
+        string $childGroupId,
+        DirectoryGroupGraph $graph
+    ): GroupCycleDetectionResult;
+}
+```
+
+---
+
+# 1081. Nested group depth limit
+
+La política deberá limitar la profundidad de expansión.
+
+---
+
+# 1082. Membership explosion protection
+
+Deberán establecerse límites para:
+
+* miembros efectivos;
+* grupos anidados;
+* profundidad;
+* tiempo de cálculo;
+* fan-out;
+* recomputación.
+
+---
+
+# 1083. Effective membership
+
+La membresía efectiva deberá distinguir:
+
+* directa;
+* heredada;
+* dinámica;
+* local;
+* federada;
+* SCIM.
+
+---
+
+# 1084. Authorization cache invalidation
+
+Los cambios en membresía efectiva deberán incrementar la versión de autorización correspondiente.
+
+---
+
+# 1085. Sync drift
+
+Drift es la diferencia no esperada entre el estado externo y el estado local.
+
+---
+
+# 1086. DirectoryDriftDetector
+
+```php
+interface DirectoryDriftDetectorInterface
+{
+    public function compare(
+        DirectorySnapshot $external,
+        LocalDirectoryProjection $local
+    ): DirectoryDriftReport;
+}
+```
+
+---
+
+# 1087. Drift categories
+
+```php
+enum DirectoryDriftCategory: string
+{
+    case MissingLocalResource = 'missing_local_resource';
+    case MissingExternalResource = 'missing_external_resource';
+    case AttributeMismatch = 'attribute_mismatch';
+    case MembershipMismatch = 'membership_mismatch';
+    case StatusMismatch = 'status_mismatch';
+    case OwnershipMismatch = 'ownership_mismatch';
+    case VersionMismatch = 'version_mismatch';
+}
+```
+
+---
+
+# 1088. DirectoryDriftReport
+
+```php
+final readonly class DirectoryDriftReport
+{
+    public function __construct(
+        public string $sourceId,
+        public string $tenantId,
+        public DateTimeImmutable $generatedAt,
+        public array $differences,
+        public DirectoryDriftSeverity $severity,
+    ) {
+    }
+}
+```
+
+---
+
+# 1089. Drift remediation modes
+
+```php
+enum DriftRemediationMode: string
+{
+    case ReportOnly = 'report_only';
+    case AutoRepairSafe = 'auto_repair_safe';
+    case RequireApproval = 'require_approval';
+    case PauseSynchronization = 'pause_synchronization';
+}
+```
+
+---
+
+# 1090. Safe auto-repair
+
+Solo deberán repararse automáticamente diferencias:
+
+* no destructivas;
+* deterministas;
+* respaldadas por una autoridad clara;
+* sin impacto de privilegios;
+* auditables.
+
+---
+
+# 1091. Provisioning health monitoring
+
+VoltStack deberá medir la salud operacional del subsistema.
+
+---
+
+# 1092. DirectorySyncHealthMetrics
+
+Métricas recomendadas:
+
+* tiempo desde último sync exitoso;
+* duración de sync;
+* changes procesados;
+* failures;
+* retries;
+* poison changes;
+* conflictos;
+* drift;
+* cuentas desactivadas;
+* membresías modificadas;
+* cursor age;
+* API latency;
+* rate-limit responses.
+
+---
+
+# 1093. DirectorySyncHealthStatus
+
+```php
+enum DirectorySyncHealthStatus: string
+{
+    case Healthy = 'healthy';
+    case Degraded = 'degraded';
+    case Delayed = 'delayed';
+    case Failed = 'failed';
+    case Suspended = 'suspended';
+}
+```
+
+---
+
+# 1094. Health threshold policies
+
+Cada tenant podrá definir tolerancias según:
+
+* criticidad;
+* frecuencia esperada;
+* volumen;
+* impacto de desprovisionamiento;
+* requisitos regulatorios.
+
+---
+
+# 1095. Provisioning alerts
+
+VoltStack deberá alertar ante:
+
+* sync retrasado;
+* cursor inválido;
+* volumen anómalo;
+* borrado masivo;
+* conflicto creciente;
+* fuente no autenticable;
+* drift crítico;
+* fallos repetidos.
+
+---
+
+# 1096. Disaster recovery foundations
+
+La recuperación deberá contemplar:
+
+* checkpoints;
+* cursores;
+* change ledger;
+* mappings externos;
+* tombstones;
+* attribute ownership;
+* group graph;
+* audit logs.
+
+---
+
+# 1097. DirectorySyncRecoveryService
+
+```php
+interface DirectorySyncRecoveryServiceInterface
+{
+    public function recover(
+        DirectorySourceDefinition $source,
+        DirectoryRecoveryPoint $point,
+        DirectoryRecoveryPolicy $policy
+    ): DirectoryRecoveryResult;
+}
+```
+
+---
+
+# 1098. Recovery strategies
+
+VoltStack podrá ejecutar:
+
+* replay desde checkpoint;
+* reconstrucción desde full snapshot;
+* rollback lógico;
+* rehidratación de mappings;
+* reparación de drift;
+* reconstrucción de membresías.
+
+---
+
+# 1099. Directory synchronization audit events
+
+Eventos recomendados:
+
+* `DirectorySyncStarted`;
+* `DirectorySyncCompleted`;
+* `DirectorySyncFailed`;
+* `DirectoryCursorInvalidated`;
+* `DirectoryCheckpointCommitted`;
+* `DirectoryChangeRejected`;
+* `DirectoryPoisonChangeDetected`;
+* `IdentityReconciliationConflict`;
+* `AttributeConflictResolved`;
+* `DirectoryTombstoneCreated`;
+* `MassDeletionThresholdExceeded`;
+* `OrphanIdentityDetected`;
+* `DirectoryDriftDetected`;
+* `DirectoryRecoveryStarted`;
+* `DirectoryRecoveryCompleted`.
+
+---
+
+# 1100. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Directory Synchronization Architecture
+Full and Incremental Synchronization
+Directory Connectors
+Change Tokens and Cursors
+Sync Checkpoints
+Idempotent Change Processing
+Retry and Poison Change Handling
+Identity Reconciliation
+Source-of-Truth Policies
+Attribute Ownership
+Field-Level Conflict Resolution
+Tombstones
+Soft and Hard Delete Policies
+Mass Deletion Protection
+Reprovisioning
+Orphan Identity Detection
+Stale Account Detection
+Manager Hierarchy Synchronization
+Nested Group Synchronization
+Cyclic Group Protection
+Membership Explosion Protection
+Directory Drift Detection
+Safe Drift Remediation
+Provisioning Health Monitoring
+Provisioning Alerts
+Disaster Recovery Foundations
+Directory Synchronization Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 12
+
+- Identity governance architecture
+- Access reviews
+- Access recertification
+- Entitlement catalog
+- Role mining
+- Separation of duties
+- Toxic access combinations
+- Joiner, mover and leaver workflows
+- Temporary access
+- Just-in-time privileged access
+- Access expiration
+- Break-glass identities
+- Dormant privileged accounts
+- Delegated administration
+- Approval policies
+- Identity lifecycle orchestration
+- Governance evidence
+- Compliance reporting
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 12 de varias
+**Cobertura:** Secciones **1101–1200**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 11`
+
+---
+
+# 1101. Identity Governance Architecture
+
+VoltStack deberá incorporar un subsistema de Identity Governance and Administration para gobernar:
+
+* identidades;
+* memberships;
+* roles;
+* permisos;
+* entitlements;
+* accesos temporales;
+* cuentas privilegiadas;
+* delegaciones;
+* revisiones de acceso;
+* evidencia de cumplimiento.
+
+Este subsistema deberá operar por encima de autenticación, autorización y aprovisionamiento, sin reemplazarlos.
+
+---
+
+# 1102. Governance security goals
+
+La arquitectura deberá garantizar:
+
+* mínimo privilegio;
+* acceso justificable;
+* expiración automática;
+* separación de funciones;
+* trazabilidad;
+* recertificación;
+* delegación limitada;
+* remediación verificable;
+* reducción de privilegios acumulados;
+* evidencia auditable.
+
+---
+
+# 1103. Governance threat model
+
+El modelo deberá considerar:
+
+* privilege creep;
+* acceso huérfano;
+* aprobaciones automáticas inseguras;
+* conflictos de interés;
+* cuentas privilegiadas inactivas;
+* accesos temporales que no expiran;
+* delegaciones excesivas;
+* manipulación de revisiones;
+* autoaprobación;
+* ocultamiento de toxic combinations;
+* acceso residual después de transferencias;
+* abuso de break-glass;
+* evidencia incompleta.
+
+---
+
+# 1104. Governance architectural components
+
+```text
+Identity Sources
+      ↓
+Entitlement Catalog
+      ↓
+Role and Policy Model
+      ↓
+Access Request Engine
+      ↓
+Approval Workflow
+      ↓
+Provisioning and Authorization
+      ↓
+Access Review Engine
+      ↓
+SoD Analysis
+      ↓
+Remediation
+      ↓
+Evidence and Compliance Reporting
+```
+
+---
+
+# 1105. IdentityGovernanceService
+
+```php
+interface IdentityGovernanceServiceInterface
+{
+    public function evaluate(
+        GovernanceSubject $subject,
+        GovernanceContext $context
+    ): GovernanceAssessment;
+
+    public function remediate(
+        GovernanceRemediationCommand $command
+    ): GovernanceRemediationResult;
+}
+```
+
+---
+
+# 1106. GovernanceSubject
+
+```php
+final readonly class GovernanceSubject
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public string $tenantId,
+        public array $roles,
+        public array $entitlements,
+        public array $memberships,
+        public array $delegations,
+    ) {
+    }
+}
+```
+
+---
+
+# 1107. GovernanceAssessment
+
+```php
+final readonly class GovernanceAssessment
+{
+    public function __construct(
+        public GovernanceRiskLevel $risk,
+        public array $violations,
+        public array $recommendations,
+        public bool $requiresImmediateAction,
+    ) {
+    }
+}
+```
+
+---
+
+# 1108. GovernanceRiskLevel
+
+```php
+enum GovernanceRiskLevel: string
+{
+    case Low = 'low';
+    case Moderate = 'moderate';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 1109. Entitlement catalog
+
+VoltStack deberá mantener un catálogo central de derechos de acceso.
+
+Un entitlement podrá representar:
+
+* permiso;
+* rol;
+* grupo;
+* licencia;
+* acceso a aplicación;
+* capacidad administrativa;
+* acceso a dataset;
+* operación privilegiada;
+* membership organizacional.
+
+---
+
+# 1110. EntitlementDefinition
+
+```php
+final readonly class EntitlementDefinition
+{
+    public function __construct(
+        public string $entitlementId,
+        public string $name,
+        public string $description,
+        public EntitlementType $type,
+        public EntitlementRiskLevel $riskLevel,
+        public string $resourceId,
+        public string $ownerIdentityId,
+        public bool $requestable,
+        public bool $reviewable,
+        public bool $temporaryAllowed,
+        public bool $privileged,
+        public array $tags,
+    ) {
+    }
+}
+```
+
+---
+
+# 1111. EntitlementType
+
+```php
+enum EntitlementType: string
+{
+    case Permission = 'permission';
+    case Role = 'role';
+    case Group = 'group';
+    case ApplicationAccess = 'application_access';
+    case License = 'license';
+    case DataAccess = 'data_access';
+    case AdministrativeCapability = 'administrative_capability';
+    case ResourceMembership = 'resource_membership';
+}
+```
+
+---
+
+# 1112. EntitlementRiskLevel
+
+```php
+enum EntitlementRiskLevel: string
+{
+    case Standard = 'standard';
+    case Sensitive = 'sensitive';
+    case High = 'high';
+    case Privileged = 'privileged';
+}
+```
+
+---
+
+# 1113. Entitlement ownership
+
+Cada entitlement deberá tener un propietario responsable de:
+
+* descripción;
+* clasificación;
+* aprobación;
+* recertificación;
+* revisión de uso;
+* remediación;
+* retiro.
+
+---
+
+# 1114. Entitlement lifecycle
+
+```php
+enum EntitlementLifecycleState: string
+{
+    case Draft = 'draft';
+    case Active = 'active';
+    case Deprecated = 'deprecated';
+    case Suspended = 'suspended';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1115. EntitlementCatalog
+
+```php
+interface EntitlementCatalogInterface
+{
+    public function resolve(
+        string $entitlementId
+    ): EntitlementDefinition;
+
+    public function search(
+        EntitlementSearchCriteria $criteria
+    ): array;
+}
+```
+
+---
+
+# 1116. Requestable entitlements
+
+Un entitlement requestable deberá declarar:
+
+* quién puede solicitarlo;
+* quién puede recibirlo;
+* duración máxima;
+* aprobadores;
+* requisitos de training;
+* conflictos SoD;
+* assurance requerido;
+* justificación requerida.
+
+---
+
+# 1117. Entitlement metadata integrity
+
+La metadata crítica deberá:
+
+* versionarse;
+* firmarse o protegerse por integridad;
+* auditarse;
+* requerir aprobación para cambios sensibles.
+
+---
+
+# 1118. Role architecture
+
+Los roles deberán representar agrupaciones gobernadas de acceso.
+
+---
+
+# 1119. Role types
+
+```php
+enum GovernanceRoleType: string
+{
+    case Business = 'business';
+    case Technical = 'technical';
+    case Application = 'application';
+    case Privileged = 'privileged';
+    case Dynamic = 'dynamic';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 1120. GovernanceRole
+
+```php
+final readonly class GovernanceRole
+{
+    public function __construct(
+        public string $roleId,
+        public string $name,
+        public GovernanceRoleType $type,
+        public array $entitlements,
+        public string $ownerIdentityId,
+        public RoleRiskProfile $riskProfile,
+        public GovernanceRoleState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1121. GovernanceRoleState
+
+```php
+enum GovernanceRoleState: string
+{
+    case Draft = 'draft';
+    case Active = 'active';
+    case Frozen = 'frozen';
+    case Deprecated = 'deprecated';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1122. Role explosion prevention
+
+VoltStack deberá detectar:
+
+* roles duplicados;
+* roles excesivamente específicos;
+* roles sin miembros;
+* roles de un solo usuario;
+* roles con combinaciones equivalentes;
+* jerarquías innecesarias.
+
+---
+
+# 1123. Role mining
+
+Role mining deberá analizar patrones de acceso existentes para proponer roles.
+
+---
+
+# 1124. RoleMiningService
+
+```php
+interface RoleMiningServiceInterface
+{
+    public function analyze(
+        RoleMiningDataset $dataset,
+        RoleMiningPolicy $policy
+    ): RoleMiningReport;
+}
+```
+
+---
+
+# 1125. Role mining limitations
+
+Las recomendaciones no deberán aplicarse automáticamente a roles privilegiados.
+
+---
+
+# 1126. RoleMiningReport
+
+```php
+final readonly class RoleMiningReport
+{
+    public function __construct(
+        public array $candidateRoles,
+        public array $outliers,
+        public array $duplicatePatterns,
+        public array $riskFindings,
+    ) {
+    }
+}
+```
+
+---
+
+# 1127. Access request architecture
+
+VoltStack deberá ofrecer un flujo gobernado para solicitar acceso.
+
+---
+
+# 1128. AccessRequest
+
+```php
+final readonly class AccessRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $requester,
+        public IdentityIdentifier $beneficiary,
+        public string $tenantId,
+        public array $requestedEntitlements,
+        public string $justification,
+        public ?DateTimeImmutable $requestedStartAt,
+        public ?DateTimeImmutable $requestedEndAt,
+        public AccessRequestState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1129. AccessRequestState
+
+```php
+enum AccessRequestState: string
+{
+    case Draft = 'draft';
+    case Submitted = 'submitted';
+    case Evaluating = 'evaluating';
+    case PendingApproval = 'pending_approval';
+    case Approved = 'approved';
+    case Denied = 'denied';
+    case Provisioning = 'provisioning';
+    case Fulfilled = 'fulfilled';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Failed = 'failed';
+}
+```
+
+---
+
+# 1130. Access request validation
+
+El request deberá validar:
+
+* identidad solicitante;
+* beneficiario;
+* tenant;
+* elegibilidad;
+* entitlement;
+* vigencia;
+* justificación;
+* conflictos;
+* riesgo;
+* approvals necesarios.
+
+---
+
+# 1131. Self-request restrictions
+
+Un usuario podrá solicitar acceso para sí mismo, pero no deberá autoaprobarlo cuando el entitlement sea sensible.
+
+---
+
+# 1132. Request-on-behalf-of
+
+Solicitar acceso para otra persona deberá requerir:
+
+* autoridad delegada;
+* relación organizacional válida;
+* justificación;
+* auditoría.
+
+---
+
+# 1133. Access justification
+
+La justificación deberá:
+
+* ser obligatoria para accesos sensibles;
+* tener longitud mínima;
+* evitar valores genéricos;
+* vincularse al propósito;
+* conservarse como evidencia.
+
+---
+
+# 1134. Access duration
+
+Todo acceso temporal deberá declarar una expiración.
+
+---
+
+# 1135. Maximum access duration
+
+La duración máxima deberá depender de:
+
+* riesgo;
+* tipo de entitlement;
+* rol;
+* tenant;
+* regulación;
+* contrato;
+* contexto laboral.
+
+---
+
+# 1136. Approval policy architecture
+
+```php
+interface AccessApprovalPolicyInterface
+{
+    public function resolve(
+        AccessRequest $request,
+        AccessApprovalContext $context
+    ): AccessApprovalPlan;
+}
+```
+
+---
+
+# 1137. AccessApprovalPlan
+
+```php
+final readonly class AccessApprovalPlan
+{
+    public function __construct(
+        public array $stages,
+        public bool $parallelAllowed,
+        public bool $unanimousRequired,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1138. Approval stages
+
+Una aprobación podrá requerir:
+
+* manager;
+* resource owner;
+* entitlement owner;
+* security;
+* compliance;
+* data owner;
+* application owner;
+* tenant administrator.
+
+---
+
+# 1139. ApprovalStage
+
+```php
+final readonly class ApprovalStage
+{
+    public function __construct(
+        public string $stageId,
+        public ApprovalStageType $type,
+        public array $eligibleApprovers,
+        public int $requiredApprovals,
+        public bool $denyOverrides,
+    ) {
+    }
+}
+```
+
+---
+
+# 1140. ApprovalStageType
+
+```php
+enum ApprovalStageType: string
+{
+    case Manager = 'manager';
+    case ResourceOwner = 'resource_owner';
+    case EntitlementOwner = 'entitlement_owner';
+    case Security = 'security';
+    case Compliance = 'compliance';
+    case DataOwner = 'data_owner';
+    case TenantAdministrator = 'tenant_administrator';
+}
+```
+
+---
+
+# 1141. Self-approval prohibition
+
+El solicitante, beneficiario o actor con conflicto directo no deberá aprobar el request.
+
+---
+
+# 1142. Approval delegation
+
+Una delegación de aprobación deberá ser:
+
+* temporal;
+* explícita;
+* limitada por tipo de solicitud;
+* auditada;
+* no transitiva por defecto.
+
+---
+
+# 1143. ApprovalDecision
+
+```php
+final readonly class ApprovalDecision
+{
+    public function __construct(
+        public string $decisionId,
+        public string $requestId,
+        public IdentityIdentifier $approver,
+        public ApprovalDecisionType $decision,
+        public string $reason,
+        public DateTimeImmutable $decidedAt,
+        public ?string $delegationId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1144. ApprovalDecisionType
+
+```php
+enum ApprovalDecisionType: string
+{
+    case Approved = 'approved';
+    case Denied = 'denied';
+    case Returned = 'returned';
+    case Abstained = 'abstained';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 1145. Approval timeout
+
+Las aprobaciones pendientes deberán expirar.
+
+---
+
+# 1146. Approval escalation
+
+La policy podrá:
+
+* reasignar;
+* escalar;
+* solicitar segundo aprobador;
+* cancelar;
+* denegar por timeout.
+
+---
+
+# 1147. Approval evidence
+
+Toda aprobación deberá conservar:
+
+* actor;
+* timestamp;
+* decisión;
+* razón;
+* policy;
+* delegación;
+* risk assessment;
+* versión del request.
+
+---
+
+# 1148. Separation of Duties
+
+SoD deberá impedir combinaciones de acceso que creen riesgo operativo o fraude.
+
+---
+
+# 1149. SoD rule types
+
+```php
+enum SeparationOfDutiesRuleType: string
+{
+    case Static = 'static';
+    case Dynamic = 'dynamic';
+    case Transactional = 'transactional';
+    case Temporal = 'temporal';
+    case Contextual = 'contextual';
+}
+```
+
+---
+
+# 1150. Static SoD
+
+Una regla estática impide poseer simultáneamente determinados accesos.
+
+Ejemplo:
+
+```text
+vendor.create + payment.approve
+```
+
+---
+
+# 1151. Dynamic SoD
+
+Una regla dinámica podrá permitir ambos accesos, pero no utilizarlos dentro de una misma transacción o proceso.
+
+---
+
+# 1152. Transactional SoD
+
+La separación deberá aplicarse al momento de ejecutar acciones relacionadas.
+
+---
+
+# 1153. Temporal SoD
+
+Una identidad no deberá realizar dos acciones incompatibles dentro de una ventana temporal definida.
+
+---
+
+# 1154. Contextual SoD
+
+La regla podrá depender de:
+
+* tenant;
+* monto;
+* región;
+* recurso;
+* unidad organizacional;
+* nivel de riesgo;
+* tipo de operación.
+
+---
+
+# 1155. SeparationOfDutiesRule
+
+```php
+final readonly class SeparationOfDutiesRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $name,
+        public SeparationOfDutiesRuleType $type,
+        public array $incompatibleEntitlements,
+        public GovernanceRiskLevel $severity,
+        public bool $compensatingControlAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 1156. SoD evaluator
+
+```php
+interface SeparationOfDutiesEvaluatorInterface
+{
+    public function evaluate(
+        IdentityIdentifier $identity,
+        array $proposedEntitlements,
+        GovernanceContext $context
+    ): SeparationOfDutiesAssessment;
+}
+```
+
+---
+
+# 1157. Toxic access combinations
+
+Una toxic combination representa una combinación de acceso con riesgo elevado.
+
+---
+
+# 1158. ToxicCombination
+
+```php
+final readonly class ToxicCombination
+{
+    public function __construct(
+        public string $combinationId,
+        public array $entitlements,
+        public string $riskDescription,
+        public GovernanceRiskLevel $severity,
+        public array $requiredControls,
+    ) {
+    }
+}
+```
+
+---
+
+# 1159. Toxic access detection
+
+La detección deberá ejecutarse:
+
+* al solicitar acceso;
+* al cambiar roles;
+* al sincronizar grupos;
+* durante access reviews;
+* antes de operaciones críticas;
+* periódicamente.
+
+---
+
+# 1160. Compensating controls
+
+Una excepción SoD podrá requerir:
+
+* aprobación ejecutiva;
+* monitoreo;
+* doble control;
+* acceso temporal;
+* logging reforzado;
+* revisión frecuente;
+* limitación de monto;
+* session recording.
+
+---
+
+# 1161. SoD exception
+
+```php
+final readonly class SeparationOfDutiesException
+{
+    public function __construct(
+        public string $exceptionId,
+        public IdentityIdentifier $identity,
+        public string $ruleId,
+        public string $justification,
+        public array $controls,
+        public DateTimeImmutable $expiresAt,
+        public string $approvedBy,
+    ) {
+    }
+}
+```
+
+---
+
+# 1162. SoD exception expiry
+
+Toda excepción deberá expirar y no renovarse automáticamente.
+
+---
+
+# 1163. Access review architecture
+
+VoltStack deberá permitir revisiones periódicas y event-driven.
+
+---
+
+# 1164. AccessReviewCampaign
+
+```php
+final readonly class AccessReviewCampaign
+{
+    public function __construct(
+        public string $campaignId,
+        public string $name,
+        public string $tenantId,
+        public AccessReviewScope $scope,
+        public DateTimeImmutable $startsAt,
+        public DateTimeImmutable $endsAt,
+        public AccessReviewCampaignState $state,
+        public AccessReviewPolicy $policy,
+    ) {
+    }
+}
+```
+
+---
+
+# 1165. AccessReviewCampaignState
+
+```php
+enum AccessReviewCampaignState: string
+{
+    case Draft = 'draft';
+    case Scheduled = 'scheduled';
+    case Active = 'active';
+    case Remediation = 'remediation';
+    case Completed = 'completed';
+    case Cancelled = 'cancelled';
+}
+```
+
+---
+
+# 1166. AccessReviewScope
+
+La campaña podrá revisar:
+
+* todos los usuarios;
+* identidades privilegiadas;
+* aplicación;
+* tenant;
+* departamento;
+* grupos;
+* roles;
+* entitlements sensibles;
+* cuentas dormidas;
+* excepciones SoD.
+
+---
+
+# 1167. Review item
+
+```php
+final readonly class AccessReviewItem
+{
+    public function __construct(
+        public string $itemId,
+        public string $campaignId,
+        public IdentityIdentifier $identity,
+        public string $entitlementId,
+        public IdentityIdentifier $reviewer,
+        public AccessReviewItemState $state,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 1168. AccessReviewItemState
+
+```php
+enum AccessReviewItemState: string
+{
+    case Pending = 'pending';
+    case Approved = 'approved';
+    case Revoke = 'revoke';
+    case Modify = 'modify';
+    case Escalated = 'escalated';
+    case Expired = 'expired';
+    case Remediated = 'remediated';
+}
+```
+
+---
+
+# 1169. Reviewer selection
+
+El reviewer podrá ser:
+
+* manager;
+* resource owner;
+* role owner;
+* application owner;
+* security;
+* compliance;
+* data owner;
+* independent reviewer.
+
+---
+
+# 1170. Reviewer conflict prevention
+
+No deberá permitirse que una identidad certifique su propio acceso sensible.
+
+---
+
+# 1171. Review evidence
+
+La interfaz deberá mostrar:
+
+* acceso actual;
+* origen;
+* fecha de asignación;
+* último uso;
+* frecuencia;
+* justificación;
+* riesgo;
+* SoD conflicts;
+* fecha de expiración;
+* owner.
+
+---
+
+# 1172. Usage-aware review
+
+El sistema podrá incorporar señales de uso, pero ausencia de uso no deberá ser la única base para revocar automáticamente acceso crítico.
+
+---
+
+# 1173. AccessReviewDecision
+
+```php
+final readonly class AccessReviewDecision
+{
+    public function __construct(
+        public string $itemId,
+        public AccessReviewDecisionType $decision,
+        public string $reason,
+        public IdentityIdentifier $reviewer,
+        public DateTimeImmutable $decidedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1174. AccessReviewDecisionType
+
+```php
+enum AccessReviewDecisionType: string
+{
+    case Certify = 'certify';
+    case Revoke = 'revoke';
+    case Modify = 'modify';
+    case Delegate = 'delegate';
+    case Escalate = 'escalate';
+}
+```
+
+---
+
+# 1175. Access recertification
+
+La recertificación deberá exigir una decisión explícita.
+
+La ausencia de respuesta no deberá equivaler automáticamente a aprobación.
+
+---
+
+# 1176. Default-deny review policy
+
+Para accesos privilegiados, la política podrá revocar por falta de certificación.
+
+---
+
+# 1177. Review reminders
+
+El sistema deberá emitir recordatorios antes de la fecha límite.
+
+---
+
+# 1178. Review escalation
+
+Los items no revisados podrán escalar a:
+
+* manager superior;
+* owner;
+* seguridad;
+* compliance;
+* tenant administrator.
+
+---
+
+# 1179. Review remediation
+
+Una decisión de revocación deberá generar una acción verificable.
+
+---
+
+# 1180. Remediation tracking
+
+```php
+final readonly class GovernanceRemediationTask
+{
+    public function __construct(
+        public string $taskId,
+        public string $sourceType,
+        public string $sourceId,
+        public IdentityIdentifier $identity,
+        public array $actions,
+        public GovernanceRemediationState $state,
+        public DateTimeImmutable $dueAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1181. GovernanceRemediationState
+
+```php
+enum GovernanceRemediationState: string
+{
+    case Pending = 'pending';
+    case Applying = 'applying';
+    case Completed = 'completed';
+    case Failed = 'failed';
+    case Escalated = 'escalated';
+}
+```
+
+---
+
+# 1182. Remediation verification
+
+Una tarea no deberá marcarse como completada hasta confirmar el estado real en el sistema objetivo.
+
+---
+
+# 1183. Joiner workflow
+
+El flujo Joiner deberá gobernar la incorporación de una nueva identidad.
+
+---
+
+# 1184. Joiner workflow stages
+
+```text
+Authoritative Identity Created
+      ↓
+Identity Correlation
+      ↓
+Tenant Membership
+      ↓
+Birthright Access Calculation
+      ↓
+SoD Evaluation
+      ↓
+Required Approvals
+      ↓
+Provisioning
+      ↓
+Authentication Enrollment
+      ↓
+Security Training
+      ↓
+Activation
+```
+
+---
+
+# 1185. Birthright access
+
+El acceso base deberá derivarse de reglas claras y mínimas.
+
+---
+
+# 1186. BirthrightAccessPolicy
+
+```php
+interface BirthrightAccessPolicyInterface
+{
+    public function calculate(
+        JoinerContext $context
+    ): BirthrightAccessPlan;
+}
+```
+
+---
+
+# 1187. Birthright restrictions
+
+El acceso base no deberá incluir privilegios administrativos salvo excepción documentada.
+
+---
+
+# 1188. Mover workflow
+
+El flujo Mover deberá gestionar cambios como:
+
+* puesto;
+* manager;
+* departamento;
+* ubicación;
+* tenant;
+* función;
+* contrato;
+* nivel de riesgo.
+
+---
+
+# 1189. Mover access recomputation
+
+Un cambio organizacional deberá recalcular:
+
+* birthright access;
+* roles;
+* grupos;
+* SoD;
+* approvals;
+* accesos temporales;
+* ownerships.
+
+---
+
+# 1190. Add-before-remove risk
+
+Agregar acceso nuevo antes de retirar acceso anterior podrá crear toxic combinations temporales.
+
+La secuencia deberá planificarse según riesgo.
+
+---
+
+# 1191. Mover transition plan
+
+```php
+final readonly class MoverTransitionPlan
+{
+    public function __construct(
+        public array $accessToAdd,
+        public array $accessToRemove,
+        public array $accessToRetain,
+        public array $requiredApprovals,
+        public array $detectedConflicts,
+        public DateTimeImmutable $effectiveAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1192. Leaver workflow
+
+El flujo Leaver deberá retirar acceso de forma oportuna y verificable.
+
+---
+
+# 1193. Leaver trigger types
+
+```php
+enum LeaverTriggerType: string
+{
+    case Scheduled = 'scheduled';
+    case Immediate = 'immediate';
+    case ContractEnd = 'contract_end';
+    case Administrative = 'administrative';
+    case SecurityIncident = 'security_incident';
+}
+```
+
+---
+
+# 1194. Leaver actions
+
+El workflow deberá poder:
+
+* bloquear login;
+* revocar sesiones;
+* revocar tokens;
+* desactivar credenciales;
+* retirar roles;
+* retirar groups;
+* transferir ownership;
+* retirar delegaciones;
+* cancelar access requests;
+* preservar evidencia;
+* aplicar retención.
+
+---
+
+# 1195. Immediate termination
+
+Una salida inmediata deberá priorizar:
+
+1. bloquear autenticación;
+2. revocar sesiones;
+3. revocar credenciales;
+4. retirar privilegios;
+5. preservar evidencia;
+6. transferir ownership.
+
+---
+
+# 1196. Access expiration engine
+
+```php
+interface AccessExpirationServiceInterface
+{
+    public function expireDueAccess(
+        DateTimeImmutable $now
+    ): AccessExpirationResult;
+}
+```
+
+---
+
+# 1197. Expiration sources
+
+La expiración podrá provenir de:
+
+* request temporal;
+* contrato;
+* excepción SoD;
+* delegación;
+* JIT access;
+* access review;
+* policy;
+* licencia;
+* proyecto.
+
+---
+
+# 1198. Just-in-time privileged access
+
+El acceso privilegiado JIT deberá:
+
+* estar desactivado por defecto;
+* requerir request;
+* tener duración corta;
+* exigir MFA fuerte;
+* aplicar SoD;
+* registrar uso;
+* expirar automáticamente;
+* revocar sesión privilegiada.
+
+---
+
+# 1199. Break-glass identity governance
+
+Las identidades break-glass deberán:
+
+* existir en número mínimo;
+* almacenarse de forma protegida;
+* excluirse de uso cotidiano;
+* monitorearse continuamente;
+* requerir revisión después de uso;
+* rotar credenciales;
+* emitir alertas inmediatas;
+* tener owners explícitos.
+
+---
+
+# 1200. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Governance Architecture
+Entitlement Catalog
+Entitlement Ownership
+Governance Roles
+Role Mining
+Access Request Architecture
+Approval Policies
+Approval Delegation
+Self-Approval Prevention
+Separation of Duties
+Static, Dynamic and Transactional SoD
+Toxic Access Combinations
+Compensating Controls
+SoD Exceptions
+Access Review Campaigns
+Access Recertification
+Review Evidence
+Remediation Tracking
+Joiner Workflows
+Mover Workflows
+Leaver Workflows
+Birthright Access
+Access Expiration
+Just-in-Time Privileged Access
+Break-Glass Identity Governance
+Governance Audit Foundations
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 13
+
+- Privileged access management
+- Privileged identities
+- Privileged sessions
+- Elevation workflows
+- Just-in-time elevation
+- Just-enough administration
+- Privileged credential vaulting
+- Credential checkout
+- Session recording
+- Command and action restrictions
+- Dual control
+- Emergency access
+- Break-glass execution
+- Dormant privileged accounts
+- Service accounts
+- Machine identities
+- Workload identities
+- Non-human identity governance
+- Secret rotation
+- Privileged access analytics
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 13 de varias
+**Cobertura:** Secciones **1201–1300**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 12`
+
+---
+
+# 1201. Privileged Access Management Architecture
+
+VoltStack deberá incorporar un subsistema de Privileged Access Management para gobernar:
+
+* identidades administrativas;
+* elevaciones temporales;
+* credenciales privilegiadas;
+* sesiones administrativas;
+* cuentas de servicio;
+* identidades de carga de trabajo;
+* secretos;
+* accesos de emergencia;
+* actividades de alto impacto.
+
+El subsistema deberá mantenerse separado de la autorización ordinaria de aplicaciones.
+
+---
+
+# 1202. PAM security goals
+
+La arquitectura deberá garantizar:
+
+* privilegio mínimo;
+* elevación temporal;
+* acceso justificado;
+* separación entre identidad personal y administrativa;
+* control de credenciales;
+* trazabilidad completa;
+* revocación rápida;
+* protección de secretos;
+* supervisión de sesiones;
+* reducción de privilegios permanentes.
+
+---
+
+# 1203. PAM threat model
+
+El modelo deberá considerar:
+
+* robo de credenciales administrativas;
+* privilegios permanentes excesivos;
+* cuentas compartidas;
+* abuso interno;
+* elevaciones sin aprobación;
+* secretos no rotados;
+* cuentas de servicio huérfanas;
+* session hijacking;
+* bypass de controles;
+* desactivación de auditoría;
+* abuso de break-glass;
+* persistencia después de compromiso;
+* identidades de máquina sin owner.
+
+---
+
+# 1204. PAM architectural components
+
+```text
+Privileged Access Request
+      ↓
+Identity and Device Verification
+      ↓
+Risk and SoD Evaluation
+      ↓
+Approval and Policy
+      ↓
+Temporary Entitlement Issuance
+      ↓
+Privileged Session Broker
+      ↓
+Command and Action Enforcement
+      ↓
+Recording and Telemetry
+      ↓
+Automatic Expiration
+      ↓
+Review and Evidence
+```
+
+---
+
+# 1205. Privileged identity
+
+Una identidad privilegiada es cualquier identidad capaz de:
+
+* alterar seguridad;
+* administrar usuarios;
+* conceder acceso;
+* modificar infraestructura;
+* acceder a secretos;
+* cambiar configuración crítica;
+* ejecutar operaciones irreversibles;
+* desactivar controles.
+
+---
+
+# 1206. PrivilegedIdentityProfile
+
+```php
+final readonly class PrivilegedIdentityProfile
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public string $tenantId,
+        public array $privilegedRoles,
+        public array $managedResources,
+        public PrivilegedIdentityState $state,
+        public PrivilegedRiskLevel $riskLevel,
+        public ?IdentityIdentifier $owner,
+    ) {
+    }
+}
+```
+
+---
+
+# 1207. PrivilegedIdentityState
+
+```php
+enum PrivilegedIdentityState: string
+{
+    case Eligible = 'eligible';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Dormant = 'dormant';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 1208. PrivilegedRiskLevel
+
+```php
+enum PrivilegedRiskLevel: string
+{
+    case Standard = 'standard';
+    case Elevated = 'elevated';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 1209. Personal and administrative identity separation
+
+VoltStack deberá permitir separar:
+
+* identidad personal;
+* identidad administrativa;
+* identidad break-glass;
+* identidad de servicio.
+
+Una identidad administrativa no deberá utilizarse para tareas ordinarias.
+
+---
+
+# 1210. Linked privileged identities
+
+```php
+final readonly class PrivilegedIdentityLink
+{
+    public function __construct(
+        public IdentityIdentifier $personalIdentity,
+        public IdentityIdentifier $privilegedIdentity,
+        public string $relationshipType,
+        public DateTimeImmutable $linkedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1211. Standing privilege reduction
+
+Los privilegios permanentes deberán minimizarse.
+
+El estado preferido será:
+
+```text
+eligible but inactive
+```
+
+---
+
+# 1212. Privileged eligibility
+
+Una identidad eligible puede solicitar activación, pero no posee privilegios efectivos hasta completar el workflow.
+
+---
+
+# 1213. Privileged access request
+
+```php
+final readonly class PrivilegedAccessRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $requester,
+        public string $tenantId,
+        public array $requestedEntitlements,
+        public array $targetResources,
+        public string $justification,
+        public DateTimeImmutable $requestedStartAt,
+        public DateTimeImmutable $requestedEndAt,
+        public PrivilegedAccessRequestState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1214. PrivilegedAccessRequestState
+
+```php
+enum PrivilegedAccessRequestState: string
+{
+    case Draft = 'draft';
+    case Submitted = 'submitted';
+    case Evaluating = 'evaluating';
+    case PendingApproval = 'pending_approval';
+    case Approved = 'approved';
+    case Active = 'active';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Denied = 'denied';
+    case Failed = 'failed';
+}
+```
+
+---
+
+# 1215. Privileged request requirements
+
+Una solicitud deberá incluir:
+
+* propósito;
+* recursos;
+* duración;
+* ticket o incidente relacionado;
+* nivel de privilegio;
+* ventana temporal;
+* riesgo;
+* comandos o acciones previstas cuando aplique.
+
+---
+
+# 1216. Strong authentication requirement
+
+Toda elevación privilegiada deberá requerir:
+
+* autenticación reciente;
+* MFA;
+* assurance elevado;
+* preferencia por método phishing-resistant;
+* verificación de dispositivo cuando aplique.
+
+---
+
+# 1217. Privileged device policy
+
+El acceso podrá limitarse a:
+
+* dispositivos administrados;
+* posture compatible;
+* cifrado habilitado;
+* agente de seguridad activo;
+* red autorizada;
+* navegador o cliente aprobado.
+
+---
+
+# 1218. PrivilegedAccessPolicy
+
+```php
+interface PrivilegedAccessPolicyInterface
+{
+    public function evaluate(
+        PrivilegedAccessRequest $request,
+        PrivilegedAccessContext $context
+    ): PrivilegedAccessDecision;
+}
+```
+
+---
+
+# 1219. PrivilegedAccessDecision
+
+```php
+final readonly class PrivilegedAccessDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $requiredApprovals,
+        public array $requiredControls,
+        public ?DateInterval $maximumDuration,
+        public array $restrictions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1220. Just-in-time elevation
+
+La elevación JIT deberá activar privilegios solo durante una ventana corta y explícita.
+
+---
+
+# 1221. Privilege elevation grant
+
+```php
+final readonly class PrivilegeElevationGrant
+{
+    public function __construct(
+        public string $grantId,
+        public IdentityIdentifier $identity,
+        public string $tenantId,
+        public array $entitlements,
+        public array $resources,
+        public DateTimeImmutable $activatedAt,
+        public DateTimeImmutable $expiresAt,
+        public PrivilegeElevationGrantState $state,
+        public string $requestId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1222. PrivilegeElevationGrantState
+
+```php
+enum PrivilegeElevationGrantState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 1223. Automatic expiration
+
+Toda elevación deberá expirar automáticamente sin depender de logout o acción manual.
+
+---
+
+# 1224. Maximum elevation duration
+
+La duración máxima deberá depender de:
+
+* criticidad;
+* recurso;
+* entitlement;
+* tipo de operación;
+* riesgo;
+* horario;
+* tenant;
+* regulación.
+
+---
+
+# 1225. Renewal restrictions
+
+Una elevación no deberá renovarse silenciosamente.
+
+Toda extensión deberá volver a evaluar:
+
+* necesidad;
+* riesgo;
+* aprobación;
+* duración;
+* conflictos.
+
+---
+
+# 1226. Just-enough administration
+
+JEA deberá otorgar únicamente las acciones necesarias para completar una tarea.
+
+---
+
+# 1227. Action-level privilege model
+
+```php
+final readonly class PrivilegedActionDefinition
+{
+    public function __construct(
+        public string $actionId,
+        public string $resourceType,
+        public string $operation,
+        public array $constraints,
+        public PrivilegedRiskLevel $risk,
+    ) {
+    }
+}
+```
+
+---
+
+# 1228. Resource-scoped elevation
+
+Un grant deberá limitarse a recursos concretos.
+
+Ejemplos:
+
+* servidor específico;
+* base de datos;
+* tenant;
+* cluster;
+* secret path;
+* aplicación;
+* conjunto de usuarios.
+
+---
+
+# 1229. Command-scoped elevation
+
+Cuando sea técnicamente posible, VoltStack deberá restringir:
+
+* comandos;
+* argumentos;
+* rutas;
+* operaciones;
+* APIs;
+* verbos administrativos.
+
+---
+
+# 1230. Privileged command policy
+
+```php
+interface PrivilegedCommandPolicyInterface
+{
+    public function authorize(
+        PrivilegeElevationGrant $grant,
+        PrivilegedCommand $command,
+        PrivilegedSessionContext $context
+    ): PrivilegedCommandDecision;
+}
+```
+
+---
+
+# 1231. PrivilegedCommand
+
+```php
+final readonly class PrivilegedCommand
+{
+    public function __construct(
+        public string $command,
+        public array $arguments,
+        public string $targetResource,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1232. Dangerous command restrictions
+
+Operaciones destructivas podrán requerir:
+
+* aprobación adicional;
+* dual control;
+* confirmación explícita;
+* ventana de mantenimiento;
+* backup verificado;
+* ticket válido.
+
+---
+
+# 1233. Dual control
+
+Dual control exige participación de al menos dos actores independientes.
+
+---
+
+# 1234. DualControlPolicy
+
+```php
+final readonly class DualControlPolicy
+{
+    public function __construct(
+        public int $requiredActors,
+        public array $eligibleActorRoles,
+        public bool $sameSessionProhibited,
+        public bool $sameManagerChainProhibited,
+    ) {
+    }
+}
+```
+
+---
+
+# 1235. Four-eyes principle
+
+Para operaciones críticas deberá impedirse que una sola persona:
+
+* solicite;
+* apruebe;
+* ejecute;
+* certifique;
+
+la misma acción completa.
+
+---
+
+# 1236. Privileged session architecture
+
+Una sesión privilegiada deberá ser distinta de la sesión ordinaria.
+
+---
+
+# 1237. PrivilegedSession
+
+```php
+final readonly class PrivilegedSession
+{
+    public function __construct(
+        public string $privilegedSessionId,
+        public SessionIdentifier $parentSession,
+        public string $grantId,
+        public IdentityIdentifier $identity,
+        public array $resources,
+        public DateTimeImmutable $startedAt,
+        public DateTimeImmutable $expiresAt,
+        public PrivilegedSessionState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1238. PrivilegedSessionState
+
+```php
+enum PrivilegedSessionState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Restricted = 'restricted';
+    case Suspended = 'suspended';
+    case Terminated = 'terminated';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 1239. Session isolation
+
+Una sesión privilegiada deberá:
+
+* usar identificador separado;
+* tener timeout menor;
+* no heredar privilegios indefinidamente;
+* exigir step-up;
+* registrar provenance;
+* poder revocarse de forma independiente.
+
+---
+
+# 1240. Privileged session broker
+
+```php
+interface PrivilegedSessionBrokerInterface
+{
+    public function open(
+        PrivilegeElevationGrant $grant,
+        PrivilegedSessionOpenContext $context
+    ): PrivilegedSession;
+
+    public function terminate(
+        string $privilegedSessionId,
+        PrivilegedSessionTerminationReason $reason
+    ): void;
+}
+```
+
+---
+
+# 1241. Session proxying
+
+VoltStack podrá intermediar acceso hacia:
+
+* SSH;
+* RDP;
+* bases de datos;
+* Kubernetes;
+* paneles administrativos;
+* APIs;
+* consolas cloud.
+
+---
+
+# 1242. Direct credential exposure reduction
+
+Siempre que sea posible, el usuario no deberá recibir directamente la credencial privilegiada.
+
+---
+
+# 1243. Session recording
+
+Las sesiones de alto riesgo podrán registrar:
+
+* comandos;
+* acciones;
+* terminal;
+* requests;
+* respuestas;
+* cambios de configuración;
+* timestamps;
+* recursos afectados.
+
+---
+
+# 1244. PrivilegedSessionRecorder
+
+```php
+interface PrivilegedSessionRecorderInterface
+{
+    public function begin(
+        PrivilegedSession $session
+    ): SessionRecordingHandle;
+
+    public function record(
+        SessionRecordingHandle $handle,
+        PrivilegedActivity $activity
+    ): void;
+
+    public function complete(
+        SessionRecordingHandle $handle
+    ): SessionRecordingManifest;
+}
+```
+
+---
+
+# 1245. Recording integrity
+
+Las grabaciones deberán:
+
+* ser append-only;
+* incluir integrity hashes;
+* poseer timestamp confiable;
+* cifrarse;
+* controlar acceso;
+* aplicar retención.
+
+---
+
+# 1246. Recording privacy
+
+La grabación deberá minimizar exposición de:
+
+* secretos;
+* datos personales;
+* tokens;
+* información regulada;
+* contenido no relacionado.
+
+---
+
+# 1247. Sensitive output redaction
+
+VoltStack deberá redactar valores sensibles cuando sea posible sin destruir la evidencia operacional.
+
+---
+
+# 1248. Live session monitoring
+
+Sesiones críticas podrán ser supervisadas en tiempo real por seguridad o un aprobador autorizado.
+
+---
+
+# 1249. Session intervention
+
+El supervisor autorizado podrá:
+
+* advertir;
+* pausar;
+* restringir;
+* terminar;
+* elevar incidente.
+
+---
+
+# 1250. Privileged credential vault
+
+VoltStack deberá abstraer almacenamiento seguro de credenciales privilegiadas.
+
+---
+
+# 1251. PrivilegedCredentialVault
+
+```php
+interface PrivilegedCredentialVaultInterface
+{
+    public function store(
+        PrivilegedCredential $credential
+    ): CredentialVaultReference;
+
+    public function checkout(
+        CredentialVaultReference $reference,
+        CredentialCheckoutContext $context
+    ): CredentialCheckoutLease;
+
+    public function rotate(
+        CredentialVaultReference $reference,
+        CredentialRotationContext $context
+    ): CredentialRotationResult;
+}
+```
+
+---
+
+# 1252. Vault storage requirements
+
+El vault deberá utilizar:
+
+* encryption at rest;
+* KMS o HSM cuando corresponda;
+* access control;
+* audit logging;
+* key rotation;
+* tamper detection;
+* separación de duties.
+
+---
+
+# 1253. PrivilegedCredential
+
+```php
+final readonly class PrivilegedCredential
+{
+    public function __construct(
+        public string $credentialId,
+        public PrivilegedCredentialType $type,
+        public string $resourceId,
+        public SensitiveValue $secret,
+        public PrivilegedCredentialState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1254. PrivilegedCredentialType
+
+```php
+enum PrivilegedCredentialType: string
+{
+    case Password = 'password';
+    case ApiKey = 'api_key';
+    case SshKey = 'ssh_key';
+    case Certificate = 'certificate';
+    case DatabaseCredential = 'database_credential';
+    case CloudCredential = 'cloud_credential';
+    case Token = 'token';
+}
+```
+
+---
+
+# 1255. PrivilegedCredentialState
+
+```php
+enum PrivilegedCredentialState: string
+{
+    case Active = 'active';
+    case CheckedOut = 'checked_out';
+    case Rotating = 'rotating';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 1256. Credential checkout
+
+El checkout deberá:
+
+* requerir grant activo;
+* limitar duración;
+* vincularse a identidad;
+* vincularse a recurso;
+* registrarse;
+* impedir reutilización no autorizada.
+
+---
+
+# 1257. CredentialCheckoutLease
+
+```php
+final readonly class CredentialCheckoutLease
+{
+    public function __construct(
+        public string $leaseId,
+        public CredentialVaultReference $reference,
+        public IdentityIdentifier $holder,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public CredentialCheckoutLeaseState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1258. CredentialCheckoutLeaseState
+
+```php
+enum CredentialCheckoutLeaseState: string
+{
+    case Active = 'active';
+    case Returned = 'returned';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 1259. Post-checkout rotation
+
+Las credenciales compartidas deberán rotarse después de:
+
+* checkout;
+* expiración;
+* incidente;
+* cambio de owner;
+* uso break-glass;
+* sospecha de exposición.
+
+---
+
+# 1260. Secret exposure minimization
+
+El sistema deberá preferir:
+
+* injection temporal;
+* brokered sessions;
+* short-lived credentials;
+* workload identity federation;
+* dynamic database credentials;
+
+sobre revelar secretos estáticos.
+
+---
+
+# 1261. Emergency access
+
+El acceso de emergencia deberá estar disponible para incidentes donde el flujo normal sea insuficiente.
+
+---
+
+# 1262. EmergencyAccessRequest
+
+```php
+final readonly class EmergencyAccessRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $requester,
+        public string $incidentId,
+        public array $resources,
+        public string $reason,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1263. Emergency access controls
+
+El flujo deberá:
+
+* exigir razón;
+* registrar incidente;
+* limitar duración;
+* generar alerta inmediata;
+* aplicar máxima observabilidad;
+* ejecutar revisión posterior obligatoria.
+
+---
+
+# 1264. Break-glass execution
+
+El uso de una identidad break-glass deberá considerarse un evento de seguridad crítico.
+
+---
+
+# 1265. BreakGlassExecutionRecord
+
+```php
+final readonly class BreakGlassExecutionRecord
+{
+    public function __construct(
+        public string $executionId,
+        public IdentityIdentifier $breakGlassIdentity,
+        public IdentityIdentifier $operator,
+        public string $incidentId,
+        public array $resources,
+        public DateTimeImmutable $startedAt,
+        public ?DateTimeImmutable $endedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1266. Break-glass post-use actions
+
+Después del uso deberá:
+
+* revocarse la sesión;
+* rotarse la credencial;
+* preservar evidencia;
+* revisar acciones;
+* validar recursos;
+* cerrar o actualizar incidente;
+* recertificar la identidad.
+
+---
+
+# 1267. Dormant privileged accounts
+
+Una cuenta privilegiada dormida representa alto riesgo aunque no tenga uso reciente.
+
+---
+
+# 1268. DormantPrivilegedAccountPolicy
+
+```php
+final readonly class DormantPrivilegedAccountPolicy
+{
+    public function __construct(
+        public DateInterval $inactivityThreshold,
+        public bool $suspendAutomatically,
+        public bool $requireRecertification,
+        public bool $revokeStandingPrivileges,
+    ) {
+    }
+}
+```
+
+---
+
+# 1269. Dormant account detection
+
+Deberá considerar:
+
+* último login;
+* última elevación;
+* última acción;
+* owner vigente;
+* fuente de aprovisionamiento;
+* estado laboral;
+* recursos asignados.
+
+---
+
+# 1270. Dormant account remediation
+
+Las acciones podrán incluir:
+
+* suspender;
+* retirar roles;
+* revocar credentials;
+* exigir revisión;
+* eliminar account binding;
+* marcar para investigación.
+
+---
+
+# 1271. Service accounts
+
+Una service account es una identidad no humana utilizada por aplicaciones o procesos.
+
+---
+
+# 1272. ServiceAccountProfile
+
+```php
+final readonly class ServiceAccountProfile
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public string $tenantId,
+        public string $purpose,
+        public IdentityIdentifier $owner,
+        public array $allowedWorkloads,
+        public array $entitlements,
+        public ServiceAccountState $state,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1273. ServiceAccountState
+
+```php
+enum ServiceAccountState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Orphaned = 'orphaned';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 1274. Service account requirements
+
+Toda service account deberá tener:
+
+* propósito;
+* owner;
+* tenant;
+* recursos autorizados;
+* método de autenticación;
+* fecha de revisión;
+* rotación;
+* expiración cuando sea viable.
+
+---
+
+# 1275. Shared service account restrictions
+
+Las service accounts no deberán utilizarse como cuentas humanas compartidas.
+
+---
+
+# 1276. Interactive login prohibition
+
+Por defecto, una service account no deberá permitir login interactivo.
+
+---
+
+# 1277. Service account owner lifecycle
+
+Si el owner deja la organización o cambia de función, deberá iniciarse:
+
+* reasignación;
+* revisión;
+* suspensión;
+* revocación si no existe nuevo owner.
+
+---
+
+# 1278. Orphan service accounts
+
+Una service account sin owner válido deberá marcarse como huérfana.
+
+---
+
+# 1279. Machine identities
+
+VoltStack deberá tratar como identidades de máquina a:
+
+* servidores;
+* dispositivos;
+* agentes;
+* runners;
+* nodos;
+* appliances;
+* workloads.
+
+---
+
+# 1280. MachineIdentityProfile
+
+```php
+final readonly class MachineIdentityProfile
+{
+    public function __construct(
+        public string $machineIdentityId,
+        public string $tenantId,
+        public string $machineType,
+        public array $attestationClaims,
+        public array $entitlements,
+        public MachineIdentityState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1281. MachineIdentityState
+
+```php
+enum MachineIdentityState: string
+{
+    case Provisioning = 'provisioning';
+    case Active = 'active';
+    case Quarantined = 'quarantined';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1282. Workload identity
+
+Una workload identity deberá representar una carga de trabajo concreta, no una infraestructura compartida genérica.
+
+---
+
+# 1283. WorkloadIdentityProfile
+
+```php
+final readonly class WorkloadIdentityProfile
+{
+    public function __construct(
+        public string $workloadIdentityId,
+        public string $tenantId,
+        public string $platform,
+        public string $namespace,
+        public string $workloadName,
+        public array $claims,
+        public array $allowedAudiences,
+        public WorkloadIdentityState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1284. WorkloadIdentityState
+
+```php
+enum WorkloadIdentityState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1285. Workload identity federation
+
+VoltStack deberá preferir federación de identidad sobre secretos estáticos cuando la plataforma lo permita.
+
+---
+
+# 1286. Workload assertion validation
+
+Las assertions deberán validar:
+
+* issuer;
+* audience;
+* subject;
+* platform;
+* namespace;
+* workload;
+* expiration;
+* signature;
+* attestation;
+* replay.
+
+---
+
+# 1287. Short-lived workload credentials
+
+Las credenciales emitidas a workloads deberán tener vida corta y scope mínimo.
+
+---
+
+# 1288. Non-human identity governance
+
+Toda identidad no humana deberá someterse a:
+
+* owner;
+* propósito;
+* revisión;
+* expiración;
+* inventario;
+* entitlement mapping;
+* rotación;
+* detección de uso anómalo.
+
+---
+
+# 1289. NonHumanIdentityRecord
+
+```php
+final readonly class NonHumanIdentityRecord
+{
+    public function __construct(
+        public string $identityId,
+        public NonHumanIdentityType $type,
+        public string $tenantId,
+        public IdentityIdentifier $owner,
+        public string $purpose,
+        public array $entitlements,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1290. NonHumanIdentityType
+
+```php
+enum NonHumanIdentityType: string
+{
+    case ServiceAccount = 'service_account';
+    case Machine = 'machine';
+    case Workload = 'workload';
+    case Integration = 'integration';
+    case Bot = 'bot';
+    case Automation = 'automation';
+}
+```
+
+---
+
+# 1291. Secret rotation architecture
+
+```php
+interface SecretRotationServiceInterface
+{
+    public function rotate(
+        SecretReference $secret,
+        SecretRotationPolicy $policy,
+        SecretRotationContext $context
+    ): SecretRotationResult;
+}
+```
+
+---
+
+# 1292. Rotation triggers
+
+La rotación deberá activarse por:
+
+* calendario;
+* checkout;
+* despliegue;
+* cambio de owner;
+* incidente;
+* sospecha de exposición;
+* cambio de algoritmo;
+* cumplimiento;
+* uso break-glass.
+
+---
+
+# 1293. Zero-downtime rotation
+
+Cuando sea posible, la rotación deberá soportar:
+
+1. crear nueva credencial;
+2. distribuirla;
+3. validar adopción;
+4. retirar la anterior;
+5. verificar ausencia de uso;
+6. revocar definitivamente.
+
+---
+
+# 1294. Secret versioning
+
+```php
+final readonly class SecretVersion
+{
+    public function __construct(
+        public string $secretId,
+        public string $versionId,
+        public SecretVersionState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $retiredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1295. SecretVersionState
+
+```php
+enum SecretVersionState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Retiring = 'retiring';
+    case Retired = 'retired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 1296. Privileged access analytics
+
+VoltStack deberá analizar:
+
+* frecuencia de elevaciones;
+* duración;
+* recursos;
+* comandos;
+* horario;
+* fallos;
+* denegaciones;
+* anomalías;
+* uso de break-glass;
+* secretos consultados;
+* cuentas inactivas.
+
+---
+
+# 1297. PrivilegedAccessAnalyticsEngine
+
+```php
+interface PrivilegedAccessAnalyticsEngineInterface
+{
+    public function analyze(
+        PrivilegedActivityDataset $dataset,
+        PrivilegedAnalyticsPolicy $policy
+    ): PrivilegedAccessAnalyticsReport;
+}
+```
+
+---
+
+# 1298. Privileged anomaly signals
+
+Señales recomendadas:
+
+* elevación fuera de horario;
+* duración inusual;
+* recurso no habitual;
+* volumen elevado;
+* comandos destructivos;
+* múltiples denegaciones;
+* credential checkout atípico;
+* movimiento lateral;
+* uso desde dispositivo nuevo;
+* uso simultáneo.
+
+---
+
+# 1299. PAM audit events
+
+Eventos recomendados:
+
+* `PrivilegedAccessRequested`;
+* `PrivilegedAccessApproved`;
+* `PrivilegedAccessDenied`;
+* `PrivilegeElevationActivated`;
+* `PrivilegeElevationExpired`;
+* `PrivilegeElevationRevoked`;
+* `PrivilegedSessionOpened`;
+* `PrivilegedSessionTerminated`;
+* `PrivilegedCommandDenied`;
+* `CredentialCheckedOut`;
+* `CredentialReturned`;
+* `PrivilegedCredentialRotated`;
+* `BreakGlassAccessUsed`;
+* `DormantPrivilegedAccountDetected`;
+* `ServiceAccountOrphaned`;
+* `WorkloadIdentityCompromised`;
+* `SecretRotationFailed`;
+* `PrivilegedAnomalyDetected`.
+
+---
+
+# 1300. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Privileged Access Management Architecture
+Privileged Identity Separation
+Standing Privilege Reduction
+Privileged Eligibility
+Privileged Access Requests
+Strong Authentication for Elevation
+Device-Aware Privileged Access
+Just-in-Time Elevation
+Just-Enough Administration
+Resource-Scoped Privileges
+Command-Level Restrictions
+Dual Control
+Four-Eyes Principle
+Privileged Session Isolation
+Privileged Session Broker
+Session Recording
+Live Session Monitoring
+Privileged Credential Vault
+Credential Checkout
+Post-Checkout Rotation
+Emergency Access
+Break-Glass Execution
+Dormant Privileged Accounts
+Service Account Governance
+Machine Identities
+Workload Identities
+Workload Identity Federation
+Non-Human Identity Governance
+Secret Rotation
+Privileged Access Analytics
+PAM Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 14
+
+- Identity threat detection and response
+- Authentication anomaly correlation
+- Session risk scoring
+- Impossible travel
+- Token replay detection
+- Credential compromise detection
+- Password spray correlation
+- MFA fatigue detection
+- Device compromise signals
+- Identity behavior analytics
+- User and entity behavior analytics
+- Risk-based access decisions
+- Continuous access evaluation
+- Session restriction and quarantine
+- Automated identity containment
+- Incident response playbooks
+- Identity evidence preservation
+- Security operations integration
+- SIEM and SOAR integration
+- Identity security metrics
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 14 de varias
+**Cobertura:** Secciones **1301–1400**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 13`
+
+---
+
+# 1301. Identity Threat Detection and Response (ITDR) Architecture
+
+VoltStack deberá incorporar un subsistema de **Identity Threat Detection and Response (ITDR)** encargado de detectar, correlacionar y responder a amenazas relacionadas con identidades humanas y no humanas.
+
+El objetivo será reducir el tiempo entre:
+
+* detección;
+* evaluación;
+* contención;
+* remediación;
+* recuperación.
+
+---
+
+# 1302. ITDR security goals
+
+La arquitectura deberá garantizar:
+
+* detección temprana;
+* correlación de señales;
+* reducción de falsos positivos;
+* respuesta proporcional al riesgo;
+* preservación de evidencia;
+* automatización controlada;
+* integración con operaciones de seguridad;
+* reevaluación continua del riesgo.
+
+---
+
+# 1303. ITDR threat model
+
+El modelo deberá contemplar, entre otros:
+
+* robo de credenciales;
+* secuestro de sesiones;
+* replay de tokens;
+* password spraying;
+* credential stuffing;
+* MFA fatigue;
+* phishing resistente e intento de bypass;
+* compromiso de dispositivos;
+* abuso de cuentas privilegiadas;
+* movimiento lateral;
+* uso anómalo de workloads;
+* abuso de cuentas de servicio;
+* escalamiento silencioso de privilegios.
+
+---
+
+# 1304. ITDR architecture
+
+```text
+Identity Signals
+        ↓
+Signal Collection
+        ↓
+Normalization
+        ↓
+Correlation Engine
+        ↓
+Risk Engine
+        ↓
+Policy Evaluation
+        ↓
+Containment
+        ↓
+Response Actions
+        ↓
+Evidence Preservation
+        ↓
+SOC / SIEM / SOAR
+```
+
+---
+
+# 1305. IdentityThreatDetectionService
+
+```php
+interface IdentityThreatDetectionServiceInterface
+{
+    public function analyze(
+        IdentitySecuritySignal $signal
+    ): ThreatAssessment;
+}
+```
+
+---
+
+# 1306. IdentitySecuritySignal
+
+```php
+final readonly class IdentitySecuritySignal
+{
+    public function __construct(
+        public string $signalId,
+        public IdentityIdentifier $identity,
+        public IdentitySignalType $type,
+        public DateTimeImmutable $occurredAt,
+        public array $attributes,
+        public SignalConfidence $confidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 1307. IdentitySignalType
+
+```php
+enum IdentitySignalType: string
+{
+    case Authentication;
+    case Session;
+    case Device;
+    case Token;
+    case Credential;
+    case Authorization;
+    case Behavioral;
+    case Network;
+    case ThreatIntel;
+}
+```
+
+---
+
+# 1308. Signal confidence
+
+Cada señal deberá indicar un nivel de confianza que refleje la calidad de la evidencia y permita ponderar adecuadamente el riesgo.
+
+---
+
+# 1309. Signal normalization
+
+Todas las señales deberán convertirse a un formato interno común antes de iniciar la correlación.
+
+---
+
+# 1310. ThreatAssessment
+
+```php
+final readonly class ThreatAssessment
+{
+    public function __construct(
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $matchedSignals,
+        public array $recommendedResponses,
+        public bool $requiresImmediateContainment,
+    ) {
+    }
+}
+```
+
+---
+
+# 1311. Authentication anomaly correlation
+
+VoltStack deberá correlacionar:
+
+* múltiples fallos consecutivos;
+* cambios bruscos de ubicación;
+* nuevos dispositivos;
+* horarios inusuales;
+* cambios de navegador;
+* autenticaciones simultáneas;
+* cambios de método MFA.
+
+---
+
+# 1312. Multi-signal correlation
+
+Una única señal de bajo riesgo no deberá provocar automáticamente una respuesta severa.
+
+La decisión deberá basarse en múltiples evidencias consistentes.
+
+---
+
+# 1313. Correlation engine
+
+```php
+interface IdentityCorrelationEngineInterface
+{
+    public function correlate(
+        array $signals
+    ): IdentityThreatCorrelation;
+}
+```
+
+---
+
+# 1314. Correlation windows
+
+La correlación podrá utilizar ventanas:
+
+* segundos;
+* minutos;
+* horas;
+* días;
+
+según el tipo de amenaza.
+
+---
+
+# 1315. Risk accumulation
+
+El riesgo podrá acumularse mediante múltiples eventos pequeños en lugar de depender únicamente de un evento crítico.
+
+---
+
+# 1316. Session risk scoring
+
+Cada sesión activa deberá mantener un puntaje dinámico de riesgo.
+
+---
+
+# 1317. SessionRiskScore
+
+```php
+final readonly class SessionRiskScore
+{
+    public function __construct(
+        public SessionIdentifier $session,
+        public int $score,
+        public SessionRiskLevel $level,
+        public array $signals,
+        public DateTimeImmutable $evaluatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1318. Risk contributors
+
+Factores recomendados:
+
+* dispositivo;
+* geografía;
+* horario;
+* assurance;
+* privilegios;
+* comportamiento;
+* reputación IP;
+* anomalías recientes;
+* inteligencia externa.
+
+---
+
+# 1319. Continuous risk recomputation
+
+El riesgo no deberá calcularse únicamente durante el login.
+
+---
+
+# 1320. Continuous evaluation triggers
+
+Reevaluar cuando ocurra:
+
+* cambio de IP;
+* cambio de dispositivo;
+* elevación privilegiada;
+* modificación de roles;
+* nueva inteligencia de amenazas;
+* revocación de credenciales;
+* señal de compromiso.
+
+---
+
+# 1321. Impossible travel detection
+
+VoltStack podrá detectar desplazamientos físicamente improbables entre autenticaciones.
+
+---
+
+# 1322. ImpossibleTravelAssessment
+
+```php
+final readonly class ImpossibleTravelAssessment
+{
+    public function __construct(
+        public bool $detected,
+        public float $estimatedVelocityKmPerHour,
+        public array $locations,
+        public array $supportingSignals,
+    ) {
+    }
+}
+```
+
+---
+
+# 1323. Impossible travel limitations
+
+La detección deberá considerar:
+
+* VPN;
+* proxies corporativos;
+* roaming móvil;
+* redes satelitales;
+* cambios ASN legítimos.
+
+---
+
+# 1324. Token replay detection
+
+Los tokens reutilizados fuera de su patrón esperado deberán generar alertas.
+
+---
+
+# 1325. Replay registry correlation
+
+La detección deberá apoyarse en:
+
+* jti;
+* nonce;
+* DPoP;
+* sender constraints;
+* Session Identifier;
+* refresh token family.
+
+---
+
+# 1326. Credential compromise detection
+
+El sistema deberá identificar indicios como:
+
+* uso simultáneo;
+* autenticaciones incompatibles;
+* password recientemente filtrado;
+* cambio inesperado de MFA;
+* bypass de controles.
+
+---
+
+# 1327. Password spray detection
+
+VoltStack deberá correlacionar intentos distribuidos contra múltiples usuarios utilizando la misma contraseña o patrón.
+
+---
+
+# 1328. Credential stuffing detection
+
+El sistema deberá detectar autenticaciones derivadas de listas masivas de credenciales comprometidas.
+
+---
+
+# 1329. MFA fatigue detection
+
+Se deberán identificar patrones de:
+
+* múltiples solicitudes consecutivas;
+* rechazo repetido;
+* aceptación tardía sospechosa;
+* solicitudes desde origen inesperado.
+
+---
+
+# 1330. Push approval abuse
+
+Una aprobación MFA no deberá interpretarse automáticamente como ausencia de compromiso.
+
+---
+
+# 1331. Device compromise signals
+
+Señales recomendadas:
+
+* jailbreak;
+* root;
+* boot inseguro;
+* attestation fallida;
+* EDR comprometido;
+* certificado inválido;
+* postura degradada.
+
+---
+
+# 1332. DeviceRiskAssessment
+
+```php
+final readonly class DeviceRiskAssessment
+{
+    public function __construct(
+        public DeviceIdentifier $device,
+        public DeviceRiskLevel $risk,
+        public array $signals,
+        public bool $trusted,
+    ) {
+    }
+}
+```
+
+---
+
+# 1333. Identity Behavior Analytics (IBA)
+
+VoltStack podrá mantener perfiles de comportamiento normal por identidad.
+
+---
+
+# 1334. Behavioral baseline
+
+El perfil podrá considerar:
+
+* horario habitual;
+* recursos utilizados;
+* frecuencia;
+* comandos;
+* dispositivos;
+* regiones;
+* duración de sesión.
+
+---
+
+# 1335. Behavior profile
+
+```php
+final readonly class IdentityBehaviorProfile
+{
+    public function __construct(
+        public IdentityIdentifier $identity,
+        public array $baselineCharacteristics,
+        public DateTimeImmutable $lastUpdated,
+    ) {
+    }
+}
+```
+
+---
+
+# 1336. UEBA foundations
+
+El motor de User and Entity Behavior Analytics deberá analizar:
+
+* usuarios;
+* cuentas privilegiadas;
+* cuentas de servicio;
+* workloads;
+* dispositivos.
+
+---
+
+# 1337. UEBA risk enrichment
+
+Las anomalías de comportamiento deberán enriquecer, no reemplazar, el motor principal de riesgo.
+
+---
+
+# 1338. Risk-based access decisions
+
+Las decisiones de acceso podrán adaptarse dinámicamente al riesgo.
+
+---
+
+# 1339. Adaptive responses
+
+Ejemplos:
+
+* permitir;
+* requerir MFA adicional;
+* exigir passkey;
+* limitar permisos;
+* reducir duración de sesión;
+* bloquear.
+
+---
+
+# 1340. Risk decision engine
+
+```php
+interface RiskBasedAccessDecisionEngineInterface
+{
+    public function decide(
+        RiskEvaluationContext $context
+    ): AdaptiveAccessDecision;
+}
+```
+
+---
+
+# 1341. AdaptiveAccessDecision
+
+```php
+final readonly class AdaptiveAccessDecision
+{
+    public function __construct(
+        public AdaptiveDecisionType $decision,
+        public array $requiredActions,
+        public SessionRestrictionLevel $restrictionLevel,
+    ) {
+    }
+}
+```
+
+---
+
+# 1342. Continuous Access Evaluation
+
+VoltStack deberá reevaluar sesiones activas durante toda su vida útil.
+
+---
+
+# 1343. Continuous evaluation events
+
+Eventos relevantes:
+
+* cambio de contraseña;
+* revocación de roles;
+* señal de compromiso;
+* dispositivo comprometido;
+* sesión paralela;
+* logout remoto.
+
+---
+
+# 1344. Session restriction
+
+Una sesión podrá pasar dinámicamente a estado restringido.
+
+---
+
+# 1345. Restriction actions
+
+Una sesión restringida podrá:
+
+* impedir operaciones privilegiadas;
+* bloquear escritura;
+* permitir solo lectura;
+* exigir reautenticación;
+* impedir descarga;
+* impedir exportación.
+
+---
+
+# 1346. Session quarantine
+
+```php
+interface SessionQuarantineServiceInterface
+{
+    public function quarantine(
+        SessionIdentifier $session,
+        QuarantineReason $reason
+    ): QuarantineResult;
+}
+```
+
+---
+
+# 1347. Automated identity containment
+
+Las respuestas automáticas podrán incluir:
+
+* revocar sesiones;
+* invalidar tokens;
+* suspender identidad;
+* bloquear dispositivo;
+* revocar elevaciones;
+* suspender service account.
+
+---
+
+# 1348. Containment proportionality
+
+La respuesta deberá ser proporcional al nivel de confianza y severidad.
+
+---
+
+# 1349. Automated playbooks
+
+```php
+interface IdentityIncidentPlaybookInterface
+{
+    public function execute(
+        IdentityIncident $incident
+    ): PlaybookExecutionResult;
+}
+```
+
+---
+
+# 1350. Playbook examples
+
+Ejemplos:
+
+* Credential Compromise;
+* Break-glass Misuse;
+* Impossible Travel;
+* Privileged Session Abuse;
+* Password Spray;
+* Service Account Exposure.
+
+---
+
+# 1351. Identity incident
+
+```php
+final readonly class IdentityIncident
+{
+    public function __construct(
+        public string $incidentId,
+        public IdentityIdentifier $identity,
+        public IdentityIncidentSeverity $severity,
+        public array $signals,
+        public array $affectedResources,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1352. Evidence preservation
+
+Toda respuesta deberá preservar:
+
+* señales;
+* decisiones;
+* timestamps;
+* sesiones;
+* tokens;
+* dispositivos;
+* acciones automáticas.
+
+---
+
+# 1353. Chain of custody
+
+La evidencia deberá mantener:
+
+* integridad;
+* inmutabilidad;
+* trazabilidad;
+* control de acceso;
+* auditoría.
+
+---
+
+# 1354. Identity forensic package
+
+```php
+final readonly class IdentityForensicPackage
+{
+    public function __construct(
+        public string $packageId,
+        public array $events,
+        public array $logs,
+        public array $tokens,
+        public array $sessions,
+        public array $deviceEvidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 1355. SIEM integration
+
+VoltStack deberá exportar eventos mediante formatos estructurados compatibles con plataformas SIEM.
+
+---
+
+# 1356. SOAR integration
+
+Las respuestas automáticas podrán iniciarse desde plataformas SOAR autorizadas.
+
+---
+
+# 1357. Threat intelligence enrichment
+
+El motor podrá enriquecer señales utilizando:
+
+* reputación IP;
+* dominios maliciosos;
+* indicadores de compromiso;
+* inteligencia sobre credenciales comprometidas.
+
+---
+
+# 1358. Threat intelligence trust
+
+La inteligencia externa deberá clasificarse según nivel de confianza y antigüedad.
+
+---
+
+# 1359. Identity security metrics
+
+Métricas recomendadas:
+
+* tiempo medio de detección;
+* tiempo medio de contención;
+* sesiones restringidas;
+* sesiones revocadas;
+* cuentas comprometidas;
+* elevaciones bloqueadas;
+* incidentes cerrados.
+
+---
+
+# 1360. Security KPI dashboard
+
+El dashboard podrá mostrar:
+
+* tendencias;
+* riesgo por tenant;
+* riesgo por aplicación;
+* identidades privilegiadas;
+* cuentas huérfanas;
+* MFA coverage;
+* anomalías.
+
+---
+
+# 1361. ThreatSeverity
+
+```php
+enum ThreatSeverity: string
+{
+    case Low;
+    case Medium;
+    case High;
+    case Critical;
+}
+```
+
+---
+
+# 1362. ThreatConfidence
+
+```php
+enum ThreatConfidence: string
+{
+    case Low;
+    case Medium;
+    case High;
+}
+```
+
+---
+
+# 1363. IdentityIncidentSeverity
+
+```php
+enum IdentityIncidentSeverity: string
+{
+    case Informational;
+    case Low;
+    case Medium;
+    case High;
+    case Critical;
+}
+```
+
+---
+
+# 1364. SessionRiskLevel
+
+```php
+enum SessionRiskLevel: string
+{
+    case Low;
+    case Elevated;
+    case High;
+    case Critical;
+}
+```
+
+---
+
+# 1365. DeviceRiskLevel
+
+```php
+enum DeviceRiskLevel: string
+{
+    case Trusted;
+    case Elevated;
+    case High;
+    case Compromised;
+}
+```
+
+---
+
+# 1366. SignalConfidence
+
+```php
+enum SignalConfidence: string
+{
+    case Weak;
+    case Moderate;
+    case Strong;
+}
+```
+
+---
+
+# 1367. AdaptiveDecisionType
+
+```php
+enum AdaptiveDecisionType: string
+{
+    case Allow;
+    case Challenge;
+    case Restrict;
+    case Quarantine;
+    case Deny;
+}
+```
+
+---
+
+# 1368. SessionRestrictionLevel
+
+```php
+enum SessionRestrictionLevel: string
+{
+    case None;
+    case ReadOnly;
+    case Limited;
+    case HighlyRestricted;
+}
+```
+
+---
+
+# 1369. QuarantineReason
+
+```php
+enum QuarantineReason: string
+{
+    case CredentialCompromise;
+    case DeviceCompromise;
+    case ImpossibleTravel;
+    case PrivilegedMisuse;
+    case ThreatIntelligence;
+}
+```
+
+---
+
+# 1370. Identity incident lifecycle
+
+Estados recomendados:
+
+* Detected;
+* Investigating;
+* Contained;
+* Recovering;
+* Closed.
+
+---
+
+# 1371. False positive handling
+
+Toda alerta deberá poder clasificarse como falso positivo sin perder la trazabilidad histórica.
+
+---
+
+# 1372. Analyst feedback loop
+
+Las decisiones de analistas podrán retroalimentar el motor de correlación para mejorar futuras evaluaciones.
+
+---
+
+# 1373. Multi-tenant isolation
+
+Las señales de un tenant nunca deberán influir directamente en el riesgo calculado para otro tenant.
+
+---
+
+# 1374. Privacy-aware analytics
+
+Los modelos analíticos deberán minimizar el tratamiento de datos personales cuando no sean necesarios.
+
+---
+
+# 1375. Retention policy
+
+Las señales deberán conservarse únicamente durante el período definido por la política de seguridad y regulación aplicable.
+
+---
+
+# 1376. Secure signal storage
+
+Las señales deberán almacenarse con:
+
+* cifrado;
+* control de acceso;
+* integridad;
+* versionado cuando aplique.
+
+---
+
+# 1377. Replay-resistant telemetry
+
+La telemetría utilizada por el motor ITDR deberá protegerse contra inyección y replay.
+
+---
+
+# 1378. Threat model updates
+
+El catálogo de amenazas deberá revisarse periódicamente para incorporar nuevas técnicas de ataque.
+
+---
+
+# 1379. Detection testing
+
+VoltStack deberá permitir pruebas controladas de reglas de detección sin afectar producción.
+
+---
+
+# 1380. Simulation mode
+
+Las políticas podrán ejecutarse en modo simulación para medir impacto antes de activarse.
+
+---
+
+# 1381. Explainable decisions
+
+Las decisiones automáticas deberán incluir una explicación auditable de los factores que las motivaron.
+
+---
+
+# 1382. Response override
+
+Un operador autorizado podrá cancelar una respuesta automática cuando exista justificación documentada.
+
+---
+
+# 1383. Override audit
+
+Toda anulación manual deberá quedar registrada con:
+
+* actor;
+* motivo;
+* hora;
+* incidente asociado.
+
+---
+
+# 1384. Identity security reporting
+
+Los reportes deberán poder agrupar incidentes por:
+
+* tenant;
+* aplicación;
+* tipo de amenaza;
+* criticidad;
+* identidad;
+* periodo.
+
+---
+
+# 1385. Operational resilience
+
+El fallo del motor analítico no deberá impedir la aplicación de controles de autenticación básicos.
+
+---
+
+# 1386. Graceful degradation
+
+Si un componente analítico deja de estar disponible, VoltStack deberá degradar funcionalidades no esenciales sin comprometer la seguridad mínima.
+
+---
+
+# 1387. ITDR extensibility
+
+El motor deberá permitir incorporar nuevos detectores sin modificar el núcleo del framework.
+
+---
+
+# 1388. Detector plugin model
+
+```php
+interface IdentityThreatDetectorInterface
+{
+    public function detect(
+        IdentitySecuritySignal $signal
+    ): ?ThreatAssessment;
+}
+```
+
+---
+
+# 1389. Detector isolation
+
+Un detector defectuoso no deberá impedir la ejecución del resto de detectores.
+
+---
+
+# 1390. Detector prioritization
+
+Los detectores podrán ejecutarse según prioridad y costo computacional.
+
+---
+
+# 1391. Threat response policy
+
+Las respuestas deberán gobernarse mediante políticas configurables por tenant.
+
+---
+
+# 1392. Tenant risk profile
+
+Cada tenant podrá definir umbrales de riesgo acordes con sus requisitos regulatorios y operativos.
+
+---
+
+# 1393. Incident notification
+
+Las alertas críticas podrán notificarse a:
+
+* SOC;
+* administradores;
+* propietarios del tenant;
+* equipos de respuesta.
+
+---
+
+# 1394. Notification throttling
+
+Las notificaciones deberán limitarse para evitar tormentas de alertas.
+
+---
+
+# 1395. Security evidence export
+
+La evidencia deberá poder exportarse preservando integridad y metadatos.
+
+---
+
+# 1396. Compliance support
+
+El subsistema deberá facilitar evidencia para auditorías de seguridad y cumplimiento.
+
+---
+
+# 1397. Identity resilience
+
+La arquitectura deberá asumir que una identidad puede verse comprometida en cualquier momento y reaccionar en consecuencia.
+
+---
+
+# 1398. Zero Trust alignment
+
+Todas las decisiones deberán alinearse con el principio de **"never trust, always verify"**.
+
+---
+
+# 1399. Security events
+
+Eventos recomendados:
+
+* `IdentityThreatDetected`
+* `SessionRiskElevated`
+* `ImpossibleTravelDetected`
+* `CredentialCompromiseSuspected`
+* `PasswordSprayDetected`
+* `MfaFatigueDetected`
+* `IdentityQuarantined`
+* `AdaptiveAccessDecisionApplied`
+* `ThreatPlaybookExecuted`
+* `IdentityIncidentClosed`
+
+---
+
+# 1400. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Threat Detection and Response (ITDR)
+Authentication Anomaly Correlation
+Continuous Session Risk Scoring
+Impossible Travel Detection
+Token Replay Detection
+Credential Compromise Detection
+Password Spray Correlation
+MFA Fatigue Detection
+Device Compromise Signals
+Identity Behavior Analytics
+User and Entity Behavior Analytics
+Risk-Based Access Decisions
+Continuous Access Evaluation
+Session Restriction and Quarantine
+Automated Identity Containment
+Incident Response Playbooks
+Identity Evidence Preservation
+SIEM and SOAR Integration
+Identity Security Metrics
+Zero Trust Identity Response
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 15
+
+- Cryptographic Architecture
+- Cryptographic Agility
+- Key Management Architecture
+- Envelope Encryption
+- Data Encryption Policies
+- Field-Level Encryption
+- Key Hierarchies
+- HSM Integration
+- KMS Integration
+- Secret Derivation
+- Secure Random Generation
+- Digital Signatures
+- MAC Validation
+- Hashing Policies
+- Secure Key Rotation
+- Cryptographic Auditing
+- Post-Quantum Readiness
+- FIPS Compliance
+- Cryptographic Governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 15 de varias
+**Cobertura:** Secciones **1401–1500**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 14`
+
+---
+
+# 1401. Cryptographic Architecture
+
+VoltStack deberá incorporar una arquitectura criptográfica centralizada para proteger:
+
+* credenciales;
+* sesiones;
+* tokens;
+* secretos;
+* claves;
+* datos personales;
+* evidencia de auditoría;
+* comunicaciones;
+* artefactos firmados;
+* información multi-tenant.
+
+La criptografía no deberá implementarse de forma dispersa dentro de Controllers, Services o paquetes individuales.
+
+---
+
+# 1402. Cryptographic security goals
+
+La arquitectura deberá garantizar:
+
+* confidencialidad;
+* integridad;
+* autenticidad;
+* no reutilización insegura de claves;
+* separación de propósitos;
+* rotación;
+* revocación;
+* trazabilidad;
+* agilidad criptográfica;
+* recuperación controlada.
+
+---
+
+# 1403. Cryptographic threat model
+
+El modelo deberá considerar:
+
+* robo de claves;
+* algoritmos obsoletos;
+* configuración insegura;
+* nonce reuse;
+* weak randomness;
+* downgrade attacks;
+* key confusion;
+* cross-tenant key reuse;
+* exposición de plaintext;
+* errores de implementación;
+* side channels;
+* replay;
+* key substitution;
+* pérdida de material criptográfico;
+* compromiso de KMS o HSM.
+
+---
+
+# 1404. Cryptographic architectural components
+
+```text id="zdl2tw"
+Application Security Operation
+        ↓
+Cryptographic Policy Resolver
+        ↓
+Purpose and Tenant Resolution
+        ↓
+Key Resolution
+        ↓
+Algorithm Selection
+        ↓
+Cryptographic Provider
+        ↓
+Protected Operation
+        ↓
+Metadata and Versioning
+        ↓
+Audit and Telemetry
+```
+
+---
+
+# 1405. CryptographicService
+
+```php id="u0rrha"
+interface CryptographicServiceInterface
+{
+    public function encrypt(
+        SensitiveValue $plaintext,
+        EncryptionContext $context
+    ): EncryptedPayload;
+
+    public function decrypt(
+        EncryptedPayload $payload,
+        DecryptionContext $context
+    ): SensitiveValue;
+
+    public function sign(
+        string $message,
+        SignatureContext $context
+    ): DigitalSignature;
+
+    public function verify(
+        string $message,
+        DigitalSignature $signature,
+        VerificationContext $context
+    ): SignatureVerificationResult;
+}
+```
+
+---
+
+# 1406. Cryptographic operation purposes
+
+Toda operación deberá declarar un propósito explícito.
+
+Ejemplos:
+
+* session protection;
+* token signing;
+* credential encryption;
+* audit integrity;
+* tenant data encryption;
+* secret wrapping;
+* password reset tokens;
+* webhook signatures.
+
+---
+
+# 1407. CryptographicPurpose
+
+```php id="pqkt3b"
+enum CryptographicPurpose: string
+{
+    case DataEncryption = 'data_encryption';
+    case FieldEncryption = 'field_encryption';
+    case KeyWrapping = 'key_wrapping';
+    case DigitalSignature = 'digital_signature';
+    case MessageAuthentication = 'message_authentication';
+    case TokenProtection = 'token_protection';
+    case AuditIntegrity = 'audit_integrity';
+    case SecretDerivation = 'secret_derivation';
+}
+```
+
+---
+
+# 1408. Purpose separation
+
+Una misma clave no deberá reutilizarse para propósitos criptográficos distintos.
+
+No deberá utilizarse una clave de:
+
+* cifrado para firmar;
+* firma para MAC;
+* sesión para cifrado de datos;
+* tenant A para tenant B;
+* producción para desarrollo.
+
+---
+
+# 1409. Cryptographic policy engine
+
+```php id="zfxl8i"
+interface CryptographicPolicyEngineInterface
+{
+    public function resolve(
+        CryptographicOperationContext $context
+    ): CryptographicPolicyDecision;
+}
+```
+
+---
+
+# 1410. CryptographicPolicyDecision
+
+```php id="5j1m9c"
+final readonly class CryptographicPolicyDecision
+{
+    public function __construct(
+        public string $algorithm,
+        public string $keyProfile,
+        public int $minimumKeyStrength,
+        public bool $hardwareProtectionRequired,
+        public bool $rotationRequired,
+        public array $restrictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1411. Cryptographic agility
+
+VoltStack deberá poder sustituir algoritmos, proveedores y formatos sin reescribir el dominio.
+
+---
+
+# 1412. Algorithm registry
+
+```php id="gzp2j3"
+interface CryptographicAlgorithmRegistryInterface
+{
+    public function resolve(
+        string $algorithmId
+    ): CryptographicAlgorithmDefinition;
+
+    public function isAllowed(
+        string $algorithmId,
+        CryptographicPurpose $purpose
+    ): bool;
+}
+```
+
+---
+
+# 1413. CryptographicAlgorithmDefinition
+
+```php id="yk2o0d"
+final readonly class CryptographicAlgorithmDefinition
+{
+    public function __construct(
+        public string $algorithmId,
+        public CryptographicAlgorithmType $type,
+        public int $securityStrengthBits,
+        public CryptographicAlgorithmState $state,
+        public array $allowedPurposes,
+    ) {
+    }
+}
+```
+
+---
+
+# 1414. CryptographicAlgorithmType
+
+```php id="gwdrng"
+enum CryptographicAlgorithmType: string
+{
+    case SymmetricEncryption = 'symmetric_encryption';
+    case AsymmetricEncryption = 'asymmetric_encryption';
+    case DigitalSignature = 'digital_signature';
+    case Hash = 'hash';
+    case Mac = 'mac';
+    case KeyDerivation = 'key_derivation';
+    case PasswordHashing = 'password_hashing';
+}
+```
+
+---
+
+# 1415. CryptographicAlgorithmState
+
+```php id="cjmhk7"
+enum CryptographicAlgorithmState: string
+{
+    case Preferred = 'preferred';
+    case Allowed = 'allowed';
+    case LegacyVerifyOnly = 'legacy_verify_only';
+    case Deprecated = 'deprecated';
+    case Prohibited = 'prohibited';
+}
+```
+
+---
+
+# 1416. Algorithm allowlists
+
+VoltStack deberá utilizar allowlists explícitas.
+
+Nunca deberá aceptar automáticamente cualquier algoritmo declarado por input externo.
+
+---
+
+# 1417. Algorithm downgrade prevention
+
+Cuando un artefacto declare un algoritmo inferior al requerido, la operación deberá rechazarse aunque el algoritmo todavía exista en el runtime.
+
+---
+
+# 1418. Legacy verification mode
+
+Algoritmos antiguos podrán conservarse únicamente para:
+
+* verificar datos existentes;
+* migrar formatos;
+* reemitir artefactos;
+* rotar claves.
+
+No deberán utilizarse para nuevas operaciones.
+
+---
+
+# 1419. Cryptographic provider abstraction
+
+```php id="32nuv8"
+interface CryptographicProviderInterface
+{
+    public function supports(
+        CryptographicAlgorithmDefinition $algorithm
+    ): bool;
+
+    public function execute(
+        CryptographicOperation $operation
+    ): CryptographicOperationResult;
+}
+```
+
+---
+
+# 1420. Provider types
+
+VoltStack podrá integrar:
+
+* OpenSSL;
+* libsodium;
+* platform crypto APIs;
+* cloud KMS;
+* HSM;
+* PKCS#11;
+* remote signing services.
+
+---
+
+# 1421. Provider selection policy
+
+La selección deberá considerar:
+
+* algoritmo;
+* tenant;
+* sensibilidad;
+* compliance;
+* latencia;
+* disponibilidad;
+* hardware requirement;
+* key residency.
+
+---
+
+# 1422. Key management architecture
+
+Todas las claves deberán gestionarse mediante un subsistema central.
+
+---
+
+# 1423. KeyManagementService
+
+```php id="sau45d"
+interface KeyManagementServiceInterface
+{
+    public function create(
+        KeyCreationRequest $request
+    ): ManagedKey;
+
+    public function resolve(
+        KeyReference $reference,
+        KeyUsageContext $context
+    ): ResolvedKey;
+
+    public function rotate(
+        KeyReference $reference,
+        KeyRotationPolicy $policy
+    ): KeyRotationResult;
+
+    public function revoke(
+        KeyReference $reference,
+        KeyRevocationReason $reason
+    ): void;
+}
+```
+
+---
+
+# 1424. ManagedKey
+
+```php id="xg5czx"
+final readonly class ManagedKey
+{
+    public function __construct(
+        public string $keyId,
+        public string $versionId,
+        public CryptographicPurpose $purpose,
+        public string $algorithm,
+        public ManagedKeyState $state,
+        public KeyProtectionLevel $protectionLevel,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1425. ManagedKeyState
+
+```php id="mr3c8h"
+enum ManagedKeyState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Retiring = 'retiring';
+    case Retired = 'retired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Destroyed = 'destroyed';
+}
+```
+
+---
+
+# 1426. KeyProtectionLevel
+
+```php id="6ugklx"
+enum KeyProtectionLevel: string
+{
+    case Software = 'software';
+    case OperatingSystem = 'operating_system';
+    case CloudKms = 'cloud_kms';
+    case HardwareSecurityModule = 'hardware_security_module';
+}
+```
+
+---
+
+# 1427. Key references
+
+El dominio deberá trabajar con referencias opacas, no con material de clave directamente.
+
+---
+
+# 1428. KeyReference
+
+```php id="2zjo8l"
+final readonly class KeyReference
+{
+    public function __construct(
+        public string $keyId,
+        public ?string $versionId,
+        public string $provider,
+        public string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1429. Key material isolation
+
+El material de clave no deberá:
+
+* aparecer en logs;
+* serializarse;
+* incluirse en excepciones;
+* exponerse a Controllers;
+* persistirse sin protección;
+* permanecer más tiempo del necesario en memoria.
+
+---
+
+# 1430. Key hierarchy
+
+VoltStack deberá utilizar jerarquías de claves para evitar cifrar todo directamente con una clave raíz.
+
+---
+
+# 1431. Recommended key hierarchy
+
+```text id="b8ih3l"
+Root Key
+   ↓
+Key Encryption Key
+   ↓
+Tenant Master Key
+   ↓
+Data Encryption Key
+   ↓
+Protected Data
+```
+
+---
+
+# 1432. Root key
+
+La root key deberá:
+
+* permanecer fuera del almacenamiento ordinario;
+* utilizarse solo para proteger claves inferiores;
+* residir preferentemente en HSM o KMS;
+* tener acceso extremadamente restringido.
+
+---
+
+# 1433. Key Encryption Key
+
+Una KEK deberá proteger:
+
+* tenant keys;
+* data encryption keys;
+* backup keys;
+* signing key material exportable.
+
+---
+
+# 1434. Tenant master keys
+
+Cada tenant podrá poseer una o más claves maestras separadas.
+
+---
+
+# 1435. Tenant cryptographic isolation
+
+Nunca deberá utilizarse la misma DEK para cifrar datos de tenants diferentes.
+
+---
+
+# 1436. Data Encryption Key
+
+```php id="4o7kss"
+final readonly class DataEncryptionKey
+{
+    public function __construct(
+        public string $keyId,
+        public string $tenantId,
+        public string $algorithm,
+        public SensitiveValue $keyMaterial,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1437. Envelope encryption
+
+VoltStack deberá utilizar envelope encryption para datos sensibles de alto volumen.
+
+---
+
+# 1438. Envelope encryption flow
+
+```text id="v0f2d6"
+Generate DEK
+     ↓
+Encrypt Data with DEK
+     ↓
+Wrap DEK with KEK
+     ↓
+Store Ciphertext
+     ↓
+Store Wrapped DEK
+     ↓
+Store Algorithm and Version Metadata
+```
+
+---
+
+# 1439. EncryptedPayload
+
+```php id="d8zgpt"
+final readonly class EncryptedPayload
+{
+    public function __construct(
+        public string $ciphertext,
+        public string $algorithm,
+        public string $keyId,
+        public string $keyVersion,
+        public string $nonce,
+        public ?string $authenticationTag,
+        public ?string $wrappedKey,
+        public array $authenticatedMetadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 1440. Authenticated encryption
+
+Para nuevo cifrado simétrico deberá preferirse AEAD.
+
+Ejemplos de familias permitidas según policy:
+
+* AES-GCM;
+* ChaCha20-Poly1305;
+* XChaCha20-Poly1305.
+
+---
+
+# 1441. AEAD associated data
+
+El associated data podrá incluir:
+
+* tenant ID;
+* resource type;
+* resource ID;
+* field name;
+* schema version;
+* key purpose.
+
+---
+
+# 1442. Ciphertext swapping prevention
+
+Los metadatos autenticados deberán impedir mover ciphertext válidos entre:
+
+* tenants;
+* recursos;
+* campos;
+* contextos;
+* versiones incompatibles.
+
+---
+
+# 1443. Nonce generation
+
+Los nonces deberán:
+
+* generarse correctamente según el algoritmo;
+* tener longitud válida;
+* no reutilizarse con la misma clave;
+* no depender de timestamps únicamente.
+
+---
+
+# 1444. Nonce reuse protection
+
+Para algoritmos sensibles a nonce reuse, VoltStack deberá:
+
+* utilizar generación segura;
+* registrar estrategia;
+* aplicar contadores cuando corresponda;
+* rotar claves ante riesgo de repetición.
+
+---
+
+# 1445. Data encryption policy
+
+```php id="spm8jw"
+final readonly class DataEncryptionPolicy
+{
+    public function __construct(
+        public DataClassification $minimumClassification,
+        public CryptographicPurpose $purpose,
+        public string $algorithmProfile,
+        public KeyProtectionLevel $minimumProtection,
+        public bool $fieldLevelRequired,
+        public bool $searchableEncryptionAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 1446. Data classification
+
+```php id="79yiax"
+enum DataClassification: string
+{
+    case Public = 'public';
+    case Internal = 'internal';
+    case Confidential = 'confidential';
+    case Restricted = 'restricted';
+    case HighlyRestricted = 'highly_restricted';
+}
+```
+
+---
+
+# 1447. Encryption at rest
+
+VoltStack deberá considerar múltiples capas:
+
+* disk encryption;
+* database encryption;
+* object storage encryption;
+* application-level encryption;
+* field-level encryption.
+
+Una capa no deberá asumirse sustituto automático de las demás.
+
+---
+
+# 1448. Field-level encryption
+
+Los campos especialmente sensibles deberán cifrarse antes de llegar al storage.
+
+---
+
+# 1449. FieldEncryptionService
+
+```php id="eh7ry5"
+interface FieldEncryptionServiceInterface
+{
+    public function encryptField(
+        string $fieldName,
+        SensitiveValue $value,
+        FieldEncryptionContext $context
+    ): EncryptedFieldValue;
+
+    public function decryptField(
+        string $fieldName,
+        EncryptedFieldValue $value,
+        FieldDecryptionContext $context
+    ): SensitiveValue;
+}
+```
+
+---
+
+# 1450. EncryptedFieldValue
+
+```php id="b3vo48"
+final readonly class EncryptedFieldValue
+{
+    public function __construct(
+        public string $ciphertext,
+        public string $keyId,
+        public string $keyVersion,
+        public string $algorithm,
+        public string $nonce,
+        public string $authenticationTag,
+        public int $formatVersion,
+    ) {
+    }
+}
+```
+
+---
+
+# 1451. Field encryption candidates
+
+Ejemplos:
+
+* government identifiers;
+* recovery secrets;
+* private keys;
+* phone numbers según policy;
+* medical or financial attributes;
+* identity provider tokens;
+* sensitive external identifiers.
+
+---
+
+# 1452. Search limitations
+
+Los campos cifrados no deberán hacerse buscables mediante cifrado determinista sin una evaluación explícita del riesgo de pattern leakage.
+
+---
+
+# 1453. Blind indexing
+
+Cuando sea indispensable buscar datos protegidos, VoltStack podrá utilizar blind indexes separados.
+
+---
+
+# 1454. BlindIndexService
+
+```php id="2o6l8d"
+interface BlindIndexServiceInterface
+{
+    public function create(
+        SensitiveValue $value,
+        BlindIndexContext $context
+    ): BlindIndexValue;
+}
+```
+
+---
+
+# 1455. Blind index restrictions
+
+Los blind indexes deberán:
+
+* utilizar clave separada;
+* normalizarse cuidadosamente;
+* limitar colisiones;
+* no revelar el plaintext;
+* rotarse;
+* tratarse como información sensible.
+
+---
+
+# 1456. Deterministic encryption restrictions
+
+El cifrado determinista deberá estar deshabilitado por defecto y solo habilitarse con:
+
+* caso de uso documentado;
+* baja entropía evaluada;
+* mitigaciones;
+* aprobación de seguridad.
+
+---
+
+# 1457. HSM integration
+
+VoltStack deberá poder integrar Hardware Security Modules para operaciones de alta sensibilidad.
+
+---
+
+# 1458. HSM use cases
+
+El HSM podrá utilizarse para:
+
+* root keys;
+* signing keys;
+* code signing;
+* certificate authority keys;
+* privileged token signing;
+* key wrapping;
+* regulated workloads.
+
+---
+
+# 1459. HsmProvider
+
+```php id="v2feg1"
+interface HsmProviderInterface
+{
+    public function generateKey(
+        HsmKeyGenerationRequest $request
+    ): HsmKeyReference;
+
+    public function sign(
+        HsmKeyReference $key,
+        string $message,
+        HsmSignatureContext $context
+    ): DigitalSignature;
+
+    public function unwrap(
+        HsmKeyReference $key,
+        string $wrappedPayload
+    ): SensitiveValue;
+}
+```
+
+---
+
+# 1460. HSM extraction prohibition
+
+Las claves marcadas como non-exportable nunca deberán salir del HSM en plaintext.
+
+---
+
+# 1461. KMS integration
+
+VoltStack deberá abstraer servicios de gestión de claves cloud y privados.
+
+---
+
+# 1462. KmsProvider
+
+```php id="fa0ie6"
+interface KmsProviderInterface
+{
+    public function encrypt(
+        KeyReference $key,
+        SensitiveValue $plaintext,
+        array $encryptionContext
+    ): KmsEncryptedPayload;
+
+    public function decrypt(
+        KmsEncryptedPayload $payload,
+        array $encryptionContext
+    ): SensitiveValue;
+
+    public function generateDataKey(
+        KeyReference $key,
+        DataKeyGenerationContext $context
+    ): GeneratedDataKey;
+}
+```
+
+---
+
+# 1463. KMS encryption context
+
+El encryption context deberá vincular la operación a:
+
+* tenant;
+* application;
+* purpose;
+* resource;
+* environment.
+
+---
+
+# 1464. KMS provider compromise
+
+La arquitectura deberá asumir que un proveedor KMS puede sufrir:
+
+* indisponibilidad;
+* revocación;
+* configuración incorrecta;
+* compromiso de credenciales;
+* restricciones regionales.
+
+---
+
+# 1465. Multi-provider key strategy
+
+Para cargas críticas, VoltStack podrá permitir:
+
+* primary KMS;
+* backup KMS;
+* HSM local;
+* recovery key escrow.
+
+La recuperación no deberá debilitar el control ordinario.
+
+---
+
+# 1466. Key derivation
+
+La derivación de claves deberá utilizar algoritmos diseñados para ese propósito.
+
+---
+
+# 1467. KeyDerivationService
+
+```php id="dc9cbm"
+interface KeyDerivationServiceInterface
+{
+    public function derive(
+        SensitiveValue $inputKeyMaterial,
+        KeyDerivationContext $context
+    ): DerivedKey;
+}
+```
+
+---
+
+# 1468. Key derivation use cases
+
+Ejemplos:
+
+* subkeys por tenant;
+* subkeys por propósito;
+* session keys;
+* blind index keys;
+* MAC keys;
+* temporary encryption keys.
+
+---
+
+# 1469. HKDF policy
+
+HKDF podrá utilizarse para derivar subkeys cuando el input key material posea entropía suficiente.
+
+---
+
+# 1470. Password-derived keys
+
+Las claves derivadas de contraseñas deberán utilizar KDFs específicas como:
+
+* Argon2id;
+* scrypt;
+* PBKDF2 cuando exista requerimiento de compatibilidad.
+
+---
+
+# 1471. Salt requirements
+
+Los salts deberán:
+
+* ser únicos;
+* generarse aleatoriamente;
+* almacenarse junto al resultado;
+* no reutilizarse como secretos.
+
+---
+
+# 1472. Pepper requirements
+
+Los peppers deberán:
+
+* almacenarse fuera de la base de datos;
+* rotarse;
+* versionarse;
+* protegerse mediante KMS o HSM cuando corresponda.
+
+---
+
+# 1473. Secure random generation
+
+Toda entropía criptográfica deberá provenir de un CSPRNG confiable.
+
+---
+
+# 1474. SecureRandomGenerator
+
+```php id="6sfcn6"
+interface SecureRandomGeneratorInterface
+{
+    public function bytes(int $length): SensitiveValue;
+
+    public function token(int $entropyBits): SensitiveValue;
+
+    public function integer(int $minimum, int $maximum): int;
+}
+```
+
+---
+
+# 1475. Randomness use cases
+
+Se utilizará para:
+
+* session identifiers;
+* CSRF tokens;
+* nonces;
+* salts;
+* reset tokens;
+* authorization codes;
+* API keys;
+* recovery codes;
+* data encryption keys.
+
+---
+
+# 1476. Predictable randomness prohibition
+
+No deberán utilizarse para seguridad:
+
+* timestamps;
+* incremental IDs;
+* UUID no aleatorios sin análisis;
+* pseudo-random generators generales;
+* hashes de datos predecibles.
+
+---
+
+# 1477. Entropy health
+
+El runtime deberá detectar y fallar de forma segura si el sistema no puede proporcionar entropía confiable.
+
+---
+
+# 1478. Digital signatures
+
+VoltStack deberá centralizar las operaciones de firma y verificación.
+
+---
+
+# 1479. DigitalSignature
+
+```php id="2xsod1"
+final readonly class DigitalSignature
+{
+    public function __construct(
+        public string $value,
+        public string $algorithm,
+        public string $keyId,
+        public string $keyVersion,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1480. Signature use cases
+
+Ejemplos:
+
+* JWT;
+* OIDC tokens;
+* audit manifests;
+* software artifacts;
+* federation metadata;
+* signed webhooks;
+* policy bundles;
+* configuration packages.
+
+---
+
+# 1481. Signature algorithm policy
+
+La política deberá definir:
+
+* algoritmos permitidos;
+* tamaño mínimo de clave;
+* formatos;
+* curve allowlist;
+* hashing;
+* key provenance;
+* maximum artifact lifetime.
+
+---
+
+# 1482. Signature verification pipeline
+
+```text id="b9g5n2"
+Parse Signature Metadata
+      ↓
+Resolve Trusted Key
+      ↓
+Validate Algorithm Allowlist
+      ↓
+Validate Key Purpose
+      ↓
+Validate Key State
+      ↓
+Validate Signature
+      ↓
+Validate Artifact Context
+      ↓
+Validate Replay or Freshness
+```
+
+---
+
+# 1483. Key confusion prevention
+
+Una clave deberá validarse contra:
+
+* tipo;
+* algoritmo;
+* uso;
+* issuer;
+* tenant;
+* lifecycle state.
+
+---
+
+# 1484. Signature context binding
+
+Una firma válida criptográficamente no deberá aceptarse si pertenece a otro:
+
+* tenant;
+* issuer;
+* audience;
+* purpose;
+* environment;
+* artifact type.
+
+---
+
+# 1485. Message authentication codes
+
+VoltStack deberá utilizar MAC cuando ambas partes compartan un secreto y no sea necesaria verificación pública.
+
+---
+
+# 1486. MacService
+
+```php id="5y3jvi"
+interface MacServiceInterface
+{
+    public function create(
+        string $message,
+        MacContext $context
+    ): MessageAuthenticationCode;
+
+    public function verify(
+        string $message,
+        MessageAuthenticationCode $mac,
+        MacVerificationContext $context
+    ): bool;
+}
+```
+
+---
+
+# 1487. MAC key separation
+
+Cada integración deberá tener una clave MAC distinta y separada de las claves de cifrado.
+
+---
+
+# 1488. Constant-time comparison
+
+La comparación de:
+
+* MACs;
+* hashes secretos;
+* tokens;
+* signatures codificadas;
+
+deberá utilizar operaciones constant-time cuando corresponda.
+
+---
+
+# 1489. Hashing policies
+
+VoltStack deberá distinguir claramente entre:
+
+* hashing general;
+* password hashing;
+* keyed hashing;
+* integrity hashing;
+* content addressing.
+
+---
+
+# 1490. HashPolicy
+
+```php id="jdjnvl"
+final readonly class HashPolicy
+{
+    public function __construct(
+        public string $algorithm,
+        public int $minimumOutputBits,
+        public bool $keyedRequired,
+        public bool $legacyVerificationAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 1491. General-purpose hash usage
+
+Los hashes generales podrán utilizarse para:
+
+* integrity digests;
+* cache keys;
+* artifact fingerprints;
+* content addressing;
+* audit chaining.
+
+No deberán usarse directamente para almacenar contraseñas.
+
+---
+
+# 1492. Cryptographic key rotation
+
+Toda clase de clave deberá tener una política de rotación.
+
+---
+
+# 1493. KeyRotationPolicy
+
+```php id="b2cu7g"
+final readonly class KeyRotationPolicy
+{
+    public function __construct(
+        public DateInterval $maximumAge,
+        public DateInterval $overlapPeriod,
+        public bool $rotateOnUseThreshold,
+        public bool $rotateOnIncident,
+        public bool $reencryptExistingData,
+    ) {
+    }
+}
+```
+
+---
+
+# 1494. Rotation stages
+
+```text id="1c1g80"
+Create New Key Version
+      ↓
+Publish New Active Version
+      ↓
+Use New Version for Writes
+      ↓
+Accept Previous Version for Reads
+      ↓
+Re-encrypt or Re-sign as Needed
+      ↓
+Retire Previous Version
+      ↓
+Destroy When Retention Allows
+```
+
+---
+
+# 1495. Emergency key rotation
+
+Ante sospecha de compromiso deberá:
+
+* marcarse la clave como compromised;
+* impedir nuevos usos;
+* activar nueva versión;
+* identificar artefactos afectados;
+* revocar tokens;
+* reemitir firmas;
+* recifrar datos según riesgo;
+* preservar evidencia.
+
+---
+
+# 1496. Cryptographic audit events
+
+Eventos recomendados:
+
+* `CryptographicOperationDenied`;
+* `KeyCreated`;
+* `KeyActivated`;
+* `KeyRotationStarted`;
+* `KeyRotationCompleted`;
+* `KeyRetired`;
+* `KeyRevoked`;
+* `KeyCompromiseDetected`;
+* `KeyDestroyed`;
+* `DecryptionFailed`;
+* `SignatureVerificationFailed`;
+* `AlgorithmDowngradeRejected`;
+* `LegacyAlgorithmUsed`;
+* `HsmOperationFailed`;
+* `KmsProviderUnavailable`.
+
+---
+
+# 1497. Cryptographic governance
+
+VoltStack deberá mantener un inventario de:
+
+* algoritmos;
+* claves;
+* certificados;
+* proveedores;
+* owners;
+* propósitos;
+* dependencias;
+* fechas de expiración;
+* excepciones.
+
+---
+
+# 1498. Compliance and FIPS mode
+
+VoltStack podrá ofrecer perfiles criptográficos orientados a entornos regulados.
+
+Un perfil FIPS deberá:
+
+* utilizar proveedores validados cuando sea requerido;
+* restringir algoritmos;
+* bloquear configuraciones incompatibles;
+* registrar el modo activo;
+* impedir fallback silencioso.
+
+---
+
+# 1499. Post-quantum readiness
+
+VoltStack deberá prepararse para migraciones post-cuánticas mediante:
+
+* inventario criptográfico;
+* versionado de algoritmos;
+* formatos extensibles;
+* crypto-agility;
+* separación entre identidad y algoritmo;
+* soporte futuro para esquemas híbridos;
+* políticas de transición.
+
+No deberán adoptarse algoritmos experimentales en producción sin estandarización, soporte del proveedor y evaluación de seguridad.
+
+---
+
+# 1500. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text id="xp6kpg"
+Cryptographic Architecture
+Cryptographic Policy Engine
+Purpose Separation
+Cryptographic Agility
+Algorithm Registry
+Algorithm Downgrade Prevention
+Legacy Verification Mode
+Cryptographic Provider Abstraction
+Key Management Architecture
+Managed Key Lifecycle
+Key References
+Key Material Isolation
+Key Hierarchies
+Tenant Cryptographic Isolation
+Envelope Encryption
+Authenticated Encryption
+Associated Data Binding
+Nonce Reuse Protection
+Data Encryption Policies
+Field-Level Encryption
+Blind Indexing
+HSM Integration
+KMS Integration
+Key Derivation
+Salt and Pepper Policies
+Secure Random Generation
+Digital Signatures
+Signature Context Binding
+Message Authentication Codes
+Constant-Time Comparison
+Hashing Policies
+Secure Key Rotation
+Emergency Key Rotation
+Cryptographic Auditing
+Cryptographic Governance
+FIPS-Oriented Profiles
+Post-Quantum Readiness
+```
+
+La siguiente entrega continuará con:
+
+```text id="6989cs"
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 16
+
+- Certificate and PKI architecture
+- Certificate authorities
+- Trust stores
+- Certificate profiles
+- Certificate issuance
+- Certificate signing requests
+- Certificate lifecycle
+- Certificate rotation
+- Certificate revocation
+- CRL and OCSP
+- mTLS identity
+- Client certificate authentication
+- Service-to-service authentication
+- SPIFFE and SPIRE foundations
+- Workload certificates
+- Certificate pinning
+- Trust anchor rotation
+- Code signing certificates
+- Timestamping authorities
+- PKI audit and governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 16 de varias
+**Cobertura:** Secciones **1501–1600**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 15`
+
+---
+
+# 1501. Public Key Infrastructure Architecture
+
+VoltStack deberá incorporar una arquitectura central de Public Key Infrastructure para gestionar:
+
+* autoridades certificadoras;
+* certificados X.509;
+* identidades de servicio;
+* identidades de workload;
+* autenticación mTLS;
+* firmas de código;
+* sellado de tiempo;
+* trust stores;
+* revocación;
+* validación de cadenas;
+* políticas de confianza.
+
+La infraestructura PKI deberá mantenerse separada del código de aplicación y de los Controllers.
+
+---
+
+# 1502. PKI security goals
+
+La arquitectura deberá garantizar:
+
+* autenticidad de identidades;
+* integridad de certificados;
+* validación correcta de cadenas;
+* separación de autoridades;
+* emisión controlada;
+* rotación;
+* revocación oportuna;
+* aislamiento por tenant y entorno;
+* auditabilidad;
+* reducción de confianza implícita.
+
+---
+
+# 1503. PKI threat model
+
+El modelo deberá considerar:
+
+* compromiso de una CA;
+* emisión no autorizada;
+* certificados fraudulentos;
+* claves privadas robadas;
+* trust stores manipulados;
+* certificados expirados;
+* revocación no consultada;
+* validación incompleta de hostname;
+* path building inseguro;
+* algoritmo débil;
+* cross-tenant trust;
+* abuso de certificados cliente;
+* sustitución de trust anchors;
+* downgrade de TLS;
+* abuso de certificados de firma de código.
+
+---
+
+# 1504. PKI architectural components
+
+```text
+Certificate Request
+       ↓
+Identity and Policy Validation
+       ↓
+Certificate Profile Resolution
+       ↓
+Certificate Authority Selection
+       ↓
+Key Proof Validation
+       ↓
+Certificate Issuance
+       ↓
+Distribution
+       ↓
+Usage Monitoring
+       ↓
+Renewal or Rotation
+       ↓
+Revocation and Audit
+```
+
+---
+
+# 1505. PublicKeyInfrastructureService
+
+```php
+interface PublicKeyInfrastructureServiceInterface
+{
+    public function issue(
+        CertificateIssuanceRequest $request
+    ): IssuedCertificate;
+
+    public function renew(
+        CertificateRenewalRequest $request
+    ): IssuedCertificate;
+
+    public function revoke(
+        CertificateReference $certificate,
+        CertificateRevocationReason $reason
+    ): CertificateRevocationResult;
+
+    public function validate(
+        PresentedCertificate $certificate,
+        CertificateValidationContext $context
+    ): CertificateValidationResult;
+}
+```
+
+---
+
+# 1506. Certificate authority hierarchy
+
+VoltStack deberá soportar jerarquías compuestas por:
+
+* offline root CA;
+* intermediate CAs;
+* issuing CAs;
+* tenant-specific CAs;
+* workload CAs;
+* code-signing CAs;
+* recovery authorities.
+
+---
+
+# 1507. Root certificate authority
+
+La root CA deberá:
+
+* permanecer offline cuando sea viable;
+* utilizarse únicamente para firmar intermediarias;
+* residir en HSM;
+* requerir quorum operacional;
+* poseer procedimientos de recuperación;
+* mantenerse fuera del tráfico ordinario.
+
+---
+
+# 1508. Intermediate certificate authority
+
+Una intermediate CA deberá separar dominios de confianza como:
+
+* producción;
+* desarrollo;
+* workloads;
+* usuarios;
+* dispositivos;
+* firma de código;
+* tenants regulados.
+
+---
+
+# 1509. Issuing certificate authority
+
+Una issuing CA deberá emitir certificados finales bajo políticas limitadas y perfiles explícitos.
+
+---
+
+# 1510. CertificateAuthorityDefinition
+
+```php
+final readonly class CertificateAuthorityDefinition
+{
+    public function __construct(
+        public string $authorityId,
+        public string $name,
+        public CertificateAuthorityType $type,
+        public CertificateAuthorityState $state,
+        public CertificateReference $certificate,
+        public KeyReference $signingKey,
+        public array $allowedProfiles,
+        public ?string $parentAuthorityId,
+        public string $trustDomain,
+    ) {
+    }
+}
+```
+
+---
+
+# 1511. CertificateAuthorityType
+
+```php
+enum CertificateAuthorityType: string
+{
+    case Root = 'root';
+    case Intermediate = 'intermediate';
+    case Issuing = 'issuing';
+    case Workload = 'workload';
+    case Device = 'device';
+    case CodeSigning = 'code_signing';
+    case Timestamping = 'timestamping';
+}
+```
+
+---
+
+# 1512. CertificateAuthorityState
+
+```php
+enum CertificateAuthorityState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Retiring = 'retiring';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1513. CA purpose separation
+
+Una CA no deberá emitir certificados para propósitos no incluidos expresamente en su política.
+
+Una CA de workloads no deberá emitir certificados para:
+
+* usuarios humanos;
+* firma de código;
+* correo;
+* documentos;
+* certificados públicos web.
+
+---
+
+# 1514. CA private key protection
+
+Las claves privadas de CA deberán:
+
+* ser non-exportable;
+* residir preferentemente en HSM;
+* requerir autorización reforzada;
+* tener controles duales;
+* emitir auditoría por cada uso;
+* rotarse bajo ceremonia controlada.
+
+---
+
+# 1515. Certificate profile architecture
+
+Todo certificado deberá emitirse a partir de un perfil versionado.
+
+---
+
+# 1516. CertificateProfile
+
+```php
+final readonly class CertificateProfile
+{
+    public function __construct(
+        public string $profileId,
+        public int $version,
+        public string $name,
+        public CertificatePurpose $purpose,
+        public DateInterval $maximumLifetime,
+        public array $allowedSubjectAttributes,
+        public array $requiredExtensions,
+        public array $allowedKeyAlgorithms,
+        public array $allowedSignatureAlgorithms,
+        public bool $subjectAlternativeNameRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 1517. CertificatePurpose
+
+```php
+enum CertificatePurpose: string
+{
+    case ServerAuthentication = 'server_authentication';
+    case ClientAuthentication = 'client_authentication';
+    case MutualTls = 'mutual_tls';
+    case WorkloadIdentity = 'workload_identity';
+    case DeviceIdentity = 'device_identity';
+    case CodeSigning = 'code_signing';
+    case DocumentSigning = 'document_signing';
+    case Timestamping = 'timestamping';
+    case EmailProtection = 'email_protection';
+}
+```
+
+---
+
+# 1518. Certificate profile controls
+
+Un perfil deberá definir:
+
+* Extended Key Usage;
+* Key Usage;
+* Subject Alternative Names;
+* basic constraints;
+* path length;
+* name constraints;
+* algorithm;
+* key size;
+* validez máxima;
+* política de revocación.
+
+---
+
+# 1519. Extended Key Usage restrictions
+
+VoltStack deberá validar que el certificado posea el EKU correcto para la operación solicitada.
+
+Un certificado de server authentication no deberá aceptarse automáticamente como client authentication.
+
+---
+
+# 1520. Key Usage restrictions
+
+La validación deberá comprobar usos como:
+
+* digitalSignature;
+* keyEncipherment;
+* keyAgreement;
+* keyCertSign;
+* cRLSign;
+* contentCommitment.
+
+---
+
+# 1521. Certificate signing request
+
+La emisión podrá iniciarse mediante un Certificate Signing Request.
+
+---
+
+# 1522. CertificateSigningRequest
+
+```php
+final readonly class CertificateSigningRequest
+{
+    public function __construct(
+        public string $encodedRequest,
+        public string $publicKeyAlgorithm,
+        public string $signatureAlgorithm,
+        public array $requestedSubjectAttributes,
+        public array $requestedExtensions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1523. CSR validation
+
+La validación deberá comprobar:
+
+* estructura ASN.1;
+* firma del CSR;
+* proof of possession;
+* algoritmo permitido;
+* tamaño de clave;
+* extensiones solicitadas;
+* identidad solicitante;
+* tenant;
+* perfil.
+
+---
+
+# 1524. CSR extension filtering
+
+Las extensiones solicitadas no deberán copiarse directamente al certificado.
+
+La CA deberá reconstruirlas desde la policy.
+
+---
+
+# 1525. Subject validation
+
+Los datos del Subject deberán derivarse de fuentes confiables y no únicamente de input del solicitante.
+
+---
+
+# 1526. Subject Alternative Name
+
+SAN deberá utilizarse para representar identidades modernas como:
+
+* DNS names;
+* IP addresses;
+* URI identities;
+* email identities;
+* SPIFFE IDs;
+* device identifiers.
+
+---
+
+# 1527. Common Name limitations
+
+El Common Name no deberá utilizarse como sustituto de SAN para validación de identidad de red.
+
+---
+
+# 1528. Certificate issuance request
+
+```php
+final readonly class CertificateIssuanceRequest
+{
+    public function __construct(
+        public string $requestId,
+        public string $tenantId,
+        public IdentityIdentifier|string $subject,
+        public string $profileId,
+        public CertificateSigningRequest $csr,
+        public DateInterval $requestedLifetime,
+        public array $requestedNames,
+        public CertificateIssuanceContext $context,
+    ) {
+    }
+}
+```
+
+---
+
+# 1529. Certificate issuance policy
+
+```php
+interface CertificateIssuancePolicyInterface
+{
+    public function evaluate(
+        CertificateIssuanceRequest $request
+    ): CertificateIssuanceDecision;
+}
+```
+
+---
+
+# 1530. CertificateIssuanceDecision
+
+```php
+final readonly class CertificateIssuanceDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public string $authorityId,
+        public string $profileId,
+        public DateInterval $approvedLifetime,
+        public array $approvedNames,
+        public array $requiredApprovals,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1531. Proof of possession
+
+La CA deberá verificar que el solicitante controla la clave privada correspondiente a la clave pública del CSR.
+
+---
+
+# 1532. IssuedCertificate
+
+```php
+final readonly class IssuedCertificate
+{
+    public function __construct(
+        public CertificateReference $reference,
+        public string $encodedCertificate,
+        public array $certificateChain,
+        public DateTimeImmutable $notBefore,
+        public DateTimeImmutable $notAfter,
+        public string $serialNumber,
+        public string $fingerprint,
+        public string $profileId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1533. CertificateReference
+
+```php
+final readonly class CertificateReference
+{
+    public function __construct(
+        public string $certificateId,
+        public string $serialNumber,
+        public string $authorityId,
+        public string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1534. Certificate serial numbers
+
+Los serial numbers deberán:
+
+* ser únicos dentro de la CA;
+* poseer entropía suficiente;
+* no exponer secuencias sensibles;
+* soportar indexación de revocación;
+* conservarse como metadata auditable.
+
+---
+
+# 1535. Certificate lifetime policy
+
+La validez deberá reducirse conforme aumente:
+
+* sensibilidad;
+* exposición;
+* automatización;
+* alcance;
+* privilegio.
+
+Los certificados de workload deberán tener vidas significativamente menores que certificados de infraestructura estática.
+
+---
+
+# 1536. Backdating restrictions
+
+La fecha `notBefore` podrá incluir una tolerancia mínima para clock skew, pero no deberá utilizar backdating amplio.
+
+---
+
+# 1537. Certificate distribution
+
+La distribución deberá:
+
+* proteger la integridad;
+* usar canales autenticados;
+* evitar exponer private keys;
+* confirmar identidad del receptor;
+* registrar entrega.
+
+---
+
+# 1538. Private key generation models
+
+VoltStack deberá soportar:
+
+* generación local;
+* generación dentro de HSM;
+* generación dentro de TPM;
+* generación en KMS;
+* generación mediante agente de workload.
+
+---
+
+# 1539. Preferred private key model
+
+Siempre que sea posible, la clave privada deberá generarse y permanecer en el componente que la utilizará.
+
+---
+
+# 1540. Certificate lifecycle
+
+```php
+enum CertificateLifecycleState: string
+{
+    case Requested = 'requested';
+    case Issued = 'issued';
+    case Active = 'active';
+    case RenewalPending = 'renewal_pending';
+    case Rotating = 'rotating';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1541. Certificate inventory
+
+VoltStack deberá mantener inventario de:
+
+* certificado;
+* serial;
+* subject;
+* SAN;
+* issuer;
+* owner;
+* tenant;
+* resource;
+* purpose;
+* expiration;
+* state;
+* key location.
+
+---
+
+# 1542. Certificate discovery
+
+El sistema podrá descubrir certificados en:
+
+* load balancers;
+* web servers;
+* API gateways;
+* Kubernetes Secrets;
+* service meshes;
+* databases;
+* object storage;
+* repositories;
+* devices.
+
+---
+
+# 1543. Unknown certificate detection
+
+Todo certificado no registrado pero encontrado en infraestructura administrada deberá generar una finding.
+
+---
+
+# 1544. Certificate ownership
+
+Cada certificado deberá tener:
+
+* owner técnico;
+* owner de negocio cuando aplique;
+* recurso asociado;
+* mecanismo de renovación;
+* contacto de incidente.
+
+---
+
+# 1545. Certificate renewal
+
+La renovación deberá iniciarse antes de la expiración mediante una ventana definida por policy.
+
+---
+
+# 1546. CertificateRenewalRequest
+
+```php
+final readonly class CertificateRenewalRequest
+{
+    public function __construct(
+        public CertificateReference $currentCertificate,
+        public CertificateSigningRequest $newCsr,
+        public array $requestedNames,
+        public CertificateRenewalReason $reason,
+    ) {
+    }
+}
+```
+
+---
+
+# 1547. CertificateRenewalReason
+
+```php
+enum CertificateRenewalReason: string
+{
+    case Scheduled = 'scheduled';
+    case ExpirationApproaching = 'expiration_approaching';
+    case KeyRotation = 'key_rotation';
+    case ProfileMigration = 'profile_migration';
+    case AlgorithmMigration = 'algorithm_migration';
+    case IncidentResponse = 'incident_response';
+}
+```
+
+---
+
+# 1548. Renewal authorization
+
+Renovar un certificado no deberá omitir:
+
+* validación de identidad;
+* validación de ownership;
+* policy vigente;
+* entitlement actual;
+* SAN actuales;
+* estado de la CA.
+
+---
+
+# 1549. Certificate key rotation
+
+La renovación deberá preferir una nueva key pair cuando:
+
+* el certificado expira;
+* cambia de algoritmo;
+* existe sospecha de exposición;
+* la policy lo exige;
+* el recurso cambia de owner.
+
+---
+
+# 1550. Overlapping certificate rotation
+
+VoltStack deberá permitir una ventana de coexistencia para:
+
+1. emitir nuevo certificado;
+2. distribuirlo;
+3. activar confianza;
+4. migrar tráfico;
+5. retirar el anterior;
+6. validar ausencia de uso.
+
+---
+
+# 1551. Zero-downtime certificate rotation
+
+La rotación automatizada deberá evitar interrupciones mediante:
+
+* dual certificate support;
+* trust overlap;
+* hot reload;
+* health verification;
+* rollback controlado.
+
+---
+
+# 1552. Certificate revocation
+
+Un certificado deberá revocarse cuando:
+
+* la clave privada se comprometa;
+* el subject deje de ser válido;
+* cambie el ownership;
+* se retire el workload;
+* exista emisión incorrecta;
+* se comprometa la CA;
+* se incumpla policy.
+
+---
+
+# 1553. CertificateRevocationReason
+
+```php
+enum CertificateRevocationReason: string
+{
+    case Unspecified = 'unspecified';
+    case KeyCompromise = 'key_compromise';
+    case CaCompromise = 'ca_compromise';
+    case AffiliationChanged = 'affiliation_changed';
+    case Superseded = 'superseded';
+    case CessationOfOperation = 'cessation_of_operation';
+    case CertificateHold = 'certificate_hold';
+    case PrivilegeWithdrawn = 'privilege_withdrawn';
+    case IssuanceError = 'issuance_error';
+}
+```
+
+---
+
+# 1554. CertificateRevocationRecord
+
+```php
+final readonly class CertificateRevocationRecord
+{
+    public function __construct(
+        public CertificateReference $certificate,
+        public CertificateRevocationReason $reason,
+        public DateTimeImmutable $revokedAt,
+        public IdentityIdentifier|string $revokedBy,
+        public ?DateTimeImmutable $invalidityDate,
+    ) {
+    }
+}
+```
+
+---
+
+# 1555. Revocation publication
+
+La revocación deberá publicarse mediante mecanismos compatibles con el perfil, como:
+
+* Certificate Revocation Lists;
+* Online Certificate Status Protocol;
+* internal revocation registries;
+* service mesh control planes.
+
+---
+
+# 1556. Certificate Revocation List
+
+```php
+final readonly class CertificateRevocationList
+{
+    public function __construct(
+        public string $issuerId,
+        public int $crlNumber,
+        public DateTimeImmutable $thisUpdate,
+        public DateTimeImmutable $nextUpdate,
+        public array $revokedCertificates,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1557. CRL generation
+
+Las CRLs deberán:
+
+* firmarse;
+* versionarse;
+* incluir número secuencial;
+* publicarse de forma autenticada;
+* regenerarse al ocurrir revocaciones críticas;
+* mantener intervalos apropiados.
+
+---
+
+# 1558. Delta CRLs
+
+VoltStack podrá soportar delta CRLs para reducir el tamaño de actualizaciones frecuentes.
+
+---
+
+# 1559. OCSP architecture
+
+```php
+interface OcspResponderInterface
+{
+    public function respond(
+        OcspRequest $request
+    ): OcspResponse;
+}
+```
+
+---
+
+# 1560. OCSP response states
+
+```php
+enum OcspCertificateStatus: string
+{
+    case Good = 'good';
+    case Revoked = 'revoked';
+    case Unknown = 'unknown';
+}
+```
+
+---
+
+# 1561. OCSP responder security
+
+El responder deberá:
+
+* firmar respuestas;
+* limitar replay;
+* usar tiempos de validez cortos;
+* proteger su signing key;
+* registrar consultas anómalas;
+* evitar filtrar metadata innecesaria.
+
+---
+
+# 1562. OCSP stapling
+
+Para servicios TLS, VoltStack deberá favorecer OCSP stapling cuando el entorno y los clientes lo soporten.
+
+---
+
+# 1563. Revocation checking policy
+
+```php
+enum RevocationCheckingMode: string
+{
+    case Required = 'required';
+    case SoftFail = 'soft_fail';
+    case CachedOnly = 'cached_only';
+    case Disabled = 'disabled';
+}
+```
+
+---
+
+# 1564. Revocation fail behavior
+
+Para certificados privilegiados o internos de alto riesgo, la indisponibilidad del mecanismo de revocación deberá tender a fail-closed.
+
+---
+
+# 1565. Certificate validation pipeline
+
+```text
+Parse Certificate
+      ↓
+Validate Encoding
+      ↓
+Build Trust Path
+      ↓
+Validate Signatures
+      ↓
+Validate Time
+      ↓
+Validate Basic Constraints
+      ↓
+Validate Key Usage and EKU
+      ↓
+Validate Names
+      ↓
+Validate Policies
+      ↓
+Check Revocation
+      ↓
+Bind to Runtime Identity
+```
+
+---
+
+# 1566. CertificateValidationContext
+
+```php
+final readonly class CertificateValidationContext
+{
+    public function __construct(
+        public string $tenantId,
+        public CertificatePurpose $expectedPurpose,
+        public array $expectedNames,
+        public string $trustStoreId,
+        public RevocationCheckingMode $revocationMode,
+        public DateTimeImmutable $validationTime,
+    ) {
+    }
+}
+```
+
+---
+
+# 1567. CertificateValidationResult
+
+```php
+final readonly class CertificateValidationResult
+{
+    public function __construct(
+        public CertificateValidationStatus $status,
+        public ?CertificateIdentity $identity,
+        public array $validatedChain,
+        public array $warnings,
+        public array $failures,
+    ) {
+    }
+}
+```
+
+---
+
+# 1568. CertificateValidationStatus
+
+```php
+enum CertificateValidationStatus: string
+{
+    case Valid = 'valid';
+    case Invalid = 'invalid';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Untrusted = 'untrusted';
+    case PolicyRejected = 'policy_rejected';
+    case Indeterminate = 'indeterminate';
+}
+```
+
+---
+
+# 1569. Trust store architecture
+
+VoltStack deberá administrar trust stores como recursos versionados y gobernados.
+
+---
+
+# 1570. TrustStore
+
+```php
+final readonly class TrustStore
+{
+    public function __construct(
+        public string $trustStoreId,
+        public string $tenantId,
+        public string $environment,
+        public array $trustAnchors,
+        public array $intermediates,
+        public int $version,
+        public TrustStoreState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1571. TrustStoreState
+
+```php
+enum TrustStoreState: string
+{
+    case Draft = 'draft';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1572. Trust anchor governance
+
+Agregar o retirar un trust anchor deberá requerir:
+
+* aprobación;
+* validación de fingerprint;
+* verificación fuera de banda;
+* evaluación de impacto;
+* versión nueva;
+* auditoría.
+
+---
+
+# 1573. Trust anchor pinning
+
+Los trust anchors críticos deberán identificarse mediante fingerprints esperados y metadata protegida.
+
+---
+
+# 1574. Trust store isolation
+
+Deberán existir trust stores separados para:
+
+* producción;
+* desarrollo;
+* test;
+* tenants;
+* workloads;
+* integraciones externas;
+* code signing.
+
+---
+
+# 1575. Cross-environment trust prohibition
+
+Producción no deberá confiar automáticamente en CAs de desarrollo o testing.
+
+---
+
+# 1576. Trust anchor rotation
+
+La rotación deberá permitir coexistencia temporal entre:
+
+* anchor anterior;
+* anchor nuevo;
+* cadenas emitidas por ambas jerarquías.
+
+---
+
+# 1577. Trust rotation stages
+
+```text
+Create New Trust Anchor
+      ↓
+Distribute New Anchor
+      ↓
+Enable Dual Trust
+      ↓
+Issue from New Hierarchy
+      ↓
+Migrate Certificates
+      ↓
+Remove Old Anchor
+      ↓
+Monitor Validation Failures
+```
+
+---
+
+# 1578. Trust store rollback
+
+Toda actualización deberá conservar capacidad de rollback mientras no exista evidencia de compromiso del anchor anterior.
+
+---
+
+# 1579. Mutual TLS architecture
+
+VoltStack deberá soportar mTLS para autenticar ambos extremos de una conexión.
+
+---
+
+# 1580. MutualTlsIdentity
+
+```php
+final readonly class MutualTlsIdentity
+{
+    public function __construct(
+        public string $certificateFingerprint,
+        public string $subject,
+        public array $subjectAlternativeNames,
+        public string $issuer,
+        public string $trustDomain,
+        public string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1581. mTLS authentication flow
+
+```text
+TLS Handshake
+      ↓
+Peer Certificate Presentation
+      ↓
+Chain Validation
+      ↓
+Revocation Validation
+      ↓
+Name and Purpose Validation
+      ↓
+Certificate-to-Identity Mapping
+      ↓
+Authorization Policy
+      ↓
+Secure Channel Established
+```
+
+---
+
+# 1582. Client certificate authentication
+
+Un certificado cliente deberá mapearse a una identidad mediante datos estables y gobernados.
+
+---
+
+# 1583. ClientCertificateIdentityMapper
+
+```php
+interface ClientCertificateIdentityMapperInterface
+{
+    public function map(
+        PresentedCertificate $certificate,
+        CertificateValidationResult $validation
+    ): ClientCertificateIdentityMappingResult;
+}
+```
+
+---
+
+# 1584. Unsafe certificate mapping prohibition
+
+No deberá mapearse una identidad únicamente mediante:
+
+* Common Name ambiguo;
+* display name;
+* email no verificado;
+* subject string parcial;
+* issuer no confiable.
+
+---
+
+# 1585. Certificate-to-identity binding
+
+El binding deberá considerar:
+
+* issuer;
+* serial;
+* SAN URI;
+* trust domain;
+* certificate profile;
+* tenant;
+* lifecycle state.
+
+---
+
+# 1586. Service-to-service authentication
+
+Los servicios internos deberán autenticarse mediante identidades propias y no compartir credenciales humanas.
+
+---
+
+# 1587. ServiceIdentity
+
+```php
+final readonly class ServiceIdentity
+{
+    public function __construct(
+        public string $serviceIdentityId,
+        public string $tenantId,
+        public string $serviceName,
+        public string $environment,
+        public string $trustDomain,
+        public array $allowedAudiences,
+    ) {
+    }
+}
+```
+
+---
+
+# 1588. Service identity authorization
+
+La validación del certificado deberá completarse con autorización basada en:
+
+* servicio;
+* namespace;
+* tenant;
+* environment;
+* operation;
+* destination;
+* audience.
+
+---
+
+# 1589. SPIFFE foundations
+
+VoltStack podrá soportar SPIFFE para representar identidades de workloads mediante URI SAN.
+
+Formato conceptual:
+
+```text
+spiffe://trust-domain/path/to/workload
+```
+
+---
+
+# 1590. SpiffeIdentity
+
+```php
+final readonly class SpiffeIdentity
+{
+    public function __construct(
+        public string $trustDomain,
+        public string $path,
+        public string $spiffeId,
+        public string $tenantId,
+        public array $selectors,
+    ) {
+    }
+}
+```
+
+---
+
+# 1591. SPIFFE ID validation
+
+Un SPIFFE ID deberá validar:
+
+* esquema URI;
+* trust domain;
+* path autorizado;
+* tenant binding;
+* selector mapping;
+* workload state.
+
+---
+
+# 1592. SPIRE integration foundations
+
+VoltStack podrá integrarse con SPIRE para:
+
+* node attestation;
+* workload attestation;
+* SVID issuance;
+* trust bundle distribution;
+* rotation;
+* workload identity discovery.
+
+---
+
+# 1593. Workload attestation
+
+Antes de emitir identidad, el sistema deberá validar atributos como:
+
+* cluster;
+* namespace;
+* service account;
+* process;
+* node;
+* image;
+* deployment;
+* environment.
+
+---
+
+# 1594. Workload certificate
+
+```php
+final readonly class WorkloadCertificate
+{
+    public function __construct(
+        public string $spiffeId,
+        public IssuedCertificate $certificate,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public array $attestationEvidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 1595. Short-lived workload certificates
+
+Los certificados de workload deberán:
+
+* tener vida corta;
+* rotarse automáticamente;
+* no depender de renovación manual;
+* utilizar claves efímeras cuando sea viable;
+* revocarse al desaparecer el workload.
+
+---
+
+# 1596. Certificate pinning
+
+El pinning podrá emplearse en contextos controlados, pero deberá diseñarse con:
+
+* múltiples pins;
+* backup keys;
+* fecha de expiración;
+* rotation plan;
+* recovery mechanism;
+* observabilidad.
+
+El pinning rígido sin plan de rotación deberá evitarse.
+
+---
+
+# 1597. Code signing certificates
+
+Los certificados de firma de código deberán:
+
+* usar claves protegidas por hardware;
+* requerir autorización reforzada;
+* limitarse a pipelines confiables;
+* registrar cada firma;
+* prohibir exportación de clave;
+* soportar revocación rápida.
+
+---
+
+# 1598. Timestamping authority
+
+Una Timestamping Authority deberá permitir demostrar que una firma existía durante la validez del certificado firmante.
+
+```php
+interface TimestampingAuthorityInterface
+{
+    public function timestamp(
+        string $artifactDigest,
+        TimestampingContext $context
+    ): TrustedTimestampToken;
+}
+```
+
+---
+
+# 1599. PKI audit events
+
+Eventos recomendados:
+
+* `CertificateRequested`;
+* `CertificateIssued`;
+* `CertificateRenewed`;
+* `CertificateRotationStarted`;
+* `CertificateRotationCompleted`;
+* `CertificateRevoked`;
+* `CertificateExpired`;
+* `CertificateValidationFailed`;
+* `UnknownCertificateDetected`;
+* `CertificateAuthorityActivated`;
+* `CertificateAuthorityCompromised`;
+* `TrustAnchorAdded`;
+* `TrustAnchorRemoved`;
+* `TrustStoreUpdated`;
+* `MutualTlsAuthenticationSucceeded`;
+* `MutualTlsAuthenticationFailed`;
+* `WorkloadCertificateIssued`;
+* `WorkloadAttestationFailed`;
+* `CodeArtifactSigned`;
+* `TrustedTimestampIssued`.
+
+---
+
+# 1600. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Public Key Infrastructure Architecture
+Certificate Authority Hierarchies
+Offline Root Authorities
+Intermediate and Issuing CAs
+CA Purpose Separation
+CA Key Protection
+Certificate Profiles
+Key Usage and Extended Key Usage
+Certificate Signing Requests
+Proof of Possession
+Subject and SAN Validation
+Certificate Issuance Policies
+Certificate Inventory
+Certificate Ownership
+Certificate Renewal
+Certificate Key Rotation
+Zero-Downtime Certificate Rotation
+Certificate Revocation
+CRL Architecture
+OCSP Architecture
+Revocation Checking Policies
+Certificate Validation Pipeline
+Trust Store Architecture
+Trust Anchor Governance
+Trust Anchor Rotation
+Mutual TLS Authentication
+Client Certificate Identity Mapping
+Service-to-Service Authentication
+SPIFFE Identity Foundations
+SPIRE Integration Foundations
+Workload Attestation
+Short-Lived Workload Certificates
+Certificate Pinning Governance
+Code Signing Certificates
+Timestamping Authorities
+PKI Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 17
+
+- Secrets management architecture
+- Secret classification
+- Secret stores
+- Secret references
+- Dynamic secrets
+- Secret leasing
+- Secret injection
+- Secret zeroization
+- Secret scanning
+- Secret exposure detection
+- Repository secret protection
+- CI/CD secret security
+- Environment variable risks
+- Configuration secret separation
+- Secret rotation orchestration
+- Secret revocation
+- Secret recovery
+- Backup secret protection
+- Secret access auditing
+- Secret governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 17 de varias
+**Cobertura:** Secciones **1601–1700**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 16`
+
+---
+
+# 1601. Secrets Management Architecture
+
+VoltStack deberá incorporar una arquitectura centralizada de gestión de secretos para proteger:
+
+* contraseñas de infraestructura;
+* API keys;
+* tokens de integración;
+* claves privadas;
+* credenciales de bases de datos;
+* certificados y material asociado;
+* secretos de CI/CD;
+* credenciales de service accounts;
+* secretos de workloads;
+* material de recuperación.
+
+Los secretos no deberán administrarse como configuración ordinaria.
+
+---
+
+# 1602. Secrets management security goals
+
+La arquitectura deberá garantizar:
+
+* mínima exposición;
+* acceso por referencia;
+* entrega temporal;
+* rotación;
+* revocación;
+* separación por tenant;
+* trazabilidad;
+* clasificación;
+* detección de filtraciones;
+* recuperación controlada.
+
+---
+
+# 1603. Secrets threat model
+
+El modelo deberá considerar:
+
+* secretos hardcoded;
+* exposición en logs;
+* filtración en repositorios;
+* variables de entorno visibles;
+* secretos persistidos en imágenes;
+* credenciales compartidas;
+* acceso excesivo;
+* secretos huérfanos;
+* rotación fallida;
+* backup inseguro;
+* lectura desde memoria;
+* inyección en procesos no autorizados;
+* abuso interno;
+* acceso cross-tenant.
+
+---
+
+# 1604. Secrets architecture components
+
+```text
+Secret Producer
+      ↓
+Secret Classification
+      ↓
+Secret Policy Evaluation
+      ↓
+Secret Store
+      ↓
+Opaque Reference
+      ↓
+Lease or Injection
+      ↓
+Usage Monitoring
+      ↓
+Rotation / Revocation
+      ↓
+Audit and Exposure Detection
+```
+
+---
+
+# 1605. SecretsManagementService
+
+```php
+interface SecretsManagementServiceInterface
+{
+    public function store(
+        SecretMaterial $secret,
+        SecretStorageContext $context
+    ): SecretReference;
+
+    public function resolve(
+        SecretReference $reference,
+        SecretAccessContext $context
+    ): SecretLease;
+
+    public function rotate(
+        SecretReference $reference,
+        SecretRotationPolicy $policy
+    ): SecretRotationResult;
+
+    public function revoke(
+        SecretReference $reference,
+        SecretRevocationReason $reason
+    ): SecretRevocationResult;
+}
+```
+
+---
+
+# 1606. SecretMaterial
+
+```php
+final readonly class SecretMaterial
+{
+    public function __construct(
+        public SensitiveValue $value,
+        public SecretType $type,
+        public SecretClassification $classification,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 1607. SecretType
+
+```php
+enum SecretType: string
+{
+    case Password = 'password';
+    case ApiKey = 'api_key';
+    case AccessToken = 'access_token';
+    case RefreshToken = 'refresh_token';
+    case PrivateKey = 'private_key';
+    case CertificateBundle = 'certificate_bundle';
+    case DatabaseCredential = 'database_credential';
+    case SshCredential = 'ssh_credential';
+    case WebhookSecret = 'webhook_secret';
+    case RecoverySecret = 'recovery_secret';
+    case EncryptionKeyMaterial = 'encryption_key_material';
+}
+```
+
+---
+
+# 1608. Secret classification
+
+Toda entrada deberá clasificarse antes de almacenarse.
+
+---
+
+# 1609. SecretClassification
+
+```php
+enum SecretClassification: string
+{
+    case Internal = 'internal';
+    case Sensitive = 'sensitive';
+    case Restricted = 'restricted';
+    case Privileged = 'privileged';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 1610. Classification factors
+
+La clasificación deberá considerar:
+
+* impacto de exposición;
+* alcance;
+* privilegios;
+* tenant;
+* entorno;
+* capacidad de rotación;
+* uso humano o no humano;
+* regulación;
+* persistencia.
+
+---
+
+# 1611. Secret ownership
+
+Todo secreto deberá tener:
+
+* owner técnico;
+* owner de negocio cuando aplique;
+* tenant;
+* propósito;
+* consumidor;
+* sistema origen;
+* política de rotación;
+* fecha de revisión.
+
+---
+
+# 1612. SecretRecord
+
+```php
+final readonly class SecretRecord
+{
+    public function __construct(
+        public string $secretId,
+        public string $tenantId,
+        public SecretType $type,
+        public SecretClassification $classification,
+        public IdentityIdentifier|string $owner,
+        public string $purpose,
+        public SecretLifecycleState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1613. SecretLifecycleState
+
+```php
+enum SecretLifecycleState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Expiring = 'expiring';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+    case Destroyed = 'destroyed';
+}
+```
+
+---
+
+# 1614. Secret store abstraction
+
+VoltStack deberá soportar múltiples proveedores sin acoplar el dominio a uno específico.
+
+---
+
+# 1615. SecretStore
+
+```php
+interface SecretStoreInterface
+{
+    public function put(
+        SecretMaterial $secret,
+        SecretStoreContext $context
+    ): SecretReference;
+
+    public function lease(
+        SecretReference $reference,
+        SecretLeaseContext $context
+    ): SecretLease;
+
+    public function delete(
+        SecretReference $reference
+    ): void;
+}
+```
+
+---
+
+# 1616. Supported secret stores
+
+La arquitectura podrá integrar:
+
+* Vault;
+* cloud secret managers;
+* KMS-backed stores;
+* HSM-backed stores;
+* operating system keyrings;
+* Kubernetes secret providers;
+* encrypted local development stores.
+
+---
+
+# 1617. Secret store selection policy
+
+La selección deberá considerar:
+
+* entorno;
+* tenant;
+* clasificación;
+* latencia;
+* disponibilidad;
+* región;
+* compliance;
+* hardware protection;
+* rotation support.
+
+---
+
+# 1618. SecretReference
+
+```php
+final readonly class SecretReference
+{
+    public function __construct(
+        public string $secretId,
+        public string $provider,
+        public string $tenantId,
+        public ?string $versionId,
+        public string $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 1619. Opaque secret references
+
+La referencia no deberá contener:
+
+* valor secreto;
+* credencial embebida;
+* token;
+* información reversible;
+* metadatos innecesarios.
+
+---
+
+# 1620. Reference-only domain model
+
+Controllers, Commands y Services deberán transportar referencias y no secretos cuando no sea indispensable resolverlos.
+
+---
+
+# 1621. Secret access policy
+
+```php
+interface SecretAccessPolicyInterface
+{
+    public function evaluate(
+        SecretReference $reference,
+        SecretAccessContext $context
+    ): SecretAccessDecision;
+}
+```
+
+---
+
+# 1622. SecretAccessDecision
+
+```php
+final readonly class SecretAccessDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public DateInterval $maximumLeaseDuration,
+        public bool $stepUpRequired,
+        public bool $deviceTrustRequired,
+        public bool $approvalRequired,
+        public array $restrictions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1623. Secret access context
+
+La evaluación deberá considerar:
+
+* identidad;
+* workload;
+* tenant;
+* propósito;
+* recurso;
+* entorno;
+* assurance;
+* device posture;
+* horario;
+* riesgo;
+* ticket;
+* sesión privilegiada.
+
+---
+
+# 1624. Least privilege secret access
+
+El acceso deberá limitarse por:
+
+* secreto;
+* versión;
+* operación;
+* duración;
+* entorno;
+* workload;
+* audiencia;
+* recurso.
+
+---
+
+# 1625. Secret leasing
+
+La entrega preferida será mediante leases de corta duración.
+
+---
+
+# 1626. SecretLease
+
+```php
+final readonly class SecretLease
+{
+    public function __construct(
+        public string $leaseId,
+        public SecretReference $reference,
+        public SensitiveValue $value,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public SecretLeaseState $state,
+        public array $restrictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1627. SecretLeaseState
+
+```php
+enum SecretLeaseState: string
+{
+    case Active = 'active';
+    case Renewing = 'renewing';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Returned = 'returned';
+}
+```
+
+---
+
+# 1628. Lease duration
+
+La duración deberá ser la mínima compatible con el caso de uso.
+
+---
+
+# 1629. Lease renewal
+
+La renovación deberá reevaluar:
+
+* identidad;
+* workload;
+* riesgo;
+* propósito;
+* estado del secreto;
+* entitlement;
+* tenant;
+* policy vigente.
+
+---
+
+# 1630. Lease revocation
+
+VoltStack deberá poder revocar un lease sin esperar su expiración natural.
+
+---
+
+# 1631. Dynamic secrets
+
+El framework deberá favorecer secretos generados bajo demanda.
+
+Ejemplos:
+
+* credenciales temporales de base de datos;
+* tokens cloud;
+* certificados cortos;
+* credenciales SSH efímeras;
+* tokens de acceso scoped.
+
+---
+
+# 1632. DynamicSecretProvider
+
+```php
+interface DynamicSecretProviderInterface
+{
+    public function issue(
+        DynamicSecretRequest $request
+    ): DynamicSecretLease;
+
+    public function revoke(
+        DynamicSecretLease $lease
+    ): void;
+}
+```
+
+---
+
+# 1633. DynamicSecretRequest
+
+```php
+final readonly class DynamicSecretRequest
+{
+    public function __construct(
+        public string $tenantId,
+        public IdentityIdentifier|string $subject,
+        public string $resourceId,
+        public array $requestedCapabilities,
+        public DateInterval $requestedLifetime,
+        public DynamicSecretContext $context,
+    ) {
+    }
+}
+```
+
+---
+
+# 1634. Dynamic secret advantages
+
+Los secretos dinámicos reducen:
+
+* reutilización;
+* exposición prolongada;
+* distribución manual;
+* credenciales compartidas;
+* impacto de filtración.
+
+---
+
+# 1635. Dynamic database credentials
+
+Las credenciales de base de datos dinámicas deberán:
+
+* crear principal temporal;
+* limitar permisos;
+* limitar esquema;
+* limitar duración;
+* revocarse al expirar;
+* registrar consultas administrativas cuando aplique.
+
+---
+
+# 1636. Dynamic cloud credentials
+
+Las credenciales cloud temporales deberán limitar:
+
+* account;
+* role;
+* region;
+* service;
+* resource;
+* action;
+* duration.
+
+---
+
+# 1637. Secret injection architecture
+
+VoltStack deberá permitir inyectar secretos sin persistirlos innecesariamente.
+
+---
+
+# 1638. SecretInjectionService
+
+```php
+interface SecretInjectionServiceInterface
+{
+    public function inject(
+        SecretReference $reference,
+        SecretInjectionTarget $target,
+        SecretInjectionContext $context
+    ): SecretInjectionResult;
+}
+```
+
+---
+
+# 1639. Secret injection targets
+
+Se podrá inyectar en:
+
+* proceso;
+* archivo temporal;
+* memory-backed filesystem;
+* sidecar;
+* service mesh;
+* runtime container;
+* socket;
+* API request;
+* database connection factory.
+
+---
+
+# 1640. Preferred injection models
+
+Orden recomendado:
+
+1. brokered use sin exposición;
+2. in-memory injection;
+3. ephemeral file;
+4. environment variable solo cuando sea necesario.
+
+---
+
+# 1641. Brokered secret usage
+
+Cuando sea posible, el consumidor deberá pedir la operación y no recibir directamente el secreto.
+
+---
+
+# 1642. Environment variable risks
+
+Las variables de entorno pueden exponerse mediante:
+
+* process inspection;
+* crash dumps;
+* debug tools;
+* logs;
+* child processes;
+* platform metadata;
+* accidental diagnostics.
+
+---
+
+# 1643. Environment variable policy
+
+Su uso deberá:
+
+* ser explícito;
+* limitarse por entorno;
+* evitar secretos críticos cuando existan alternativas;
+* impedir logging;
+* limpiar el entorno de procesos hijos;
+* documentar la exposición.
+
+---
+
+# 1644. Ephemeral secret files
+
+Los archivos temporales deberán:
+
+* almacenarse en filesystem en memoria cuando sea viable;
+* usar permisos mínimos;
+* tener nombre no predecible;
+* eliminarse al finalizar;
+* no incluirse en backups;
+* no persistirse en imágenes.
+
+---
+
+# 1645. Secret zeroization
+
+VoltStack deberá minimizar el tiempo durante el cual un secreto permanece en memoria.
+
+---
+
+# 1646. SecretZeroizer
+
+```php
+interface SecretZeroizerInterface
+{
+    public function zeroize(
+        SensitiveValue $value
+    ): void;
+}
+```
+
+---
+
+# 1647. Zeroization limitations
+
+PHP no garantiza control absoluto sobre copias internas, garbage collection o optimizaciones del runtime.
+
+Por ello, VoltStack deberá complementar zeroization con:
+
+* vida útil corta;
+* menor número de copias;
+* tipos sensibles;
+* aislamiento de proceso;
+* brokered operations;
+* no serialización.
+
+---
+
+# 1648. SensitiveValue restrictions
+
+`SensitiveValue` deberá:
+
+* impedir conversión implícita a string;
+* prohibir serialización;
+* redactar `var_dump`;
+* evitar inclusión en excepciones;
+* exigir acceso explícito;
+* limitar clonación.
+
+---
+
+# 1649. Secret redaction
+
+VoltStack deberá registrar patrones conocidos para redactar secretos en:
+
+* logs;
+* traces;
+* exceptions;
+* profiler;
+* debug output;
+* HTTP dumps;
+* job payloads.
+
+---
+
+# 1650. SecretRedactionService
+
+```php
+interface SecretRedactionServiceInterface
+{
+    public function redact(
+        string|array $payload,
+        SecretRedactionContext $context
+    ): string|array;
+}
+```
+
+---
+
+# 1651. Redaction strategies
+
+Se podrán utilizar:
+
+* key-name matching;
+* schema metadata;
+* token pattern detection;
+* exact secret fingerprints;
+* structured field policies;
+* entropy heuristics.
+
+---
+
+# 1652. Redaction false confidence
+
+La redacción no deberá considerarse sustituto de evitar que el secreto llegue al sistema de logging.
+
+---
+
+# 1653. Configuration and secret separation
+
+La configuración deberá referenciar secretos, no contenerlos.
+
+Ejemplo recomendado:
+
+```php
+return [
+    'database' => [
+        'password' => Secret::reference('database.production.password'),
+    ],
+];
+```
+
+---
+
+# 1654. Secret configuration resolver
+
+```php
+interface SecretConfigurationResolverInterface
+{
+    public function resolve(
+        SecretReference $reference,
+        ConfigurationResolutionContext $context
+    ): SecretLease;
+}
+```
+
+---
+
+# 1655. Configuration cache restrictions
+
+Un secreto resuelto no deberá persistirse en:
+
+* cache de configuración;
+* archivos compilados;
+* manifests;
+* OPcache preload files;
+* build artifacts.
+
+---
+
+# 1656. Build-time versus runtime secrets
+
+VoltStack deberá distinguir:
+
+* secretos necesarios durante build;
+* secretos necesarios durante deploy;
+* secretos necesarios en runtime.
+
+---
+
+# 1657. Build secret policy
+
+Un secreto de build deberá:
+
+* montarse temporalmente;
+* no copiarse a capas;
+* no quedar en historial;
+* revocarse después;
+* limitarse al job.
+
+---
+
+# 1658. Container image protection
+
+No deberán incluirse secretos en:
+
+* Dockerfile;
+* image layers;
+* image labels;
+* build arguments persistentes;
+* package metadata;
+* startup scripts.
+
+---
+
+# 1659. CI/CD secret security
+
+Los pipelines deberán:
+
+* usar identidades federadas;
+* evitar credenciales permanentes;
+* limitar logs;
+* restringir forks;
+* separar entornos;
+* aplicar approvals;
+* rotar secretos tras incidentes.
+
+---
+
+# 1660. CiCdSecretPolicy
+
+```php
+final readonly class CiCdSecretPolicy
+{
+    public function __construct(
+        public bool $federationPreferred,
+        public DateInterval $maximumLeaseDuration,
+        public bool $protectedBranchRequired,
+        public bool $approvalRequired,
+        public bool $forkAccessDenied,
+        public array $allowedPipelines,
+    ) {
+    }
+}
+```
+
+---
+
+# 1661. Pull request secret protection
+
+Pipelines originados desde código no confiable no deberán recibir secretos privilegiados.
+
+---
+
+# 1662. Environment separation
+
+Los secretos de producción deberán estar aislados de:
+
+* desarrollo;
+* testing;
+* preview environments;
+* forks;
+* personal sandboxes.
+
+---
+
+# 1663. Repository secret protection
+
+VoltStack deberá incluir controles para impedir secretos en repositorios.
+
+---
+
+# 1664. RepositorySecretScanner
+
+```php
+interface RepositorySecretScannerInterface
+{
+    public function scan(
+        RepositorySnapshot $snapshot,
+        SecretScanningPolicy $policy
+    ): SecretScanningReport;
+}
+```
+
+---
+
+# 1665. Secret scanning scopes
+
+El scanner deberá analizar:
+
+* working tree;
+* staged changes;
+* commits;
+* branches;
+* tags;
+* pull requests;
+* release artifacts;
+* generated files;
+* Git history.
+
+---
+
+# 1666. Secret detection techniques
+
+Se deberán combinar:
+
+* patrones;
+* prefijos conocidos;
+* checksums;
+* entropy analysis;
+* provider validation;
+* contextual heuristics;
+* exact fingerprint matching.
+
+---
+
+# 1667. SecretScanningFinding
+
+```php
+final readonly class SecretScanningFinding
+{
+    public function __construct(
+        public string $findingId,
+        public SecretFindingType $type,
+        public string $location,
+        public int $line,
+        public SecretFindingSeverity $severity,
+        public string $fingerprint,
+        public bool $validated,
+    ) {
+    }
+}
+```
+
+---
+
+# 1668. SecretFindingSeverity
+
+```php
+enum SecretFindingSeverity: string
+{
+    case Informational = 'informational';
+    case Low = 'low';
+    case Medium = 'medium';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 1669. Validated secret detection
+
+Cuando sea seguro, el sistema podrá validar con el proveedor si una credencial sigue activa.
+
+La validación no deberá aumentar la exposición.
+
+---
+
+# 1670. Pre-commit scanning
+
+VoltStack deberá ofrecer integración para bloquear commits que contengan secretos.
+
+---
+
+# 1671. Server-side repository scanning
+
+La protección no deberá depender únicamente del desarrollador local.
+
+---
+
+# 1672. Historical secret exposure
+
+Eliminar un secreto del commit más reciente no elimina su exposición histórica.
+
+---
+
+# 1673. Repository exposure response
+
+Ante una filtración deberán ejecutarse:
+
+1. revocar o rotar;
+2. identificar uso;
+3. preservar evidencia;
+4. limpiar historial cuando corresponda;
+5. actualizar consumidores;
+6. revisar logs;
+7. cerrar incidente.
+
+---
+
+# 1674. Secret exposure detection
+
+VoltStack deberá detectar exposición en:
+
+* repositorios;
+* logs;
+* traces;
+* tickets;
+* chat;
+* artifacts;
+* object storage;
+* container registries;
+* backups;
+* dumps.
+
+---
+
+# 1675. SecretExposureDetector
+
+```php
+interface SecretExposureDetectorInterface
+{
+    public function analyze(
+        ExposureSource $source,
+        SecretExposureDetectionContext $context
+    ): SecretExposureReport;
+}
+```
+
+---
+
+# 1676. Secret fingerprinting
+
+El sistema podrá mantener fingerprints no reversibles para identificar secretos expuestos sin conservar el plaintext.
+
+---
+
+# 1677. Fingerprint key separation
+
+Los fingerprints keyed deberán utilizar una clave dedicada, separada de cifrado y MAC de aplicaciones.
+
+---
+
+# 1678. Secret exposure event
+
+```php
+final readonly class SecretExposureEvent
+{
+    public function __construct(
+        public string $eventId,
+        public ?SecretReference $secret,
+        public string $source,
+        public SecretExposureSeverity $severity,
+        public DateTimeImmutable $detectedAt,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 1679. Exposure severity
+
+La severidad deberá considerar:
+
+* secreto activo;
+* privilegio;
+* alcance;
+* entorno;
+* visibilidad;
+* tiempo expuesto;
+* uso detectado;
+* capacidad de revocación.
+
+---
+
+# 1680. Automated secret containment
+
+Para findings de alta confianza, el sistema podrá:
+
+* revocar;
+* rotar;
+* deshabilitar integración;
+* bloquear pipeline;
+* suspender workload;
+* abrir incidente;
+* notificar owner.
+
+---
+
+# 1681. Secret rotation orchestration
+
+La rotación deberá coordinar productor, store y consumidores.
+
+---
+
+# 1682. SecretRotationOrchestrator
+
+```php
+interface SecretRotationOrchestratorInterface
+{
+    public function plan(
+        SecretReference $reference,
+        SecretRotationContext $context
+    ): SecretRotationPlan;
+
+    public function execute(
+        SecretRotationPlan $plan
+    ): SecretRotationResult;
+}
+```
+
+---
+
+# 1683. SecretRotationPlan
+
+```php
+final readonly class SecretRotationPlan
+{
+    public function __construct(
+        public string $planId,
+        public SecretReference $currentSecret,
+        public array $consumers,
+        public array $stages,
+        public DateTimeImmutable $scheduledAt,
+        public SecretRotationStrategy $strategy,
+    ) {
+    }
+}
+```
+
+---
+
+# 1684. SecretRotationStrategy
+
+```php
+enum SecretRotationStrategy: string
+{
+    case ImmediateCutover = 'immediate_cutover';
+    case DualVersion = 'dual_version';
+    case Rolling = 'rolling';
+    case ConsumerByConsumer = 'consumer_by_consumer';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 1685. Dual-secret rotation
+
+Cuando el sistema lo permita:
+
+1. crear nueva versión;
+2. habilitar ambas;
+3. actualizar consumidores;
+4. verificar adopción;
+5. deshabilitar anterior;
+6. revocar anterior.
+
+---
+
+# 1686. Rotation dependency graph
+
+VoltStack deberá conocer qué consumidores dependen de cada secreto.
+
+---
+
+# 1687. SecretConsumerBinding
+
+```php
+final readonly class SecretConsumerBinding
+{
+    public function __construct(
+        public string $consumerId,
+        public SecretReference $secret,
+        public string $environment,
+        public string $tenantId,
+        public SecretConsumptionMode $mode,
+        public DateTimeImmutable $lastObservedUse,
+    ) {
+    }
+}
+```
+
+---
+
+# 1688. SecretConsumptionMode
+
+```php
+enum SecretConsumptionMode: string
+{
+    case DirectRead = 'direct_read';
+    case Lease = 'lease';
+    case Injection = 'injection';
+    case Brokered = 'brokered';
+    case Federated = 'federated';
+}
+```
+
+---
+
+# 1689. Rotation verification
+
+Una rotación no deberá marcarse como completa hasta validar:
+
+* nuevos consumidores;
+* ausencia de errores;
+* ausencia de uso de versión antigua;
+* revocación efectiva;
+* actualización de inventario.
+
+---
+
+# 1690. Secret revocation
+
+La revocación deberá:
+
+* invalidar nuevos accesos;
+* cancelar leases;
+* notificar consumidores;
+* actualizar estado;
+* generar evidencia;
+* iniciar rotación cuando corresponda.
+
+---
+
+# 1691. SecretRevocationReason
+
+```php
+enum SecretRevocationReason: string
+{
+    case Compromise = 'compromise';
+    case Exposure = 'exposure';
+    case OwnerChanged = 'owner_changed';
+    case ConsumerRetired = 'consumer_retired';
+    case PolicyViolation = 'policy_violation';
+    case ScheduledRetirement = 'scheduled_retirement';
+    case ProviderRevocation = 'provider_revocation';
+}
+```
+
+---
+
+# 1692. Secret recovery
+
+La recuperación deberá diseñarse para evitar que el mecanismo de contingencia se convierta en una puerta trasera.
+
+---
+
+# 1693. SecretRecoveryPolicy
+
+```php
+final readonly class SecretRecoveryPolicy
+{
+    public function __construct(
+        public int $requiredApprovers,
+        public bool $dualControlRequired,
+        public bool $hardwareTokenRequired,
+        public bool $incidentRequired,
+        public DateInterval $recoveryAccessLifetime,
+    ) {
+    }
+}
+```
+
+---
+
+# 1694. Recovery controls
+
+La recuperación podrá requerir:
+
+* quorum;
+* break-glass;
+* identidad fuerte;
+* dispositivo administrado;
+* ticket;
+* sesión grabada;
+* acceso temporal;
+* revisión posterior.
+
+---
+
+# 1695. Backup secret protection
+
+Los backups deberán proteger:
+
+* secretos almacenados;
+* metadata;
+* claves de wrapping;
+* índices;
+* audit trails;
+* recovery material.
+
+---
+
+# 1696. Backup isolation
+
+Los backups de secretos deberán:
+
+* cifrarse con claves separadas;
+* almacenarse en dominio distinto;
+* limitar acceso;
+* probar restauración;
+* aplicar retención;
+* registrar lecturas.
+
+---
+
+# 1697. Secret access auditing
+
+Toda lectura o uso deberá registrar:
+
+* actor;
+* workload;
+* secreto;
+* versión;
+* propósito;
+* recurso;
+* lease;
+* timestamp;
+* decisión;
+* resultado.
+
+El valor secreto nunca deberá incluirse en el evento.
+
+---
+
+# 1698. Secret governance
+
+VoltStack deberá mantener inventario y métricas de:
+
+* secretos activos;
+* owners;
+* rotaciones vencidas;
+* secretos sin consumidor;
+* secretos sin owner;
+* exposiciones;
+* leases;
+* accesos denegados;
+* credenciales estáticas;
+* secretos de alta antigüedad.
+
+---
+
+# 1699. Secrets audit events
+
+Eventos recomendados:
+
+* `SecretStored`;
+* `SecretAccessRequested`;
+* `SecretAccessGranted`;
+* `SecretAccessDenied`;
+* `SecretLeaseIssued`;
+* `SecretLeaseRenewed`;
+* `SecretLeaseRevoked`;
+* `DynamicSecretIssued`;
+* `SecretInjected`;
+* `SecretRotationStarted`;
+* `SecretRotationCompleted`;
+* `SecretRotationFailed`;
+* `SecretRevoked`;
+* `SecretCompromised`;
+* `SecretExposureDetected`;
+* `RepositorySecretDetected`;
+* `SecretRecoveryInitiated`;
+* `SecretRecoveryCompleted`;
+* `OrphanSecretDetected`;
+* `SecretDestroyed`.
+
+---
+
+# 1700. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Secrets Management Architecture
+Secret Classification
+Secret Ownership
+Secret Lifecycle
+Secret Store Abstraction
+Opaque Secret References
+Reference-Only Domain Model
+Secret Access Policies
+Secret Leasing
+Dynamic Secrets
+Dynamic Database Credentials
+Dynamic Cloud Credentials
+Secret Injection
+Brokered Secret Usage
+Environment Variable Risk Controls
+Ephemeral Secret Files
+Secret Zeroization
+Sensitive Value Restrictions
+Secret Redaction
+Configuration and Secret Separation
+Build-Time and Runtime Secret Separation
+Container Image Secret Protection
+CI/CD Secret Security
+Pull Request Secret Protection
+Environment Isolation
+Repository Secret Scanning
+Historical Exposure Response
+Secret Exposure Detection
+Secret Fingerprinting
+Automated Secret Containment
+Secret Rotation Orchestration
+Rotation Dependency Graph
+Dual-Version Rotation
+Rotation Verification
+Secret Revocation
+Secret Recovery
+Backup Secret Protection
+Secret Access Auditing
+Secret Governance
+Secrets Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 18
+
+- Security token architecture
+- Token classification
+- Token formats
+- Opaque tokens
+- Structured tokens
+- JWT governance
+- Token claims policies
+- Token audience restriction
+- Token issuer validation
+- Token lifetime policies
+- Token binding
+- Proof-of-possession tokens
+- Token exchange
+- Delegation tokens
+- Impersonation tokens
+- Downscoping
+- Token revocation
+- Token replay protection
+- Token introspection
+- Token audit and governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 18 de varias
+**Cobertura:** Secciones **1701–1800**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 17`
+
+---
+
+# 1701. Security Token Architecture
+
+VoltStack deberá incorporar una arquitectura centralizada para emisión, validación, intercambio, restricción, revocación y auditoría de tokens de seguridad.
+
+Esta arquitectura deberá cubrir:
+
+* access tokens;
+* refresh tokens;
+* identity tokens;
+* session tokens;
+* delegation tokens;
+* impersonation tokens;
+* proof-of-possession tokens;
+* service tokens;
+* workload tokens;
+* one-time tokens;
+* recovery tokens.
+
+Los Controllers no deberán construir ni validar tokens directamente.
+
+---
+
+# 1702. Token security goals
+
+La arquitectura deberá garantizar:
+
+* autenticidad;
+* integridad;
+* audiencia restringida;
+* issuer confiable;
+* lifetime mínimo;
+* mínima exposición;
+* revocación;
+* replay resistance;
+* scope mínimo;
+* trazabilidad;
+* separación entre tipos de token;
+* crypto-agility.
+
+---
+
+# 1703. Token threat model
+
+El modelo deberá considerar:
+
+* robo de bearer tokens;
+* token replay;
+* token substitution;
+* audience confusion;
+* issuer confusion;
+* algorithm confusion;
+* key confusion;
+* claim injection;
+* excessive lifetime;
+* excessive scope;
+* token leakage;
+* token chaining abuse;
+* impersonation abuse;
+* delegation escalation;
+* refresh token reuse;
+* cross-tenant token acceptance;
+* introspection bypass.
+
+---
+
+# 1704. Token architecture components
+
+```text
+Token Request
+      ↓
+Subject and Actor Resolution
+      ↓
+Token Policy Evaluation
+      ↓
+Claims Construction
+      ↓
+Scope and Audience Reduction
+      ↓
+Signing or Opaque Token Issuance
+      ↓
+Token Registry
+      ↓
+Validation / Introspection
+      ↓
+Revocation / Expiration
+      ↓
+Audit and Analytics
+```
+
+---
+
+# 1705. SecurityTokenService
+
+```php
+interface SecurityTokenServiceInterface
+{
+    public function issue(
+        TokenIssuanceRequest $request
+    ): IssuedSecurityToken;
+
+    public function validate(
+        PresentedSecurityToken $token,
+        TokenValidationContext $context
+    ): TokenValidationResult;
+
+    public function revoke(
+        TokenReference $token,
+        TokenRevocationReason $reason
+    ): TokenRevocationResult;
+
+    public function exchange(
+        TokenExchangeRequest $request
+    ): TokenExchangeResult;
+}
+```
+
+---
+
+# 1706. Token classification
+
+Todo token deberá clasificarse por:
+
+* purpose;
+* format;
+* bearer model;
+* subject type;
+* audience;
+* lifetime;
+* revocability;
+* sensitivity;
+* delegation semantics.
+
+---
+
+# 1707. SecurityTokenType
+
+```php
+enum SecurityTokenType: string
+{
+    case Access = 'access';
+    case Refresh = 'refresh';
+    case Identity = 'identity';
+    case Session = 'session';
+    case Delegation = 'delegation';
+    case Impersonation = 'impersonation';
+    case Service = 'service';
+    case Workload = 'workload';
+    case Recovery = 'recovery';
+    case OneTime = 'one_time';
+}
+```
+
+---
+
+# 1708. TokenFormat
+
+```php
+enum TokenFormat: string
+{
+    case Opaque = 'opaque';
+    case Jwt = 'jwt';
+    case Paseto = 'paseto';
+    case Macaroon = 'macaroon';
+    case CustomStructured = 'custom_structured';
+}
+```
+
+---
+
+# 1709. TokenBearerModel
+
+```php
+enum TokenBearerModel: string
+{
+    case Bearer = 'bearer';
+    case ProofOfPossession = 'proof_of_possession';
+    case SenderConstrained = 'sender_constrained';
+    case OneTime = 'one_time';
+}
+```
+
+---
+
+# 1710. Token format selection policy
+
+La selección de formato deberá depender de:
+
+* entorno;
+* arquitectura;
+* necesidad de validación offline;
+* revocación;
+* sensibilidad;
+* interoperabilidad;
+* tamaño;
+* latencia;
+* trust boundary.
+
+---
+
+# 1711. Opaque tokens
+
+Los tokens opacos deberán contener únicamente un identificador aleatorio sin significado interpretable por el cliente.
+
+---
+
+# 1712. OpaqueTokenRecord
+
+```php
+final readonly class OpaqueTokenRecord
+{
+    public function __construct(
+        public string $tokenId,
+        public string $tokenHash,
+        public SecurityTokenType $type,
+        public IdentityIdentifier|string $subject,
+        public ?IdentityIdentifier $actor,
+        public array $audiences,
+        public array $scopes,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public TokenLifecycleState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1713. Opaque token storage
+
+El valor del token opaco no deberá almacenarse en plaintext.
+
+El registro deberá conservar:
+
+* hash;
+* metadata;
+* estado;
+* referencias;
+* expiración;
+* bindings.
+
+---
+
+# 1714. Opaque token advantages
+
+Los tokens opacos facilitan:
+
+* revocación inmediata;
+* introspection centralizada;
+* menor exposición de claims;
+* políticas dinámicas;
+* control de sesión;
+* ocultamiento de metadata.
+
+---
+
+# 1715. Opaque token limitations
+
+Sus desventajas incluyen:
+
+* dependencia del issuer;
+* mayor latencia;
+* necesidad de cache;
+* riesgo de indisponibilidad del servicio de introspection.
+
+---
+
+# 1716. Structured tokens
+
+Los tokens estructurados deberán utilizar formatos estandarizados y políticas estrictas.
+
+---
+
+# 1717. Structured token restrictions
+
+Nunca deberá confiarse en claims antes de:
+
+* validar estructura;
+* validar firma o autenticación;
+* validar algoritmo;
+* validar issuer;
+* validar audience;
+* validar expiración;
+* validar propósito;
+* validar key state.
+
+---
+
+# 1718. JWT governance
+
+VoltStack deberá tratar JWT como un contenedor firmado, no como un mecanismo completo de autorización.
+
+---
+
+# 1719. JwtTokenProfile
+
+```php
+final readonly class JwtTokenProfile
+{
+    public function __construct(
+        public string $profileId,
+        public SecurityTokenType $type,
+        public array $allowedAlgorithms,
+        public array $requiredClaims,
+        public DateInterval $maximumLifetime,
+        public bool $encryptionRequired,
+        public bool $revocationCheckRequired,
+        public bool $proofOfPossessionRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 1720. JWT algorithm allowlist
+
+El algoritmo deberá resolverse desde policy y nunca aceptarse únicamente desde el header del token.
+
+---
+
+# 1721. JWT unsecured mode prohibition
+
+Los JWT con:
+
+```text
+alg = none
+```
+
+deberán rechazarse siempre.
+
+---
+
+# 1722. Symmetric and asymmetric separation
+
+VoltStack deberá evitar utilizar una clave pública como secreto HMAC o mezclar claves simétricas y asimétricas dentro del mismo perfil.
+
+---
+
+# 1723. JWT header policy
+
+Los headers permitidos deberán limitarse y validarse.
+
+Ejemplos:
+
+* `alg`;
+* `kid`;
+* `typ`;
+* `cty`;
+* `crit`.
+
+---
+
+# 1724. Critical header validation
+
+Los headers declarados en `crit` deberán ser comprendidos y procesados explícitamente o el token deberá rechazarse.
+
+---
+
+# 1725. Token type header
+
+`typ` deberá utilizarse para reducir token confusion entre:
+
+* access token;
+* ID token;
+* logout token;
+* recovery token;
+* delegation token.
+
+---
+
+# 1726. Nested tokens
+
+Los tokens anidados deberán declarar explícitamente:
+
+* formato externo;
+* formato interno;
+* orden de firma y cifrado;
+* propósito;
+* maximum nesting depth.
+
+---
+
+# 1727. Sign-then-encrypt policy
+
+Para tokens confidenciales, VoltStack podrá aplicar:
+
+```text
+Claims
+  ↓
+Signed Token
+  ↓
+Encrypted Token
+```
+
+Esto protege integridad interna y confidencialidad externa.
+
+---
+
+# 1728. Token encryption
+
+La firma no oculta claims.
+
+Los tokens con información sensible deberán:
+
+* cifrarse;
+* reemplazarse por opaque tokens;
+* minimizar claims;
+* evitarse en frontends no confiables.
+
+---
+
+# 1729. Token claims policy
+
+```php
+interface TokenClaimsPolicyInterface
+{
+    public function evaluate(
+        TokenClaimsContext $context
+    ): TokenClaimsDecision;
+}
+```
+
+---
+
+# 1730. TokenClaimsDecision
+
+```php
+final readonly class TokenClaimsDecision
+{
+    public function __construct(
+        public array $includedClaims,
+        public array $excludedClaims,
+        public array $requiredClaims,
+        public array $transformations,
+        public array $restrictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1731. Claim minimization
+
+Los tokens deberán incluir únicamente los claims necesarios para el consumidor.
+
+---
+
+# 1732. Registered claims
+
+Claims comunes:
+
+* `iss`;
+* `sub`;
+* `aud`;
+* `exp`;
+* `nbf`;
+* `iat`;
+* `jti`.
+
+Cada uno deberá validarse según el perfil.
+
+---
+
+# 1733. Issuer validation
+
+El issuer deberá compararse mediante coincidencia exacta contra una configuración confiable.
+
+---
+
+# 1734. Issuer confusion prevention
+
+No deberá seleccionarse automáticamente una configuración de validación basada únicamente en el `iss` recibido sin antes aplicar una allowlist segura.
+
+---
+
+# 1735. Audience restriction
+
+Todo access token deberá tener una audiencia concreta.
+
+---
+
+# 1736. Audience validation
+
+El recurso deberá verificar que su identificador esté incluido explícitamente en `aud`.
+
+No deberá aceptar tokens destinados a otro servicio.
+
+---
+
+# 1737. Multi-audience token restrictions
+
+Los tokens con múltiples audiencias deberán utilizarse solo cuando exista una necesidad documentada.
+
+---
+
+# 1738. Authorized party
+
+Cuando existan múltiples audiencias, deberá validarse `azp` o un mecanismo equivalente cuando el protocolo lo requiera.
+
+---
+
+# 1739. Subject claim
+
+`sub` deberá ser:
+
+* estable dentro del issuer;
+* no ambiguo;
+* no reasignable;
+* compatible con aislamiento multi-tenant.
+
+---
+
+# 1740. Tenant claim
+
+Si el token incluye tenant, dicho claim deberá validarse contra:
+
+* issuer;
+* subject;
+* audience;
+* request context;
+* resource tenancy.
+
+---
+
+# 1741. Cross-tenant token prohibition
+
+Un token emitido para un tenant no deberá utilizarse en otro, aunque el subject comparta un identificador externo.
+
+---
+
+# 1742. Token lifetime policy
+
+```php
+final readonly class TokenLifetimePolicy
+{
+    public function __construct(
+        public DateInterval $maximumLifetime,
+        public DateInterval $maximumClockSkew,
+        public bool $notBeforeRequired,
+        public bool $issuedAtRequired,
+        public bool $absoluteExpirationRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 1743. Short-lived access tokens
+
+Los access tokens deberán tener vidas cortas, especialmente cuando sean bearer tokens.
+
+---
+
+# 1744. Refresh token separation
+
+Un refresh token no deberá aceptarse como access token ni presentarse a resource servers.
+
+---
+
+# 1745. One-time token lifetime
+
+Los tokens de:
+
+* recuperación;
+* verificación;
+* autorización;
+* enlace mágico;
+
+deberán tener expiración corta y consumo único.
+
+---
+
+# 1746. Clock skew
+
+La tolerancia de reloj deberá:
+
+* ser limitada;
+* configurarse por perfil;
+* no extender de forma significativa la validez;
+* registrarse en validaciones anómalas.
+
+---
+
+# 1747. TokenLifecycleState
+
+```php
+enum TokenLifecycleState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Consumed = 'consumed';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Superseded = 'superseded';
+}
+```
+
+---
+
+# 1748. Token identifier
+
+Todo token revocable o replay-sensitive deberá poseer un identificador único.
+
+---
+
+# 1749. TokenReference
+
+```php
+final readonly class TokenReference
+{
+    public function __construct(
+        public string $tokenId,
+        public SecurityTokenType $type,
+        public string $issuer,
+        public string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1750. Token binding
+
+VoltStack deberá poder vincular tokens a:
+
+* certificado;
+* public key;
+* device;
+* session;
+* client;
+* workload;
+* request proof.
+
+---
+
+# 1751. TokenBinding
+
+```php
+final readonly class TokenBinding
+{
+    public function __construct(
+        public TokenBindingType $type,
+        public string $bindingIdentifier,
+        public string $confirmationMethod,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 1752. TokenBindingType
+
+```php
+enum TokenBindingType: string
+{
+    case MtlsCertificate = 'mtls_certificate';
+    case DpopKey = 'dpop_key';
+    case Device = 'device';
+    case Session = 'session';
+    case Workload = 'workload';
+    case ClientInstance = 'client_instance';
+}
+```
+
+---
+
+# 1753. Proof-of-possession tokens
+
+Un proof-of-possession token deberá exigir evidencia de control de una clave adicional.
+
+---
+
+# 1754. PoP validation
+
+La validación deberá comprobar:
+
+* token binding;
+* firma del proof;
+* freshness;
+* HTTP method;
+* target URI;
+* nonce cuando aplique;
+* replay registry;
+* key thumbprint.
+
+---
+
+# 1755. DPoP proof
+
+```php
+final readonly class DpopProof
+{
+    public function __construct(
+        public string $jwt,
+        public string $publicKeyThumbprint,
+        public string $httpMethod,
+        public string $httpUri,
+        public string $proofId,
+        public DateTimeImmutable $issuedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1756. DPoP URI normalization
+
+La comparación del target URI deberá seguir una canonicalización estricta para evitar mismatches y bypasses.
+
+---
+
+# 1757. DPoP replay registry
+
+```php
+interface DpopReplayRegistryInterface
+{
+    public function consume(
+        string $proofId,
+        string $keyThumbprint,
+        DateTimeImmutable $expiresAt
+    ): bool;
+}
+```
+
+---
+
+# 1758. mTLS-bound access tokens
+
+Un token ligado a mTLS deberá incluir o referenciar el thumbprint del certificado cliente.
+
+---
+
+# 1759. Certificate rotation and bound tokens
+
+La rotación del certificado deberá contemplar cómo se renuevan o invalidan tokens ligados a la clave anterior.
+
+---
+
+# 1760. Sender constraint enforcement
+
+El resource server deberá verificar el sender constraint; no basta con que el authorization server lo haya emitido.
+
+---
+
+# 1761. Token exchange architecture
+
+VoltStack deberá soportar intercambio controlado de tokens entre dominios o servicios.
+
+---
+
+# 1762. TokenExchangeRequest
+
+```php
+final readonly class TokenExchangeRequest
+{
+    public function __construct(
+        public PresentedSecurityToken $subjectToken,
+        public ?PresentedSecurityToken $actorToken,
+        public SecurityTokenType $requestedTokenType,
+        public array $requestedAudiences,
+        public array $requestedScopes,
+        public TokenExchangeContext $context,
+    ) {
+    }
+}
+```
+
+---
+
+# 1763. Token exchange policy
+
+```php
+interface TokenExchangePolicyInterface
+{
+    public function evaluate(
+        TokenExchangeRequest $request
+    ): TokenExchangeDecision;
+}
+```
+
+---
+
+# 1764. TokenExchangeDecision
+
+```php
+final readonly class TokenExchangeDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $approvedAudiences,
+        public array $approvedScopes,
+        public DateInterval $maximumLifetime,
+        public bool $actorChainRequired,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1765. No privilege amplification
+
+El token resultante no deberá tener más privilegios que:
+
+* el subject token;
+* el actor token;
+* la policy;
+* el client entitlement;
+* el target resource policy.
+
+---
+
+# 1766. Token downscoping
+
+Todo intercambio deberá preferir reducción de:
+
+* audience;
+* scope;
+* lifetime;
+* resource set;
+* action set.
+
+---
+
+# 1767. DownscopedTokenRequest
+
+```php
+final readonly class DownscopedTokenRequest
+{
+    public function __construct(
+        public TokenReference $sourceToken,
+        public array $targetResources,
+        public array $allowedActions,
+        public DateInterval $requestedLifetime,
+    ) {
+    }
+}
+```
+
+---
+
+# 1768. Delegation tokens
+
+Un delegation token representa autoridad delegada por un subject a otro actor o servicio.
+
+---
+
+# 1769. DelegationTokenClaims
+
+```php
+final readonly class DelegationTokenClaims
+{
+    public function __construct(
+        public IdentityIdentifier|string $subject,
+        public IdentityIdentifier|string $actor,
+        public array $delegatedScopes,
+        public array $resources,
+        public array $delegationChain,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1770. Delegation semantics
+
+La delegación deberá distinguir:
+
+* quién es el propietario de la autoridad;
+* quién ejecuta la acción;
+* qué autoridad fue delegada;
+* para qué recursos;
+* durante cuánto tiempo.
+
+---
+
+# 1771. Delegation chain
+
+Toda delegación encadenada deberá conservar provenance completo.
+
+---
+
+# 1772. Delegation depth
+
+VoltStack deberá limitar la profundidad de delegación para evitar cadenas incontrolables.
+
+---
+
+# 1773. Delegation cycle prevention
+
+No deberá permitirse una cadena de delegación que regrese a una identidad previa o genere ciclos.
+
+---
+
+# 1774. Delegation revocation
+
+Revocar una delegación superior deberá invalidar delegaciones descendientes derivadas de ella.
+
+---
+
+# 1775. Impersonation tokens
+
+Un impersonation token permite que un actor opere temporalmente como otro subject bajo controles reforzados.
+
+---
+
+# 1776. ImpersonationTokenClaims
+
+```php
+final readonly class ImpersonationTokenClaims
+{
+    public function __construct(
+        public IdentityIdentifier $subject,
+        public IdentityIdentifier $actor,
+        public string $reason,
+        public string $ticketId,
+        public array $allowedActions,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1777. Impersonation requirements
+
+Toda impersonación deberá requerir:
+
+* permiso explícito;
+* MFA reciente;
+* justificación;
+* ticket;
+* duración corta;
+* logging reforzado;
+* aviso visible;
+* prohibición de acciones sensibles cuando aplique.
+
+---
+
+# 1778. Actor and subject preservation
+
+Durante impersonación, los logs y decisiones deberán conservar tanto:
+
+* actor real;
+* subject representado.
+
+Nunca deberá sustituirse uno por otro.
+
+---
+
+# 1779. Impersonation restrictions
+
+La impersonación podrá bloquear:
+
+* cambio de credenciales;
+* modificación de MFA;
+* creación de nuevos tokens;
+* acceso a secretos;
+* aprobación de accesos propios;
+* eliminación de auditoría;
+* elevaciones privilegiadas adicionales.
+
+---
+
+# 1780. Support impersonation
+
+Para soporte técnico deberá preferirse:
+
+* read-only;
+* scoped;
+* time-limited;
+* customer-visible;
+* explicitly approved.
+
+---
+
+# 1781. Token chaining
+
+Cuando un servicio llama a otro utilizando tokens derivados, VoltStack deberá conservar:
+
+* original subject;
+* current actor;
+* delegation chain;
+* source token reference;
+* target audience.
+
+---
+
+# 1782. Actor token
+
+Un actor token deberá representar la identidad del componente que ejecuta la operación, no sustituir al subject token.
+
+---
+
+# 1783. Service-to-service token policy
+
+Los tokens de servicio deberán:
+
+* tener audience específica;
+* scope mínimo;
+* lifetime corto;
+* sender constraint cuando sea viable;
+* identidad de workload;
+* rotación automática.
+
+---
+
+# 1784. Workload token issuance
+
+Los tokens de workload deberán emitirse a partir de:
+
+* attestation;
+* SPIFFE identity;
+* mTLS identity;
+* cloud workload federation;
+* trusted runtime identity.
+
+---
+
+# 1785. User token reuse prohibition
+
+Un servicio no deberá reutilizar directamente un token frontend para múltiples servicios internos sin token exchange o audience restriction adecuada.
+
+---
+
+# 1786. Token revocation
+
+VoltStack deberá admitir revocación por:
+
+* token;
+* session;
+* subject;
+* client;
+* device;
+* family;
+* tenant;
+* issuer;
+* key;
+* delegation chain.
+
+---
+
+# 1787. TokenRevocationReason
+
+```php
+enum TokenRevocationReason: string
+{
+    case UserLogout = 'user_logout';
+    case AdministratorAction = 'administrator_action';
+    case CredentialCompromise = 'credential_compromise';
+    case SessionCompromise = 'session_compromise';
+    case ClientCompromise = 'client_compromise';
+    case ConsentRevoked = 'consent_revoked';
+    case ScopeWithdrawn = 'scope_withdrawn';
+    case KeyCompromise = 'key_compromise';
+    case TokenReuse = 'token_reuse';
+    case PolicyViolation = 'policy_violation';
+}
+```
+
+---
+
+# 1788. Token revocation registry
+
+```php
+interface TokenRevocationRegistryInterface
+{
+    public function revoke(
+        TokenReference $token,
+        TokenRevocationReason $reason,
+        DateTimeImmutable $revokedAt
+    ): void;
+
+    public function isRevoked(
+        TokenReference $token
+    ): bool;
+}
+```
+
+---
+
+# 1789. Revocation propagation
+
+La revocación deberá propagarse a:
+
+* authorization servers;
+* resource servers;
+* gateways;
+* session stores;
+* token caches;
+* introspection caches;
+* downstream services.
+
+---
+
+# 1790. Revocation latency
+
+Las políticas deberán definir cuánto tiempo máximo puede tardar una revocación en ser efectiva.
+
+Para operaciones críticas, la propagación deberá ser casi inmediata.
+
+---
+
+# 1791. Token replay protection
+
+La protección deberá considerar:
+
+* `jti`;
+* one-time consumption;
+* sender constraints;
+* nonce;
+* replay registries;
+* token family state;
+* request binding.
+
+---
+
+# 1792. OneTimeTokenRegistry
+
+```php
+interface OneTimeTokenRegistryInterface
+{
+    public function consume(
+        string $tokenId,
+        DateTimeImmutable $expiresAt
+    ): OneTimeTokenConsumptionResult;
+}
+```
+
+---
+
+# 1793. Refresh token reuse detection
+
+Cuando un refresh token rotado vuelva a utilizarse, deberá asumirse posible compromiso de toda la familia.
+
+---
+
+# 1794. Token introspection
+
+Los resource servers podrán consultar el estado de tokens opacos o revocables.
+
+---
+
+# 1795. TokenIntrospectionService
+
+```php
+interface TokenIntrospectionServiceInterface
+{
+    public function introspect(
+        PresentedSecurityToken $token,
+        TokenIntrospectionContext $context
+    ): TokenIntrospectionResult;
+}
+```
+
+---
+
+# 1796. TokenIntrospectionResult
+
+```php
+final readonly class TokenIntrospectionResult
+{
+    public function __construct(
+        public bool $active,
+        public SecurityTokenType $type,
+        public ?IdentityIdentifier $subject,
+        public ?IdentityIdentifier $actor,
+        public array $audiences,
+        public array $scopes,
+        public ?DateTimeImmutable $expiresAt,
+        public array $confirmation,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 1797. Introspection authorization
+
+No cualquier cliente deberá poder introspectar cualquier token.
+
+La respuesta deberá limitarse según:
+
+* resource server;
+* audience;
+* tenant;
+* client;
+* token type;
+* policy.
+
+---
+
+# 1798. Introspection caching
+
+El cache deberá considerar:
+
+* expiración;
+* revocación;
+* token sensitivity;
+* maximum staleness;
+* issuer state;
+* key state.
+
+Las respuestas inactivas críticas deberán evitar caches prolongados.
+
+---
+
+# 1799. Token audit events
+
+Eventos recomendados:
+
+* `SecurityTokenIssued`;
+* `OpaqueTokenIssued`;
+* `StructuredTokenIssued`;
+* `TokenValidationSucceeded`;
+* `TokenValidationFailed`;
+* `TokenIssuerRejected`;
+* `TokenAudienceRejected`;
+* `TokenExpired`;
+* `TokenReplayDetected`;
+* `ProofOfPossessionFailed`;
+* `TokenExchangeRequested`;
+* `TokenExchangeCompleted`;
+* `TokenExchangeDenied`;
+* `DelegationTokenIssued`;
+* `DelegationChainRejected`;
+* `ImpersonationTokenIssued`;
+* `ImpersonationTokenUsed`;
+* `TokenDownscoped`;
+* `TokenRevoked`;
+* `TokenFamilyCompromised`;
+* `TokenIntrospected`.
+
+---
+
+# 1800. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Security Token Architecture
+Token Classification
+Token Format Selection
+Opaque Tokens
+Structured Tokens
+JWT Governance
+JWT Algorithm Allowlists
+Token Type Confusion Prevention
+Token Encryption
+Claims Minimization
+Issuer Validation
+Audience Restriction
+Tenant Binding
+Token Lifetime Policies
+Short-Lived Access Tokens
+One-Time Tokens
+Token Binding
+Proof-of-Possession Tokens
+DPoP Validation
+mTLS-Bound Tokens
+Token Exchange
+No Privilege Amplification
+Token Downscoping
+Delegation Tokens
+Delegation Chains
+Delegation Cycle Prevention
+Impersonation Tokens
+Actor and Subject Preservation
+Service-to-Service Tokens
+Workload Token Issuance
+Token Revocation
+Revocation Propagation
+Token Replay Protection
+Refresh Token Reuse Detection
+Token Introspection
+Introspection Authorization
+Token Governance and Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 19
+
+- API authentication architecture
+- API client identities
+- API key architecture
+- API key hashing
+- API key prefixes
+- API key scoping
+- API key rotation
+- HMAC request authentication
+- Signed request canonicalization
+- Timestamp and nonce validation
+- Webhook authentication
+- Webhook signature verification
+- mTLS API authentication
+- OAuth-protected APIs
+- Internal API trust
+- API gateway authentication
+- Service mesh authentication
+- API abuse detection
+- API credential governance
+- API authentication audit
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 19 de varias
+**Cobertura:** Secciones **1801–1900**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 18`
+
+---
+
+# 1801. API Authentication Architecture
+
+VoltStack deberá incorporar una arquitectura centralizada de autenticación para APIs públicas, privadas, internas y machine-to-machine.
+
+La arquitectura deberá cubrir:
+
+* API keys;
+* OAuth 2.0 access tokens;
+* proof-of-possession tokens;
+* HMAC request signing;
+* mutual TLS;
+* workload identities;
+* signed webhooks;
+* service mesh identities;
+* gateway-mediated authentication.
+
+Los Controllers no deberán validar credenciales de API directamente.
+
+---
+
+# 1802. API authentication security goals
+
+La arquitectura deberá garantizar:
+
+* identificación inequívoca del cliente;
+* autenticación fuerte;
+* scope mínimo;
+* restricción de audiencia;
+* resistencia a replay;
+* rotación;
+* revocación;
+* aislamiento multi-tenant;
+* trazabilidad;
+* protección contra abuso;
+* separación entre autenticación y autorización.
+
+---
+
+# 1803. API authentication threat model
+
+El modelo deberá considerar:
+
+* API keys filtradas;
+* bearer token theft;
+* replay de requests;
+* credential stuffing;
+* key guessing;
+* signature bypass;
+* canonicalization confusion;
+* timestamp manipulation;
+* nonce reuse;
+* webhook spoofing;
+* downgrade de mecanismos;
+* confianza implícita en redes internas;
+* abuso de service accounts;
+* cross-tenant access;
+* exceso de scopes;
+* credenciales sin expiración;
+* gateway bypass.
+
+---
+
+# 1804. API authentication pipeline
+
+```text
+Incoming API Request
+        ↓
+Credential Extraction
+        ↓
+Authentication Scheme Resolution
+        ↓
+Credential Validation
+        ↓
+Replay and Freshness Validation
+        ↓
+Client Identity Resolution
+        ↓
+Tenant and Audience Binding
+        ↓
+Authorization Context Creation
+        ↓
+Rate Limit and Abuse Evaluation
+        ↓
+Controller Dispatch
+```
+
+---
+
+# 1805. ApiAuthenticationService
+
+```php
+interface ApiAuthenticationServiceInterface
+{
+    public function authenticate(
+        ApiAuthenticationRequest $request
+    ): ApiAuthenticationResult;
+}
+```
+
+---
+
+# 1806. ApiAuthenticationRequest
+
+```php
+final readonly class ApiAuthenticationRequest
+{
+    public function __construct(
+        public string $method,
+        public string $uri,
+        public array $headers,
+        public string $body,
+        public string $remoteAddress,
+        public DateTimeImmutable $receivedAt,
+        public ApiAuthenticationContext $context,
+    ) {
+    }
+}
+```
+
+---
+
+# 1807. ApiAuthenticationResult
+
+```php
+final readonly class ApiAuthenticationResult
+{
+    public function __construct(
+        public ApiAuthenticationStatus $status,
+        public ?ApiClientIdentity $client,
+        public ?IdentityIdentifier $subject,
+        public ?IdentityIdentifier $actor,
+        public array $grantedScopes,
+        public AuthenticationAssuranceLevel $assurance,
+        public array $bindings,
+        public array $failures,
+    ) {
+    }
+}
+```
+
+---
+
+# 1808. ApiAuthenticationStatus
+
+```php
+enum ApiAuthenticationStatus: string
+{
+    case Authenticated = 'authenticated';
+    case Challenged = 'challenged';
+    case Denied = 'denied';
+    case InvalidCredential = 'invalid_credential';
+    case ExpiredCredential = 'expired_credential';
+    case RevokedCredential = 'revoked_credential';
+    case ReplayDetected = 'replay_detected';
+}
+```
+
+---
+
+# 1809. API authentication scheme registry
+
+VoltStack deberá registrar explícitamente los mecanismos soportados.
+
+---
+
+# 1810. ApiAuthenticationScheme
+
+```php
+enum ApiAuthenticationScheme: string
+{
+    case ApiKey = 'api_key';
+    case BearerToken = 'bearer_token';
+    case Dpop = 'dpop';
+    case HmacSignature = 'hmac_signature';
+    case MutualTls = 'mutual_tls';
+    case WorkloadIdentity = 'workload_identity';
+    case SignedWebhook = 'signed_webhook';
+}
+```
+
+---
+
+# 1811. Scheme resolution
+
+La selección del esquema deberá considerar:
+
+* ruta;
+* API version;
+* tenant;
+* cliente;
+* trust boundary;
+* sensibilidad;
+* transport;
+* metadata de ruta.
+
+---
+
+# 1812. Route authentication metadata
+
+```php
+#[ApiAuthentication(
+    schemes: [
+        ApiAuthenticationScheme::Dpop,
+        ApiAuthenticationScheme::MutualTls,
+    ],
+    requireAll: false,
+    minimumAssurance: AuthenticationAssuranceLevel::High,
+)]
+```
+
+---
+
+# 1813. Multiple authentication schemes
+
+Una ruta podrá:
+
+* aceptar cualquiera de varios esquemas;
+* requerir combinación de esquemas;
+* exigir un mecanismo concreto;
+* prohibir mecanismos heredados.
+
+---
+
+# 1814. Downgrade prevention
+
+Un cliente configurado para mTLS o proof-of-possession no deberá degradarse silenciosamente a una API key bearer.
+
+---
+
+# 1815. API client identities
+
+Todo consumidor deberá representarse mediante una identidad de cliente explícita.
+
+---
+
+# 1816. ApiClientIdentity
+
+```php
+final readonly class ApiClientIdentity
+{
+    public function __construct(
+        public string $clientId,
+        public string $tenantId,
+        public string $name,
+        public ApiClientType $type,
+        public ApiClientState $state,
+        public array $allowedAuthenticationSchemes,
+        public array $allowedAudiences,
+        public array $defaultScopes,
+        public IdentityIdentifier|string $owner,
+    ) {
+    }
+}
+```
+
+---
+
+# 1817. ApiClientType
+
+```php
+enum ApiClientType: string
+{
+    case PublicApplication = 'public_application';
+    case ConfidentialApplication = 'confidential_application';
+    case FirstPartyService = 'first_party_service';
+    case ThirdPartyIntegration = 'third_party_integration';
+    case Workload = 'workload';
+    case Device = 'device';
+    case Automation = 'automation';
+    case WebhookProducer = 'webhook_producer';
+}
+```
+
+---
+
+# 1818. ApiClientState
+
+```php
+enum ApiClientState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Restricted = 'restricted';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1819. Client ownership
+
+Cada cliente deberá poseer:
+
+* owner técnico;
+* owner de negocio cuando aplique;
+* tenant;
+* propósito;
+* entorno;
+* contacto de seguridad;
+* fecha de revisión;
+* mecanismo de autenticación;
+* política de rotación.
+
+---
+
+# 1820. Client registration
+
+El registro de clientes deberá validar:
+
+* identidad del solicitante;
+* caso de uso;
+* redirect URIs cuando aplique;
+* audiences;
+* scopes;
+* entorno;
+* tenant;
+* owner;
+* nivel de riesgo.
+
+---
+
+# 1821. API key architecture
+
+Las API keys deberán utilizarse únicamente cuando mecanismos más fuertes no sean viables o cuando el riesgo sea aceptable.
+
+---
+
+# 1822. ApiKeyCredential
+
+```php
+final readonly class ApiKeyCredential
+{
+    public function __construct(
+        public string $keyId,
+        public string $clientId,
+        public string $tenantId,
+        public string $prefix,
+        public string $secretHash,
+        public string $hashAlgorithm,
+        public ApiKeyState $state,
+        public array $scopes,
+        public array $allowedResources,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1823. ApiKeyState
+
+```php
+enum ApiKeyState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1824. API key format
+
+Una API key podrá estructurarse conceptualmente como:
+
+```text
+vsk_live_<prefix>_<secret>
+```
+
+El formato deberá permitir identificar:
+
+* proveedor o framework;
+* entorno;
+* tipo de credencial;
+* clave candidata;
+
+sin exponer material sensible.
+
+---
+
+# 1825. API key prefixes
+
+El prefix deberá:
+
+* facilitar lookup;
+* no ser secreto;
+* no contener permisos;
+* no revelar tenant sensible;
+* no permitir reconstruir la key;
+* ser suficientemente único.
+
+---
+
+# 1826. API key secret generation
+
+La parte secreta deberá generarse mediante CSPRNG y contener entropía suficiente para resistir ataques de guessing.
+
+---
+
+# 1827. API key one-time display
+
+El valor completo deberá mostrarse una sola vez durante creación o rotación.
+
+---
+
+# 1828. API key hashing
+
+VoltStack no deberá almacenar API keys completas en plaintext.
+
+---
+
+# 1829. ApiKeyHasher
+
+```php
+interface ApiKeyHasherInterface
+{
+    public function hash(
+        SensitiveValue $apiKey
+    ): ApiKeyHash;
+
+    public function verify(
+        SensitiveValue $presentedKey,
+        ApiKeyHash $storedHash
+    ): bool;
+}
+```
+
+---
+
+# 1830. API key hash strategy
+
+Podrá utilizarse:
+
+* HMAC con pepper protegido;
+* hash criptográfico keyed;
+* password hashing en contextos específicos.
+
+La selección deberá considerar volumen, latencia y riesgo de enumeración.
+
+---
+
+# 1831. API key lookup
+
+El prefix podrá localizar un conjunto reducido de candidatos y la parte secreta deberá verificarse mediante comparación segura.
+
+---
+
+# 1832. API key enumeration protection
+
+Las respuestas no deberán revelar si:
+
+* el prefix existe;
+* el cliente existe;
+* la key expiró;
+* la key fue revocada.
+
+---
+
+# 1833. API key scopes
+
+Toda API key deberá poseer scopes explícitos.
+
+---
+
+# 1834. API key resource restrictions
+
+Además de scopes, una key podrá restringirse a:
+
+* endpoints;
+* recursos;
+* tenant;
+* región;
+* environment;
+* IP ranges;
+* methods;
+* horario.
+
+---
+
+# 1835. API key wildcard restrictions
+
+Los scopes globales o wildcards deberán requerir aprobación reforzada.
+
+---
+
+# 1836. API key expiration
+
+Las API keys deberán expirar salvo excepciones documentadas.
+
+---
+
+# 1837. API key inactivity policy
+
+Las claves sin uso durante un período definido deberán:
+
+* marcarse como dormant;
+* notificarse;
+* suspenderse;
+* revocarse según policy.
+
+---
+
+# 1838. API key rotation
+
+La rotación deberá admitir coexistencia controlada entre versión antigua y nueva.
+
+---
+
+# 1839. ApiKeyRotationService
+
+```php
+interface ApiKeyRotationServiceInterface
+{
+    public function start(
+        ApiKeyReference $currentKey,
+        ApiKeyRotationContext $context
+    ): ApiKeyRotationPlan;
+
+    public function complete(
+        ApiKeyRotationPlan $plan
+    ): ApiKeyRotationResult;
+}
+```
+
+---
+
+# 1840. API key rotation stages
+
+```text
+Generate Replacement Key
+        ↓
+Activate New Key
+        ↓
+Allow Controlled Overlap
+        ↓
+Observe Client Migration
+        ↓
+Disable Previous Key
+        ↓
+Revoke Previous Key
+```
+
+---
+
+# 1841. API key usage telemetry
+
+VoltStack deberá registrar:
+
+* primer uso;
+* último uso;
+* frecuencia;
+* origen;
+* endpoints;
+* errores;
+* anomalías;
+* versión utilizada.
+
+---
+
+# 1842. HMAC request authentication
+
+VoltStack deberá soportar autenticación de requests mediante firma HMAC.
+
+---
+
+# 1843. HmacApiCredential
+
+```php
+final readonly class HmacApiCredential
+{
+    public function __construct(
+        public string $credentialId,
+        public string $clientId,
+        public SecretReference $secret,
+        public string $algorithm,
+        public HmacCredentialState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1844. HmacCredentialState
+
+```php
+enum HmacCredentialState: string
+{
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 1845. Signed request components
+
+La firma deberá cubrir, según policy:
+
+* HTTP method;
+* canonical URI;
+* query parameters;
+* selected headers;
+* timestamp;
+* nonce;
+* body digest;
+* client identifier;
+* content type.
+
+---
+
+# 1846. Canonical request
+
+```php
+final readonly class CanonicalApiRequest
+{
+    public function __construct(
+        public string $method,
+        public string $canonicalUri,
+        public string $canonicalQuery,
+        public string $canonicalHeaders,
+        public string $signedHeaders,
+        public string $payloadDigest,
+        public string $timestamp,
+        public string $nonce,
+    ) {
+    }
+}
+```
+
+---
+
+# 1847. Canonicalization service
+
+```php
+interface ApiRequestCanonicalizerInterface
+{
+    public function canonicalize(
+        ApiAuthenticationRequest $request,
+        SignedRequestProfile $profile
+    ): CanonicalApiRequest;
+}
+```
+
+---
+
+# 1848. Canonicalization determinism
+
+Cliente y servidor deberán producir exactamente la misma representación para un request equivalente.
+
+---
+
+# 1849. URI canonicalization
+
+La canonicalización deberá definir:
+
+* encoding;
+* path normalization;
+* trailing slash;
+* duplicate separators;
+* dot segments;
+* case sensitivity;
+* percent-encoding.
+
+---
+
+# 1850. Query canonicalization
+
+La policy deberá definir:
+
+* ordenamiento;
+* parámetros repetidos;
+* valores vacíos;
+* encoding;
+* exclusiones;
+* arrays.
+
+---
+
+# 1851. Header canonicalization
+
+Deberá especificarse:
+
+* nombres en lowercase;
+* trimming;
+* whitespace normalization;
+* orden;
+* headers obligatorios;
+* headers prohibidos;
+* combinación de valores repetidos.
+
+---
+
+# 1852. Request body digest
+
+El body deberá resumirse mediante un hash criptográfico permitido.
+
+---
+
+# 1853. Streaming body verification
+
+Para payloads grandes, VoltStack deberá permitir cálculo incremental sin cargar todo el contenido en memoria.
+
+---
+
+# 1854. SignedRequestProfile
+
+```php
+final readonly class SignedRequestProfile
+{
+    public function __construct(
+        public string $profileId,
+        public string $algorithm,
+        public array $requiredHeaders,
+        public DateInterval $maximumAge,
+        public bool $nonceRequired,
+        public bool $bodyDigestRequired,
+        public bool $contentTypeSigned,
+    ) {
+    }
+}
+```
+
+---
+
+# 1855. HMAC signature creation
+
+```php
+interface ApiRequestSignerInterface
+{
+    public function sign(
+        CanonicalApiRequest $request,
+        SensitiveValue $secret,
+        SignedRequestProfile $profile
+    ): ApiRequestSignature;
+}
+```
+
+---
+
+# 1856. ApiRequestSignature
+
+```php
+final readonly class ApiRequestSignature
+{
+    public function __construct(
+        public string $credentialId,
+        public string $algorithm,
+        public string $signature,
+        public string $signedHeaders,
+        public DateTimeImmutable $createdAt,
+        public string $nonce,
+    ) {
+    }
+}
+```
+
+---
+
+# 1857. Signature verification
+
+La verificación deberá:
+
+1. resolver la credencial;
+2. validar estado;
+3. validar algoritmo;
+4. reconstruir canonical request;
+5. validar timestamp;
+6. consumir nonce;
+7. verificar firma;
+8. validar client policy.
+
+---
+
+# 1858. Timestamp validation
+
+El timestamp deberá estar dentro de una ventana pequeña definida por policy.
+
+---
+
+# 1859. Timestamp source
+
+El servidor deberá utilizar su propio reloj confiable para validar freshness.
+
+---
+
+# 1860. Clock synchronization
+
+Los componentes críticos deberán mantener sincronización de reloj y alertar ante drift excesivo.
+
+---
+
+# 1861. Nonce validation
+
+Cada request firmado deberá incluir un nonce único cuando la policy lo requiera.
+
+---
+
+# 1862. ApiRequestNonceRegistry
+
+```php
+interface ApiRequestNonceRegistryInterface
+{
+    public function consume(
+        string $credentialId,
+        string $nonce,
+        DateTimeImmutable $expiresAt
+    ): NonceConsumptionResult;
+}
+```
+
+---
+
+# 1863. Nonce replay prevention
+
+Un nonce reutilizado dentro de la ventana de validez deberá provocar rechazo.
+
+---
+
+# 1864. Replay registry availability
+
+Para operaciones críticas, la indisponibilidad del registry deberá producir fail-closed.
+
+---
+
+# 1865. Signature comparison
+
+La firma deberá compararse mediante una operación constant-time.
+
+---
+
+# 1866. Key rotation for signed requests
+
+Durante rotación, el cliente podrá indicar key version o credential ID, pero el servidor deberá limitar las versiones aceptadas.
+
+---
+
+# 1867. Asymmetric request signing
+
+VoltStack podrá soportar firmas asimétricas para clientes que necesiten evitar secretos compartidos.
+
+---
+
+# 1868. AsymmetricApiCredential
+
+```php
+final readonly class AsymmetricApiCredential
+{
+    public function __construct(
+        public string $credentialId,
+        public string $clientId,
+        public JsonWebKey|CertificateReference $publicCredential,
+        public string $algorithm,
+        public ApiKeyState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1869. Asymmetric request proof
+
+El cliente deberá demostrar control de la clave privada sin enviarla al servidor.
+
+---
+
+# 1870. Webhook authentication architecture
+
+Todo webhook entrante deberá autenticarse.
+
+---
+
+# 1871. WebhookEndpointDefinition
+
+```php
+final readonly class WebhookEndpointDefinition
+{
+    public function __construct(
+        public string $endpointId,
+        public string $tenantId,
+        public string $providerId,
+        public WebhookAuthenticationScheme $scheme,
+        public array $allowedEventTypes,
+        public WebhookReplayPolicy $replayPolicy,
+        public WebhookEndpointState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1872. WebhookAuthenticationScheme
+
+```php
+enum WebhookAuthenticationScheme: string
+{
+    case HmacSignature = 'hmac_signature';
+    case AsymmetricSignature = 'asymmetric_signature';
+    case MutualTls = 'mutual_tls';
+    case OAuthBearer = 'oauth_bearer';
+    case Combined = 'combined';
+}
+```
+
+---
+
+# 1873. WebhookEndpointState
+
+```php
+enum WebhookEndpointState: string
+{
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Rotating = 'rotating';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 1874. Webhook signature verification
+
+La verificación deberá realizarse sobre el body original recibido antes de:
+
+* parsearlo;
+* normalizar JSON;
+* transformar encoding;
+* modificar whitespace;
+* deserializar.
+
+---
+
+# 1875. WebhookSignatureVerifier
+
+```php
+interface WebhookSignatureVerifierInterface
+{
+    public function verify(
+        IncomingWebhookRequest $request,
+        WebhookEndpointDefinition $endpoint
+    ): WebhookVerificationResult;
+}
+```
+
+---
+
+# 1876. IncomingWebhookRequest
+
+```php
+final readonly class IncomingWebhookRequest
+{
+    public function __construct(
+        public array $headers,
+        public string $rawBody,
+        public string $remoteAddress,
+        public DateTimeImmutable $receivedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1877. Webhook freshness
+
+La firma deberá incorporar:
+
+* timestamp;
+* nonce;
+* event ID;
+
+cuando el proveedor lo soporte.
+
+---
+
+# 1878. Webhook replay registry
+
+```php
+interface WebhookReplayRegistryInterface
+{
+    public function consume(
+        string $providerId,
+        string $eventId,
+        DateTimeImmutable $expiresAt
+    ): WebhookReplayResult;
+}
+```
+
+---
+
+# 1879. Duplicate webhook delivery
+
+La entrega duplicada legítima deberá diferenciarse de replay malicioso mediante procesamiento idempotente.
+
+---
+
+# 1880. Webhook idempotency
+
+El event ID deberá utilizarse para impedir efectos de negocio duplicados.
+
+---
+
+# 1881. Webhook secret rotation
+
+La rotación deberá permitir verificar temporalmente con:
+
+* secret actual;
+* secret anterior;
+* version metadata.
+
+---
+
+# 1882. Webhook source IP restrictions
+
+Las allowlists de IP podrán usarse como señal adicional, pero no deberán sustituir la verificación criptográfica.
+
+---
+
+# 1883. Outgoing webhook signing
+
+VoltStack deberá firmar sus propios webhooks emitidos a terceros.
+
+---
+
+# 1884. OutgoingWebhookSigner
+
+```php
+interface OutgoingWebhookSignerInterface
+{
+    public function sign(
+        OutgoingWebhookMessage $message,
+        WebhookSigningContext $context
+    ): SignedWebhookMessage;
+}
+```
+
+---
+
+# 1885. Outgoing webhook metadata
+
+Un webhook emitido deberá incluir:
+
+* event ID;
+* event type;
+* timestamp;
+* signature version;
+* key ID;
+* retry attempt;
+* payload digest.
+
+---
+
+# 1886. mTLS API authentication
+
+Las APIs de alta sensibilidad deberán poder exigir certificados cliente.
+
+---
+
+# 1887. mTLS API validation
+
+La autenticación deberá validar:
+
+* certificate chain;
+* revocation;
+* EKU;
+* SAN;
+* trust domain;
+* client mapping;
+* tenant;
+* certificate state.
+
+---
+
+# 1888. OAuth-protected APIs
+
+Las APIs protegidas por OAuth deberán validar:
+
+* issuer;
+* audience;
+* scope;
+* token type;
+* client;
+* subject;
+* proof-of-possession;
+* revocation;
+* tenant.
+
+---
+
+# 1889. Scope-to-route mapping
+
+```php
+#[RequiresScopes(
+    all: ['orders.read'],
+    any: ['tenant.orders', 'admin.orders'],
+)]
+```
+
+---
+
+# 1890. Scope authorization limitations
+
+Poseer un scope no deberá sustituir:
+
+* ownership checks;
+* tenant checks;
+* resource policies;
+* record-level authorization;
+* business rules.
+
+---
+
+# 1891. Internal API trust
+
+VoltStack no deberá considerar confiable una request únicamente porque proviene de una red interna.
+
+---
+
+# 1892. Internal service authentication
+
+Los servicios internos deberán usar:
+
+* workload identity;
+* mTLS;
+* sender-constrained tokens;
+* signed requests;
+* short-lived credentials.
+
+---
+
+# 1893. API gateway authentication
+
+El gateway podrá realizar autenticación inicial, pero el backend deberá recibir evidencia verificable.
+
+---
+
+# 1894. Gateway authentication evidence
+
+```php
+final readonly class GatewayAuthenticationEvidence
+{
+    public function __construct(
+        public string $gatewayId,
+        public string $clientId,
+        public ?IdentityIdentifier $subject,
+        public array $scopes,
+        public DateTimeImmutable $authenticatedAt,
+        public string $requestBinding,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1895. Gateway bypass prevention
+
+Los servicios protegidos por gateway deberán impedir acceso directo no autenticado mediante:
+
+* network policy;
+* mTLS;
+* signed gateway assertions;
+* private ingress;
+* service mesh policy.
+
+---
+
+# 1896. Service mesh authentication
+
+VoltStack podrá consumir identidades proporcionadas por un service mesh, siempre que:
+
+* la conexión esté autenticada;
+* el workload esté attested;
+* el trust domain sea válido;
+* la identidad sea autorizada;
+* no se confíe en headers sin protección.
+
+---
+
+# 1897. API abuse detection
+
+El framework deberá detectar:
+
+* request bursts;
+* key sharing;
+* impossible geography;
+* enumeration;
+* scraping;
+* unusual endpoints;
+* scope probing;
+* replay;
+* error pattern abuse;
+* token cycling.
+
+---
+
+# 1898. API credential governance
+
+VoltStack deberá mantener inventario de:
+
+* clientes;
+* API keys;
+* certificados;
+* signing credentials;
+* owners;
+* scopes;
+* audiences;
+* expiración;
+* última actividad;
+* rotaciones;
+* excepciones.
+
+---
+
+# 1899. API authentication audit events
+
+Eventos recomendados:
+
+* `ApiAuthenticationAttempted`;
+* `ApiAuthenticationSucceeded`;
+* `ApiAuthenticationFailed`;
+* `ApiClientRegistered`;
+* `ApiClientSuspended`;
+* `ApiKeyCreated`;
+* `ApiKeyRotated`;
+* `ApiKeyRevoked`;
+* `DormantApiKeyDetected`;
+* `SignedApiRequestAccepted`;
+* `SignedApiRequestRejected`;
+* `ApiRequestReplayDetected`;
+* `WebhookSignatureValidated`;
+* `WebhookSignatureRejected`;
+* `WebhookReplayDetected`;
+* `MutualTlsApiAuthenticationSucceeded`;
+* `MutualTlsApiAuthenticationFailed`;
+* `GatewayAssertionRejected`;
+* `ApiAbuseDetected`;
+* `ApiCredentialCompromised`.
+
+---
+
+# 1900. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+API Authentication Architecture
+API Authentication Pipeline
+API Client Identities
+API Client Registration
+API Key Architecture
+API Key Prefixes
+API Key Hashing
+API Key Enumeration Protection
+API Key Scoping
+API Key Resource Restrictions
+API Key Expiration
+API Key Rotation
+API Key Usage Telemetry
+HMAC Request Authentication
+Canonical Request Construction
+URI, Query and Header Canonicalization
+Request Body Digests
+Timestamp Validation
+Nonce Validation
+Replay Protection
+Asymmetric Request Signing
+Webhook Authentication
+Webhook Signature Verification
+Webhook Freshness Validation
+Webhook Replay Protection
+Webhook Idempotency
+Webhook Secret Rotation
+Outgoing Webhook Signing
+mTLS API Authentication
+OAuth-Protected APIs
+Scope-to-Route Mapping
+Internal API Zero Trust
+API Gateway Authentication
+Gateway Bypass Prevention
+Service Mesh Authentication
+API Abuse Detection
+API Credential Governance
+API Authentication Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 20
+
+- Authorization context integrity
+- Security context propagation
+- Actor and subject propagation
+- Tenant context propagation
+- Request identity envelopes
+- Signed security contexts
+- Trusted proxy identity
+- Gateway identity assertions
+- Service-to-service identity propagation
+- Delegation chain propagation
+- Context attenuation
+- Context freshness
+- Context replay protection
+- Context boundary validation
+- Async identity propagation
+- Queue and job identities
+- Scheduled task identities
+- Event consumer identities
+- Distributed tracing security
+- Security context governance
+```
