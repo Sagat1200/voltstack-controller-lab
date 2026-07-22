@@ -30406,3 +30406,2952 @@ Entrega 24
 - Lifecycle governance
 - Lifecycle audit events
 ```
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 24 de varias
+**Cobertura:** Secciones **2301–2400**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 23`
+
+---
+
+# 2301. Identity Lifecycle Orchestration Architecture
+
+VoltStack deberá incorporar una arquitectura formal para orquestar el ciclo de vida completo de identidades humanas, técnicas, externas, privilegiadas y no humanas.
+
+La arquitectura deberá cubrir:
+
+* creación;
+* verificación;
+* activación;
+* suspensión;
+* restricción;
+* deshabilitación;
+* reactivación;
+* transferencia;
+* fusión;
+* separación;
+* migración;
+* archivado;
+* eliminación;
+* recuperación;
+* deprovisioning.
+
+---
+
+# 2302. Identity lifecycle security goals
+
+La arquitectura deberá garantizar:
+
+* transiciones controladas;
+* consistencia entre sistemas;
+* mínima permanencia de acceso;
+* preservación de evidencia;
+* prevención de reactivaciones indebidas;
+* aislamiento multi-tenant;
+* integridad de estado;
+* idempotencia;
+* reversibilidad controlada;
+* auditabilidad;
+* cumplimiento de retención y privacidad.
+
+---
+
+# 2303. Identity lifecycle threat model
+
+El modelo deberá considerar:
+
+* activación sin verificación;
+* cuentas huérfanas;
+* deprovisioning incompleto;
+* reactivación no autorizada;
+* transferencia de identidad entre tenants;
+* colisión de identidades;
+* account takeover durante migración;
+* fusión incorrecta;
+* pérdida de provenance;
+* eliminación prematura;
+* persistencia de sesiones;
+* credenciales activas tras baja;
+* race conditions entre conectores;
+* rollback parcial;
+* abuso administrativo.
+
+---
+
+# 2304. Identity lifecycle pipeline
+
+```text
+Lifecycle Trigger
+      ↓
+Identity Resolution
+      ↓
+Current State Validation
+      ↓
+Policy Evaluation
+      ↓
+Approval Resolution
+      ↓
+Transition Plan
+      ↓
+Credential and Access Actions
+      ↓
+Downstream Provisioning
+      ↓
+Verification
+      ↓
+Commit State
+      ↓
+Audit and Notification
+```
+
+---
+
+# 2305. IdentityLifecycleOrchestrator
+
+```php
+interface IdentityLifecycleOrchestratorInterface
+{
+    public function plan(
+        IdentityLifecycleCommand $command
+    ): IdentityLifecyclePlan;
+
+    public function execute(
+        IdentityLifecyclePlan $plan
+    ): IdentityLifecycleResult;
+
+    public function rollback(
+        IdentityLifecycleExecution $execution,
+        IdentityLifecycleRollbackContext $context
+    ): IdentityLifecycleRollbackResult;
+}
+```
+
+---
+
+# 2306. IdentityLifecycleCommand
+
+```php
+final readonly class IdentityLifecycleCommand
+{
+    public function __construct(
+        public string $commandId,
+        public IdentityIdentifier $identityId,
+        public IdentityLifecycleAction $action,
+        public IdentityIdentifier|string $requestedBy,
+        public string $tenantId,
+        public string $reason,
+        public array $parameters,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2307. IdentityLifecycleAction
+
+```php
+enum IdentityLifecycleAction: string
+{
+    case Create = 'create';
+    case Verify = 'verify';
+    case Activate = 'activate';
+    case Restrict = 'restrict';
+    case Suspend = 'suspend';
+    case Disable = 'disable';
+    case Reactivate = 'reactivate';
+    case Transfer = 'transfer';
+    case Merge = 'merge';
+    case Split = 'split';
+    case Migrate = 'migrate';
+    case Archive = 'archive';
+    case Delete = 'delete';
+    case Restore = 'restore';
+    case Deprovision = 'deprovision';
+}
+```
+
+---
+
+# 2308. Identity lifecycle state machine
+
+Toda identidad deberá operar bajo una máquina de estados explícita.
+
+---
+
+# 2309. IdentityLifecycleState
+
+```php
+enum IdentityLifecycleState: string
+{
+    case Draft = 'draft';
+    case PendingVerification = 'pending_verification';
+    case PendingActivation = 'pending_activation';
+    case Active = 'active';
+    case Restricted = 'restricted';
+    case Suspended = 'suspended';
+    case Disabled = 'disabled';
+    case PendingTransfer = 'pending_transfer';
+    case PendingMerge = 'pending_merge';
+    case PendingMigration = 'pending_migration';
+    case Deprovisioning = 'deprovisioning';
+    case Archived = 'archived';
+    case PendingDeletion = 'pending_deletion';
+    case Deleted = 'deleted';
+}
+```
+
+---
+
+# 2310. State transition invariants
+
+Una transición no deberá:
+
+* saltar validaciones obligatorias;
+* preservar privilegios incompatibles;
+* reactivar credenciales revocadas;
+* cambiar tenant implícitamente;
+* eliminar provenance;
+* ignorar legal hold;
+* extender acceso sin policy;
+* producir estados imposibles.
+
+---
+
+# 2311. IdentityStateTransition
+
+```php
+final readonly class IdentityStateTransition
+{
+    public function __construct(
+        public IdentityLifecycleState $from,
+        public IdentityLifecycleState $to,
+        public IdentityLifecycleAction $action,
+        public array $requiredConditions,
+        public array $requiredApprovals,
+        public array $sideEffects,
+    ) {
+    }
+}
+```
+
+---
+
+# 2312. IdentityStateMachine
+
+```php
+interface IdentityStateMachineInterface
+{
+    public function canTransition(
+        IdentityLifecycleState $from,
+        IdentityLifecycleState $to,
+        IdentityLifecycleContext $context
+    ): bool;
+
+    public function transition(
+        IdentityRecord $identity,
+        IdentityLifecycleState $target,
+        IdentityLifecycleContext $context
+    ): IdentityRecord;
+}
+```
+
+---
+
+# 2313. Transition authorization
+
+Toda transición deberá autorizarse según:
+
+* actor;
+* tenant;
+* identity type;
+* current state;
+* target state;
+* risk;
+* environment;
+* business owner;
+* legal constraints.
+
+---
+
+# 2314. Identity lifecycle policy engine
+
+```php
+interface IdentityLifecyclePolicyEngineInterface
+{
+    public function evaluate(
+        IdentityLifecycleCommand $command,
+        IdentityLifecycleSnapshot $snapshot
+    ): IdentityLifecycleDecision;
+}
+```
+
+---
+
+# 2315. IdentityLifecycleDecision
+
+```php
+final readonly class IdentityLifecycleDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $requiredApprovals,
+        public array $requiredChecks,
+        public array $requiredActions,
+        public array $restrictions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 2316. Identity creation
+
+La creación deberá distinguir:
+
+* identidad solicitada;
+* identidad preprovisionada;
+* identidad federada;
+* identidad importada;
+* identidad técnica;
+* identidad temporal;
+* identidad privilegiada.
+
+---
+
+# 2317. Identity creation validation
+
+La creación deberá validar:
+
+* uniqueness;
+* tenant;
+* owner;
+* identity type;
+* source;
+* required attributes;
+* duplicate candidates;
+* authorization;
+* retention profile.
+
+---
+
+# 2318. IdentityDraft
+
+```php
+final readonly class IdentityDraft
+{
+    public function __construct(
+        public string $draftId,
+        public string $tenantId,
+        public IdentityType $type,
+        public array $attributes,
+        public IdentitySource $source,
+        public IdentityIdentifier|string $createdBy,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2319. Identity verification
+
+La verificación deberá comprobar que la identidad representa legítimamente al sujeto o workload esperado.
+
+---
+
+# 2320. Verification methods
+
+Podrán incluirse:
+
+* email verification;
+* phone verification;
+* document verification;
+* federation assertion;
+* manager approval;
+* HR source confirmation;
+* device attestation;
+* workload attestation;
+* administrator validation.
+
+---
+
+# 2321. IdentityVerificationRecord
+
+```php
+final readonly class IdentityVerificationRecord
+{
+    public function __construct(
+        public string $verificationId,
+        public IdentityIdentifier $identityId,
+        public IdentityVerificationMethod $method,
+        public IdentityVerificationStatus $status,
+        public array $evidenceReferences,
+        public DateTimeImmutable $verifiedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2322. IdentityVerificationStatus
+
+```php
+enum IdentityVerificationStatus: string
+{
+    case Pending = 'pending';
+    case Verified = 'verified';
+    case Rejected = 'rejected';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 2323. Identity activation
+
+Una identidad no deberá activarse hasta cumplir:
+
+* verification;
+* required approvals;
+* owner assignment;
+* tenant binding;
+* credential enrollment;
+* policy acceptance;
+* risk evaluation.
+
+---
+
+# 2324. IdentityActivationRequest
+
+```php
+final readonly class IdentityActivationRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public array $requestedAccess,
+        public array $verificationReferences,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2325. Activation policy
+
+La activación deberá aplicar least privilege y no asignar privilegios amplios por defecto.
+
+---
+
+# 2326. Activation side effects
+
+Podrán incluir:
+
+* emisión de credenciales;
+* habilitación de sesión;
+* creación de perfiles;
+* asignación de access packages;
+* provisionamiento downstream;
+* notificación;
+* enrollment MFA.
+
+---
+
+# 2327. Activation verification
+
+La transición solo deberá completarse cuando los sistemas críticos confirmen provisionamiento exitoso.
+
+---
+
+# 2328. Partial activation
+
+Si algunos sistemas fallan, la identidad deberá permanecer:
+
+* pending activation;
+* restricted;
+* quarantined;
+
+según la criticidad del fallo.
+
+---
+
+# 2329. Identity restriction
+
+Una identidad restringida conserva existencia y autenticación limitada, pero pierde capacidades específicas.
+
+---
+
+# 2330. IdentityRestrictionProfile
+
+```php
+final readonly class IdentityRestrictionProfile
+{
+    public function __construct(
+        public string $profileId,
+        public array $blockedActions,
+        public array $allowedActions,
+        public array $blockedResources,
+        public bool $newSessionsAllowed,
+        public bool $credentialChangesAllowed,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2331. Restriction use cases
+
+La restricción podrá utilizarse para:
+
+* riesgo elevado;
+* investigación;
+* transición laboral;
+* compliance;
+* deuda de verificación;
+* anomalías;
+* recovery session;
+* acceso temporal.
+
+---
+
+# 2332. Identity suspension
+
+La suspensión deberá detener actividad sin eliminar la identidad.
+
+---
+
+# 2333. IdentitySuspensionRequest
+
+```php
+final readonly class IdentitySuspensionRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public IdentitySuspensionReason $reason,
+        public IdentityIdentifier|string $requestedBy,
+        public bool $revokeSessions,
+        public bool $revokeCredentials,
+        public ?DateTimeImmutable $until,
+    ) {
+    }
+}
+```
+
+---
+
+# 2334. IdentitySuspensionReason
+
+```php
+enum IdentitySuspensionReason: string
+{
+    case SecurityIncident = 'security_incident';
+    case AdministrativeReview = 'administrative_review';
+    case EmploymentLeave = 'employment_leave';
+    case PolicyViolation = 'policy_violation';
+    case PaymentOrContractIssue = 'payment_or_contract_issue';
+    case Inactivity = 'inactivity';
+    case VerificationFailure = 'verification_failure';
+    case LegalRequirement = 'legal_requirement';
+}
+```
+
+---
+
+# 2335. Suspension side effects
+
+La suspensión podrá:
+
+* revocar sesiones;
+* bloquear autenticación;
+* suspender tokens;
+* detener jobs;
+* bloquear API clients;
+* pausar workflows;
+* remover acceso privilegiado;
+* conservar evidencia.
+
+---
+
+# 2336. Temporary suspension
+
+Toda suspensión temporal deberá incluir:
+
+* expiration;
+* review owner;
+* automatic review;
+* restoration policy;
+* notification rules.
+
+---
+
+# 2337. Identity disablement
+
+La deshabilitación representa una interrupción más fuerte y generalmente prolongada.
+
+---
+
+# 2338. Disablement requirements
+
+Deberá:
+
+* impedir autenticación;
+* invalidar sesiones;
+* revocar credenciales;
+* bloquear delegaciones;
+* detener impersonation;
+* deshabilitar tokens;
+* bloquear nuevas asignaciones.
+
+---
+
+# 2339. Disabled identity access
+
+Una identidad deshabilitada solo podrá acceder a flujos explícitos de:
+
+* appeal;
+* recovery;
+* compliance;
+* data export;
+* support verification.
+
+---
+
+# 2340. Identity reactivation
+
+La reactivación no deberá restaurar automáticamente el estado previo completo.
+
+---
+
+# 2341. IdentityReactivationRequest
+
+```php
+final readonly class IdentityReactivationRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public IdentityIdentifier|string $requestedBy,
+        public string $reason,
+        public array $requestedRestorations,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2342. Reactivation checks
+
+Deberán reevaluarse:
+
+* identity ownership;
+* tenant membership;
+* employment or contract state;
+* verification;
+* device trust;
+* credentials;
+* MFA;
+* current policies;
+* dormant access;
+* risk signals.
+
+---
+
+# 2343. Reactivation credential policy
+
+Las credenciales comprometidas, expiradas o revocadas no deberán reactivarse.
+
+---
+
+# 2344. Reactivation access reconstruction
+
+El acceso deberá reconstruirse desde fuentes vigentes y no desde snapshots históricos no verificados.
+
+---
+
+# 2345. Identity deprovisioning
+
+El deprovisioning deberá retirar acceso de forma coordinada y verificable.
+
+---
+
+# 2346. IdentityDeprovisioningPlan
+
+```php
+final readonly class IdentityDeprovisioningPlan
+{
+    public function __construct(
+        public string $planId,
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public array $credentialActions,
+        public array $sessionActions,
+        public array $entitlementActions,
+        public array $downstreamActions,
+        public array $dataOwnershipActions,
+        public DeprovisioningMode $mode,
+    ) {
+    }
+}
+```
+
+---
+
+# 2347. DeprovisioningMode
+
+```php
+enum DeprovisioningMode: string
+{
+    case Immediate = 'immediate';
+    case Graceful = 'graceful';
+    case Scheduled = 'scheduled';
+    case Emergency = 'emergency';
+    case LegalHold = 'legal_hold';
+}
+```
+
+---
+
+# 2348. Deprovisioning sequence
+
+```text
+Freeze New Access
+      ↓
+Revoke Sessions
+      ↓
+Revoke Credentials
+      ↓
+Remove Privileged Access
+      ↓
+Remove Entitlements
+      ↓
+Disable Downstream Accounts
+      ↓
+Transfer Ownership
+      ↓
+Verify Completion
+      ↓
+Archive Identity
+```
+
+---
+
+# 2349. Deprovisioning idempotency
+
+Repetir el proceso no deberá:
+
+* recrear acceso;
+* duplicar transferencias;
+* fallar por recursos ya removidos;
+* corromper ownership;
+* omitir validaciones.
+
+---
+
+# 2350. Downstream deprovisioning verification
+
+Cada conector deberá confirmar:
+
+* request accepted;
+* operation completed;
+* final state;
+* timestamp;
+* remote identifier;
+* failure reason.
+
+---
+
+# 2351. Deprovisioning failure handling
+
+Los fallos deberán clasificarse como:
+
+* retryable;
+* permanent;
+* authorization failure;
+* connector unavailable;
+* object not found;
+* policy conflict;
+* manual remediation required.
+
+---
+
+# 2352. Orphaned access detection
+
+Tras deprovisioning deberá buscarse acceso residual en:
+
+* applications;
+* databases;
+* cloud roles;
+* certificates;
+* API keys;
+* shared accounts;
+* secrets;
+* jobs;
+* service principals.
+
+---
+
+# 2353. DeprovisioningCompletionReport
+
+```php
+final readonly class DeprovisioningCompletionReport
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public bool $complete,
+        public array $completedActions,
+        public array $failedActions,
+        public array $residualAccess,
+        public DateTimeImmutable $completedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2354. Identity archival
+
+El archivado conserva registro histórico sin permitir uso operativo.
+
+---
+
+# 2355. Archived identity restrictions
+
+Una identidad archivada no deberá:
+
+* autenticarse;
+* recibir nuevas asignaciones;
+* iniciar workflows;
+* poseer sesiones;
+* emitir tokens;
+* actuar como delegada.
+
+---
+
+# 2356. IdentityArchiveRecord
+
+```php
+final readonly class IdentityArchiveRecord
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public string $archiveReason,
+        public array $retainedAttributes,
+        public array $redactedAttributes,
+        public DateTimeImmutable $archivedAt,
+        public ?DateTimeImmutable $retentionUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2357. Archive minimization
+
+Solo deberán conservarse atributos necesarios para:
+
+* auditoría;
+* legal hold;
+* seguridad;
+* contabilidad;
+* trazabilidad;
+* obligaciones contractuales.
+
+---
+
+# 2358. Identity deletion
+
+La eliminación deberá diferenciar:
+
+* logical deletion;
+* anonymization;
+* crypto-shredding;
+* irreversible physical deletion.
+
+---
+
+# 2359. IdentityDeletionRequest
+
+```php
+final readonly class IdentityDeletionRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $identityId,
+        public IdentityDeletionMode $mode,
+        public IdentityIdentifier|string $requestedBy,
+        public string $reason,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2360. IdentityDeletionMode
+
+```php
+enum IdentityDeletionMode: string
+{
+    case Logical = 'logical';
+    case Anonymize = 'anonymize';
+    case CryptoShred = 'crypto_shred';
+    case Physical = 'physical';
+}
+```
+
+---
+
+# 2361. Deletion preconditions
+
+Antes de eliminar deberán verificarse:
+
+* legal hold;
+* retention;
+* active incidents;
+* financial obligations;
+* shared ownership;
+* delegated resources;
+* audit requirements;
+* downstream dependencies.
+
+---
+
+# 2362. Deletion tombstones
+
+Podrá conservarse un tombstone mínimo para evitar:
+
+* accidental recreation;
+* duplicate identity import;
+* identifier reuse;
+* reconciliation ambiguity.
+
+---
+
+# 2363. IdentityDeletionTombstone
+
+```php
+final readonly class IdentityDeletionTombstone
+{
+    public function __construct(
+        public string $tombstoneId,
+        public string $tenantId,
+        public string $identityFingerprint,
+        public string $deletionReason,
+        public DateTimeImmutable $deletedAt,
+        public ?DateTimeImmutable $retainUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2364. Identity restoration
+
+La restauración solo deberá ser posible cuando el modo de eliminación y la policy lo permitan.
+
+---
+
+# 2365. Restoration safeguards
+
+Deberá requerir:
+
+* approval;
+* identity re-verification;
+* tenant validation;
+* credential re-enrollment;
+* access reconstruction;
+* duplicate detection;
+* audit.
+
+---
+
+# 2366. Identity merge
+
+La fusión combina dos o más registros que representan al mismo sujeto.
+
+---
+
+# 2367. IdentityMergeRequest
+
+```php
+final readonly class IdentityMergeRequest
+{
+    public function __construct(
+        public string $mergeId,
+        public array $sourceIdentityIds,
+        public IdentityIdentifier $targetIdentityId,
+        public string $tenantId,
+        public IdentityIdentifier|string $requestedBy,
+        public string $reason,
+        public array $mergeRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2368. Merge preconditions
+
+La fusión deberá verificar:
+
+* same subject;
+* tenant compatibility;
+* identity type compatibility;
+* no legal conflict;
+* no security incident conflict;
+* credential ownership;
+* entitlement collisions;
+* data ownership.
+
+---
+
+# 2369. Merge authority
+
+La decisión no deberá basarse únicamente en coincidencias débiles como nombre o email.
+
+---
+
+# 2370. Merge evidence
+
+La fusión deberá documentar:
+
+* matching attributes;
+* authoritative sources;
+* approvals;
+* confidence;
+* conflicts;
+* resolution decisions.
+
+---
+
+# 2371. Merge conflict categories
+
+Conflictos posibles:
+
+* attributes;
+* credentials;
+* sessions;
+* roles;
+* groups;
+* tenant membership;
+* recovery methods;
+* privileged status;
+* data ownership.
+
+---
+
+# 2372. IdentityMergePlan
+
+```php
+final readonly class IdentityMergePlan
+{
+    public function __construct(
+        public IdentityIdentifier $target,
+        public array $sources,
+        public array $attributeResolutions,
+        public array $credentialActions,
+        public array $entitlementActions,
+        public array $ownershipTransfers,
+        public array $conflicts,
+    ) {
+    }
+}
+```
+
+---
+
+# 2373. Credential handling during merge
+
+Las credenciales deberán:
+
+* reasociarse solo si su ownership es verificable;
+* revocarse si existe duda;
+* deduplicarse;
+* mantener provenance;
+* conservar historial.
+
+---
+
+# 2374. Session handling during merge
+
+Las sesiones existentes deberán revocarse por defecto para evitar contextos inconsistentes.
+
+---
+
+# 2375. Merge rollback
+
+La fusión deberá soportar rollback únicamente mientras no existan efectos irreversibles.
+
+---
+
+# 2376. Merge tombstones
+
+Las identidades fuente deberán conservar tombstones que apunten a la identidad canónica.
+
+---
+
+# 2377. Identity split
+
+La separación divide una identidad incorrectamente fusionada o compartida.
+
+---
+
+# 2378. IdentitySplitRequest
+
+```php
+final readonly class IdentitySplitRequest
+{
+    public function __construct(
+        public string $splitId,
+        public IdentityIdentifier $sourceIdentityId,
+        public array $targetDefinitions,
+        public IdentityIdentifier|string $requestedBy,
+        public string $reason,
+        public array $allocationRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2379. Split complexity
+
+La separación deberá resolver:
+
+* attributes;
+* credentials;
+* access;
+* events;
+* ownership;
+* sessions;
+* audit records;
+* external identifiers.
+
+---
+
+# 2380. Split security policy
+
+Cuando no exista evidencia suficiente para asignar una credencial, deberá revocarse en lugar de duplicarse.
+
+---
+
+# 2381. Duplicate identity resolution
+
+VoltStack deberá detectar identidades potencialmente duplicadas.
+
+---
+
+# 2382. DuplicateIdentityCandidate
+
+```php
+final readonly class DuplicateIdentityCandidate
+{
+    public function __construct(
+        public IdentityIdentifier $left,
+        public IdentityIdentifier $right,
+        public float $confidence,
+        public array $matchingSignals,
+        public array $conflictingSignals,
+        public DuplicateResolutionRecommendation $recommendation,
+    ) {
+    }
+}
+```
+
+---
+
+# 2383. Duplicate detection signals
+
+Podrán incluir:
+
+* authoritative external ID;
+* verified email;
+* employee number;
+* legal identifier hash;
+* device history;
+* manager relationship;
+* recovery methods;
+* federation subject.
+
+---
+
+# 2384. Duplicate detection safeguards
+
+No deberán utilizarse atributos sensibles de manera indiscriminada ni realizar merges automáticos con señales ambiguas.
+
+---
+
+# 2385. DuplicateResolutionRecommendation
+
+```php
+enum DuplicateResolutionRecommendation: string
+{
+    case NoAction = 'no_action';
+    case ManualReview = 'manual_review';
+    case Link = 'link';
+    case Merge = 'merge';
+    case InvestigateFraud = 'investigate_fraud';
+}
+```
+
+---
+
+# 2386. Identity migration
+
+La migración deberá mover identidades entre:
+
+* stores;
+* identity providers;
+* tenants;
+* regions;
+* framework versions;
+* credential systems;
+* schemas.
+
+---
+
+# 2387. IdentityMigrationPlan
+
+```php
+final readonly class IdentityMigrationPlan
+{
+    public function __construct(
+        public string $migrationId,
+        public array $identityIds,
+        public string $sourceSystem,
+        public string $targetSystem,
+        public IdentityMigrationMode $mode,
+        public array $mappingRules,
+        public array $validationRules,
+        public array $rollbackRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2388. IdentityMigrationMode
+
+```php
+enum IdentityMigrationMode: string
+{
+    case Online = 'online';
+    case Offline = 'offline';
+    case DualWrite = 'dual_write';
+    case ReadThrough = 'read_through';
+    case Incremental = 'incremental';
+    case Cutover = 'cutover';
+}
+```
+
+---
+
+# 2389. Migration integrity
+
+La migración deberá preservar:
+
+* identity IDs o mappings;
+* provenance;
+* credential state;
+* authorization version;
+* tenant;
+* verification status;
+* lifecycle state;
+* audit references.
+
+---
+
+# 2390. Password migration
+
+Los passwords no deberán descifrarse ni exportarse en plaintext.
+
+Podrán utilizarse:
+
+* legacy hash verification;
+* rehash on login;
+* password reset;
+* staged migration.
+
+---
+
+# 2391. MFA migration
+
+Los factores MFA deberán migrarse únicamente si:
+
+* el formato es seguro;
+* el secret permanece protegido;
+* la policy lo permite;
+* el usuario es notificado;
+* existe rollback.
+
+---
+
+# 2392. Migration cutover validation
+
+Antes del cutover deberán verificarse:
+
+* record counts;
+* state consistency;
+* credential validation;
+* authorization equivalence;
+* tenant isolation;
+* reconciliation results;
+* rollback readiness.
+
+---
+
+# 2393. Identity portability
+
+La portabilidad deberá diferenciar entre:
+
+* exportar datos;
+* transferir control;
+* migrar credenciales;
+* recrear identidad;
+* mover tenant membership.
+
+---
+
+# 2394. Portable identity package
+
+```php
+final readonly class PortableIdentityPackage
+{
+    public function __construct(
+        public string $packageId,
+        public IdentityIdentifier $identityId,
+        public string $schemaVersion,
+        public array $portableAttributes,
+        public array $nonPortableReferences,
+        public DateTimeImmutable $generatedAt,
+        public string $packageDigest,
+        public DigitalSignature $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 2395. Portability restrictions
+
+No deberán exportarse:
+
+* password hashes salvo caso controlado;
+* private keys;
+* recovery secrets;
+* internal risk scores;
+* confidential administrative notes;
+* unrelated tenant data.
+
+---
+
+# 2396. Tenant transfer
+
+Mover una identidad entre tenants deberá considerarse una operación sensible y no una simple actualización de campo.
+
+---
+
+# 2397. TenantTransferPlan
+
+```php
+final readonly class TenantTransferPlan
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $sourceTenantId,
+        public string $targetTenantId,
+        public array $attributesToTransfer,
+        public array $credentialsToReissue,
+        public array $accessToRemove,
+        public array $accessToRequest,
+        public array $ownershipTransfers,
+    ) {
+    }
+}
+```
+
+---
+
+# 2398. Tenant transfer invariants
+
+La transferencia deberá:
+
+* revocar acceso del tenant origen;
+* impedir sesiones cruzadas;
+* reemitir credenciales tenant-bound;
+* reevaluar roles;
+* separar datos;
+* preservar audit trail;
+* evitar leakage.
+
+---
+
+# 2399. Identity lifecycle audit events
+
+Eventos recomendados:
+
+* `IdentityLifecycleCommandRequested`;
+* `IdentityCreated`;
+* `IdentityVerificationCompleted`;
+* `IdentityActivated`;
+* `IdentityRestricted`;
+* `IdentitySuspended`;
+* `IdentityDisabled`;
+* `IdentityReactivationRequested`;
+* `IdentityReactivated`;
+* `IdentityDeprovisioningStarted`;
+* `IdentityDeprovisioningCompleted`;
+* `ResidualAccessDetected`;
+* `IdentityArchived`;
+* `IdentityDeletionRequested`;
+* `IdentityDeleted`;
+* `IdentityRestored`;
+* `IdentityMergeRequested`;
+* `IdentityMerged`;
+* `IdentitySplitRequested`;
+* `IdentitySplitCompleted`;
+* `DuplicateIdentityDetected`;
+* `IdentityMigrationStarted`;
+* `IdentityMigrationCompleted`;
+* `TenantTransferStarted`;
+* `TenantTransferCompleted`;
+* `IdentityLifecycleRollbackExecuted`.
+
+---
+
+# 2400. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Lifecycle Orchestration
+Identity State Machines
+Transition Invariants
+Lifecycle Policy Evaluation
+Identity Creation
+Identity Verification
+Identity Activation
+Partial Activation Handling
+Identity Restriction
+Identity Suspension
+Identity Disablement
+Identity Reactivation
+Credential Re-enrollment
+Identity Deprovisioning
+Downstream Deprovisioning Verification
+Residual Access Detection
+Identity Archival
+Identity Deletion
+Identity Tombstones
+Identity Restoration
+Identity Merge
+Merge Conflict Resolution
+Identity Split
+Duplicate Identity Detection
+Identity Migration
+Password and MFA Migration
+Migration Cutover Validation
+Identity Portability
+Tenant Transfer
+Lifecycle Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 25
+
+- Identity ownership transfer
+- Resource ownership reassignment
+- Delegation transfer
+- Manager transition
+- Tenant transfer execution
+- Cross-tenant identity migration
+- Lifecycle approval workflows
+- Dual-control lifecycle actions
+- Lifecycle scheduling
+- Effective-date transitions
+- Grace periods
+- Lifecycle cancellation
+- Lifecycle rollback architecture
+- Compensating lifecycle actions
+- Lifecycle reconciliation
+- Lifecycle drift detection
+- Lifecycle health monitoring
+- Lifecycle governance
+- Lifecycle compliance evidence
+- Lifecycle exception management
+```
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 25 de varias
+**Cobertura:** Secciones **2401–2500**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 24`
+
+---
+
+# 2401. Identity Ownership Transfer Architecture
+
+VoltStack deberá incorporar una arquitectura formal para transferir ownership de identidades, recursos, delegaciones, relaciones jerárquicas y responsabilidades operativas.
+
+La transferencia deberá diferenciar entre:
+
+* ownership de identidad;
+* ownership de recursos;
+* ownership administrativo;
+* ownership de datos;
+* ownership de credenciales;
+* ownership de workflows;
+* ownership de servicios;
+* ownership de entitlements.
+
+---
+
+# 2402. Ownership transfer security goals
+
+La arquitectura deberá garantizar:
+
+* continuidad operativa;
+* mínimo acceso residual;
+* validación del nuevo owner;
+* conservación de provenance;
+* separación de funciones;
+* protección multi-tenant;
+* revocación del owner anterior;
+* consistencia entre sistemas;
+* reversibilidad controlada;
+* auditabilidad.
+
+---
+
+# 2403. Ownership transfer threat model
+
+El modelo deberá considerar:
+
+* transferencia no autorizada;
+* owner inexistente;
+* self-assignment privilegiado;
+* transferencia cross-tenant;
+* access inheritance excesivo;
+* ownership duplicado;
+* recursos huérfanos;
+* delegaciones persistentes;
+* transferencia durante incidentes;
+* race conditions;
+* pérdida de accountability;
+* reactivación del owner anterior.
+
+---
+
+# 2404. Ownership transfer pipeline
+
+```text
+Transfer Trigger
+      ↓
+Ownership Discovery
+      ↓
+Current Owner Validation
+      ↓
+Target Owner Validation
+      ↓
+Policy Evaluation
+      ↓
+Approval Resolution
+      ↓
+Dependency Analysis
+      ↓
+Transfer Execution
+      ↓
+Access Reconciliation
+      ↓
+Verification
+      ↓
+Audit and Closure
+```
+
+---
+
+# 2405. IdentityOwnershipTransferService
+
+```php
+interface IdentityOwnershipTransferServiceInterface
+{
+    public function plan(
+        IdentityOwnershipTransferRequest $request
+    ): IdentityOwnershipTransferPlan;
+
+    public function execute(
+        IdentityOwnershipTransferPlan $plan
+    ): IdentityOwnershipTransferResult;
+}
+```
+
+---
+
+# 2406. IdentityOwnershipTransferRequest
+
+```php
+final readonly class IdentityOwnershipTransferRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $subjectIdentityId,
+        public IdentityIdentifier|string $currentOwner,
+        public IdentityIdentifier|string $targetOwner,
+        public string $tenantId,
+        public OwnershipTransferReason $reason,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2407. OwnershipTransferReason
+
+```php
+enum OwnershipTransferReason: string
+{
+    case OrganizationalChange = 'organizational_change';
+    case ManagerChange = 'manager_change';
+    case RoleChange = 'role_change';
+    case Offboarding = 'offboarding';
+    case TenantTransfer = 'tenant_transfer';
+    case ServiceMigration = 'service_migration';
+    case IncidentResponse = 'incident_response';
+    case AdministrativeCorrection = 'administrative_correction';
+}
+```
+
+---
+
+# 2408. Ownership types
+
+VoltStack deberá modelar al menos:
+
+```php
+enum OwnershipType: string
+{
+    case Identity = 'identity';
+    case Resource = 'resource';
+    case Data = 'data';
+    case Credential = 'credential';
+    case Workflow = 'workflow';
+    case Service = 'service';
+    case Entitlement = 'entitlement';
+    case Administrative = 'administrative';
+}
+```
+
+---
+
+# 2409. OwnershipRecord
+
+```php
+final readonly class OwnershipRecord
+{
+    public function __construct(
+        public string $ownershipId,
+        public OwnershipType $type,
+        public string $resourceId,
+        public IdentityIdentifier|string $ownerId,
+        public string $tenantId,
+        public OwnershipState $state,
+        public DateTimeImmutable $effectiveFrom,
+        public ?DateTimeImmutable $effectiveUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2410. OwnershipState
+
+```php
+enum OwnershipState: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Transferring = 'transferring';
+    case Superseded = 'superseded';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 2411. Target owner validation
+
+El nuevo owner deberá cumplir:
+
+* identidad activa;
+* tenant compatible;
+* business relationship válida;
+* capacidad para administrar el recurso;
+* ausencia de conflicto SoD;
+* assurance suficiente;
+* no estar suspendido;
+* no estar bajo incidente relevante.
+
+---
+
+# 2412. Ownership transfer policy engine
+
+```php
+interface OwnershipTransferPolicyInterface
+{
+    public function evaluate(
+        IdentityOwnershipTransferRequest $request,
+        OwnershipTransferContext $context
+    ): OwnershipTransferDecision;
+}
+```
+
+---
+
+# 2413. OwnershipTransferDecision
+
+```php
+final readonly class OwnershipTransferDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $requiredApprovals,
+        public array $requiredChecks,
+        public array $resourcesIncluded,
+        public array $resourcesExcluded,
+        public array $restrictions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 2414. Resource ownership reassignment
+
+La reasignación deberá descubrir todos los recursos vinculados al owner anterior.
+
+---
+
+# 2415. OwnedResourceInventory
+
+```php
+final readonly class OwnedResourceInventory
+{
+    public function __construct(
+        public IdentityIdentifier|string $ownerId,
+        public string $tenantId,
+        public array $resources,
+        public array $sharedResources,
+        public array $privilegedResources,
+        public array $unresolvedResources,
+    ) {
+    }
+}
+```
+
+---
+
+# 2416. Resource categories
+
+La búsqueda deberá incluir:
+
+* files;
+* records;
+* queues;
+* dashboards;
+* reports;
+* API clients;
+* service accounts;
+* secrets;
+* certificates;
+* cloud resources;
+* workflows;
+* approval responsibilities.
+
+---
+
+# 2417. Resource transfer classification
+
+Cada recurso deberá clasificarse como:
+
+* transferable;
+* shared;
+* non-transferable;
+* privileged;
+* regulated;
+* orphan candidate;
+* manual review required.
+
+---
+
+# 2418. ResourceOwnershipTransferPlan
+
+```php
+final readonly class ResourceOwnershipTransferPlan
+{
+    public function __construct(
+        public string $planId,
+        public IdentityIdentifier|string $sourceOwner,
+        public IdentityIdentifier|string $targetOwner,
+        public array $directTransfers,
+        public array $sharedOwnershipChanges,
+        public array $manualReviewItems,
+        public array $revocations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2419. Shared ownership
+
+Los recursos compartidos deberán definir:
+
+* primary owner;
+* co-owners;
+* delegates;
+* approval rights;
+* revocation rules;
+* succession policy.
+
+---
+
+# 2420. Orphan resource prevention
+
+No deberá completarse un offboarding si permanecen recursos críticos sin owner válido.
+
+---
+
+# 2421. Delegation transfer
+
+Las delegaciones no deberán transferirse automáticamente sin reevaluación.
+
+---
+
+# 2422. DelegationTransferRequest
+
+```php
+final readonly class DelegationTransferRequest
+{
+    public function __construct(
+        public string $delegationId,
+        public IdentityIdentifier|string $currentDelegate,
+        public IdentityIdentifier|string $targetDelegate,
+        public array $scopes,
+        public array $resources,
+        public DateTimeImmutable $effectiveAt,
+        public string $reason,
+    ) {
+    }
+}
+```
+
+---
+
+# 2423. Delegation transfer invariants
+
+La transferencia deberá:
+
+* preservar al delegator original;
+* validar el nuevo delegate;
+* reducir scopes cuando sea necesario;
+* mantener expiración;
+* no ampliar recursos;
+* registrar provenance;
+* revocar la delegación anterior.
+
+---
+
+# 2424. Delegation succession
+
+Las delegaciones críticas podrán definir succession rules para ausencia, baja o cambio de rol.
+
+---
+
+# 2425. Manager transition architecture
+
+Los cambios de manager deberán actualizar:
+
+* approval chains;
+* access review ownership;
+* birthright access;
+* delegation relationships;
+* reporting hierarchy;
+* workflow routing;
+* escalation paths.
+
+---
+
+# 2426. ManagerTransitionPlan
+
+```php
+final readonly class ManagerTransitionPlan
+{
+    public function __construct(
+        public IdentityIdentifier $employeeIdentityId,
+        public ?IdentityIdentifier $previousManager,
+        public IdentityIdentifier $newManager,
+        public array $approvalAssignments,
+        public array $delegations,
+        public array $governanceResponsibilities,
+        public DateTimeImmutable $effectiveAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2427. Manager transition validation
+
+El nuevo manager deberá:
+
+* pertenecer al tenant;
+* estar activo;
+* no crear ciclos jerárquicos;
+* tener authority suficiente;
+* no violar SoD;
+* pertenecer a una estructura autorizada.
+
+---
+
+# 2428. Hierarchy cycle prevention
+
+```php
+interface ManagementHierarchyValidatorInterface
+{
+    public function validateTransition(
+        IdentityIdentifier $subject,
+        IdentityIdentifier $newManager
+    ): ManagementHierarchyValidationResult;
+}
+```
+
+---
+
+# 2429. Tenant transfer execution
+
+La transferencia entre tenants deberá ejecutarse como workflow coordinado y no como actualización directa.
+
+---
+
+# 2430. Tenant transfer phases
+
+```text
+Prepare
+  ↓
+Freeze Source Access
+  ↓
+Snapshot Source State
+  ↓
+Remove Source Entitlements
+  ↓
+Transfer Approved Data
+  ↓
+Reissue Credentials
+  ↓
+Provision Target Access
+  ↓
+Validate Isolation
+  ↓
+Activate Target Membership
+  ↓
+Close Source Membership
+```
+
+---
+
+# 2431. TenantTransferExecution
+
+```php
+final readonly class TenantTransferExecution
+{
+    public function __construct(
+        public string $executionId,
+        public TenantTransferPlan $plan,
+        public TenantTransferPhase $phase,
+        public array $completedSteps,
+        public array $pendingSteps,
+        public array $failures,
+        public DateTimeImmutable $startedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2432. TenantTransferPhase
+
+```php
+enum TenantTransferPhase: string
+{
+    case Prepared = 'prepared';
+    case SourceFrozen = 'source_frozen';
+    case SourceAccessRemoved = 'source_access_removed';
+    case DataTransferred = 'data_transferred';
+    case TargetProvisioned = 'target_provisioned';
+    case IsolationValidated = 'isolation_validated';
+    case Completed = 'completed';
+    case Failed = 'failed';
+    case RolledBack = 'rolled_back';
+}
+```
+
+---
+
+# 2433. Cross-tenant identity migration
+
+La migración cross-tenant deberá tratar atributos, credenciales, recursos y relaciones como dominios separados.
+
+---
+
+# 2434. CrossTenantIdentityMigrationPolicy
+
+```php
+interface CrossTenantIdentityMigrationPolicyInterface
+{
+    public function evaluate(
+        TenantTransferPlan $plan,
+        CrossTenantMigrationContext $context
+    ): CrossTenantMigrationDecision;
+}
+```
+
+---
+
+# 2435. Cross-tenant migration restrictions
+
+No deberán migrarse automáticamente:
+
+* privileged roles;
+* tenant-specific API keys;
+* tenant-bound certificates;
+* private tenant notes;
+* internal risk flags no portables;
+* shared secrets;
+* ownerless resources.
+
+---
+
+# 2436. Credential reissuance
+
+Las credenciales ligadas al tenant origen deberán revocarse y reemitirse para el tenant destino.
+
+---
+
+# 2437. Session isolation during transfer
+
+Todas las sesiones existentes deberán revocarse antes de activar el nuevo tenant context.
+
+---
+
+# 2438. Tenant transfer data controls
+
+Los datos deberán clasificarse como:
+
+* transferable;
+* export-only;
+* retain-in-source;
+* redactable;
+* prohibited;
+* legal-review-required.
+
+---
+
+# 2439. Lifecycle approval workflows
+
+Las operaciones de alto riesgo deberán utilizar workflows de aprobación.
+
+---
+
+# 2440. LifecycleApprovalPlan
+
+```php
+final readonly class LifecycleApprovalPlan
+{
+    public function __construct(
+        public string $planId,
+        public IdentityLifecycleAction $action,
+        public array $stages,
+        public bool $sequential,
+        public DateTimeImmutable $expiresAt,
+        public ApprovalEscalationPolicy $escalationPolicy,
+    ) {
+    }
+}
+```
+
+---
+
+# 2441. Lifecycle approval stages
+
+Podrán incluir:
+
+* manager;
+* resource owner;
+* tenant administrator;
+* security;
+* compliance;
+* HR;
+* legal;
+* data protection;
+* system owner.
+
+---
+
+# 2442. Approval context integrity
+
+Los approvers deberán recibir:
+
+* acción;
+* identidad;
+* current state;
+* target state;
+* riesgo;
+* recursos afectados;
+* tenant;
+* side effects;
+* compensating controls.
+
+---
+
+# 2443. Self-approval prevention
+
+El solicitante no deberá aprobar su propia operación salvo excepción explícita y control compensatorio.
+
+---
+
+# 2444. Approval independence
+
+Para acciones críticas, los approvers deberán pertenecer a funciones independientes.
+
+---
+
+# 2445. Dual-control lifecycle actions
+
+Deberán considerarse dual-control:
+
+* eliminación irreversible;
+* tenant transfer;
+* identity merge;
+* identity split;
+* privileged reactivation;
+* crypto-shredding;
+* ownership transfer de recursos críticos.
+
+---
+
+# 2446. DualControlLifecyclePolicy
+
+```php
+final readonly class DualControlLifecyclePolicy
+{
+    public function __construct(
+        public int $minimumApprovers,
+        public array $requiredFunctions,
+        public bool $requesterExcluded,
+        public bool $sameManagerExcluded,
+        public DateInterval $approvalWindow,
+    ) {
+    }
+}
+```
+
+---
+
+# 2447. Approval expiry
+
+Una aprobación expirada no deberá reutilizarse para ejecutar una transición posterior.
+
+---
+
+# 2448. Approval revocation
+
+Un approver deberá poder retirar una aprobación antes de la ejecución cuando la policy lo permita.
+
+---
+
+# 2449. Approval evidence
+
+Toda aprobación deberá registrar:
+
+* approver;
+* decision;
+* timestamp;
+* rationale;
+* authentication assurance;
+* conflicts disclosed;
+* policy version.
+
+---
+
+# 2450. Lifecycle scheduling
+
+VoltStack deberá soportar transiciones programadas.
+
+---
+
+# 2451. ScheduledLifecycleTransition
+
+```php
+final readonly class ScheduledLifecycleTransition
+{
+    public function __construct(
+        public string $scheduleId,
+        public IdentityIdentifier $identityId,
+        public IdentityLifecycleAction $action,
+        public DateTimeImmutable $effectiveAt,
+        public string $timezone,
+        public array $preconditions,
+        public ScheduledTransitionState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2452. ScheduledTransitionState
+
+```php
+enum ScheduledTransitionState: string
+{
+    case Pending = 'pending';
+    case Ready = 'ready';
+    case Executing = 'executing';
+    case Completed = 'completed';
+    case Failed = 'failed';
+    case Cancelled = 'cancelled';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 2453. Effective-date transitions
+
+Las transiciones deberán poder activarse en:
+
+* fecha de contratación;
+* fecha de baja;
+* inicio de contrato;
+* expiración de acceso;
+* cambio organizacional;
+* fin de licencia;
+* fecha regulatoria.
+
+---
+
+# 2454. Effective time validation
+
+Antes de ejecutar deberá reevaluarse:
+
+* identity state;
+* approvals;
+* policy version;
+* tenant;
+* risk;
+* owner;
+* schedule validity;
+* external source status.
+
+---
+
+# 2455. Timezone consistency
+
+Las fechas deberán almacenarse en UTC y conservar la timezone de negocio para interpretación.
+
+---
+
+# 2456. Clock drift tolerance
+
+Las ejecuciones distribuidas deberán definir tolerancia de clock skew.
+
+---
+
+# 2457. Grace periods
+
+Las operaciones podrán incluir grace periods para:
+
+* offboarding;
+* access expiration;
+* ownership transfer;
+* credential rotation;
+* contract termination;
+* archival.
+
+---
+
+# 2458. LifecycleGracePeriod
+
+```php
+final readonly class LifecycleGracePeriod
+{
+    public function __construct(
+        public DateInterval $duration,
+        public array $allowedActions,
+        public array $blockedActions,
+        public bool $newSessionsAllowed,
+        public bool $privilegedAccessAllowed,
+        public DateTimeImmutable $endsAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2459. Grace period restrictions
+
+Un grace period no deberá preservar privilegios críticos salvo autorización explícita.
+
+---
+
+# 2460. Grace period expiration
+
+Al finalizar deberá ejecutarse automáticamente la transición pendiente o escalarse el fallo.
+
+---
+
+# 2461. Lifecycle cancellation
+
+Las transiciones programadas o pendientes deberán poder cancelarse cuando no hayan producido efectos irreversibles.
+
+---
+
+# 2462. LifecycleCancellationRequest
+
+```php
+final readonly class LifecycleCancellationRequest
+{
+    public function __construct(
+        public string $executionId,
+        public IdentityIdentifier|string $requestedBy,
+        public string $reason,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2463. Cancellation policy
+
+La cancelación deberá verificar:
+
+* execution state;
+* irreversible steps;
+* tenant;
+* actor authority;
+* pending approvals;
+* external side effects;
+* compensating actions.
+
+---
+
+# 2464. Partial cancellation
+
+Cuando no pueda revertirse completamente, deberá producirse un plan compensatorio.
+
+---
+
+# 2465. Lifecycle rollback architecture
+
+El rollback deberá restaurar un estado seguro, no necesariamente el estado histórico exacto.
+
+---
+
+# 2466. IdentityLifecycleRollbackPlan
+
+```php
+final readonly class IdentityLifecycleRollbackPlan
+{
+    public function __construct(
+        public string $rollbackId,
+        public string $executionId,
+        public array $reversibleActions,
+        public array $compensatingActions,
+        public array $irreversibleEffects,
+        public array $requiredApprovals,
+        public RollbackRiskLevel $riskLevel,
+    ) {
+    }
+}
+```
+
+---
+
+# 2467. RollbackRiskLevel
+
+```php
+enum RollbackRiskLevel: string
+{
+    case Low = 'low';
+    case Moderate = 'moderate';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 2468. Rollback invariants
+
+El rollback no deberá:
+
+* reactivar credenciales comprometidas;
+* restaurar privilegios expirados;
+* ignorar policies actuales;
+* reconstruir sesiones antiguas;
+* revertir legal holds;
+* mezclar tenants;
+* borrar evidencia.
+
+---
+
+# 2469. Compensating lifecycle actions
+
+Cuando una acción no sea reversible, deberán ejecutarse compensaciones.
+
+---
+
+# 2470. CompensatingLifecycleAction
+
+```php
+final readonly class CompensatingLifecycleAction
+{
+    public function __construct(
+        public string $actionId,
+        public string $originalActionId,
+        public CompensatingActionType $type,
+        public array $parameters,
+        public array $expectedOutcomes,
+        public bool $manualApprovalRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 2471. CompensatingActionType
+
+```php
+enum CompensatingActionType: string
+{
+    case RevokeAccess = 'revoke_access';
+    case ReissueCredential = 'reissue_credential';
+    case RestoreOwnership = 'restore_ownership';
+    case CreateReplacementIdentity = 'create_replacement_identity';
+    case CorrectAttribute = 'correct_attribute';
+    case ReconcileDownstream = 'reconcile_downstream';
+    case NotifyStakeholders = 'notify_stakeholders';
+}
+```
+
+---
+
+# 2472. Saga-based lifecycle orchestration
+
+VoltStack podrá modelar workflows distribuidos como sagas con:
+
+* forward actions;
+* compensating actions;
+* checkpoints;
+* retries;
+* timeouts;
+* human intervention.
+
+---
+
+# 2473. LifecycleExecutionCheckpoint
+
+```php
+final readonly class LifecycleExecutionCheckpoint
+{
+    public function __construct(
+        public string $checkpointId,
+        public string $executionId,
+        public string $stepId,
+        public array $completedEffects,
+        public array $pendingEffects,
+        public DateTimeImmutable $createdAt,
+        public string $stateDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 2474. Checkpoint integrity
+
+Cada checkpoint deberá protegerse contra modificación y duplicación.
+
+---
+
+# 2475. Lifecycle reconciliation
+
+VoltStack deberá reconciliar el estado interno con sistemas externos.
+
+---
+
+# 2476. IdentityLifecycleReconciliationService
+
+```php
+interface IdentityLifecycleReconciliationServiceInterface
+{
+    public function reconcile(
+        IdentityIdentifier $identityId,
+        LifecycleReconciliationContext $context
+    ): LifecycleReconciliationReport;
+}
+```
+
+---
+
+# 2477. LifecycleReconciliationReport
+
+```php
+final readonly class LifecycleReconciliationReport
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public IdentityLifecycleState $expectedState,
+        public array $observedStates,
+        public array $driftItems,
+        public array $recommendedActions,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2478. Reconciliation scopes
+
+La reconciliación deberá revisar:
+
+* identity state;
+* credentials;
+* sessions;
+* roles;
+* groups;
+* downstream accounts;
+* ownership;
+* delegations;
+* tenant memberships;
+* scheduled actions.
+
+---
+
+# 2479. Authoritative lifecycle state
+
+VoltStack deberá definir qué sistema es authoritative para cada aspecto.
+
+---
+
+# 2480. Lifecycle drift detection
+
+El drift ocurre cuando el estado efectivo difiere del estado esperado.
+
+---
+
+# 2481. LifecycleDriftDetector
+
+```php
+interface LifecycleDriftDetectorInterface
+{
+    public function detect(
+        IdentityLifecycleSnapshot $expected,
+        array $observedStates
+    ): LifecycleDriftReport;
+}
+```
+
+---
+
+# 2482. LifecycleDriftCategory
+
+```php
+enum LifecycleDriftCategory: string
+{
+    case StateMismatch = 'state_mismatch';
+    case ResidualCredential = 'residual_credential';
+    case ResidualSession = 'residual_session';
+    case ResidualEntitlement = 'residual_entitlement';
+    case OwnershipMismatch = 'ownership_mismatch';
+    case TenantMismatch = 'tenant_mismatch';
+    case MissingDownstreamAccount = 'missing_downstream_account';
+    case UnexpectedReactivation = 'unexpected_reactivation';
+}
+```
+
+---
+
+# 2483. High-risk drift
+
+Deberán considerarse críticos:
+
+* identidad disabled con sesión activa;
+* acceso privilegiado residual;
+* tenant mismatch;
+* credencial activa después de deletion;
+* owner anterior aún autorizado;
+* cuenta downstream reactivada.
+
+---
+
+# 2484. Automated drift remediation
+
+La remediación automática podrá:
+
+* revocar sesiones;
+* revocar credentials;
+* remover roles;
+* suspender downstream accounts;
+* corregir ownership;
+* colocar identidad en restricted state.
+
+---
+
+# 2485. Manual remediation
+
+Los casos ambiguos deberán generar tareas para revisión humana.
+
+---
+
+# 2486. Lifecycle health monitoring
+
+VoltStack deberá medir la salud operacional del ciclo de vida.
+
+---
+
+# 2487. IdentityLifecycleHealthStatus
+
+```php
+final readonly class IdentityLifecycleHealthStatus
+{
+    public function __construct(
+        public LifecycleHealthState $state,
+        public array $degradedConnectors,
+        public array $stuckExecutions,
+        public array $driftSummary,
+        public array $overdueApprovals,
+        public DateTimeImmutable $assessedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2488. LifecycleHealthState
+
+```php
+enum LifecycleHealthState: string
+{
+    case Healthy = 'healthy';
+    case Degraded = 'degraded';
+    case AtRisk = 'at_risk';
+    case Critical = 'critical';
+    case Recovering = 'recovering';
+}
+```
+
+---
+
+# 2489. Lifecycle health indicators
+
+Indicadores recomendados:
+
+* activation latency;
+* deprovisioning latency;
+* residual access rate;
+* failed transition rate;
+* rollback rate;
+* stuck workflow count;
+* approval expiration rate;
+* reconciliation drift;
+* orphan resource count;
+* reactivation anomalies.
+
+---
+
+# 2490. Lifecycle SLA policies
+
+Deberán definirse SLA por:
+
+* joiner;
+* mover;
+* leaver;
+* emergency disablement;
+* privileged deprovisioning;
+* tenant transfer;
+* ownership transfer;
+* incident suspension.
+
+---
+
+# 2491. Lifecycle governance architecture
+
+La gobernanza deberá definir:
+
+* owners;
+* authoritative sources;
+* transition policies;
+* approval models;
+* retention;
+* exception handling;
+* reconciliation frequency;
+* incident escalation;
+* compliance mappings.
+
+---
+
+# 2492. Lifecycle policy versioning
+
+Toda transición deberá registrar la versión de policy utilizada.
+
+---
+
+# 2493. Lifecycle compliance evidence
+
+VoltStack deberá producir evidencia sobre:
+
+* solicitudes;
+* approvals;
+* transitions;
+* credential revocation;
+* session invalidation;
+* access removal;
+* ownership transfer;
+* downstream verification;
+* rollback;
+* exceptions.
+
+---
+
+# 2494. LifecycleComplianceEvidencePackage
+
+```php
+final readonly class LifecycleComplianceEvidencePackage
+{
+    public function __construct(
+        public string $packageId,
+        public IdentityIdentifier $identityId,
+        public array $transitionRecords,
+        public array $approvalRecords,
+        public array $reconciliationReports,
+        public array $deprovisioningEvidence,
+        public array $exceptions,
+        public DateTimeImmutable $generatedAt,
+        public string $packageDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 2495. Lifecycle exception management
+
+Toda excepción deberá incluir:
+
+* action;
+* identity;
+* tenant;
+* owner;
+* justification;
+* risk acceptance;
+* compensating controls;
+* expiration;
+* review date;
+* approval.
+
+---
+
+# 2496. LifecycleException
+
+```php
+final readonly class LifecycleException
+{
+    public function __construct(
+        public string $exceptionId,
+        public IdentityIdentifier $identityId,
+        public IdentityLifecycleAction $action,
+        public string $tenantId,
+        public string $justification,
+        public array $compensatingControls,
+        public IdentityIdentifier|string $approvedBy,
+        public DateTimeImmutable $expiresAt,
+        public LifecycleExceptionState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2497. LifecycleExceptionState
+
+```php
+enum LifecycleExceptionState: string
+{
+    case Requested = 'requested';
+    case Approved = 'approved';
+    case Active = 'active';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Closed = 'closed';
+}
+```
+
+---
+
+# 2498. Exception expiry enforcement
+
+Una excepción expirada deberá dejar de influir inmediatamente en nuevas decisiones.
+
+---
+
+# 2499. Identity lifecycle audit events
+
+Eventos recomendados:
+
+* `IdentityOwnershipTransferRequested`;
+* `IdentityOwnershipTransferred`;
+* `ResourceOwnershipReassigned`;
+* `OrphanResourceDetected`;
+* `DelegationTransferRequested`;
+* `DelegationTransferred`;
+* `ManagerTransitionStarted`;
+* `ManagerTransitionCompleted`;
+* `TenantTransferExecutionStarted`;
+* `TenantTransferExecutionCompleted`;
+* `TenantTransferExecutionFailed`;
+* `LifecycleApprovalRequested`;
+* `LifecycleApprovalGranted`;
+* `LifecycleApprovalDenied`;
+* `LifecycleTransitionScheduled`;
+* `LifecycleTransitionCancelled`;
+* `LifecycleGracePeriodStarted`;
+* `LifecycleGracePeriodExpired`;
+* `LifecycleRollbackPlanned`;
+* `LifecycleRollbackExecuted`;
+* `CompensatingLifecycleActionExecuted`;
+* `LifecycleDriftDetected`;
+* `LifecycleDriftRemediated`;
+* `LifecycleHealthDegraded`;
+* `LifecycleExceptionApproved`;
+* `LifecycleExceptionExpired`.
+
+---
+
+# 2500. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Ownership Transfer Architecture
+Resource Ownership Reassignment
+Shared Ownership Governance
+Orphan Resource Prevention
+Delegation Transfer
+Delegation Succession
+Manager Transition
+Hierarchy Cycle Prevention
+Tenant Transfer Execution
+Cross-Tenant Identity Migration
+Credential Reissuance
+Session Isolation During Transfer
+Lifecycle Approval Workflows
+Self-Approval Prevention
+Dual-Control Lifecycle Actions
+Lifecycle Scheduling
+Effective-Date Transitions
+Grace Periods
+Lifecycle Cancellation
+Lifecycle Rollback Architecture
+Compensating Lifecycle Actions
+Saga-Based Lifecycle Orchestration
+Execution Checkpoints
+Lifecycle Reconciliation
+Lifecycle Drift Detection
+Automated Drift Remediation
+Lifecycle Health Monitoring
+Lifecycle SLA Policies
+Lifecycle Governance
+Lifecycle Compliance Evidence
+Lifecycle Exception Management
+Lifecycle Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 26
+
+- Identity proofing architecture
+- Proofing assurance levels
+- Evidence collection
+- Evidence verification
+- Authoritative source checks
+- Document verification
+- Biometric verification boundaries
+- Remote identity proofing
+- In-person proofing
+- Liveness detection
+- Fraud signal correlation
+- Synthetic identity detection
+- Identity proofing vendors
+- Proofing result portability
+- Proofing evidence retention
+- Re-proofing
+- Proofing revocation
+- Proofing incident response
+- Proofing governance
+- Proofing audit events
+```
