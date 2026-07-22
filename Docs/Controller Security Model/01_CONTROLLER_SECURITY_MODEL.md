@@ -1,6 +1,5 @@
 # Controller Security Model - Part 1: Security Foundations & Threat Model
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Security`

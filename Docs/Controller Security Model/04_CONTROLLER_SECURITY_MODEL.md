@@ -1,6 +1,5 @@
 # Controller Security Model - Part 04: Transport & Response Security
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Security\Transport`

@@ -1,6 +1,5 @@
 # Controller Security Model - Part 02: Runtime & Controller Security
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Security\Runtime`
