@@ -33355,3 +33355,2523 @@ Entrega 26
 - Proofing governance
 - Proofing audit events
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 26 de varias
+**Cobertura:** Secciones **2501–2600**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 25`
+
+---
+
+# 2501. Identity Proofing Architecture
+
+VoltStack deberá incorporar un subsistema especializado para **Identity Proofing**, responsable de establecer el nivel de confianza inicial y continuo sobre una identidad antes de habilitar autenticación, autorización o asignación de privilegios.
+
+Este subsistema deberá ser independiente del mecanismo de autenticación y reutilizable por:
+
+* onboarding;
+* recuperación de cuenta;
+* elevación de privilegios;
+* acceso privilegiado;
+* federación;
+* migraciones;
+* transferencias entre tenants;
+* reactivaciones;
+* operaciones regulatorias.
+
+---
+
+# 2502. Identity proofing objectives
+
+El sistema deberá garantizar:
+
+* verificación de identidad;
+* autenticidad del sujeto;
+* unicidad razonable;
+* resistencia al fraude;
+* trazabilidad;
+* evidencia verificable;
+* cumplimiento regulatorio;
+* mínima fricción compatible con el riesgo;
+* independencia de proveedores.
+
+---
+
+# 2503. Identity proofing threat model
+
+Deberán contemplarse amenazas como:
+
+* identidad sintética;
+* robo de identidad;
+* documentos falsificados;
+* deepfakes;
+* biometría manipulada;
+* cuentas alquiladas;
+* ataques de ingeniería social;
+* collusion;
+* insiders;
+* reutilización de evidencias;
+* replay de verificaciones;
+* fraude documental.
+
+---
+
+# 2504. Identity proofing pipeline
+
+```text
+Identity Request
+      ↓
+Evidence Collection
+      ↓
+Evidence Normalization
+      ↓
+Authenticity Validation
+      ↓
+Authoritative Source Verification
+      ↓
+Risk Evaluation
+      ↓
+Fraud Detection
+      ↓
+Assurance Scoring
+      ↓
+Approval Decision
+      ↓
+Evidence Preservation
+```
+
+---
+
+# 2505. IdentityProofingService
+
+```php
+interface IdentityProofingServiceInterface
+{
+    public function start(
+        IdentityProofingRequest $request
+    ): IdentityProofingSession;
+
+    public function evaluate(
+        IdentityProofingSession $session
+    ): IdentityProofingDecision;
+
+    public function revoke(
+        IdentityProofingRecord $record,
+        IdentityProofingRevocationRequest $request
+    ): void;
+}
+```
+
+---
+
+# 2506. IdentityProofingRequest
+
+```php
+final readonly class IdentityProofingRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public IdentityProofingLevel $requiredLevel,
+        public array $acceptedEvidenceTypes,
+        public string $purpose,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {}
+}
+```
+
+---
+
+# 2507. IdentityProofingLevel
+
+```php
+enum IdentityProofingLevel: string
+{
+    case Basic='basic';
+    case Standard='standard';
+    case High='high';
+    case VeryHigh='very_high';
+    case Regulated='regulated';
+}
+```
+
+---
+
+# 2508. Assurance philosophy
+
+El nivel de assurance deberá depender del riesgo de la operación y no únicamente del tipo de usuario.
+
+---
+
+# 2509. Proofing domains
+
+La evaluación podrá abarcar:
+
+* identidad legal;
+* identidad laboral;
+* identidad académica;
+* identidad técnica;
+* identidad federada;
+* identidad gubernamental;
+* identidad organizacional.
+
+---
+
+# 2510. Assurance requirements
+
+Cada nivel deberá definir:
+
+* evidencias mínimas;
+* verificaciones obligatorias;
+* score mínimo;
+* duración;
+* revisiones periódicas.
+
+---
+
+# 2511. IdentityProofingSession
+
+```php
+final readonly class IdentityProofingSession
+{
+    public function __construct(
+        public string $sessionId,
+        public IdentityIdentifier $identityId,
+        public IdentityProofingLevel $requiredLevel,
+        public IdentityProofingState $state,
+        public array $collectedEvidence,
+        public DateTimeImmutable $startedAt,
+    ) {}
+}
+```
+
+---
+
+# 2512. IdentityProofingState
+
+```php
+enum IdentityProofingState:string
+{
+    case Pending='pending';
+    case CollectingEvidence='collecting';
+    case Evaluating='evaluating';
+    case Approved='approved';
+    case Rejected='rejected';
+    case Expired='expired';
+    case Revoked='revoked';
+}
+```
+
+---
+
+# 2513. Evidence collection principles
+
+La recolección deberá cumplir:
+
+* minimización;
+* consentimiento cuando aplique;
+* cifrado;
+* provenance;
+* clasificación;
+* integridad;
+* expiración.
+
+---
+
+# 2514. IdentityEvidence
+
+```php
+final readonly class IdentityEvidence
+{
+    public function __construct(
+        public string $evidenceId,
+        public IdentityEvidenceType $type,
+        public MessageClassification $classification,
+        public string $storageReference,
+        public string $digest,
+        public DateTimeImmutable $collectedAt,
+    ) {}
+}
+```
+
+---
+
+# 2515. IdentityEvidenceType
+
+```php
+enum IdentityEvidenceType:string
+{
+    case Email='email';
+    case Phone='phone';
+    case Passport='passport';
+    case NationalId='national_id';
+    case DriverLicense='driver_license';
+    case EmployeeRecord='employee_record';
+    case GovernmentAssertion='government_assertion';
+    case FederationAssertion='federation_assertion';
+    case OrganizationRecord='organization_record';
+    case ManualReview='manual_review';
+}
+```
+
+---
+
+# 2516. Evidence normalization
+
+Las evidencias deberán convertirse a un modelo interno uniforme antes de evaluarse.
+
+---
+
+# 2517. Evidence integrity
+
+Toda evidencia deberá poseer:
+
+* digest;
+* provenance;
+* timestamp;
+* collector;
+* classification;
+* retention profile.
+
+---
+
+# 2518. Evidence authenticity
+
+La autenticidad deberá evaluarse independientemente de la validez del documento.
+
+---
+
+# 2519. Evidence provenance
+
+Cada evidencia deberá indicar:
+
+* origen;
+* método de captura;
+* canal;
+* dispositivo;
+* operador;
+* proveedor.
+
+---
+
+# 2520. Evidence trust model
+
+No todas las evidencias tendrán el mismo peso dentro del score final.
+
+---
+
+# 2521. IdentityEvidenceWeight
+
+```php
+final readonly class IdentityEvidenceWeight
+{
+    public function __construct(
+        public IdentityEvidenceType $type,
+        public float $weight,
+        public bool $requiresSecondaryValidation,
+    ) {}
+}
+```
+
+---
+
+# 2522. Evidence expiration
+
+Determinadas evidencias deberán expirar automáticamente.
+
+---
+
+# 2523. Reusable evidence
+
+Algunas evidencias podrán reutilizarse mientras permanezcan vigentes y no hayan sido revocadas.
+
+---
+
+# 2524. IdentityEvidenceRepository
+
+```php
+interface IdentityEvidenceRepositoryInterface
+{
+    public function save(IdentityEvidence $evidence): void;
+
+    public function findValidEvidence(
+        IdentityIdentifier $identity
+    ): array;
+}
+```
+
+---
+
+# 2525. Authoritative sources
+
+Las verificaciones deberán poder realizarse contra:
+
+* HR;
+* ERP;
+* directorios;
+* proveedores federados;
+* registros oficiales;
+* bases regulatorias.
+
+---
+
+# 2526. AuthoritativeSourceType
+
+```php
+enum AuthoritativeSourceType:string
+{
+    case InternalHR='internal_hr';
+    case Government='government';
+    case Federation='federation';
+    case EnterpriseDirectory='enterprise_directory';
+    case RegulatoryAuthority='regulatory_authority';
+}
+```
+
+---
+
+# 2527. Authoritative source validation
+
+Las respuestas deberán validarse mediante:
+
+* autenticidad;
+* freshness;
+* firma;
+* canal seguro;
+* integridad.
+
+---
+
+# 2528. Source availability
+
+La indisponibilidad de una fuente no deberá generar automáticamente aprobación.
+
+---
+
+# 2529. Multi-source verification
+
+Las operaciones críticas podrán requerir múltiples fuentes independientes.
+
+---
+
+# 2530. Evidence correlation
+
+El motor deberá correlacionar inconsistencias entre evidencias.
+
+---
+
+# 2531. IdentityEvidenceCorrelation
+
+```php
+final readonly class IdentityEvidenceCorrelation
+{
+    public function __construct(
+        public array $matchedEvidence,
+        public array $conflicts,
+        public float $confidence,
+    ) {}
+}
+```
+
+---
+
+# 2532. Document verification
+
+Los documentos deberán verificarse respecto a:
+
+* formato;
+* integridad;
+* vigencia;
+* autenticidad;
+* alteraciones.
+
+---
+
+# 2533. Document fraud indicators
+
+Ejemplos:
+
+* OCR inconsistente;
+* metadatos alterados;
+* imágenes recompuestas;
+* zonas manipuladas;
+* firmas inválidas.
+
+---
+
+# 2534. DocumentVerificationDecision
+
+```php
+final readonly class DocumentVerificationDecision
+{
+    public function __construct(
+        public bool $valid,
+        public float $confidence,
+        public array $fraudIndicators,
+    ) {}
+}
+```
+
+---
+
+# 2535. Manual verification
+
+La revisión manual deberá quedar completamente auditada.
+
+---
+
+# 2536. Reviewer independence
+
+El revisor no deberá ser el solicitante.
+
+---
+
+# 2537. Manual review evidence
+
+Las decisiones manuales deberán registrar:
+
+* revisor;
+* evidencia consultada;
+* razonamiento;
+* timestamp;
+* herramientas utilizadas.
+
+---
+
+# 2538. Biometric verification boundaries
+
+VoltStack no impondrá biometría.
+
+La biometría será un proveedor opcional.
+
+---
+
+# 2539. Biometric abstraction
+
+```php
+interface BiometricVerificationProviderInterface
+{
+    public function verify(
+        BiometricVerificationRequest $request
+    ): BiometricVerificationResult;
+}
+```
+
+---
+
+# 2540. Biometric privacy
+
+Nunca deberán almacenarse plantillas biométricas salvo política explícita.
+
+---
+
+# 2541. Remote identity proofing
+
+La verificación remota deberá minimizar riesgo de spoofing.
+
+---
+
+# 2542. Remote proofing controls
+
+Podrán utilizarse:
+
+* videoconferencia;
+* documentos dinámicos;
+* challenge-response;
+* certificados;
+* firmas;
+* canales secundarios.
+
+---
+
+# 2543. Remote session integrity
+
+La sesión remota deberá estar protegida contra replay.
+
+---
+
+# 2544. In-person proofing
+
+La verificación presencial podrá registrar:
+
+* operador;
+* ubicación;
+* evidencias revisadas;
+* resultado.
+
+---
+
+# 2545. InPersonProofingRecord
+
+```php
+final readonly class InPersonProofingRecord
+{
+    public function __construct(
+        public string $recordId,
+        public string $operatorId,
+        public string $locationId,
+        public array $reviewedEvidence,
+        public DateTimeImmutable $verifiedAt,
+    ) {}
+}
+```
+
+---
+
+# 2546. Liveness detection
+
+La detección de presencia deberá desacoplarse del proveedor biométrico.
+
+---
+
+# 2547. LivenessAssessment
+
+```php
+final readonly class LivenessAssessment
+{
+    public function __construct(
+        public bool $passed,
+        public float $confidence,
+        public array $signals,
+    ) {}
+}
+```
+
+---
+
+# 2548. Anti-spoofing
+
+Los proveedores deberán informar:
+
+* replay attempts;
+* deepfake suspicion;
+* synthetic media indicators.
+
+---
+
+# 2549. Fraud signal correlation
+
+Las señales deberán combinar:
+
+* dispositivo;
+* geografía;
+* comportamiento;
+* documentos;
+* directorios;
+* identidad histórica.
+
+---
+
+# 2550. FraudCorrelationEngine
+
+```php
+interface FraudCorrelationEngineInterface
+{
+    public function correlate(
+        IdentityProofingSession $session
+    ): FraudCorrelationResult;
+}
+```
+
+---
+
+# 2551. FraudCorrelationResult
+
+```php
+final readonly class FraudCorrelationResult
+{
+    public function __construct(
+        public float $riskScore,
+        public array $signals,
+        public array $recommendations,
+    ) {}
+}
+```
+
+---
+
+# 2552. Synthetic identity detection
+
+El sistema deberá identificar patrones compatibles con identidades sintéticas.
+
+---
+
+# 2553. Synthetic identity indicators
+
+Ejemplos:
+
+* atributos incompatibles;
+* historiales imposibles;
+* documentos inconsistentes;
+* múltiples dispositivos;
+* múltiples identidades relacionadas.
+
+---
+
+# 2554. Proofing risk engine
+
+La decisión final deberá considerar:
+
+* fraude;
+* assurance;
+* evidencia;
+* contexto;
+* tenant;
+* operación solicitada.
+
+---
+
+# 2555. IdentityProofingDecision
+
+```php
+final readonly class IdentityProofingDecision
+{
+    public function __construct(
+        public bool $approved,
+        public IdentityProofingLevel $achievedLevel,
+        public float $confidence,
+        public array $conditions,
+        public array $evidence,
+        public array $denialReasons,
+    ) {}
+}
+```
+
+---
+
+# 2556. Conditional approvals
+
+La aprobación podrá requerir:
+
+* MFA obligatorio;
+* revisión posterior;
+* acceso restringido;
+* expiración reducida.
+
+---
+
+# 2557. Vendor abstraction
+
+VoltStack deberá desacoplar completamente proveedores de proofing.
+
+---
+
+# 2558. IdentityProofingProvider
+
+```php
+interface IdentityProofingProviderInterface
+{
+    public function execute(
+        IdentityProofingSession $session
+    ): IdentityProofingProviderResult;
+}
+```
+
+---
+
+# 2559. Multi-vendor strategy
+
+Podrán utilizarse múltiples proveedores para incrementar confianza.
+
+---
+
+# 2560. Vendor independence
+
+La sustitución de proveedor no deberá afectar el dominio interno.
+
+---
+
+# 2561. Proofing portability
+
+Los resultados deberán poder exportarse mediante un formato canónico.
+
+---
+
+# 2562. PortableProofingRecord
+
+```php
+final readonly class PortableProofingRecord
+{
+    public function __construct(
+        public string $proofingId,
+        public IdentityProofingLevel $level,
+        public array $evidenceReferences,
+        public float $confidence,
+        public DateTimeImmutable $verifiedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {}
+}
+```
+
+---
+
+# 2563. Proofing evidence retention
+
+Cada tipo de evidencia deberá definir:
+
+* retención;
+* destrucción;
+* archivado;
+* anonimización.
+
+---
+
+# 2564. Retention minimization
+
+No deberá conservarse evidencia más allá de lo requerido.
+
+---
+
+# 2565. Re-proofing
+
+Las identidades podrán requerir nueva verificación por:
+
+* expiración;
+* cambio de riesgo;
+* incidente;
+* privilegio elevado;
+* cambio regulatorio.
+
+---
+
+# 2566. ReProofingRequest
+
+```php
+final readonly class ReProofingRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $reason,
+        public IdentityProofingLevel $requiredLevel,
+        public DateTimeImmutable $requestedAt,
+    ) {}
+}
+```
+
+---
+
+# 2567. Continuous proofing
+
+La confianza podrá disminuir con el tiempo.
+
+---
+
+# 2568. Proofing score decay
+
+El assurance podrá degradarse progresivamente cuando no existan nuevas verificaciones.
+
+---
+
+# 2569. Proofing revocation
+
+Los resultados podrán revocarse por:
+
+* fraude;
+* error;
+* evidencia falsa;
+* proveedor comprometido;
+* incidente.
+
+---
+
+# 2570. IdentityProofingRevocationRequest
+
+```php
+final readonly class IdentityProofingRevocationRequest
+{
+    public function __construct(
+        public string $reason,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {}
+}
+```
+
+---
+
+# 2571. Revocation side effects
+
+La revocación podrá:
+
+* suspender identidad;
+* invalidar privilegios;
+* requerir re-proofing;
+* iniciar investigación.
+
+---
+
+# 2572. Revocation propagation
+
+La revocación deberá propagarse a sistemas dependientes.
+
+---
+
+# 2573. Proofing incident response
+
+Los incidentes deberán poder iniciarse automáticamente.
+
+---
+
+# 2574. Incident triggers
+
+Ejemplos:
+
+* proveedor comprometido;
+* fraude detectado;
+* evidencia manipulada;
+* identidad sintética;
+* deepfake confirmado.
+
+---
+
+# 2575. Vendor compromise
+
+Un proveedor comprometido podrá invalidar verificaciones emitidas durante una ventana temporal.
+
+---
+
+# 2576. Proofing reassessment
+
+Las verificaciones afectadas deberán reevaluarse.
+
+---
+
+# 2577. Evidence chain of custody
+
+Toda evidencia deberá mantener cadena de custodia.
+
+---
+
+# 2578. Evidence transfer audit
+
+Toda transferencia deberá auditarse.
+
+---
+
+# 2579. Proofing governance
+
+La gobernanza deberá definir:
+
+* niveles;
+* proveedores;
+* políticas;
+* retención;
+* excepciones;
+* métricas.
+
+---
+
+# 2580. Governance ownership
+
+Deberán existir responsables claros para:
+
+* proofing;
+* fraude;
+* privacidad;
+* auditoría.
+
+---
+
+# 2581. Proofing metrics
+
+Métricas sugeridas:
+
+* approval rate;
+* rejection rate;
+* fraud detection;
+* false positives;
+* re-proofing rate.
+
+---
+
+# 2582. SLA
+
+Cada nivel de proofing podrá definir SLA diferentes.
+
+---
+
+# 2583. Compliance mappings
+
+El sistema deberá mapear controles hacia:
+
+* NIST 800-63;
+* ISO 27001;
+* ISO 29115;
+* SOC2;
+* GDPR;
+* HIPAA cuando aplique.
+
+---
+
+# 2584. Privacy by design
+
+El proofing deberá diseñarse bajo principios de minimización.
+
+---
+
+# 2585. Explainability
+
+Las decisiones automatizadas deberán ser explicables cuando sea posible.
+
+---
+
+# 2586. Human override
+
+Las decisiones automáticas podrán revisarse manualmente bajo políticas definidas.
+
+---
+
+# 2587. Transparency
+
+El sujeto podrá conocer, cuando la regulación lo permita:
+
+* estado;
+* resultado;
+* expiración;
+* revisiones.
+
+---
+
+# 2588. Appeals
+
+Las decisiones negativas deberán admitir procesos de apelación.
+
+---
+
+# 2589. Appeal workflow
+
+La apelación deberá ser independiente del evaluador inicial.
+
+---
+
+# 2590. Appeal evidence
+
+La evidencia adicional deberá conservar provenance.
+
+---
+
+# 2591. Audit logging
+
+Toda operación deberá auditarse.
+
+---
+
+# 2592. Audit events
+
+Eventos recomendados:
+
+* `IdentityProofingStarted`
+* `EvidenceCollected`
+* `EvidenceVerified`
+* `DocumentValidated`
+* `FraudDetected`
+* `IdentityApproved`
+* `IdentityRejected`
+* `IdentityReProofingStarted`
+* `IdentityProofingRevoked`
+
+---
+
+# 2593. Long-term integrity
+
+Los registros deberán protegerse mediante hashes y firmas.
+
+---
+
+# 2594. Cryptographic verification
+
+Las evidencias firmadas deberán verificarse antes de aceptarse.
+
+---
+
+# 2595. Future algorithm migration
+
+El modelo deberá soportar migración criptográfica.
+
+---
+
+# 2596. Testing strategy
+
+El sistema deberá incluir:
+
+* pruebas unitarias;
+* integración;
+* fraude simulado;
+* chaos testing;
+* fuzzing documental.
+
+---
+
+# 2597. Extensibility
+
+Nuevos proveedores deberán integrarse mediante plugins.
+
+---
+
+# 2598. Performance considerations
+
+El proofing deberá ser asincrónico cuando la operación lo permita.
+
+---
+
+# 2599. Security recommendations
+
+Nunca confiar en una única evidencia ni en un único proveedor para operaciones de alto riesgo.
+
+---
+
+# 2600. Resultado de esta entrega
+
+Esta entrega incorpora:
+
+```text
+Identity Proofing Architecture
+Proofing Assurance Levels
+Evidence Collection
+Evidence Verification
+Evidence Correlation
+Authoritative Source Validation
+Document Verification
+Biometric Provider Abstraction
+Remote Identity Proofing
+In-Person Proofing
+Liveness Detection
+Fraud Correlation
+Synthetic Identity Detection
+Vendor Abstraction
+Portable Proofing Records
+Evidence Retention
+Continuous Re-Proofing
+Proofing Revocation
+Proofing Incident Response
+Proofing Governance
+Compliance Mapping
+Appeal Workflows
+Audit Events
+Performance Model
+Testing Strategy
+```
+
+**La Entrega 27 continuará con:**
+
+* Identity Recovery Architecture
+* Secure Account Recovery
+* Recovery Assurance Levels
+* Recovery Tokens
+* Recovery Secrets
+* Recovery Contacts
+* Recovery Devices
+* Recovery Escrow
+* Identity Resurrection Prevention
+* Recovery Fraud Detection
+* Recovery Session Security
+* Recovery Approval Workflows
+* Privileged Account Recovery
+* Break Glass Recovery
+* Recovery Governance
+* Recovery Compliance
+* Recovery Incident Response
+* Recovery Audit Events
+* Recovery Metrics
+* Recovery Roadmap
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 27 de varias
+**Cobertura:** Secciones **2601–2700**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 26`
+
+---
+
+# 2601. Identity Recovery Architecture
+
+VoltStack deberá incorporar una arquitectura formal para recuperar identidades cuando el sujeto legítimo pierde acceso a:
+
+* credenciales;
+* factores MFA;
+* dispositivos confiables;
+* cuentas federadas;
+* recovery secrets;
+* certificados;
+* passkeys;
+* canales de contacto;
+* cuentas privilegiadas.
+
+La recuperación deberá tratarse como una nueva verificación de confianza y no como un simple restablecimiento de contraseña.
+
+---
+
+# 2602. Identity recovery security goals
+
+El subsistema deberá garantizar:
+
+* recuperación del sujeto legítimo;
+* resistencia a account takeover;
+* assurance proporcional al riesgo;
+* aislamiento de sesiones;
+* invalidación de credenciales comprometidas;
+* trazabilidad;
+* reversibilidad limitada;
+* mínima exposición de información;
+* notificación independiente;
+* cumplimiento regulatorio.
+
+---
+
+# 2603. Recovery threat model
+
+Deberán contemplarse:
+
+* robo de correo;
+* SIM swapping;
+* ingeniería social;
+* abuso de soporte;
+* recovery token theft;
+* recovery contact compromise;
+* insider threat;
+* bypass de MFA;
+* deepfake;
+* recuperación de cuentas eliminadas;
+* credential stuffing;
+* session fixation;
+* explotación de respuestas de seguridad;
+* takeover de cuentas privilegiadas;
+* abuso de break-glass.
+
+---
+
+# 2604. Recovery trust principle
+
+Una recuperación no deberá tener menos assurance que el nivel requerido para operar la identidad recuperada.
+
+---
+
+# 2605. Recovery pipeline
+
+```text
+Recovery Request
+      ↓
+Identity Discovery
+      ↓
+Risk and Context Assessment
+      ↓
+Recovery Method Resolution
+      ↓
+Evidence Collection
+      ↓
+Recovery Proofing
+      ↓
+Approval and Policy Evaluation
+      ↓
+Credential Reset
+      ↓
+Session Revocation
+      ↓
+Access Restriction
+      ↓
+Post-Recovery Monitoring
+```
+
+---
+
+# 2606. IdentityRecoveryService
+
+```php
+interface IdentityRecoveryServiceInterface
+{
+    public function start(
+        IdentityRecoveryRequest $request
+    ): IdentityRecoverySession;
+
+    public function verify(
+        IdentityRecoverySession $session,
+        RecoveryEvidenceBundle $evidence
+    ): IdentityRecoveryDecision;
+
+    public function complete(
+        IdentityRecoverySession $session,
+        IdentityRecoveryDecision $decision
+    ): IdentityRecoveryResult;
+}
+```
+
+---
+
+# 2607. IdentityRecoveryRequest
+
+```php
+final readonly class IdentityRecoveryRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier|string $claimedIdentity,
+        public string $tenantId,
+        public RecoveryReason $reason,
+        public RecoveryChannel $initiatedThrough,
+        public array $context,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2608. RecoveryReason
+
+```php
+enum RecoveryReason: string
+{
+    case PasswordLost = 'password_lost';
+    case MfaDeviceLost = 'mfa_device_lost';
+    case PasskeyLost = 'passkey_lost';
+    case AccountLocked = 'account_locked';
+    case FederatedAccessLost = 'federated_access_lost';
+    case DeviceCompromised = 'device_compromised';
+    case CredentialCompromise = 'credential_compromise';
+    case AdministrativeRecovery = 'administrative_recovery';
+    case PrivilegedRecovery = 'privileged_recovery';
+}
+```
+
+---
+
+# 2609. RecoveryChannel
+
+```php
+enum RecoveryChannel: string
+{
+    case SelfService = 'self_service';
+    case Support = 'support';
+    case Administrator = 'administrator';
+    case InPerson = 'in_person';
+    case Federated = 'federated';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 2610. Recovery assurance levels
+
+VoltStack deberá definir niveles explícitos de assurance de recuperación.
+
+---
+
+# 2611. RecoveryAssuranceLevel
+
+```php
+enum RecoveryAssuranceLevel: string
+{
+    case Low = 'low';
+    case Standard = 'standard';
+    case High = 'high';
+    case Privileged = 'privileged';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 2612. Recovery assurance inputs
+
+El nivel requerido deberá depender de:
+
+* identity type;
+* tenant;
+* privilegios;
+* data sensitivity;
+* recovery reason;
+* risk score;
+* last trusted authentication;
+* compromised factors;
+* active incident state;
+* regulatory requirements.
+
+---
+
+# 2613. Recovery policy engine
+
+```php
+interface IdentityRecoveryPolicyEngineInterface
+{
+    public function evaluate(
+        IdentityRecoveryRequest $request,
+        IdentityRecoveryContext $context
+    ): IdentityRecoveryPolicyDecision;
+}
+```
+
+---
+
+# 2614. IdentityRecoveryPolicyDecision
+
+```php
+final readonly class IdentityRecoveryPolicyDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public RecoveryAssuranceLevel $requiredAssurance,
+        public array $allowedMethods,
+        public array $prohibitedMethods,
+        public array $requiredApprovals,
+        public array $postRecoveryRestrictions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 2615. Identity discovery security
+
+El proceso no deberá revelar si una identidad existe mediante respuestas distinguibles.
+
+---
+
+# 2616. Enumeration resistance
+
+Las respuestas públicas deberán evitar revelar:
+
+* cuenta existente;
+* email registrado;
+* teléfono registrado;
+* tenant membership;
+* identity state;
+* MFA methods;
+* privileged status.
+
+---
+
+# 2617. Recovery session
+
+Toda operación deberá ejecutarse dentro de una sesión de recuperación aislada.
+
+---
+
+# 2618. IdentityRecoverySession
+
+```php
+final readonly class IdentityRecoverySession
+{
+    public function __construct(
+        public string $sessionId,
+        public IdentityIdentifier $identityId,
+        public RecoveryAssuranceLevel $requiredAssurance,
+        public IdentityRecoveryState $state,
+        public array $allowedMethods,
+        public array $completedChallenges,
+        public DateTimeImmutable $createdAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2619. IdentityRecoveryState
+
+```php
+enum IdentityRecoveryState: string
+{
+    case Initiated = 'initiated';
+    case Challenging = 'challenging';
+    case PendingReview = 'pending_review';
+    case Approved = 'approved';
+    case Rejected = 'rejected';
+    case Completing = 'completing';
+    case Completed = 'completed';
+    case Expired = 'expired';
+    case Cancelled = 'cancelled';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 2620. Recovery session isolation
+
+La recovery session no deberá compartir:
+
+* session cookie principal;
+* authentication context;
+* CSRF token;
+* authorization state;
+* device trust;
+* privileged session.
+
+---
+
+# 2621. Recovery session binding
+
+La sesión deberá ligarse, cuando sea seguro, a:
+
+* browser instance;
+* device;
+* network risk context;
+* nonce;
+* proofing transaction;
+* requested identity;
+* tenant.
+
+---
+
+# 2622. Recovery session expiration
+
+Las sesiones deberán ser breves y expirar por:
+
+* tiempo;
+* inactividad;
+* cambio de dispositivo;
+* cambio de red de alto riesgo;
+* exceso de intentos;
+* incidente;
+* completion.
+
+---
+
+# 2623. Recovery session rotation
+
+El identificador de sesión deberá rotarse después de cada transición de assurance significativa.
+
+---
+
+# 2624. Recovery token architecture
+
+Los recovery tokens deberán ser:
+
+* aleatorios;
+* de un solo uso;
+* con expiración corta;
+* vinculados a propósito;
+* vinculados a identidad;
+* revocables;
+* almacenados mediante hash;
+* resistentes a replay.
+
+---
+
+# 2625. RecoveryToken
+
+```php
+final readonly class RecoveryToken
+{
+    public function __construct(
+        public string $tokenId,
+        public IdentityIdentifier $identityId,
+        public RecoveryTokenPurpose $purpose,
+        public string $tokenHash,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public RecoveryTokenState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2626. RecoveryTokenPurpose
+
+```php
+enum RecoveryTokenPurpose: string
+{
+    case StartRecovery = 'start_recovery';
+    case VerifyChannel = 'verify_channel';
+    case ResetCredential = 'reset_credential';
+    case EnrollNewFactor = 'enroll_new_factor';
+    case ApproveRecovery = 'approve_recovery';
+    case CancelRecovery = 'cancel_recovery';
+}
+```
+
+---
+
+# 2627. RecoveryTokenState
+
+```php
+enum RecoveryTokenState: string
+{
+    case Active = 'active';
+    case Used = 'used';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Compromised = 'compromised';
+}
+```
+
+---
+
+# 2628. Token lookup resistance
+
+El almacenamiento deberá impedir recuperar el token plaintext desde la base de datos.
+
+---
+
+# 2629. Token replay prevention
+
+El consumo deberá ser atómico y marcar el token como usado antes de ejecutar efectos sensibles.
+
+---
+
+# 2630. Recovery link security
+
+Los enlaces no deberán incluir:
+
+* datos personales;
+* tenant names sensibles;
+* privilegios;
+* estado de cuenta;
+* tokens reutilizables;
+* credenciales.
+
+---
+
+# 2631. Recovery secrets
+
+Los recovery secrets podrán utilizarse como factor complementario, nunca como única prueba para operaciones críticas.
+
+---
+
+# 2632. RecoverySecret
+
+```php
+final readonly class RecoverySecret
+{
+    public function __construct(
+        public string $secretId,
+        public IdentityIdentifier $identityId,
+        public RecoverySecretType $type,
+        public string $secretHash,
+        public RecoverySecretState $state,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2633. RecoverySecretType
+
+```php
+enum RecoverySecretType: string
+{
+    case BackupCode = 'backup_code';
+    case RecoveryPhrase = 'recovery_phrase';
+    case EscrowedSecret = 'escrowed_secret';
+    case OrganizationIssuedCode = 'organization_issued_code';
+}
+```
+
+---
+
+# 2634. Security questions prohibition
+
+VoltStack no deberá recomendar preguntas de seguridad basadas en información personal fácilmente descubrible.
+
+---
+
+# 2635. Backup codes
+
+Los códigos deberán:
+
+* ser de un solo uso;
+* almacenarse con hash;
+* poder revocarse;
+* regenerarse como conjunto;
+* invalidar el conjunto anterior;
+* auditar su consumo.
+
+---
+
+# 2636. Recovery contacts
+
+Una identidad podrá registrar contactos de recuperación bajo policy.
+
+---
+
+# 2637. RecoveryContact
+
+```php
+final readonly class RecoveryContact
+{
+    public function __construct(
+        public string $contactId,
+        public IdentityIdentifier $ownerIdentityId,
+        public IdentityIdentifier|string $contactIdentity,
+        public RecoveryContactType $type,
+        public RecoveryContactState $state,
+        public DateTimeImmutable $verifiedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2638. RecoveryContactType
+
+```php
+enum RecoveryContactType: string
+{
+    case Personal = 'personal';
+    case Manager = 'manager';
+    case Administrator = 'administrator';
+    case SecurityOfficer = 'security_officer';
+    case Organization = 'organization';
+}
+```
+
+---
+
+# 2639. Recovery contact safeguards
+
+El contacto no deberá:
+
+* recuperar su propia cuenta mediante sí mismo;
+* aprobar si tiene conflicto;
+* conocer credenciales;
+* recibir acceso automático;
+* ampliar el alcance solicitado.
+
+---
+
+# 2640. Recovery contact verification
+
+Los contactos deberán verificarse antes de ser aceptados y periódicamente después.
+
+---
+
+# 2641. Contact change cooling period
+
+Cambiar un recovery contact deberá activar un periodo de enfriamiento antes de poder usarlo.
+
+---
+
+# 2642. Recovery devices
+
+Los dispositivos previamente confiables podrán aportar señales, pero no garantizar recuperación por sí solos.
+
+---
+
+# 2643. RecoveryDeviceRecord
+
+```php
+final readonly class RecoveryDeviceRecord
+{
+    public function __construct(
+        public string $deviceId,
+        public IdentityIdentifier $identityId,
+        public DeviceTrustLevel $trustLevel,
+        public DateTimeImmutable $lastTrustedAt,
+        public RecoveryDeviceState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2644. RecoveryDeviceState
+
+```php
+enum RecoveryDeviceState: string
+{
+    case Trusted = 'trusted';
+    case Unknown = 'unknown';
+    case Lost = 'lost';
+    case Compromised = 'compromised';
+    case Revoked = 'revoked';
+}
+```
+
+---
+
+# 2645. Device signal limitations
+
+La posesión de una cookie o fingerprint no deberá interpretarse como prueba suficiente de identidad.
+
+---
+
+# 2646. Recovery escrow
+
+VoltStack podrá soportar escrow institucional para identidades empresariales.
+
+---
+
+# 2647. RecoveryEscrowRecord
+
+```php
+final readonly class RecoveryEscrowRecord
+{
+    public function __construct(
+        public string $escrowId,
+        public IdentityIdentifier $identityId,
+        public string $custodianId,
+        public string $encryptedMaterialReference,
+        public array $releaseConditions,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2648. Escrow release policy
+
+La liberación deberá requerir:
+
+* identidad del custodio;
+* approvals;
+* purpose binding;
+* incident check;
+* audit;
+* dual control cuando aplique.
+
+---
+
+# 2649. Recovery evidence bundle
+
+```php
+final readonly class RecoveryEvidenceBundle
+{
+    public function __construct(
+        public array $proofingEvidence,
+        public array $possessionEvidence,
+        public array $organizationalEvidence,
+        public array $approvalEvidence,
+        public array $riskSignals,
+    ) {
+    }
+}
+```
+
+---
+
+# 2650. Recovery proofing
+
+La recuperación deberá reutilizar la arquitectura de identity proofing definida en la Entrega 26.
+
+---
+
+# 2651. Recovery proofing differences
+
+El proofing de recuperación deberá considerar:
+
+* factores posiblemente comprometidos;
+* información histórica;
+* comportamiento previo;
+* último acceso confiable;
+* cambios recientes;
+* riesgo de coerción;
+* canales perdidos.
+
+---
+
+# 2652. Evidence independence
+
+Para assurance alto deberán utilizarse pruebas independientes entre sí.
+
+---
+
+# 2653. Channel independence
+
+Dos desafíos enviados al mismo correo comprometido no deberán contarse como dos factores independientes.
+
+---
+
+# 2654. Recovery risk engine
+
+```php
+interface IdentityRecoveryRiskEngineInterface
+{
+    public function assess(
+        IdentityRecoverySession $session,
+        RecoveryEvidenceBundle $evidence
+    ): IdentityRecoveryRiskAssessment;
+}
+```
+
+---
+
+# 2655. IdentityRecoveryRiskAssessment
+
+```php
+final readonly class IdentityRecoveryRiskAssessment
+{
+    public function __construct(
+        public float $riskScore,
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $signals,
+        public array $requiredEscalations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2656. Recovery fraud signals
+
+Se deberán analizar:
+
+* geografía inusual;
+* nuevo dispositivo;
+* proxy o anonymizer;
+* cambio reciente de contacto;
+* múltiples intentos;
+* identidad privilegiada;
+* soporte manipulado;
+* comportamiento automatizado;
+* deepfake suspicion;
+* inconsistencias documentales.
+
+---
+
+# 2657. SIM swap risk
+
+La verificación por SMS deberá degradarse cuando existan señales de:
+
+* cambio reciente de SIM;
+* portabilidad reciente;
+* número reciclado;
+* operador desconocido;
+* geografía inconsistente.
+
+---
+
+# 2658. Email compromise risk
+
+El email no deberá considerarse confiable si:
+
+* su contraseña fue restablecida recientemente;
+* existe forwarding desconocido;
+* el dominio está comprometido;
+* la sesión proviene de riesgo alto;
+* el correo es el factor perdido.
+
+---
+
+# 2659. Social engineering resistance
+
+Los operadores de soporte deberán utilizar scripts, políticas y límites que reduzcan decisiones improvisadas.
+
+---
+
+# 2660. Support recovery controls
+
+El soporte no deberá poder:
+
+* desactivar MFA unilateralmente;
+* revelar atributos sensibles;
+* cambiar tenant;
+* asignar roles;
+* omitir proofing;
+* aprobar su propia solicitud.
+
+---
+
+# 2661. SupportRecoveryCase
+
+```php
+final readonly class SupportRecoveryCase
+{
+    public function __construct(
+        public string $caseId,
+        public IdentityIdentifier $identityId,
+        public string $assignedOperatorId,
+        public RecoveryAssuranceLevel $requiredAssurance,
+        public array $evidenceReferences,
+        public SupportRecoveryCaseState $state,
+        public DateTimeImmutable $openedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2662. SupportRecoveryCaseState
+
+```php
+enum SupportRecoveryCaseState: string
+{
+    case Open = 'open';
+    case Investigating = 'investigating';
+    case PendingApproval = 'pending_approval';
+    case Approved = 'approved';
+    case Rejected = 'rejected';
+    case Escalated = 'escalated';
+    case Closed = 'closed';
+}
+```
+
+---
+
+# 2663. Recovery approval workflows
+
+Las recuperaciones de riesgo alto deberán requerir approvals independientes.
+
+---
+
+# 2664. RecoveryApprovalPlan
+
+```php
+final readonly class RecoveryApprovalPlan
+{
+    public function __construct(
+        public string $planId,
+        public array $requiredApprovers,
+        public int $minimumApprovals,
+        public bool $sequential,
+        public DateTimeImmutable $expiresAt,
+        public array $conflictRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2665. Approval functions
+
+Los approvers podrán incluir:
+
+* manager;
+* tenant administrator;
+* security;
+* identity operations;
+* HR;
+* compliance;
+* privileged access owner.
+
+---
+
+# 2666. Recovery self-approval prevention
+
+El sujeto, solicitante, operador y approver no deberán concentrarse en una sola identidad para operaciones críticas.
+
+---
+
+# 2667. Recovery decision
+
+```php
+final readonly class IdentityRecoveryDecision
+{
+    public function __construct(
+        public bool $approved,
+        public RecoveryAssuranceLevel $achievedAssurance,
+        public array $approvedActions,
+        public array $requiredRestrictions,
+        public array $credentialActions,
+        public array $sessionActions,
+        public array $denialReasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 2668. Recovery completion sequence
+
+```text
+Approve Recovery
+      ↓
+Revoke Existing Sessions
+      ↓
+Revoke Compromised Credentials
+      ↓
+Rotate Recovery Secrets
+      ↓
+Issue Temporary Recovery Context
+      ↓
+Enroll New Authentication Factors
+      ↓
+Apply Restricted Mode
+      ↓
+Notify Trusted Channels
+      ↓
+Start Enhanced Monitoring
+```
+
+---
+
+# 2669. Credential reset security
+
+El restablecimiento deberá:
+
+* impedir reutilización inmediata;
+* validar políticas actuales;
+* revocar tokens relacionados;
+* rotar secrets;
+* invalidar password reset tokens;
+* registrar provenance.
+
+---
+
+# 2670. MFA recovery
+
+La recuperación de MFA deberá diferenciar:
+
+* factor perdido;
+* factor comprometido;
+* factor temporalmente inaccesible;
+* todos los factores perdidos;
+* dispositivo principal comprometido.
+
+---
+
+# 2671. MFA factor replacement
+
+Un nuevo factor no deberá activarse plenamente hasta completar el assurance requerido.
+
+---
+
+# 2672. Temporary recovery factor
+
+```php
+final readonly class TemporaryRecoveryFactor
+{
+    public function __construct(
+        public string $factorId,
+        public IdentityIdentifier $identityId,
+        public array $allowedActions,
+        public DateTimeImmutable $expiresAt,
+        public bool $singleUse,
+    ) {
+    }
+}
+```
+
+---
+
+# 2673. Temporary factor restrictions
+
+No deberá permitir:
+
+* cambios administrativos;
+* creación de API keys;
+* acceso privilegiado;
+* modificación de recovery contacts;
+* transferencia de tenant;
+* eliminación de evidencia.
+
+---
+
+# 2674. Post-recovery restricted mode
+
+Toda recuperación de alto riesgo deberá poder activar un modo restringido.
+
+---
+
+# 2675. PostRecoveryRestrictionProfile
+
+```php
+final readonly class PostRecoveryRestrictionProfile
+{
+    public function __construct(
+        public DateInterval $duration,
+        public array $blockedActions,
+        public array $requiredStepUpActions,
+        public bool $privilegedAccessBlocked,
+        public bool $recoverySettingsLocked,
+    ) {
+    }
+}
+```
+
+---
+
+# 2676. Recovery cooling period
+
+Durante el cooling period deberán bloquearse cambios como:
+
+* recovery contacts;
+* email principal;
+* teléfono;
+* MFA removal;
+* passkey removal;
+* tenant transfer;
+* privileged elevation;
+* payout or financial destination.
+
+---
+
+# 2677. Trusted-channel notification
+
+La recuperación deberá notificarse por canales previamente registrados que no hayan participado en la recuperación.
+
+---
+
+# 2678. Recovery cancellation
+
+La notificación deberá permitir cancelar o disputar la recuperación cuando todavía sea reversible.
+
+---
+
+# 2679. Recovery dispute
+
+```php
+final readonly class RecoveryDispute
+{
+    public function __construct(
+        public string $disputeId,
+        public string $recoverySessionId,
+        public IdentityIdentifier|string $reportedBy,
+        public string $reason,
+        public DateTimeImmutable $reportedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2680. Identity resurrection prevention
+
+VoltStack deberá impedir que una recuperación reactive identidades:
+
+* eliminadas;
+* archivadas irreversiblemente;
+* legalmente bloqueadas;
+* transferidas;
+* merged como source;
+* deshabilitadas permanentemente.
+
+---
+
+# 2681. Identity state check
+
+Antes de completar deberá reevaluarse el estado lifecycle actual y no confiar en el snapshot inicial.
+
+---
+
+# 2682. Deleted identity recovery
+
+Una identidad eliminada solo podrá restaurarse mediante el workflow de restoration, no mediante recuperación ordinaria.
+
+---
+
+# 2683. Merged identity recovery
+
+Las solicitudes para identidades fusionadas deberán redirigirse de forma segura hacia la identidad canónica sin revelar detalles internos.
+
+---
+
+# 2684. Privileged account recovery
+
+Las identidades privilegiadas deberán operar bajo requisitos reforzados.
+
+---
+
+# 2685. PrivilegedRecoveryPolicy
+
+```php
+final readonly class PrivilegedRecoveryPolicy
+{
+    public function __construct(
+        public RecoveryAssuranceLevel $minimumAssurance,
+        public int $minimumApprovals,
+        public bool $inPersonVerificationRequired,
+        public bool $privilegesRevokedDuringRecovery,
+        public DateInterval $restrictedPeriod,
+    ) {
+    }
+}
+```
+
+---
+
+# 2686. Privilege revocation during recovery
+
+Los roles privilegiados deberán suspenderse antes de reemitir credenciales.
+
+---
+
+# 2687. Privilege restoration
+
+La recuperación de identidad y la restauración de privilegios deberán ser decisiones separadas.
+
+---
+
+# 2688. Break-glass recovery
+
+VoltStack podrá soportar recuperación de emergencia para continuidad operacional.
+
+---
+
+# 2689. BreakGlassRecoveryRequest
+
+```php
+final readonly class BreakGlassRecoveryRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $identityId,
+        public string $emergencyReason,
+        public array $requestedCapabilities,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2690. Break-glass safeguards
+
+La recuperación break-glass deberá exigir:
+
+* incident reference;
+* dual control;
+* scope mínimo;
+* expiración corta;
+* recording;
+* notification;
+* after-action review;
+* automatic revocation.
+
+---
+
+# 2691. Break-glass credential
+
+La credencial de emergencia deberá ser:
+
+* temporal;
+* purpose-bound;
+* scope-bound;
+* tenant-bound;
+* no renovable;
+* monitorizada;
+* revocable inmediatamente.
+
+---
+
+# 2692. Recovery incident response
+
+Toda sospecha de abuso deberá poder abrir un incidente de seguridad.
+
+---
+
+# 2693. Recovery incident triggers
+
+Ejemplos:
+
+* múltiples recuperaciones;
+* recovery contact recién cambiado;
+* operator override;
+* deepfake detectado;
+* token replay;
+* privileged account targeted;
+* recovery disputed;
+* impossible travel;
+* support collusion.
+
+---
+
+# 2694. Recovery containment
+
+La contención podrá incluir:
+
+* cancelar recovery session;
+* suspender identidad;
+* revocar nuevos factores;
+* invalidar nuevos credentials;
+* bloquear soporte;
+* congelar recovery settings;
+* preservar evidencia.
+
+---
+
+# 2695. Recovery forensic package
+
+```php
+final readonly class RecoveryForensicPackage
+{
+    public function __construct(
+        public string $packageId,
+        public string $recoverySessionId,
+        public array $evidenceReferences,
+        public array $challengeResults,
+        public array $operatorActions,
+        public array $approvalRecords,
+        public array $riskSignals,
+        public string $digest,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2696. Recovery governance
+
+La gobernanza deberá definir:
+
+* métodos aprobados;
+* assurance levels;
+* privileged recovery;
+* support capabilities;
+* contact policies;
+* escrow policies;
+* cooling periods;
+* break-glass rules;
+* retention;
+* incident escalation.
+
+---
+
+# 2697. Recovery metrics
+
+Métricas recomendadas:
+
+* recovery success rate;
+* recovery denial rate;
+* fraudulent recovery attempts;
+* mean recovery time;
+* disputed recovery rate;
+* support override rate;
+* privileged recovery count;
+* token replay detections;
+* post-recovery compromise rate.
+
+---
+
+# 2698. Recovery compliance evidence
+
+VoltStack deberá producir evidencia sobre:
+
+* request;
+* risk assessment;
+* proofing;
+* challenges;
+* approvals;
+* credential rotation;
+* session revocation;
+* restrictions;
+* notifications;
+* disputes;
+* incident handling.
+
+---
+
+# 2699. Recovery audit events
+
+Eventos recomendados:
+
+* `IdentityRecoveryRequested`;
+* `IdentityRecoverySessionStarted`;
+* `RecoveryChallengeIssued`;
+* `RecoveryChallengeCompleted`;
+* `RecoveryTokenIssued`;
+* `RecoveryTokenConsumed`;
+* `RecoveryTokenReplayDetected`;
+* `RecoveryContactUsed`;
+* `RecoveryProofingCompleted`;
+* `RecoveryApprovalRequested`;
+* `RecoveryApproved`;
+* `RecoveryRejected`;
+* `ExistingSessionsRevokedForRecovery`;
+* `AuthenticationFactorReplaced`;
+* `PostRecoveryRestrictionActivated`;
+* `RecoveryDisputed`;
+* `RecoveryCancelled`;
+* `PrivilegedRecoveryRequested`;
+* `BreakGlassRecoveryActivated`;
+* `RecoveryFraudDetected`;
+* `RecoveryIncidentOpened`;
+* `IdentityRecoveryCompleted`.
+
+---
+
+# 2700. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Recovery Architecture
+Recovery Assurance Levels
+Recovery Policy Engine
+Enumeration Resistance
+Recovery Session Isolation
+Recovery Session Binding
+Recovery Tokens
+Recovery Secrets
+Backup Codes
+Recovery Contacts
+Recovery Contact Cooling Periods
+Recovery Devices
+Recovery Escrow
+Recovery Evidence Bundles
+Recovery Proofing
+Evidence Independence
+Recovery Risk Engine
+SIM Swap Risk
+Email Compromise Risk
+Social Engineering Resistance
+Support Recovery Controls
+Recovery Approval Workflows
+Credential Reset Security
+MFA Recovery
+Temporary Recovery Factors
+Post-Recovery Restricted Mode
+Recovery Cooling Periods
+Trusted-Channel Notifications
+Recovery Disputes
+Identity Resurrection Prevention
+Privileged Account Recovery
+Privilege Restoration Separation
+Break-Glass Recovery
+Recovery Incident Response
+Recovery Forensic Preservation
+Recovery Governance
+Recovery Metrics
+Recovery Compliance Evidence
+Recovery Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 28
+
+- Account security operations
+- Account lockout architecture
+- Adaptive lockout
+- Suspicious login handling
+- Credential compromise workflows
+- Session compromise workflows
+- Device compromise workflows
+- Forced logout
+- Forced credential rotation
+- Security holds
+- Protective account restriction
+- Account takeover detection
+- Account takeover containment
+- User security notifications
+- Security action confirmations
+- User-visible security history
+- Account security center
+- Security operations governance
+- Account security metrics
+- Account security audit events
+```
