@@ -35875,3 +35875,7817 @@ Entrega 28
 - Account security metrics
 - Account security audit events
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 28 de varias
+**Cobertura:** Secciones **2701–2800**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 27`
+
+---
+
+# 2701. Account Security Operations Architecture
+
+VoltStack deberá incorporar un subsistema especializado de **Account Security Operations**, responsable de coordinar acciones defensivas sobre cuentas activas cuando se detecten señales de riesgo, compromiso o abuso.
+
+Este subsistema deberá operar sobre:
+
+* autenticación;
+* credenciales;
+* sesiones;
+* dispositivos;
+* factores MFA;
+* recovery methods;
+* privilegios;
+* tokens;
+* API clients;
+* delegaciones;
+* tenant memberships.
+
+---
+
+# 2702. Account security operations objectives
+
+La arquitectura deberá garantizar:
+
+* contención rápida;
+* mínima interrupción legítima;
+* proporcionalidad;
+* reversibilidad controlada;
+* preservación de evidencia;
+* aislamiento multi-tenant;
+* comunicación segura;
+* protección contra abuso administrativo;
+* trazabilidad;
+* automatización gobernada.
+
+---
+
+# 2703. Account security operations threat model
+
+Deberán considerarse:
+
+* account takeover;
+* credential stuffing;
+* password spraying;
+* session theft;
+* token replay;
+* passkey compromise;
+* MFA fatigue;
+* SIM swapping;
+* device theft;
+* malicious administrator;
+* insider abuse;
+* automated lockout attacks;
+* recovery takeover;
+* privilege escalation;
+* persistent access after containment.
+
+---
+
+# 2704. Account security operations pipeline
+
+```text
+Security Signal
+      ↓
+Account Resolution
+      ↓
+Context Enrichment
+      ↓
+Risk Correlation
+      ↓
+Policy Evaluation
+      ↓
+Containment Planning
+      ↓
+Protective Actions
+      ↓
+User and Operator Notification
+      ↓
+Verification
+      ↓
+Recovery or Closure
+```
+
+---
+
+# 2705. AccountSecurityOperationsService
+
+```php
+interface AccountSecurityOperationsServiceInterface
+{
+    public function assess(
+        AccountSecuritySignal $signal
+    ): AccountSecurityAssessment;
+
+    public function plan(
+        AccountSecurityAssessment $assessment
+    ): AccountSecurityActionPlan;
+
+    public function execute(
+        AccountSecurityActionPlan $plan
+    ): AccountSecurityActionResult;
+}
+```
+
+---
+
+# 2706. AccountSecuritySignal
+
+```php
+final readonly class AccountSecuritySignal
+{
+    public function __construct(
+        public string $signalId,
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public AccountSecuritySignalType $type,
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $evidence,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2707. AccountSecuritySignalType
+
+```php
+enum AccountSecuritySignalType: string
+{
+    case FailedAuthenticationBurst = 'failed_authentication_burst';
+    case CredentialCompromise = 'credential_compromise';
+    case SessionCompromise = 'session_compromise';
+    case DeviceCompromise = 'device_compromise';
+    case AccountTakeover = 'account_takeover';
+    case MfaAbuse = 'mfa_abuse';
+    case RecoveryAbuse = 'recovery_abuse';
+    case PrivilegeAnomaly = 'privilege_anomaly';
+    case TokenReplay = 'token_replay';
+    case ImpossibleTravel = 'impossible_travel';
+    case AdministrativeRisk = 'administrative_risk';
+}
+```
+
+---
+
+# 2708. AccountSecurityAssessment
+
+```php
+final readonly class AccountSecurityAssessment
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public float $riskScore,
+        public ThreatSeverity $severity,
+        public ThreatConfidence $confidence,
+        public array $affectedAssets,
+        public array $recommendedActions,
+        public array $restrictions,
+        public bool $humanReviewRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 2709. Account security policy engine
+
+```php
+interface AccountSecurityPolicyEngineInterface
+{
+    public function evaluate(
+        AccountSecurityAssessment $assessment,
+        AccountSecurityContext $context
+    ): AccountSecurityPolicyDecision;
+}
+```
+
+---
+
+# 2710. AccountSecurityPolicyDecision
+
+```php
+final readonly class AccountSecurityPolicyDecision
+{
+    public function __construct(
+        public bool $actionRequired,
+        public array $mandatoryActions,
+        public array $optionalActions,
+        public array $prohibitedActions,
+        public array $requiredApprovals,
+        public array $notificationRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2711. Account lockout architecture
+
+VoltStack deberá soportar bloqueo de cuenta sin depender exclusivamente de un contador fijo de intentos fallidos.
+
+---
+
+# 2712. Lockout security goals
+
+El bloqueo deberá:
+
+* reducir ataques automatizados;
+* evitar denial of service intencional;
+* considerar contexto;
+* diferenciar credenciales;
+* preservar recovery access;
+* limitar impactos cross-tenant;
+* mantener auditabilidad.
+
+---
+
+# 2713. AccountLockoutPolicy
+
+```php
+final readonly class AccountLockoutPolicy
+{
+    public function __construct(
+        public int $failureThreshold,
+        public DateInterval $observationWindow,
+        public DateInterval $lockDuration,
+        public bool $adaptive,
+        public bool $tenantScoped,
+        public array $riskModifiers,
+        public array $exemptions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2714. AccountLockoutState
+
+```php
+enum AccountLockoutState: string
+{
+    case None = 'none';
+    case SoftLocked = 'soft_locked';
+    case Challenged = 'challenged';
+    case TemporarilyLocked = 'temporarily_locked';
+    case AdministrativelyLocked = 'administratively_locked';
+    case SecurityLocked = 'security_locked';
+    case PermanentlyDisabled = 'permanently_disabled';
+}
+```
+
+---
+
+# 2715. Soft lockout
+
+Un soft lockout podrá:
+
+* incrementar latencia;
+* requerir CAPTCHA;
+* exigir MFA;
+* bloquear un canal concreto;
+* limitar intentos;
+* cambiar a autenticación supervisada.
+
+---
+
+# 2716. Hard lockout
+
+Un hard lockout deberá impedir autenticación hasta:
+
+* expiración;
+* intervención administrativa;
+* recovery validado;
+* eliminación de security hold;
+* resolución de incidente.
+
+---
+
+# 2717. Lockout scope
+
+El bloqueo podrá aplicarse a:
+
+* identidad completa;
+* tenant membership;
+* credencial específica;
+* factor;
+* dispositivo;
+* aplicación;
+* red;
+* región;
+* canal de autenticación.
+
+---
+
+# 2718. Lockout keying strategy
+
+El sistema no deberá utilizar exclusivamente el username como clave de rate limiting.
+
+Deberá correlacionar:
+
+* identidad;
+* IP;
+* network range;
+* device;
+* credential;
+* tenant;
+* application;
+* geografía;
+* behavioral fingerprint.
+
+---
+
+# 2719. Distributed lockout coordination
+
+En despliegues distribuidos, los contadores y estados deberán ser consistentes entre nodos.
+
+---
+
+# 2720. Lockout atomicity
+
+La evaluación, incremento y transición de lockout deberán ejecutarse de forma atómica.
+
+---
+
+# 2721. Adaptive lockout
+
+El bloqueo adaptativo deberá ajustar controles según riesgo.
+
+---
+
+# 2722. AdaptiveLockoutEngine
+
+```php
+interface AdaptiveLockoutEngineInterface
+{
+    public function assess(
+        AuthenticationAttemptSeries $attempts,
+        AccountSecurityContext $context
+    ): AdaptiveLockoutDecision;
+}
+```
+
+---
+
+# 2723. AdaptiveLockoutDecision
+
+```php
+final readonly class AdaptiveLockoutDecision
+{
+    public function __construct(
+        public AccountLockoutState $targetState,
+        public DateInterval $duration,
+        public array $requiredChallenges,
+        public array $blockedChannels,
+        public array $reasonCodes,
+    ) {
+    }
+}
+```
+
+---
+
+# 2724. Adaptive lockout inputs
+
+Deberán considerarse:
+
+* password spray patterns;
+* distributed sources;
+* trusted device;
+* successful recent login;
+* user behavior;
+* tenant criticality;
+* privilege level;
+* breached credential status;
+* network reputation;
+* recovery activity.
+
+---
+
+# 2725. Denial-of-service resistance
+
+VoltStack deberá evitar que un atacante bloquee permanentemente una cuenta mediante intentos deliberados.
+
+---
+
+# 2726. Progressive friction
+
+Antes del hard lockout podrán aplicarse:
+
+* rate limiting;
+* proof-of-work;
+* challenge;
+* MFA;
+* email confirmation;
+* trusted device validation;
+* support escalation.
+
+---
+
+# 2727. Lockout notification
+
+Las notificaciones deberán indicar actividad sospechosa sin revelar información útil al atacante.
+
+---
+
+# 2728. Lockout release
+
+La liberación deberá verificar:
+
+* reason;
+* actor;
+* recovery assurance;
+* active incidents;
+* current policy;
+* compromised credentials;
+* pending security holds.
+
+---
+
+# 2729. Suspicious login handling
+
+Un login sospechoso no deberá tratarse siempre como exitoso o fallido.
+
+Podrá quedar en estado:
+
+* challenged;
+* restricted;
+* pending verification;
+* quarantined;
+* denied;
+* observed.
+
+---
+
+# 2730. SuspiciousLoginAssessment
+
+```php
+final readonly class SuspiciousLoginAssessment
+{
+    public function __construct(
+        public string $attemptId,
+        public IdentityIdentifier $identityId,
+        public float $riskScore,
+        public array $signals,
+        public SuspiciousLoginDisposition $disposition,
+        public array $requiredActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2731. SuspiciousLoginDisposition
+
+```php
+enum SuspiciousLoginDisposition: string
+{
+    case Allow = 'allow';
+    case AllowRestricted = 'allow_restricted';
+    case StepUp = 'step_up';
+    case Quarantine = 'quarantine';
+    case Deny = 'deny';
+    case Escalate = 'escalate';
+}
+```
+
+---
+
+# 2732. Login quarantine
+
+Una sesión en cuarentena deberá:
+
+* poseer scopes mínimos;
+* no acceder a datos sensibles;
+* no cambiar credenciales;
+* no modificar recovery methods;
+* no elevar privilegios;
+* no crear tokens;
+* expirar rápidamente.
+
+---
+
+# 2733. Credential compromise workflow
+
+VoltStack deberá coordinar acciones específicas cuando una credencial sea sospechosa o confirmada como comprometida.
+
+---
+
+# 2734. CredentialCompromiseAssessment
+
+```php
+final readonly class CredentialCompromiseAssessment
+{
+    public function __construct(
+        public string $credentialId,
+        public IdentityIdentifier $identityId,
+        public CredentialCompromiseState $state,
+        public array $evidence,
+        public array $affectedSessions,
+        public array $dependentCredentials,
+    ) {
+    }
+}
+```
+
+---
+
+# 2735. CredentialCompromiseState
+
+```php
+enum CredentialCompromiseState: string
+{
+    case Suspected = 'suspected';
+    case Likely = 'likely';
+    case Confirmed = 'confirmed';
+    case Contained = 'contained';
+    case Remediated = 'remediated';
+    case FalsePositive = 'false_positive';
+}
+```
+
+---
+
+# 2736. Credential compromise actions
+
+Podrán incluir:
+
+* revocar credential;
+* bloquear autenticación;
+* invalidar sessions;
+* revocar refresh tokens;
+* rotar dependent secrets;
+* forzar recovery;
+* notificar trusted channels;
+* iniciar incident response.
+
+---
+
+# 2737. Breached password handling
+
+Una contraseña detectada en corpus de credenciales comprometidas deberá:
+
+* rechazarse durante creación;
+* marcarse para rotación;
+* elevar riesgo;
+* impedir reutilización;
+* activar notificación según policy.
+
+---
+
+# 2738. Password compromise privacy
+
+La verificación contra servicios externos no deberá exponer el password completo ni identificadores innecesarios.
+
+---
+
+# 2739. Passkey compromise
+
+Una passkey comprometida deberá revocarse por credential ID sin eliminar automáticamente otras passkeys independientes.
+
+---
+
+# 2740. Certificate compromise
+
+La respuesta deberá coordinar:
+
+* revocación;
+* actualización de CRL u OCSP;
+* rotación;
+* dependencia;
+* sesiones emitidas;
+* workload impact.
+
+---
+
+# 2741. API key compromise
+
+Una API key comprometida deberá:
+
+* revocarse inmediatamente;
+* identificar usos recientes;
+* analizar scopes;
+* detectar exfiltration;
+* rotar secrets dependientes;
+* conservar evidencia.
+
+---
+
+# 2742. Forced credential rotation
+
+VoltStack deberá soportar rotación obligatoria iniciada por:
+
+* usuario;
+* administrador;
+* policy;
+* incidente;
+* proveedor;
+* expiración;
+* detección automática.
+
+---
+
+# 2743. ForcedCredentialRotationPlan
+
+```php
+final readonly class ForcedCredentialRotationPlan
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public array $credentialIds,
+        public CredentialRotationUrgency $urgency,
+        public bool $revokeBeforeReplacement,
+        public DateTimeImmutable $deadline,
+        public array $restrictionsUntilCompletion,
+    ) {
+    }
+}
+```
+
+---
+
+# 2744. CredentialRotationUrgency
+
+```php
+enum CredentialRotationUrgency: string
+{
+    case Routine = 'routine';
+    case Elevated = 'elevated';
+    case Immediate = 'immediate';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 2745. Rotation deadline enforcement
+
+Si una rotación no se completa antes del deadline, deberán activarse restricciones progresivas o bloqueo.
+
+---
+
+# 2746. Rotation grace period
+
+Los periodos de gracia no deberán permitirse para credenciales confirmadas como comprometidas.
+
+---
+
+# 2747. Session compromise workflow
+
+La arquitectura deberá distinguir compromiso de:
+
+* sesión individual;
+* familia de sesiones;
+* browser;
+* dispositivo;
+* refresh token family;
+* tenant session;
+* privileged session.
+
+---
+
+# 2748. SessionCompromiseAssessment
+
+```php
+final readonly class SessionCompromiseAssessment
+{
+    public function __construct(
+        public string $sessionId,
+        public IdentityIdentifier $identityId,
+        public SessionCompromiseScope $scope,
+        public ThreatConfidence $confidence,
+        public array $relatedSessions,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 2749. SessionCompromiseScope
+
+```php
+enum SessionCompromiseScope: string
+{
+    case SingleSession = 'single_session';
+    case DeviceSessions = 'device_sessions';
+    case ApplicationSessions = 'application_sessions';
+    case TenantSessions = 'tenant_sessions';
+    case AllSessions = 'all_sessions';
+    case PrivilegedSessions = 'privileged_sessions';
+}
+```
+
+---
+
+# 2750. Session compromise actions
+
+Podrán incluir:
+
+* revoke session;
+* revoke session family;
+* rotate session secrets;
+* invalidate refresh tokens;
+* block device;
+* require reauthentication;
+* restrict account;
+* preserve telemetry.
+
+---
+
+# 2751. Forced logout architecture
+
+VoltStack deberá soportar logout remoto inmediato y verificable.
+
+---
+
+# 2752. ForcedLogoutRequest
+
+```php
+final readonly class ForcedLogoutRequest
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public SessionCompromiseScope $scope,
+        public IdentityIdentifier|string $requestedBy,
+        public ForcedLogoutReason $reason,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2753. ForcedLogoutReason
+
+```php
+enum ForcedLogoutReason: string
+{
+    case UserRequested = 'user_requested';
+    case CredentialChanged = 'credential_changed';
+    case SecurityIncident = 'security_incident';
+    case DeviceLost = 'device_lost';
+    case AdministratorAction = 'administrator_action';
+    case PolicyChange = 'policy_change';
+    case TenantTransfer = 'tenant_transfer';
+}
+```
+
+---
+
+# 2754. Logout propagation
+
+La revocación deberá propagarse a:
+
+* web sessions;
+* mobile sessions;
+* refresh tokens;
+* websocket connections;
+* SSE streams;
+* background workers;
+* delegated sessions;
+* privileged consoles.
+
+---
+
+# 2755. Session revocation verification
+
+El sistema deberá verificar que los nodos y aplicaciones relevantes hayan aplicado la revocación.
+
+---
+
+# 2756. Offline session handling
+
+Los clientes offline deberán recibir revocation state al reconectarse antes de sincronizar datos sensibles.
+
+---
+
+# 2757. Device compromise workflow
+
+Un dispositivo comprometido deberá afectar solo las relaciones y credenciales asociadas, salvo evidencia de mayor alcance.
+
+---
+
+# 2758. DeviceCompromiseAssessment
+
+```php
+final readonly class DeviceCompromiseAssessment
+{
+    public function __construct(
+        public string $deviceId,
+        public IdentityIdentifier $identityId,
+        public DeviceCompromiseState $state,
+        public array $credentials,
+        public array $sessions,
+        public array $signals,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2759. DeviceCompromiseState
+
+```php
+enum DeviceCompromiseState: string
+{
+    case Suspected = 'suspected';
+    case Lost = 'lost';
+    case Stolen = 'stolen';
+    case MalwareDetected = 'malware_detected';
+    case RootedOrJailbroken = 'rooted_or_jailbroken';
+    case ConfirmedCompromised = 'confirmed_compromised';
+    case Remediated = 'remediated';
+}
+```
+
+---
+
+# 2760. Device compromise actions
+
+Podrán incluir:
+
+* revoke device trust;
+* revoke device-bound sessions;
+* revoke passkeys;
+* revoke certificates;
+* remove push factor;
+* block synchronization;
+* wipe organizational material;
+* force recovery.
+
+---
+
+# 2761. Device trust downgrade
+
+El dispositivo podrá degradarse de trusted a restricted sin eliminarlo inmediatamente.
+
+---
+
+# 2762. Remote wipe boundary
+
+VoltStack solo deberá solicitar borrado sobre datos y contenedores bajo control organizacional y policy aplicable.
+
+---
+
+# 2763. Security hold architecture
+
+Un security hold deberá congelar operaciones de alto riesgo mientras se investiga una cuenta.
+
+---
+
+# 2764. AccountSecurityHold
+
+```php
+final readonly class AccountSecurityHold
+{
+    public function __construct(
+        public string $holdId,
+        public IdentityIdentifier $identityId,
+        public SecurityHoldReason $reason,
+        public array $blockedActions,
+        public IdentityIdentifier|string $imposedBy,
+        public DateTimeImmutable $imposedAt,
+        public ?DateTimeImmutable $expiresAt,
+        public SecurityHoldState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2765. SecurityHoldReason
+
+```php
+enum SecurityHoldReason: string
+{
+    case AccountTakeoverInvestigation = 'account_takeover_investigation';
+    case CredentialCompromise = 'credential_compromise';
+    case RecoveryDispute = 'recovery_dispute';
+    case FraudInvestigation = 'fraud_investigation';
+    case LegalRequest = 'legal_request';
+    case InsiderThreat = 'insider_threat';
+    case PrivilegeAbuse = 'privilege_abuse';
+}
+```
+
+---
+
+# 2766. SecurityHoldState
+
+```php
+enum SecurityHoldState: string
+{
+    case Active = 'active';
+    case PartiallyReleased = 'partially_released';
+    case Released = 'released';
+    case Expired = 'expired';
+    case Superseded = 'superseded';
+}
+```
+
+---
+
+# 2767. Security hold blocked operations
+
+Podrán bloquearse:
+
+* credential changes;
+* recovery changes;
+* money movement;
+* data export;
+* tenant transfer;
+* role elevation;
+* API key creation;
+* ownership transfer;
+* account deletion.
+
+---
+
+# 2768. Security hold authorization
+
+La imposición y liberación deberán requerir authority explícita y quedar auditadas.
+
+---
+
+# 2769. Protective account restriction
+
+Una cuenta podrá continuar parcialmente operativa bajo restricciones protectoras.
+
+---
+
+# 2770. ProtectiveRestrictionProfile
+
+```php
+final readonly class ProtectiveRestrictionProfile
+{
+    public function __construct(
+        public string $profileId,
+        public array $allowedActions,
+        public array $blockedActions,
+        public array $stepUpRequiredActions,
+        public DateTimeImmutable $effectiveAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2771. Protective restriction use cases
+
+Podrá utilizarse cuando:
+
+* el riesgo sea alto pero no concluyente;
+* el usuario necesite acceso básico;
+* exista investigación;
+* se complete recovery;
+* se rote una credencial;
+* se revalide un dispositivo.
+
+---
+
+# 2772. Account takeover detection
+
+VoltStack deberá correlacionar señales técnicas, conductuales y lifecycle para detectar account takeover.
+
+---
+
+# 2773. AccountTakeoverDetector
+
+```php
+interface AccountTakeoverDetectorInterface
+{
+    public function assess(
+        IdentityIdentifier $identityId,
+        AccountActivityWindow $activity
+    ): AccountTakeoverAssessment;
+}
+```
+
+---
+
+# 2774. AccountTakeoverAssessment
+
+```php
+final readonly class AccountTakeoverAssessment
+{
+    public function __construct(
+        public AccountTakeoverState $state,
+        public float $riskScore,
+        public ThreatConfidence $confidence,
+        public array $indicators,
+        public array $affectedAssets,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2775. AccountTakeoverState
+
+```php
+enum AccountTakeoverState: string
+{
+    case NoEvidence = 'no_evidence';
+    case Suspicious = 'suspicious';
+    case Likely = 'likely';
+    case Confirmed = 'confirmed';
+    case Contained = 'contained';
+    case Recovered = 'recovered';
+}
+```
+
+---
+
+# 2776. Account takeover indicators
+
+Deberán considerarse:
+
+* impossible travel;
+* new device;
+* MFA reset;
+* recovery change;
+* password change;
+* privilege elevation;
+* unusual data access;
+* token creation;
+* forwarding rules;
+* session concurrency;
+* user dispute;
+* behavioral deviation.
+
+---
+
+# 2777. Account takeover correlation window
+
+Las señales deberán analizarse como secuencias temporales y no como eventos aislados.
+
+---
+
+# 2778. High-confidence takeover pattern
+
+Un patrón crítico podrá incluir:
+
+```text
+New Device
+    +
+Recovery Method Change
+    +
+MFA Removal
+    +
+Credential Rotation
+    +
+Data Export
+```
+
+---
+
+# 2779. Account takeover containment
+
+La contención deberá ejecutarse según blast radius y confianza.
+
+---
+
+# 2780. AccountTakeoverContainmentPlan
+
+```php
+final readonly class AccountTakeoverContainmentPlan
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public array $sessionsToRevoke,
+        public array $credentialsToRevoke,
+        public array $devicesToBlock,
+        public array $restrictions,
+        public bool $securityHoldRequired,
+        public bool $identitySuspensionRequired,
+        public array $notifications,
+    ) {
+    }
+}
+```
+
+---
+
+# 2781. Containment ordering
+
+El orden recomendado será:
+
+```text
+Freeze Sensitive Actions
+      ↓
+Revoke Attacker Sessions
+      ↓
+Revoke Compromised Credentials
+      ↓
+Lock Recovery Settings
+      ↓
+Block Compromised Devices
+      ↓
+Notify Trusted Channels
+      ↓
+Start Recovery
+      ↓
+Investigate Persistence
+```
+
+---
+
+# 2782. Persistence search
+
+Tras contener un takeover deberán revisarse:
+
+* new API keys;
+* new passkeys;
+* new recovery contacts;
+* forwarding rules;
+* delegated access;
+* created service accounts;
+* changed webhooks;
+* trusted devices;
+* OAuth grants.
+
+---
+
+# 2783. Account restoration after takeover
+
+La restauración deberá reconstruir confianza y acceso desde fuentes vigentes.
+
+---
+
+# 2784. Post-takeover recovery requirements
+
+Podrán exigirse:
+
+* re-proofing;
+* credential re-enrollment;
+* full session revocation;
+* device review;
+* access recertification;
+* privilege reapproval;
+* recovery method reset;
+* enhanced monitoring.
+
+---
+
+# 2785. Security action confirmations
+
+Las acciones sensibles iniciadas por el usuario deberán requerir confirmación explícita.
+
+---
+
+# 2786. SecurityActionConfirmation
+
+```php
+final readonly class SecurityActionConfirmation
+{
+    public function __construct(
+        public string $confirmationId,
+        public IdentityIdentifier $identityId,
+        public SecurityActionType $action,
+        public string $actionDigest,
+        public AuthenticationAssuranceLevel $assurance,
+        public DateTimeImmutable $confirmedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2787. SecurityActionType
+
+```php
+enum SecurityActionType: string
+{
+    case RevokeSession = 'revoke_session';
+    case RevokeCredential = 'revoke_credential';
+    case ChangePassword = 'change_password';
+    case RemoveMfaFactor = 'remove_mfa_factor';
+    case AddRecoveryContact = 'add_recovery_contact';
+    case DisableAccount = 'disable_account';
+    case ExportSecurityHistory = 'export_security_history';
+}
+```
+
+---
+
+# 2788. Confirmation binding
+
+La confirmación deberá ligarse al digest exacto de la acción para impedir sustitución.
+
+---
+
+# 2789. User security notifications
+
+VoltStack deberá notificar eventos relevantes mediante canales seguros.
+
+---
+
+# 2790. Security notification categories
+
+Deberán incluir:
+
+* new login;
+* suspicious login;
+* password change;
+* MFA change;
+* recovery attempt;
+* new device;
+* session revocation;
+* account lockout;
+* security hold;
+* takeover containment.
+
+---
+
+# 2791. Notification channel independence
+
+Para eventos críticos deberá preferirse un canal distinto al canal potencialmente comprometido.
+
+---
+
+# 2792. Notification privacy
+
+Las notificaciones no deberán incluir:
+
+* tokens;
+* secrets;
+* password hints;
+* sensitive resource names;
+* internal risk scores;
+* unnecessary tenant data.
+
+---
+
+# 2793. User-visible security history
+
+El usuario deberá poder consultar un historial comprensible de seguridad.
+
+---
+
+# 2794. UserSecurityHistoryEntry
+
+```php
+final readonly class UserSecurityHistoryEntry
+{
+    public function __construct(
+        public string $entryId,
+        public IdentityIdentifier $identityId,
+        public UserSecurityEventType $type,
+        public string $summary,
+        public array $safeContext,
+        public DateTimeImmutable $occurredAt,
+        public bool $actionRequired,
+    ) {
+    }
+}
+```
+
+---
+
+# 2795. User security history safeguards
+
+El historial no deberá exponer:
+
+* IP completa cuando no sea necesario;
+* device fingerprints internos;
+* investigation notes;
+* detection rules;
+* identities de operadores;
+* información de otros tenants.
+
+---
+
+# 2796. Account security center
+
+VoltStack deberá ofrecer un dominio lógico de **Account Security Center** para:
+
+* revisar sesiones;
+* revisar dispositivos;
+* administrar credenciales;
+* revisar MFA;
+* revisar recovery methods;
+* consultar eventos;
+* revocar acceso;
+* reportar actividad;
+* iniciar recovery;
+* descargar evidencia permitida.
+
+---
+
+# 2797. AccountSecurityCenterService
+
+```php
+interface AccountSecurityCenterServiceInterface
+{
+    public function getOverview(
+        IdentityIdentifier $identityId,
+        AccountSecurityCenterContext $context
+    ): AccountSecurityOverview;
+
+    public function executeAction(
+        AccountSecurityCenterAction $action
+    ): AccountSecurityActionResult;
+}
+```
+
+---
+
+# 2798. Security operations governance and metrics
+
+La gobernanza deberá definir:
+
+* action owners;
+* automation limits;
+* lockout policies;
+* containment thresholds;
+* approval requirements;
+* notification rules;
+* retention;
+* incident handoff;
+* exception management.
+
+Métricas recomendadas:
+
+* account lockout rate;
+* false lockout rate;
+* suspicious login challenge rate;
+* forced logout latency;
+* credential compromise response time;
+* session revocation propagation time;
+* takeover detection rate;
+* containment success rate;
+* user dispute rate;
+* residual persistence rate.
+
+---
+
+# 2799. Account security audit events
+
+Eventos recomendados:
+
+* `AccountSecuritySignalDetected`;
+* `AccountSecurityAssessmentCompleted`;
+* `AccountSoftLocked`;
+* `AccountSecurityLocked`;
+* `AccountLockoutReleased`;
+* `SuspiciousLoginDetected`;
+* `SuspiciousLoginQuarantined`;
+* `CredentialCompromiseSuspected`;
+* `CredentialCompromiseConfirmed`;
+* `CredentialRevokedForSecurity`;
+* `ForcedCredentialRotationRequested`;
+* `SessionCompromiseDetected`;
+* `ForcedLogoutRequested`;
+* `ForcedLogoutCompleted`;
+* `DeviceCompromiseDetected`;
+* `DeviceTrustRevoked`;
+* `AccountSecurityHoldImposed`;
+* `AccountSecurityHoldReleased`;
+* `ProtectiveRestrictionActivated`;
+* `AccountTakeoverSuspected`;
+* `AccountTakeoverConfirmed`;
+* `AccountTakeoverContained`;
+* `SecurityActionConfirmed`;
+* `SecurityNotificationDispatched`;
+* `UserSecurityHistoryViewed`;
+* `AccountSecurityCenterActionExecuted`.
+
+---
+
+# 2800. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Account Security Operations Architecture
+Account Security Policy Engine
+Account Lockout Architecture
+Soft and Hard Lockout
+Scoped Account Lockout
+Distributed Lockout Coordination
+Adaptive Lockout
+Denial-of-Service Resistance
+Progressive Authentication Friction
+Suspicious Login Handling
+Login Quarantine
+Credential Compromise Workflows
+Breached Password Handling
+Passkey and Certificate Compromise
+API Key Compromise
+Forced Credential Rotation
+Session Compromise Workflows
+Forced Logout
+Session Revocation Propagation
+Offline Session Revocation
+Device Compromise Workflows
+Device Trust Downgrade
+Security Holds
+Protective Account Restrictions
+Account Takeover Detection
+Temporal Signal Correlation
+Account Takeover Containment
+Persistence Search
+Post-Takeover Recovery
+Security Action Confirmations
+User Security Notifications
+User-Visible Security History
+Account Security Center
+Security Operations Governance
+Security Metrics
+Account Security Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 29
+
+- Identity security observability
+- Authentication telemetry
+- Session telemetry
+- Credential telemetry
+- Identity lifecycle telemetry
+- Recovery telemetry
+- Account takeover telemetry
+- Identity security metrics
+- Security dashboards
+- Tenant-aware observability
+- Privacy-preserving telemetry
+- Telemetry cardinality controls
+- Detection engineering
+- Identity behavior analytics
+- Risk baselines
+- Drift and anomaly detection
+- SIEM integration
+- SOAR integration
+- Alert governance
+- Identity security audit events
+```
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 29 de varias
+**Cobertura:** Secciones **2801–2900**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 28`
+
+---
+
+# 2801. Identity Security Observability Architecture
+
+VoltStack deberá incorporar una arquitectura especializada de **Identity Security Observability**, responsable de recopilar, normalizar, correlacionar y analizar señales relacionadas con:
+
+* autenticación;
+* sesiones;
+* credenciales;
+* dispositivos;
+* recovery;
+* lifecycle;
+* privilegios;
+* federación;
+* account takeover;
+* operaciones administrativas;
+* acciones de seguridad.
+
+La observabilidad deberá permitir detectar riesgos sin exponer información sensible innecesaria.
+
+---
+
+# 2802. Identity security observability objectives
+
+La arquitectura deberá garantizar:
+
+* visibilidad de extremo a extremo;
+* trazabilidad;
+* detección temprana;
+* aislamiento multi-tenant;
+* integridad temporal;
+* baja latencia;
+* minimización de datos;
+* resistencia a manipulación;
+* correlación distribuida;
+* soporte forense;
+* explicabilidad.
+
+---
+
+# 2803. Observability threat model
+
+Deberán considerarse amenazas como:
+
+* eliminación de logs;
+* log forging;
+* telemetry poisoning;
+* replay de eventos;
+* pérdida de contexto;
+* cardinality explosion;
+* leakage cross-tenant;
+* timestamps manipulados;
+* alert fatigue;
+* suppression maliciosa;
+* bypass de detecciones;
+* acceso excesivo a telemetría;
+* exfiltración mediante atributos de observabilidad.
+
+---
+
+# 2804. Identity observability pipeline
+
+```text
+Identity Security Event
+      ↓
+Local Validation
+      ↓
+Normalization
+      ↓
+Context Enrichment
+      ↓
+Tenant Isolation
+      ↓
+Privacy Filtering
+      ↓
+Correlation
+      ↓
+Detection and Scoring
+      ↓
+Storage and Export
+      ↓
+Alerting and Response
+```
+
+---
+
+# 2805. IdentitySecurityTelemetryService
+
+```php
+interface IdentitySecurityTelemetryServiceInterface
+{
+    public function record(
+        IdentitySecurityTelemetryEvent $event
+    ): void;
+
+    public function query(
+        IdentitySecurityTelemetryQuery $query
+    ): IdentitySecurityTelemetryResult;
+
+    public function correlate(
+        IdentitySecurityCorrelationRequest $request
+    ): IdentitySecurityCorrelationResult;
+}
+```
+
+---
+
+# 2806. IdentitySecurityTelemetryEvent
+
+```php
+final readonly class IdentitySecurityTelemetryEvent
+{
+    public function __construct(
+        public string $eventId,
+        public IdentitySecurityTelemetryType $type,
+        public ?IdentityIdentifier $identityId,
+        public string $tenantId,
+        public array $attributes,
+        public ThreatSeverity $severity,
+        public DateTimeImmutable $occurredAt,
+        public DateTimeImmutable $observedAt,
+        public string $source,
+        public string $schemaVersion,
+    ) {
+    }
+}
+```
+
+---
+
+# 2807. IdentitySecurityTelemetryType
+
+```php
+enum IdentitySecurityTelemetryType: string
+{
+    case Authentication = 'authentication';
+    case Session = 'session';
+    case Credential = 'credential';
+    case Device = 'device';
+    case Recovery = 'recovery';
+    case Lifecycle = 'lifecycle';
+    case Authorization = 'authorization';
+    case PrivilegedAccess = 'privileged_access';
+    case Federation = 'federation';
+    case AccountTakeover = 'account_takeover';
+    case AdministrativeAction = 'administrative_action';
+    case SecurityResponse = 'security_response';
+}
+```
+
+---
+
+# 2808. Telemetry event invariants
+
+Todo evento deberá incluir:
+
+* event ID único;
+* tenant;
+* source;
+* schema version;
+* occurred time;
+* observed time;
+* integrity metadata;
+* classification;
+* retention profile;
+* correlation identifiers cuando apliquen.
+
+---
+
+# 2809. Event provenance
+
+La procedencia deberá identificar:
+
+* componente emisor;
+* node;
+* application;
+* environment;
+* runtime;
+* deployment;
+* connector;
+* authentication domain;
+* collector version.
+
+---
+
+# 2810. Event integrity
+
+Los eventos críticos deberán protegerse mediante:
+
+* hashes;
+* signatures;
+* append-only storage;
+* immutable sequences;
+* remote replication;
+* integrity checkpoints.
+
+---
+
+# 2811. Authentication telemetry
+
+La telemetría de autenticación deberá capturar el ciclo completo de cada intento.
+
+---
+
+# 2812. AuthenticationTelemetryEvent
+
+```php
+final readonly class AuthenticationTelemetryEvent
+{
+    public function __construct(
+        public string $attemptId,
+        public ?IdentityIdentifier $identityId,
+        public string $tenantId,
+        public AuthenticationTelemetryOutcome $outcome,
+        public array $methods,
+        public AuthenticationAssuranceLevel $assurance,
+        public array $riskSignals,
+        public array $safeNetworkContext,
+        public array $safeDeviceContext,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2813. AuthenticationTelemetryOutcome
+
+```php
+enum AuthenticationTelemetryOutcome: string
+{
+    case Started = 'started';
+    case Challenged = 'challenged';
+    case Succeeded = 'succeeded';
+    case Failed = 'failed';
+    case Denied = 'denied';
+    case Quarantined = 'quarantined';
+    case Cancelled = 'cancelled';
+    case TimedOut = 'timed_out';
+}
+```
+
+---
+
+# 2814. Authentication telemetry fields
+
+Podrán registrarse:
+
+* method;
+* credential type;
+* assurance achieved;
+* failure category;
+* challenge type;
+* tenant;
+* application;
+* source reputation;
+* device trust;
+* session outcome;
+* policy version;
+* risk score band.
+
+---
+
+# 2815. Authentication privacy boundaries
+
+No deberán registrarse:
+
+* passwords;
+* OTP completos;
+* private keys;
+* recovery secrets;
+* raw biometric data;
+* full authentication tokens;
+* answers de security questions;
+* secret challenge payloads.
+
+---
+
+# 2816. Failed authentication telemetry
+
+Los fallos deberán diferenciar:
+
+* unknown identity;
+* invalid credential;
+* expired credential;
+* revoked credential;
+* policy denial;
+* tenant mismatch;
+* locked account;
+* failed MFA;
+* risk denial;
+* provider failure.
+
+---
+
+# 2817. Enumeration-safe telemetry
+
+Aunque la respuesta pública sea uniforme, la telemetría interna podrá conservar una clasificación más precisa bajo controles de acceso estrictos.
+
+---
+
+# 2818. Authentication sequence correlation
+
+Los eventos deberán correlacionarse por:
+
+* attempt ID;
+* session bootstrap ID;
+* device ID;
+* identity;
+* tenant;
+* application;
+* network cluster;
+* challenge chain.
+
+---
+
+# 2819. Password spray detection support
+
+La telemetría deberá permitir identificar intentos distribuidos contra múltiples identidades con un conjunto reducido de passwords o patrones.
+
+---
+
+# 2820. Credential stuffing detection support
+
+La arquitectura deberá correlacionar:
+
+* credenciales filtradas;
+* intentos automatizados;
+* múltiples tenants;
+* múltiples aplicaciones;
+* successful takeover indicators;
+* breached password signals.
+
+---
+
+# 2821. MFA telemetry
+
+Deberán observarse:
+
+* factor type;
+* challenge issuance;
+* approval;
+* denial;
+* timeout;
+* repeated prompts;
+* fatigue patterns;
+* factor replacement;
+* enrollment;
+* removal.
+
+---
+
+# 2822. MFA fatigue analytics
+
+El sistema deberá detectar:
+
+* múltiples challenges;
+* aprobaciones después de repetidos rechazos;
+* prompts desde geografías distintas;
+* aprobaciones anormalmente rápidas;
+* operator-assisted bypass.
+
+---
+
+# 2823. Passwordless telemetry
+
+Passkeys y autenticadores passwordless deberán registrar:
+
+* credential ID pseudonimizado;
+* authenticator class;
+* user verification result;
+* attestation state;
+* device binding;
+* counter anomalies;
+* clone suspicion.
+
+---
+
+# 2824. Federated authentication telemetry
+
+Los eventos federados deberán capturar:
+
+* identity provider;
+* issuer;
+* audience;
+* assertion age;
+* assurance;
+* federation policy;
+* mapping result;
+* signature validation;
+* clock skew;
+* replay indicators.
+
+---
+
+# 2825. Session telemetry
+
+VoltStack deberá observar el ciclo completo de una sesión.
+
+---
+
+# 2826. SessionTelemetryEvent
+
+```php
+final readonly class SessionTelemetryEvent
+{
+    public function __construct(
+        public string $sessionId,
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public SessionTelemetryAction $action,
+        public SessionTrustLevel $trustLevel,
+        public array $safeContext,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2827. SessionTelemetryAction
+
+```php
+enum SessionTelemetryAction: string
+{
+    case Created = 'created';
+    case Refreshed = 'refreshed';
+    case Rotated = 'rotated';
+    case Elevated = 'elevated';
+    case Restricted = 'restricted';
+    case Revoked = 'revoked';
+    case Expired = 'expired';
+    case Migrated = 'migrated';
+    case Quarantined = 'quarantined';
+    case Terminated = 'terminated';
+}
+```
+
+---
+
+# 2828. Session correlation
+
+Las sesiones deberán poder correlacionarse con:
+
+* authentication attempt;
+* credential;
+* device;
+* refresh token family;
+* application;
+* tenant;
+* privilege elevation;
+* recovery event;
+* incident.
+
+---
+
+# 2829. Session anomaly indicators
+
+Deberán observarse:
+
+* concurrent geography;
+* token replay;
+* context changes;
+* rapid privilege elevation;
+* unusual lifetime;
+* refresh anomalies;
+* impossible client transitions;
+* post-revocation use;
+* session fixation indicators.
+
+---
+
+# 2830. Session revocation telemetry
+
+La revocación deberá registrar:
+
+* requested at;
+* enforced at;
+* scope;
+* reason;
+* actor;
+* propagation status;
+* failed consumers;
+* residual activity.
+
+---
+
+# 2831. Revocation latency metric
+
+VoltStack deberá medir el tiempo entre:
+
+```text
+Revocation Requested
+        ↓
+Revocation Persisted
+        ↓
+Revocation Propagated
+        ↓
+Last Unauthorized Use Prevented
+```
+
+---
+
+# 2832. Credential telemetry
+
+La telemetría deberá cubrir el ciclo de vida de cada credencial.
+
+---
+
+# 2833. CredentialTelemetryEvent
+
+```php
+final readonly class CredentialTelemetryEvent
+{
+    public function __construct(
+        public string $credentialId,
+        public IdentityIdentifier $identityId,
+        public CredentialType $credentialType,
+        public CredentialTelemetryAction $action,
+        public CredentialSecurityState $securityState,
+        public array $safeMetadata,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2834. CredentialTelemetryAction
+
+```php
+enum CredentialTelemetryAction: string
+{
+    case Created = 'created';
+    case Enrolled = 'enrolled';
+    case Used = 'used';
+    case Rotated = 'rotated';
+    case Suspended = 'suspended';
+    case Revoked = 'revoked';
+    case Expired = 'expired';
+    case Compromised = 'compromised';
+    case Recovered = 'recovered';
+    case Deleted = 'deleted';
+}
+```
+
+---
+
+# 2835. Credential telemetry minimization
+
+Solo deberá registrarse metadata segura como:
+
+* credential type;
+* creation time;
+* last use;
+* issuer;
+* policy version;
+* trust binding;
+* revocation reason;
+* assurance capability.
+
+---
+
+# 2836. Credential compromise analytics
+
+El sistema deberá identificar:
+
+* uso después de revocación;
+* uso simultáneo imposible;
+* anomalías de counter;
+* inesperada región;
+* uso fuera de purpose;
+* credential sharing;
+* excessive failures;
+* dependent credential creation.
+
+---
+
+# 2837. Credential inventory observability
+
+Las métricas deberán permitir conocer:
+
+* credenciales activas;
+* credenciales huérfanas;
+* credenciales expiradas;
+* credenciales sin uso;
+* credenciales privilegiadas;
+* credenciales sin owner;
+* credenciales pendientes de rotación.
+
+---
+
+# 2838. Device telemetry
+
+La observabilidad de dispositivos deberá cubrir:
+
+* registration;
+* trust assignment;
+* trust degradation;
+* credential binding;
+* session binding;
+* posture changes;
+* compromise indicators;
+* revocation.
+
+---
+
+# 2839. Device privacy controls
+
+Los fingerprints deberán:
+
+* minimizar atributos;
+* evitar tracking cross-context;
+* rotarse cuando sea posible;
+* permanecer tenant-scoped;
+* no utilizarse como identidad autónoma.
+
+---
+
+# 2840. Identity lifecycle telemetry
+
+Cada transición lifecycle deberá emitir eventos correlacionables.
+
+---
+
+# 2841. LifecycleTelemetryEvent
+
+```php
+final readonly class LifecycleTelemetryEvent
+{
+    public function __construct(
+        public string $executionId,
+        public IdentityIdentifier $identityId,
+        public IdentityLifecycleState $fromState,
+        public IdentityLifecycleState $toState,
+        public IdentityLifecycleAction $action,
+        public LifecycleTelemetryOutcome $outcome,
+        public array $safeContext,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2842. LifecycleTelemetryOutcome
+
+```php
+enum LifecycleTelemetryOutcome: string
+{
+    case Requested = 'requested';
+    case Approved = 'approved';
+    case Started = 'started';
+    case Completed = 'completed';
+    case PartiallyCompleted = 'partially_completed';
+    case Failed = 'failed';
+    case Cancelled = 'cancelled';
+    case RolledBack = 'rolled_back';
+}
+```
+
+---
+
+# 2843. Lifecycle observability goals
+
+Deberá permitir detectar:
+
+* stuck transitions;
+* missed deprovisioning;
+* unexpected reactivation;
+* partial activation;
+* orphan resources;
+* stale approvals;
+* overdue actions;
+* state drift;
+* cross-tenant anomalies.
+
+---
+
+# 2844. Joiner telemetry
+
+El onboarding deberá medir:
+
+* request-to-activation time;
+* verification latency;
+* provisioning completeness;
+* excessive initial access;
+* activation failures;
+* missing MFA enrollment.
+
+---
+
+# 2845. Mover telemetry
+
+Los cambios internos deberán observar:
+
+* old access removal;
+* new access assignment;
+* manager transition;
+* SoD conflicts;
+* ownership transfer;
+* stale delegations;
+* tenant changes.
+
+---
+
+# 2846. Leaver telemetry
+
+El offboarding deberá medir:
+
+* disablement latency;
+* session revocation latency;
+* credential revocation completeness;
+* downstream deprovisioning;
+* residual access;
+* orphan ownership;
+* archive completion.
+
+---
+
+# 2847. Recovery telemetry
+
+Las operaciones de recuperación deberán producir señales especializadas.
+
+---
+
+# 2848. RecoveryTelemetryEvent
+
+```php
+final readonly class RecoveryTelemetryEvent
+{
+    public function __construct(
+        public string $recoverySessionId,
+        public IdentityIdentifier $identityId,
+        public RecoveryTelemetryAction $action,
+        public RecoveryAssuranceLevel $assurance,
+        public array $riskSignals,
+        public array $safeContext,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2849. RecoveryTelemetryAction
+
+```php
+enum RecoveryTelemetryAction: string
+{
+    case Requested = 'requested';
+    case ChallengeIssued = 'challenge_issued';
+    case ChallengePassed = 'challenge_passed';
+    case ChallengeFailed = 'challenge_failed';
+    case Approved = 'approved';
+    case Rejected = 'rejected';
+    case Disputed = 'disputed';
+    case Cancelled = 'cancelled';
+    case Completed = 'completed';
+    case FraudDetected = 'fraud_detected';
+}
+```
+
+---
+
+# 2850. Recovery anomaly indicators
+
+Deberán observarse:
+
+* contact recently changed;
+* new device;
+* failed proofing;
+* repeated requests;
+* support overrides;
+* unusual recovery channel;
+* privileged target;
+* SIM swap signal;
+* token replay;
+* dispute after completion.
+
+---
+
+# 2851. Account takeover telemetry
+
+El sistema deberá agregar señales de takeover provenientes de múltiples dominios.
+
+---
+
+# 2852. AccountTakeoverTelemetrySnapshot
+
+```php
+final readonly class AccountTakeoverTelemetrySnapshot
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public array $authenticationSignals,
+        public array $sessionSignals,
+        public array $credentialSignals,
+        public array $recoverySignals,
+        public array $lifecycleSignals,
+        public array $privilegeSignals,
+        public DateTimeImmutable $windowStart,
+        public DateTimeImmutable $windowEnd,
+    ) {
+    }
+}
+```
+
+---
+
+# 2853. Cross-domain correlation
+
+Una detección de takeover deberá poder relacionar:
+
+```text
+Suspicious Authentication
+        +
+New Session
+        +
+Recovery Change
+        +
+New Credential
+        +
+Privilege Elevation
+        +
+Sensitive Action
+```
+
+---
+
+# 2854. Identity security metrics architecture
+
+VoltStack deberá distinguir entre:
+
+* counters;
+* gauges;
+* histograms;
+* distributions;
+* rates;
+* service-level indicators;
+* security key risk indicators.
+
+---
+
+# 2855. IdentitySecurityMetric
+
+```php
+final readonly class IdentitySecurityMetric
+{
+    public function __construct(
+        public string $name,
+        public IdentitySecurityMetricType $type,
+        public float|int $value,
+        public array $dimensions,
+        public DateTimeImmutable $observedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2856. IdentitySecurityMetricType
+
+```php
+enum IdentitySecurityMetricType: string
+{
+    case Counter = 'counter';
+    case Gauge = 'gauge';
+    case Histogram = 'histogram';
+    case Rate = 'rate';
+    case Sli = 'sli';
+    case Kri = 'kri';
+}
+```
+
+---
+
+# 2857. Core authentication metrics
+
+Métricas recomendadas:
+
+* authentication success rate;
+* authentication failure rate;
+* challenge rate;
+* step-up rate;
+* lockout rate;
+* false lockout rate;
+* MFA failure rate;
+* passwordless adoption;
+* federated failure rate;
+* risk denial rate.
+
+---
+
+# 2858. Core session metrics
+
+Deberán incluir:
+
+* active sessions;
+* privileged sessions;
+* quarantined sessions;
+* revocation latency;
+* refresh failure rate;
+* concurrent session anomalies;
+* session lifetime distribution;
+* post-revocation attempts.
+
+---
+
+# 2859. Core credential metrics
+
+Deberán incluir:
+
+* active credentials;
+* stale credentials;
+* compromised credentials;
+* overdue rotations;
+* credential reuse;
+* orphan credentials;
+* privileged credentials;
+* average credential age.
+
+---
+
+# 2860. Core lifecycle metrics
+
+Deberán incluir:
+
+* joiner completion time;
+* mover access drift;
+* leaver deprovisioning latency;
+* residual access rate;
+* orphan ownership count;
+* stuck transition count;
+* rollback rate;
+* manual remediation rate.
+
+---
+
+# 2861. Core recovery metrics
+
+Deberán incluir:
+
+* recovery success rate;
+* recovery denial rate;
+* average recovery duration;
+* fraud detection rate;
+* dispute rate;
+* support override rate;
+* privileged recovery rate;
+* post-recovery incident rate.
+
+---
+
+# 2862. Core account takeover metrics
+
+Deberán incluir:
+
+* suspected takeovers;
+* confirmed takeovers;
+* detection latency;
+* containment latency;
+* recovery latency;
+* persistent access findings;
+* false positive rate;
+* repeat compromise rate.
+
+---
+
+# 2863. Security dashboards
+
+VoltStack deberá soportar dashboards diferenciados para:
+
+* security operations;
+* identity operations;
+* tenant administrators;
+* compliance;
+* application owners;
+* privileged access teams;
+* executive risk reporting.
+
+---
+
+# 2864. Dashboard access control
+
+La visualización deberá limitarse según:
+
+* tenant;
+* role;
+* purpose;
+* data classification;
+* investigation assignment;
+* legal authorization;
+* need-to-know.
+
+---
+
+# 2865. SecurityOperationsDashboard
+
+```php
+final readonly class SecurityOperationsDashboard
+{
+    public function __construct(
+        public array $activeIncidents,
+        public array $highRiskIdentities,
+        public array $authenticationAnomalies,
+        public array $sessionCompromises,
+        public array $recoveryRisks,
+        public array $criticalMetrics,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2866. Identity operations dashboard
+
+Deberá mostrar:
+
+* pending lifecycle actions;
+* failed provisioning;
+* residual access;
+* stale accounts;
+* overdue reviews;
+* ownership gaps;
+* recovery queues;
+* connector health.
+
+---
+
+# 2867. Tenant security dashboard
+
+Cada tenant solo deberá visualizar:
+
+* sus identidades;
+* sus métricas;
+* sus incidentes;
+* sus políticas;
+* sus aplicaciones;
+* sus conectores;
+* sus riesgos agregados.
+
+---
+
+# 2868. Cross-tenant dashboard protection
+
+Las vistas globales deberán requerir privilegios especiales y aplicar agregación o pseudonimización cuando sea posible.
+
+---
+
+# 2869. Privacy-preserving telemetry
+
+La telemetría deberá aplicar:
+
+* minimización;
+* pseudonimización;
+* tokenización;
+* redaction;
+* hashing con scope;
+* aggregation;
+* retention limits;
+* purpose limitation.
+
+---
+
+# 2870. Sensitive telemetry classification
+
+Deberán clasificarse especialmente:
+
+* authentication factors;
+* recovery data;
+* network context;
+* device data;
+* biometrics;
+* investigation notes;
+* risk scores;
+* privileged actions;
+* identity proofing evidence.
+
+---
+
+# 2871. Telemetry access logging
+
+Toda consulta sensible deberá registrar:
+
+* requester;
+* tenant;
+* purpose;
+* query scope;
+* time range;
+* exported fields;
+* result count;
+* approval reference.
+
+---
+
+# 2872. Telemetry retention
+
+La retención deberá variar según:
+
+* event type;
+* severity;
+* tenant policy;
+* regulation;
+* incident linkage;
+* legal hold;
+* forensic value;
+* privacy risk.
+
+---
+
+# 2873. Telemetry deletion
+
+La eliminación deberá considerar:
+
+* retention expiry;
+* legal hold;
+* identity deletion;
+* tenant termination;
+* anonymization;
+* cryptographic erasure;
+* backup lifecycle.
+
+---
+
+# 2874. Telemetry cardinality controls
+
+VoltStack deberá limitar dimensiones de alta cardinalidad para evitar:
+
+* consumo excesivo;
+* costos impredecibles;
+* degradación;
+* alert evasion;
+* telemetry denial of service.
+
+---
+
+# 2875. Cardinality risk fields
+
+Deberán manejarse cuidadosamente:
+
+* identity ID;
+* session ID;
+* credential ID;
+* device ID;
+* IP;
+* user agent;
+* route;
+* application ID;
+* error details;
+* arbitrary metadata.
+
+---
+
+# 2876. CardinalityControlPolicy
+
+```php
+final readonly class CardinalityControlPolicy
+{
+    public function __construct(
+        public int $maximumSeriesPerTenant,
+        public int $maximumDistinctValuesPerDimension,
+        public array $allowedHighCardinalityFields,
+        public array $aggregationRules,
+        public array $dropRules,
+    ) {
+    }
+}
+```
+
+---
+
+# 2877. Cardinality overflow handling
+
+Cuando se excedan límites, el sistema deberá:
+
+* aggregate;
+* sample;
+* bucket;
+* pseudonymize;
+* drop low-value dimensions;
+* preserve security-critical events;
+* emit health alert.
+
+---
+
+# 2878. Telemetry sampling
+
+El sampling no deberá eliminar eventos críticos como:
+
+* confirmed compromise;
+* privileged changes;
+* recovery completion;
+* credential revocation;
+* tenant transfer;
+* identity deletion;
+* security hold;
+* break-glass access.
+
+---
+
+# 2879. Detection engineering architecture
+
+VoltStack deberá proporcionar una capa formal para desarrollar, versionar, probar y desplegar detecciones.
+
+---
+
+# 2880. IdentityDetectionRule
+
+```php
+final readonly class IdentityDetectionRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $name,
+        public string $version,
+        public array $requiredSignals,
+        public array $conditions,
+        public ThreatSeverity $severity,
+        public array $responseRecommendations,
+        public DetectionRuleState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 2881. DetectionRuleState
+
+```php
+enum DetectionRuleState: string
+{
+    case Draft = 'draft';
+    case Testing = 'testing';
+    case Shadow = 'shadow';
+    case Active = 'active';
+    case Disabled = 'disabled';
+    case Deprecated = 'deprecated';
+}
+```
+
+---
+
+# 2882. Detection rule lifecycle
+
+Las reglas deberán pasar por:
+
+```text
+Design
+  ↓
+Peer Review
+  ↓
+Historical Testing
+  ↓
+Shadow Mode
+  ↓
+Limited Deployment
+  ↓
+Production
+  ↓
+Continuous Tuning
+  ↓
+Retirement
+```
+
+---
+
+# 2883. Detection test requirements
+
+Toda regla deberá probarse contra:
+
+* true positive scenarios;
+* false positive scenarios;
+* malformed data;
+* missing context;
+* delayed events;
+* duplicate events;
+* cross-tenant boundaries;
+* adversarial inputs.
+
+---
+
+# 2884. Detection rule provenance
+
+Cada alerta deberá indicar:
+
+* rule ID;
+* rule version;
+* input events;
+* score;
+* confidence;
+* threshold;
+* suppression state;
+* enrichment sources.
+
+---
+
+# 2885. Identity behavior analytics
+
+VoltStack podrá construir perfiles de comportamiento para detectar desviaciones.
+
+---
+
+# 2886. IdentityBehaviorProfile
+
+```php
+final readonly class IdentityBehaviorProfile
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public string $tenantId,
+        public array $authenticationBaseline,
+        public array $sessionBaseline,
+        public array $deviceBaseline,
+        public array $resourceBaseline,
+        public array $privilegeBaseline,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2887. Behavior baseline dimensions
+
+Podrán incluirse:
+
+* usual login times;
+* common devices;
+* typical applications;
+* normal geographies;
+* expected session duration;
+* common authentication methods;
+* resource access patterns;
+* privilege usage;
+* recovery frequency.
+
+---
+
+# 2888. Baseline safeguards
+
+Los perfiles deberán:
+
+* ser tenant-scoped;
+* excluir atributos sensibles innecesarios;
+* considerar estacionalidad;
+* tolerar cambios legítimos;
+* tener expiración;
+* permitir recalibración;
+* evitar decisiones exclusivamente automatizadas de alto impacto.
+
+---
+
+# 2889. Risk baseline adaptation
+
+La adaptación deberá ser gradual para impedir que un atacante normalice actividad maliciosa rápidamente.
+
+---
+
+# 2890. Identity anomaly detection
+
+```php
+interface IdentitySecurityAnomalyDetectorInterface
+{
+    public function detect(
+        IdentityBehaviorProfile $baseline,
+        IdentityActivityWindow $activity
+    ): IdentitySecurityAnomalyAssessment;
+}
+```
+
+---
+
+# 2891. IdentitySecurityAnomalyAssessment
+
+```php
+final readonly class IdentitySecurityAnomalyAssessment
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public IdentitySecurityAnomalyType $type,
+        public float $deviationScore,
+        public ThreatConfidence $confidence,
+        public array $signals,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2892. IdentitySecurityAnomalyType
+
+```php
+enum IdentitySecurityAnomalyType: string
+{
+    case Authentication = 'authentication';
+    case Session = 'session';
+    case Credential = 'credential';
+    case Device = 'device';
+    case Recovery = 'recovery';
+    case Lifecycle = 'lifecycle';
+    case Privilege = 'privilege';
+    case Tenant = 'tenant';
+    case Behavioral = 'behavioral';
+}
+```
+
+---
+
+# 2893. Identity security drift detection
+
+Además del drift lifecycle, VoltStack deberá detectar:
+
+* policy drift;
+* assurance drift;
+* credential drift;
+* session drift;
+* device trust drift;
+* role drift;
+* tenant binding drift;
+* recovery configuration drift.
+
+---
+
+# 2894. SIEM integration
+
+VoltStack deberá exportar eventos hacia plataformas SIEM mediante formatos canónicos y contratos versionados.
+
+---
+
+# 2895. IdentitySecurityEventExporter
+
+```php
+interface IdentitySecurityEventExporterInterface
+{
+    public function export(
+        array $events,
+        IdentitySecurityExportContext $context
+    ): IdentitySecurityExportResult;
+}
+```
+
+---
+
+# 2896. SIEM export requirements
+
+La integración deberá soportar:
+
+* delivery acknowledgement;
+* retry;
+* batching;
+* ordering cuando sea necesario;
+* schema versioning;
+* tenant metadata;
+* event signing;
+* dead-letter handling;
+* backpressure;
+* privacy filtering.
+
+---
+
+# 2897. SOAR integration
+
+VoltStack deberá exponer acciones gobernadas para automatización de respuesta.
+
+Acciones posibles:
+
+* revoke session;
+* revoke credential;
+* restrict identity;
+* impose security hold;
+* block device;
+* initiate recovery;
+* suspend privileged access;
+* open incident;
+* notify trusted channel.
+
+---
+
+# 2898. SOAR safety controls
+
+Toda acción automatizada deberá respetar:
+
+* authorization;
+* tenant scope;
+* severity thresholds;
+* confidence thresholds;
+* approval requirements;
+* rate limits;
+* idempotency;
+* rollback or compensation;
+* human-in-the-loop.
+
+---
+
+# 2899. Alert governance and audit events
+
+La gobernanza de alertas deberá definir:
+
+* ownership;
+* severity model;
+* confidence model;
+* routing;
+* escalation;
+* suppression;
+* deduplication;
+* acknowledgement;
+* closure criteria;
+* retention;
+* quality review.
+
+Eventos recomendados:
+
+* `IdentityTelemetryRecorded`;
+* `AuthenticationAnomalyDetected`;
+* `SessionAnomalyDetected`;
+* `CredentialAnomalyDetected`;
+* `RecoveryAnomalyDetected`;
+* `LifecycleDriftObserved`;
+* `IdentityBehaviorBaselineCreated`;
+* `IdentityBehaviorDeviationDetected`;
+* `DetectionRuleActivated`;
+* `DetectionRuleSuppressed`;
+* `IdentitySecurityAlertCreated`;
+* `IdentitySecurityAlertAcknowledged`;
+* `IdentitySecurityAlertEscalated`;
+* `IdentitySecurityAlertClosed`;
+* `IdentitySecurityEventExported`;
+* `IdentitySecurityExportFailed`;
+* `IdentitySoarActionRequested`;
+* `IdentitySoarActionExecuted`;
+* `TelemetryCardinalityLimitExceeded`;
+* `SensitiveTelemetryAccessed`.
+
+---
+
+# 2900. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text
+Identity Security Observability Architecture
+Identity Security Telemetry Service
+Telemetry Event Integrity
+Authentication Telemetry
+MFA and Passwordless Telemetry
+Federated Authentication Telemetry
+Session Telemetry
+Session Revocation Metrics
+Credential Telemetry
+Credential Inventory Observability
+Device Telemetry
+Identity Lifecycle Telemetry
+Joiner-Mover-Leaver Metrics
+Recovery Telemetry
+Account Takeover Telemetry
+Cross-Domain Security Correlation
+Identity Security Metrics
+Security Dashboards
+Tenant-Aware Observability
+Privacy-Preserving Telemetry
+Telemetry Access Auditing
+Telemetry Retention and Deletion
+Cardinality Controls
+Security-Critical Sampling Rules
+Detection Engineering
+Detection Rule Lifecycle
+Identity Behavior Analytics
+Risk Baselines
+Identity Anomaly Detection
+Identity Security Drift Detection
+SIEM Integration
+SOAR Integration
+Alert Governance
+Identity Security Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 30
+
+- Identity security testing architecture
+- Authentication security testing
+- Session security testing
+- Credential security testing
+- Recovery security testing
+- Identity lifecycle testing
+- Federation security testing
+- Multi-tenant identity testing
+- Abuse-case testing
+- Adversarial testing
+- Fuzzing
+- Property-based testing
+- Mutation testing
+- Chaos engineering
+- Failure injection
+- Security regression suites
+- Red team scenarios
+- Purple team validation
+- Compliance control testing
+- Identity security testing governance
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 30 de varias
+**Cobertura:** Secciones **2901–3000**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 29`
+
+---
+
+# 2901. Identity Security Testing Architecture
+
+VoltStack deberá incorporar una arquitectura formal de **Identity Security Testing**, responsable de verificar continuamente la seguridad de:
+
+* autenticación;
+* sesiones;
+* credenciales;
+* MFA;
+* passkeys;
+* recovery;
+* lifecycle;
+* federación;
+* dispositivos;
+* tenants;
+* privilegios;
+* observabilidad;
+* respuesta ante incidentes.
+
+Las pruebas deberán considerarse parte del diseño del sistema y no una actividad posterior al desarrollo.
+
+---
+
+# 2902. Identity security testing objectives
+
+La arquitectura deberá garantizar:
+
+* verificación de invariantes;
+* detección temprana de regresiones;
+* resistencia a abuso;
+* aislamiento multi-tenant;
+* reproducibilidad;
+* cobertura de escenarios adversariales;
+* trazabilidad;
+* automatización;
+* evidencia de cumplimiento;
+* validación de degradación segura.
+
+---
+
+# 2903. Identity security testing threat model
+
+Las pruebas deberán contemplar:
+
+* credential stuffing;
+* password spraying;
+* session fixation;
+* session hijacking;
+* MFA fatigue;
+* token replay;
+* recovery takeover;
+* privilege escalation;
+* identity confusion;
+* tenant escape;
+* federation replay;
+* forged assertions;
+* race conditions;
+* downgrade attacks;
+* stale policy usage;
+* lifecycle drift;
+* log tampering;
+* alert suppression;
+* fail-open behavior.
+
+---
+
+# 2904. Testing domains
+
+El subsistema deberá dividir las pruebas en:
+
+```text id="hjgqaa"
+Authentication Testing
+Session Testing
+Credential Testing
+Recovery Testing
+Lifecycle Testing
+Federation Testing
+Multi-Tenant Testing
+Abuse-Case Testing
+Adversarial Testing
+Resilience Testing
+Compliance Testing
+Regression Testing
+```
+
+---
+
+# 2905. IdentitySecurityTestSuite
+
+```php id="l36l4z"
+interface IdentitySecurityTestSuiteInterface
+{
+    public function execute(
+        IdentitySecurityTestPlan $plan
+    ): IdentitySecurityTestReport;
+
+    public function verifyInvariant(
+        IdentitySecurityInvariant $invariant,
+        IdentitySecurityTestContext $context
+    ): IdentitySecurityInvariantResult;
+}
+```
+
+---
+
+# 2906. IdentitySecurityTestPlan
+
+```php id="l5rn5x"
+final readonly class IdentitySecurityTestPlan
+{
+    public function __construct(
+        public string $planId,
+        public array $testCases,
+        public array $invariants,
+        public array $environments,
+        public array $requiredFixtures,
+        public IdentitySecurityTestRiskLevel $riskLevel,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2907. IdentitySecurityTestRiskLevel
+
+```php id="g2w8wc"
+enum IdentitySecurityTestRiskLevel: string
+{
+    case Low = 'low';
+    case Standard = 'standard';
+    case Elevated = 'elevated';
+    case Destructive = 'destructive';
+    case ProductionSafe = 'production_safe';
+}
+```
+
+---
+
+# 2908. Test environment separation
+
+Las pruebas destructivas no deberán ejecutarse en producción salvo que hayan sido diseñadas explícitamente como:
+
+* production-safe;
+* non-destructive;
+* tenant-isolated;
+* rate-limited;
+* observable;
+* reversible.
+
+---
+
+# 2909. Security test fixtures
+
+Las fixtures deberán incluir:
+
+* identidades sintéticas;
+* credenciales sintéticas;
+* tenants aislados;
+* sesiones temporales;
+* dispositivos de prueba;
+* proveedores federados simulados;
+* recovery contacts sintéticos;
+* permisos controlados;
+* registros lifecycle temporales.
+
+---
+
+# 2910. Test data safety
+
+Nunca deberán utilizarse credenciales reales, secretos de producción o PII innecesaria en entornos de prueba.
+
+---
+
+# 2911. Identity security invariant model
+
+Una prueba de seguridad deberá poder validar invariantes arquitectónicos.
+
+---
+
+# 2912. IdentitySecurityInvariant
+
+```php id="d5b75h"
+final readonly class IdentitySecurityInvariant
+{
+    public function __construct(
+        public string $invariantId,
+        public string $description,
+        public IdentitySecurityInvariantType $type,
+        public array $preconditions,
+        public array $expectedProperties,
+    ) {
+    }
+}
+```
+
+---
+
+# 2913. IdentitySecurityInvariantType
+
+```php id="4qqt7c"
+enum IdentitySecurityInvariantType: string
+{
+    case Authentication = 'authentication';
+    case Session = 'session';
+    case Credential = 'credential';
+    case Recovery = 'recovery';
+    case Lifecycle = 'lifecycle';
+    case Federation = 'federation';
+    case TenantIsolation = 'tenant_isolation';
+    case Authorization = 'authorization';
+    case Audit = 'audit';
+    case Resilience = 'resilience';
+}
+```
+
+---
+
+# 2914. Core security invariants
+
+VoltStack deberá verificar al menos:
+
+* una identidad deshabilitada no puede autenticarse;
+* una sesión revocada no puede reutilizarse;
+* una credencial revocada no puede emitir nuevas sesiones;
+* una recuperación no restaura privilegios automáticamente;
+* un tenant no puede acceder a otro;
+* un factor MFA no puede aprobarse dos veces;
+* un token one-time no puede reutilizarse;
+* un evento crítico siempre genera audit trail;
+* una política denegatoria no puede degradarse a allow por error técnico;
+* un fallo de dependencia crítica debe resultar en fail-secure.
+
+---
+
+# 2915. Authentication security testing
+
+Las pruebas de autenticación deberán verificar:
+
+* identificación;
+* credential validation;
+* policy evaluation;
+* risk evaluation;
+* MFA;
+* passkeys;
+* federation;
+* lockout;
+* challenge escalation;
+* failure handling.
+
+---
+
+# 2916. AuthenticationTestCase
+
+```php id="6ypzo7"
+final readonly class AuthenticationSecurityTestCase
+{
+    public function __construct(
+        public string $testId,
+        public AuthenticationScenario $scenario,
+        public array $inputs,
+        public AuthenticationTelemetryOutcome $expectedOutcome,
+        public array $expectedSecurityEffects,
+    ) {
+    }
+}
+```
+
+---
+
+# 2917. Authentication success tests
+
+Deberán comprobar:
+
+* credencial válida;
+* identidad activa;
+* tenant válido;
+* policy permitida;
+* assurance suficiente;
+* session creation segura;
+* audit event;
+* telemetry emission.
+
+---
+
+# 2918. Authentication failure tests
+
+Deberán comprobar:
+
+* credencial inválida;
+* identidad inexistente;
+* identity disabled;
+* tenant mismatch;
+* expired credential;
+* revoked credential;
+* locked account;
+* MFA failure;
+* policy denial;
+* provider failure.
+
+---
+
+# 2919. Enumeration resistance testing
+
+Las respuestas deberán compararse respecto a:
+
+* status code;
+* body shape;
+* response size;
+* timing;
+* headers;
+* retry behavior;
+* error language.
+
+No deberán permitir inferir la existencia de una identidad.
+
+---
+
+# 2920. Timing side-channel testing
+
+VoltStack deberá medir variaciones significativas entre:
+
+* identity exists;
+* identity absent;
+* wrong password;
+* locked account;
+* disabled account;
+* tenant mismatch.
+
+---
+
+# 2921. Password policy testing
+
+Las pruebas deberán validar:
+
+* longitud;
+* entropy;
+* breached password rejection;
+* history;
+* reuse prevention;
+* normalization;
+* Unicode handling;
+* maximum length safety;
+* hashing cost;
+* migration de algoritmos.
+
+---
+
+# 2922. Password hashing tests
+
+Deberán verificar:
+
+* salt único;
+* cost configurado;
+* algoritmo permitido;
+* rehash al autenticar;
+* resistencia a truncation;
+* ausencia de plaintext;
+* ausencia de logs sensibles.
+
+---
+
+# 2923. Credential stuffing simulation
+
+El sistema deberá probar ataques con:
+
+* múltiples identidades;
+* múltiples IP;
+* credenciales filtradas;
+* bajo volumen distribuido;
+* rotación de user agents;
+* intentos cross-tenant.
+
+---
+
+# 2924. Password spraying simulation
+
+Deberán probarse patrones de:
+
+* una contraseña contra muchas identidades;
+* pocas contraseñas;
+* intervalos lentos;
+* múltiples aplicaciones;
+* múltiples tenants;
+* fuentes distribuidas.
+
+---
+
+# 2925. Adaptive lockout testing
+
+Las pruebas deberán comprobar que:
+
+* el atacante no pueda bloquear permanentemente a un usuario;
+* el riesgo incremente fricción;
+* los trusted devices no eliminen controles;
+* los privileged accounts reciban protección reforzada;
+* los contadores sean consistentes entre nodos.
+
+---
+
+# 2926. MFA security testing
+
+Las pruebas deberán cubrir:
+
+* enrollment;
+* challenge;
+* verification;
+* replay;
+* timeout;
+* removal;
+* replacement;
+* recovery;
+* factor downgrade;
+* fatigue.
+
+---
+
+# 2927. OTP testing
+
+Deberá verificarse:
+
+* expiración;
+* uso único;
+* clock drift;
+* rate limiting;
+* retry threshold;
+* secret rotation;
+* no disclosure;
+* rejection after successful use.
+
+---
+
+# 2928. Push MFA fatigue testing
+
+Deberán simularse:
+
+* repeated prompts;
+* prompt flooding;
+* delayed approval;
+* approval after denials;
+* attacker-controlled metadata;
+* ambiguous prompts.
+
+---
+
+# 2929. Passkey testing
+
+Deberán cubrirse:
+
+* registration;
+* assertion validation;
+* origin binding;
+* RP ID validation;
+* challenge uniqueness;
+* user verification;
+* credential cloning indicators;
+* counter anomalies;
+* revoked credential use.
+
+---
+
+# 2930. WebAuthn downgrade testing
+
+El sistema deberá impedir degradar silenciosamente desde un factor resistente a phishing hacia uno de menor assurance.
+
+---
+
+# 2931. Federation authentication testing
+
+Las pruebas deberán verificar:
+
+* issuer;
+* audience;
+* signature;
+* assertion expiration;
+* nonce;
+* state;
+* relay state;
+* clock skew;
+* replay;
+* subject mapping;
+* tenant mapping.
+
+---
+
+# 2932. Forged assertion testing
+
+Deberán rechazarse:
+
+* unsigned assertions;
+* invalid signatures;
+* wrong issuer;
+* wrong audience;
+* modified claims;
+* expired assertions;
+* future-dated assertions;
+* reused assertions.
+
+---
+
+# 2933. Authentication failover testing
+
+Si un proveedor externo falla, VoltStack deberá verificar que el sistema no:
+
+* omita MFA;
+* ignore policy;
+* acepte assertions no verificadas;
+* utilice cache stale insegura;
+* permita bypass administrativo.
+
+---
+
+# 2934. Session security testing
+
+Las pruebas deberán cubrir todo el ciclo de vida de sesiones.
+
+---
+
+# 2935. SessionSecurityTestCase
+
+```php id="bsi0lu"
+final readonly class SessionSecurityTestCase
+{
+    public function __construct(
+        public string $testId,
+        public SessionTelemetryAction $action,
+        public array $preconditions,
+        public array $operations,
+        public array $expectedSessionProperties,
+    ) {
+    }
+}
+```
+
+---
+
+# 2936. Session creation tests
+
+Deberán comprobar:
+
+* session ID aleatorio;
+* rotation after login;
+* secure cookie;
+* HttpOnly;
+* SameSite;
+* domain scope;
+* path scope;
+* lifetime;
+* tenant binding;
+* authentication context binding.
+
+---
+
+# 2937. Session fixation testing
+
+Las pruebas deberán garantizar que un session ID previo a autenticación no conserve validez después del login.
+
+---
+
+# 2938. Session hijacking simulation
+
+Deberán probarse:
+
+* stolen cookie;
+* stolen refresh token;
+* changed device;
+* changed geography;
+* token replay;
+* concurrent use;
+* post-revocation usage.
+
+---
+
+# 2939. Session rotation tests
+
+La sesión deberá rotarse tras:
+
+* login;
+* privilege elevation;
+* MFA completion;
+* recovery;
+* tenant switch;
+* sensitive profile change;
+* administrator impersonation start.
+
+---
+
+# 2940. Session revocation tests
+
+Deberán validar revocación de:
+
+* single session;
+* device sessions;
+* application sessions;
+* tenant sessions;
+* privileged sessions;
+* all sessions;
+* refresh token family.
+
+---
+
+# 2941. Revocation propagation testing
+
+La prueba deberá medir:
+
+* persist latency;
+* cache invalidation;
+* node propagation;
+* websocket closure;
+* background consumer enforcement;
+* offline client handling.
+
+---
+
+# 2942. Session expiry testing
+
+Deberán comprobarse:
+
+* idle timeout;
+* absolute timeout;
+* privilege timeout;
+* recovery session timeout;
+* quarantine timeout;
+* token family expiration.
+
+---
+
+# 2943. Session concurrency testing
+
+El sistema deberá comportarse correctamente ante:
+
+* múltiples logins;
+* concurrent refresh;
+* simultaneous logout;
+* revocation during request;
+* tenant switch during refresh;
+* privilege downgrade during active session.
+
+---
+
+# 2944. Credential security testing
+
+Las credenciales deberán probarse según su tipo y ciclo de vida.
+
+---
+
+# 2945. Credential lifecycle test matrix
+
+```text id="wy7jbw"
+Create
+Enroll
+Use
+Rotate
+Suspend
+Revoke
+Expire
+Compromise
+Recover
+Delete
+```
+
+---
+
+# 2946. Credential uniqueness tests
+
+Cuando aplique, el sistema deberá impedir:
+
+* duplicate credential IDs;
+* passkey binding duplicated incorrectly;
+* API key collisions;
+* certificate serial collisions;
+* recovery code reuse;
+* shared ownership no autorizado.
+
+---
+
+# 2947. Credential revocation testing
+
+Una credencial revocada no deberá:
+
+* autenticar;
+* refresh sessions;
+* sign requests;
+* authorize recovery;
+* enroll new credentials;
+* restore itself.
+
+---
+
+# 2948. Credential dependency testing
+
+La revocación de una credencial deberá evaluar correctamente:
+
+* sessions;
+* refresh tokens;
+* derived credentials;
+* linked devices;
+* delegated access;
+* issued API tokens.
+
+---
+
+# 2949. API key security testing
+
+Las pruebas deberán verificar:
+
+* entropy;
+* prefix safety;
+* secret hashing;
+* scope enforcement;
+* tenant binding;
+* rotation;
+* revocation;
+* last-used tracking;
+* leakage prevention.
+
+---
+
+# 2950. Certificate security testing
+
+Deberán comprobarse:
+
+* validity period;
+* chain validation;
+* key usage;
+* revocation;
+* issuer trust;
+* rotation;
+* expired certificate rejection;
+* compromised issuer handling.
+
+---
+
+# 2951. Recovery security testing
+
+La recuperación deberá someterse a pruebas adversariales independientes.
+
+---
+
+# 2952. RecoverySecurityTestCase
+
+```php id="pbzpuu"
+final readonly class RecoverySecurityTestCase
+{
+    public function __construct(
+        public string $testId,
+        public RecoveryReason $reason,
+        public RecoveryAssuranceLevel $requiredAssurance,
+        public array $evidence,
+        public array $attackSignals,
+        public bool $expectedApproval,
+    ) {
+    }
+}
+```
+
+---
+
+# 2953. Recovery token testing
+
+Deberán verificarse:
+
+* randomness;
+* expiration;
+* single use;
+* purpose binding;
+* identity binding;
+* tenant binding;
+* atomic consumption;
+* replay rejection;
+* revocation.
+
+---
+
+# 2954. Recovery enumeration testing
+
+El sistema no deberá revelar:
+
+* account existence;
+* recovery channel;
+* MFA type;
+* privileged status;
+* recovery contact;
+* tenant membership.
+
+---
+
+# 2955. Recovery contact testing
+
+Deberán validarse:
+
+* verified contact;
+* cooling period;
+* conflict of interest;
+* self-approval prevention;
+* expired contact;
+* compromised contact;
+* contact removal.
+
+---
+
+# 2956. Recovery channel independence testing
+
+Dos pruebas dependientes del mismo canal comprometido no deberán contabilizarse como assurance independiente.
+
+---
+
+# 2957. SIM swap scenario testing
+
+Se deberán simular:
+
+* recent SIM change;
+* recent port;
+* recycled number;
+* carrier mismatch;
+* phone unavailable;
+* attacker-controlled SMS.
+
+---
+
+# 2958. Support-assisted recovery testing
+
+Deberán verificarse controles contra:
+
+* operator bypass;
+* social engineering;
+* forged evidence;
+* self-approval;
+* incomplete audit;
+* excessive operator privileges;
+* out-of-band policy exceptions.
+
+---
+
+# 2959. Privileged recovery testing
+
+Las cuentas privilegiadas deberán exigir:
+
+* mayor assurance;
+* approvals;
+* privilege suspension;
+* restricted mode;
+* reapproval;
+* enhanced monitoring.
+
+---
+
+# 2960. Break-glass recovery testing
+
+Deberán comprobarse:
+
+* incident reference;
+* dual control;
+* short expiration;
+* limited capabilities;
+* automatic revocation;
+* after-action review;
+* no renewal;
+* complete audit.
+
+---
+
+# 2961. Identity lifecycle testing
+
+Los workflows lifecycle deberán probarse como máquinas de estado.
+
+---
+
+# 2962. Lifecycle state transition tests
+
+Deberán validarse:
+
+* allowed transitions;
+* prohibited transitions;
+* scheduled transitions;
+* approval requirements;
+* rollback;
+* cancellation;
+* partial execution;
+* retries;
+* reconciliation.
+
+---
+
+# 2963. Joiner testing
+
+El onboarding deberá probar:
+
+* proofing;
+* duplicate detection;
+* tenant assignment;
+* default access;
+* MFA enrollment;
+* activation;
+* incomplete provisioning;
+* rollback.
+
+---
+
+# 2964. Mover testing
+
+Los cambios deberán probar:
+
+* old access removal;
+* new access assignment;
+* SoD enforcement;
+* manager changes;
+* ownership transfer;
+* delegation transfer;
+* scheduled effective date;
+* rollback.
+
+---
+
+# 2965. Leaver testing
+
+El offboarding deberá validar:
+
+* immediate disablement;
+* session revocation;
+* credential revocation;
+* downstream deprovisioning;
+* ownership reassignment;
+* archive;
+* residual access detection;
+* legal hold preservation.
+
+---
+
+# 2966. Identity resurrection testing
+
+Una recuperación, importación o reconciliación no deberá reactivar identidades eliminadas o bloqueadas irreversiblemente.
+
+---
+
+# 2967. Lifecycle race-condition testing
+
+Deberán probarse:
+
+* disable during login;
+* delete during recovery;
+* tenant transfer during session refresh;
+* role removal during authorization;
+* reactivation during offboarding;
+* concurrent ownership transfer.
+
+---
+
+# 2968. Federation security testing
+
+Las relaciones federadas deberán probarse end-to-end.
+
+---
+
+# 2969. Federation trust tests
+
+Deberán validarse:
+
+* metadata source;
+* signing keys;
+* key rotation;
+* issuer trust;
+* audience restrictions;
+* tenant mapping;
+* assurance mapping;
+* logout propagation.
+
+---
+
+# 2970. Federation key rollover testing
+
+Las pruebas deberán contemplar:
+
+* old and new key overlap;
+* expired key rejection;
+* emergency rollover;
+* stale metadata;
+* compromised key;
+* cache invalidation.
+
+---
+
+# 2971. Identity mapping tests
+
+El sistema deberá impedir:
+
+* subject collision;
+* email-only unsafe matching;
+* cross-tenant subject reuse;
+* identifier normalization mismatch;
+* duplicate canonical identity;
+* privilege injection through claims.
+
+---
+
+# 2972. Federation logout testing
+
+Deberán probarse:
+
+* local logout;
+* upstream logout;
+* downstream logout;
+* partial provider outage;
+* replayed logout message;
+* incorrect session mapping.
+
+---
+
+# 2973. Multi-tenant identity testing
+
+El aislamiento tenant deberá probarse en cada subsistema.
+
+---
+
+# 2974. TenantIsolationTestCase
+
+```php id="z3tdsq"
+final readonly class TenantIsolationTestCase
+{
+    public function __construct(
+        public string $testId,
+        public string $sourceTenantId,
+        public string $targetTenantId,
+        public array $attemptedOperations,
+        public array $expectedDenials,
+    ) {
+    }
+}
+```
+
+---
+
+# 2975. Tenant isolation test coverage
+
+Deberán probarse:
+
+* identity lookup;
+* authentication;
+* session usage;
+* recovery;
+* credential listing;
+* device listing;
+* telemetry;
+* security history;
+* lifecycle operations;
+* administration.
+
+---
+
+# 2976. Cross-tenant identifier collision tests
+
+Dos tenants podrán tener identificadores humanos iguales sin producir identity confusion.
+
+---
+
+# 2977. Tenant context tampering tests
+
+Deberán probarse:
+
+* manipulated headers;
+* modified route parameters;
+* forged token claims;
+* stale tenant session;
+* tenant switch without step-up;
+* cross-tenant cache poisoning.
+
+---
+
+# 2978. Tenant data export testing
+
+Un export deberá incluir únicamente datos autorizados del tenant correspondiente.
+
+---
+
+# 2979. Abuse-case testing architecture
+
+VoltStack deberá mantener un catálogo explícito de abuse cases.
+
+---
+
+# 2980. IdentitySecurityAbuseCase
+
+```php id="0v6r3m"
+final readonly class IdentitySecurityAbuseCase
+{
+    public function __construct(
+        public string $abuseCaseId,
+        public string $actor,
+        public string $goal,
+        public array $preconditions,
+        public array $attackSteps,
+        public array $expectedControls,
+        public array $expectedEvidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 2981. Core abuse cases
+
+El catálogo deberá incluir:
+
+* attacker locks victim account;
+* attacker takes over recovery;
+* support agent bypasses MFA;
+* user reuses revoked session;
+* tenant admin accesses another tenant;
+* federated claim grants excessive privileges;
+* attacker normalizes malicious behavior;
+* operator suppresses security alert;
+* compromised device enrolls new factor;
+* deleted identity is resurrected.
+
+---
+
+# 2982. Adversarial testing
+
+Las pruebas adversariales deberán asumir que el atacante:
+
+* conoce el diseño público;
+* controla clientes;
+* modifica requests;
+* repite tokens;
+* manipula tiempos;
+* induce fallos;
+* intenta carreras;
+* combina flujos legítimos;
+* explota diferencias de error.
+
+---
+
+# 2983. Fuzzing architecture
+
+VoltStack deberá aplicar fuzzing a parsers, protocolos y entradas de identidad.
+
+---
+
+# 2984. IdentitySecurityFuzzer
+
+```php id="u5sbkg"
+interface IdentitySecurityFuzzerInterface
+{
+    public function fuzz(
+        IdentitySecurityFuzzTarget $target,
+        IdentitySecurityFuzzConfiguration $configuration
+    ): IdentitySecurityFuzzReport;
+}
+```
+
+---
+
+# 2985. Fuzz targets
+
+Deberán incluirse:
+
+* login payloads;
+* JWT;
+* SAML;
+* WebAuthn;
+* cookies;
+* session headers;
+* recovery tokens;
+* identity claims;
+* tenant identifiers;
+* redirect URIs;
+* metadata documents;
+* audit event payloads.
+
+---
+
+# 2986. Fuzzing properties
+
+El fuzzing deberá verificar:
+
+* no crash;
+* no secret leakage;
+* no authentication bypass;
+* no tenant escape;
+* bounded memory;
+* bounded CPU;
+* deterministic rejection;
+* safe error handling.
+
+---
+
+# 2987. Property-based testing
+
+VoltStack deberá utilizar property-based testing para validar invariantes con amplios espacios de entrada.
+
+---
+
+# 2988. Property-based security properties
+
+Ejemplos:
+
+* todo token usado queda inválido;
+* toda sesión revocada rechaza requests posteriores;
+* toda transición prohibida permanece prohibida;
+* todo tenant context se mantiene aislado;
+* toda credential expirada falla;
+* todo approval vencido se rechaza;
+* todo evento crítico produce audit record.
+
+---
+
+# 2989. Mutation testing
+
+La suite deberá comprobar que detecta modificaciones inseguras como:
+
+* eliminar un authorization check;
+* invertir una condición;
+* ignorar expiración;
+* omitir tenant filter;
+* aceptar signature inválida;
+* desactivar revocation;
+* convertir fail-closed en fail-open.
+
+---
+
+# 2990. Chaos engineering
+
+La seguridad deberá probarse bajo fallos parciales y degradación.
+
+---
+
+# 2991. Identity security chaos scenarios
+
+Deberán simularse:
+
+* identity store unavailable;
+* policy engine timeout;
+* MFA provider outage;
+* federation metadata outage;
+* revocation cache failure;
+* telemetry pipeline delay;
+* clock skew;
+* message duplication;
+* message reordering;
+* connector partial failure.
+
+---
+
+# 2992. Failure injection principles
+
+La inyección de fallos deberá:
+
+* estar autorizada;
+* tener scope limitado;
+* ser reversible;
+* generar observabilidad;
+* preservar tenant isolation;
+* evitar datos reales;
+* contar con abort conditions.
+
+---
+
+# 2993. Fail-secure verification
+
+Ante fallos críticos, el sistema deberá demostrar que:
+
+* no omite autenticación;
+* no omite MFA;
+* no amplía privilegios;
+* no pierde tenant scope;
+* no ignora revocación;
+* no completa recovery sin assurance;
+* no permite lifecycle inconsistente.
+
+---
+
+# 2994. Security regression suites
+
+VoltStack deberá mantener suites de regresión para vulnerabilidades corregidas.
+
+Cada vulnerabilidad deberá producir:
+
+* test reproducible;
+* issue reference;
+* fix version;
+* affected components;
+* regression identifier;
+* long-term ownership.
+
+---
+
+# 2995. Red team scenarios
+
+Los ejercicios red team deberán incluir:
+
+* account takeover;
+* privileged identity compromise;
+* support desk compromise;
+* federation abuse;
+* tenant escape;
+* recovery manipulation;
+* API credential theft;
+* persistent session access;
+* insider lifecycle abuse.
+
+---
+
+# 2996. Purple team validation
+
+Red team y blue team deberán validar conjuntamente:
+
+* detectability;
+* telemetry completeness;
+* alert quality;
+* response latency;
+* containment effectiveness;
+* evidence preservation;
+* rule tuning;
+* missed detections.
+
+---
+
+# 2997. Compliance control testing
+
+Los controles deberán mapearse a pruebas verificables.
+
+Ejemplos:
+
+* MFA enforcement;
+* session timeout;
+* privileged review;
+* credential rotation;
+* offboarding latency;
+* audit immutability;
+* tenant isolation;
+* recovery approval;
+* access recertification.
+
+---
+
+# 2998. Security test evidence
+
+Cada ejecución deberá producir:
+
+* plan;
+* environment;
+* version;
+* test cases;
+* inputs;
+* results;
+* failures;
+* evidence;
+* timestamps;
+* responsible actor;
+* remediation linkage.
+
+---
+
+# 2999. Identity security testing governance
+
+La gobernanza deberá definir:
+
+* test ownership;
+* minimum coverage;
+* release gates;
+* destructive testing rules;
+* production-safe testing;
+* red team cadence;
+* exception process;
+* evidence retention;
+* remediation SLA;
+* control mapping;
+* test review.
+
+Eventos recomendados:
+
+* `IdentitySecurityTestPlanCreated`;
+* `IdentitySecurityTestStarted`;
+* `IdentitySecurityInvariantVerified`;
+* `IdentitySecurityInvariantFailed`;
+* `AuthenticationSecurityTestFailed`;
+* `SessionSecurityTestFailed`;
+* `CredentialSecurityTestFailed`;
+* `RecoverySecurityTestFailed`;
+* `TenantIsolationTestFailed`;
+* `IdentitySecurityFuzzingCompleted`;
+* `IdentitySecurityMutationSurvived`;
+* `IdentitySecurityChaosExperimentStarted`;
+* `IdentitySecurityChaosExperimentAborted`;
+* `IdentitySecurityRegressionDetected`;
+* `IdentityRedTeamFindingCreated`;
+* `IdentityPurpleTeamValidationCompleted`;
+* `IdentityComplianceControlTested`.
+
+---
+
+# 3000. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text id="a6d7ww"
+Identity Security Testing Architecture
+Security Test Plans
+Security Test Risk Levels
+Synthetic Test Fixtures
+Identity Security Invariants
+Authentication Security Testing
+Enumeration Resistance Testing
+Timing Side-Channel Testing
+Password Security Testing
+Credential Stuffing Simulation
+Password Spraying Simulation
+Adaptive Lockout Testing
+MFA Security Testing
+OTP Replay Testing
+MFA Fatigue Testing
+Passkey Security Testing
+WebAuthn Downgrade Testing
+Federation Authentication Testing
+Forged Assertion Testing
+Authentication Failover Testing
+Session Security Testing
+Session Fixation Testing
+Session Hijacking Simulation
+Session Rotation Testing
+Session Revocation Testing
+Revocation Propagation Testing
+Credential Lifecycle Testing
+API Key Testing
+Certificate Testing
+Recovery Security Testing
+Recovery Token Testing
+Support Recovery Testing
+Privileged Recovery Testing
+Break-Glass Testing
+Identity Lifecycle Testing
+Joiner-Mover-Leaver Testing
+Identity Resurrection Testing
+Lifecycle Race-Condition Testing
+Federation Trust Testing
+Federation Key Rollover Testing
+Multi-Tenant Identity Testing
+Tenant Context Tampering Testing
+Abuse-Case Testing
+Adversarial Testing
+Fuzzing
+Property-Based Testing
+Mutation Testing
+Chaos Engineering
+Failure Injection
+Fail-Secure Verification
+Security Regression Suites
+Red Team Scenarios
+Purple Team Validation
+Compliance Control Testing
+Security Test Evidence
+Identity Security Testing Governance
+```
+
+La siguiente entrega continuará con:
+
+```text id="4wud9i"
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 31
+
+- Identity security compliance architecture
+- Control framework mapping
+- NIST identity assurance alignment
+- ISO identity security controls
+- SOC 2 control mapping
+- GDPR identity protections
+- Privacy rights handling
+- Data residency
+- Identity records retention
+- Legal holds
+- Evidence preservation
+- Access certification
+- Privileged access reviews
+- Segregation of duties
+- Policy attestations
+- Compliance exceptions
+- Continuous control monitoring
+- Audit readiness
+- Regulatory reporting
+- Identity compliance audit events
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 31 de varias
+**Cobertura:** Secciones **3001–3100**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 30`
+
+---
+
+# 3001. Identity Security Compliance Architecture
+
+VoltStack deberá incorporar una arquitectura formal de **Identity Security Compliance**, responsable de traducir requisitos legales, regulatorios, contractuales y organizacionales en controles verificables sobre:
+
+* identidades;
+* autenticación;
+* sesiones;
+* credenciales;
+* privilegios;
+* recovery;
+* lifecycle;
+* federación;
+* dispositivos;
+* auditoría;
+* observabilidad;
+* respuesta a incidentes.
+
+El cumplimiento deberá diseñarse como una capacidad continua del framework y no como una colección aislada de reportes.
+
+---
+
+# 3002. Compliance architecture objectives
+
+La arquitectura deberá garantizar:
+
+* trazabilidad entre requisitos y controles;
+* evidencia verificable;
+* separación entre política y regulación;
+* soporte multi-jurisdicción;
+* aislamiento multi-tenant;
+* automatización;
+* versionado;
+* explicabilidad;
+* monitoreo continuo;
+* preparación para auditoría;
+* gestión de excepciones;
+* mínima exposición de datos.
+
+---
+
+# 3003. Compliance architecture principles
+
+VoltStack deberá aplicar los siguientes principios:
+
+* control as code;
+* policy as code;
+* evidence by design;
+* least privilege;
+* purpose limitation;
+* data minimization;
+* defense in depth;
+* separation of duties;
+* continuous assurance;
+* immutable auditability.
+
+---
+
+# 3004. Compliance threat model
+
+Deberán contemplarse:
+
+* controles declarados pero no implementados;
+* evidencia incompleta;
+* manipulación de reportes;
+* scope incorrecto;
+* auditoría cross-tenant;
+* excepción permanente;
+* policy drift;
+* accesos no certificados;
+* legal holds omitidos;
+* retención excesiva;
+* eliminación anticipada;
+* privileged access no revisado;
+* falsos positivos de cumplimiento;
+* regulatory mapping obsoleto.
+
+---
+
+# 3005. Compliance processing pipeline
+
+```text id="dkty19"
+Regulatory Requirement
+      ↓
+Control Mapping
+      ↓
+Policy Binding
+      ↓
+Technical Enforcement
+      ↓
+Evidence Collection
+      ↓
+Continuous Monitoring
+      ↓
+Exception Evaluation
+      ↓
+Attestation
+      ↓
+Audit Reporting
+```
+
+---
+
+# 3006. IdentityComplianceService
+
+```php id="oo54nw"
+interface IdentityComplianceServiceInterface
+{
+    public function evaluate(
+        IdentityComplianceEvaluationRequest $request
+    ): IdentityComplianceEvaluationResult;
+
+    public function collectEvidence(
+        IdentityComplianceEvidenceRequest $request
+    ): IdentityComplianceEvidencePackage;
+
+    public function generateReport(
+        IdentityComplianceReportRequest $request
+    ): IdentityComplianceReport;
+}
+```
+
+---
+
+# 3007. IdentityComplianceEvaluationRequest
+
+```php id="ind3eh"
+final readonly class IdentityComplianceEvaluationRequest
+{
+    public function __construct(
+        public string $evaluationId,
+        public string $tenantId,
+        public array $frameworks,
+        public array $controlIds,
+        public DateTimeImmutable $windowStart,
+        public DateTimeImmutable $windowEnd,
+        public IdentityIdentifier|string $requestedBy,
+    ) {
+    }
+}
+```
+
+---
+
+# 3008. IdentityComplianceEvaluationResult
+
+```php id="8ayj3p"
+final readonly class IdentityComplianceEvaluationResult
+{
+    public function __construct(
+        public string $evaluationId,
+        public ComplianceEvaluationState $state,
+        public array $controlResults,
+        public array $exceptions,
+        public array $evidenceReferences,
+        public DateTimeImmutable $evaluatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3009. ComplianceEvaluationState
+
+```php id="isppq7"
+enum ComplianceEvaluationState: string
+{
+    case Compliant = 'compliant';
+    case PartiallyCompliant = 'partially_compliant';
+    case NonCompliant = 'non_compliant';
+    case NotApplicable = 'not_applicable';
+    case Indeterminate = 'indeterminate';
+}
+```
+
+---
+
+# 3010. Control framework abstraction
+
+VoltStack deberá desacoplar controles técnicos de marcos regulatorios concretos.
+
+Un mismo control técnico podrá satisfacer múltiples requisitos.
+
+---
+
+# 3011. ComplianceFramework
+
+```php id="6re4ry"
+final readonly class ComplianceFramework
+{
+    public function __construct(
+        public string $frameworkId,
+        public string $name,
+        public string $version,
+        public string $jurisdiction,
+        public array $requirements,
+        public DateTimeImmutable $effectiveAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3012. IdentityComplianceControl
+
+```php id="z9t2ed"
+final readonly class IdentityComplianceControl
+{
+    public function __construct(
+        public string $controlId,
+        public string $name,
+        public string $description,
+        public ComplianceControlType $type,
+        public array $technicalRequirements,
+        public array $evidenceRequirements,
+        public array $frameworkMappings,
+        public ComplianceControlState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3013. ComplianceControlType
+
+```php id="tf923b"
+enum ComplianceControlType: string
+{
+    case Preventive = 'preventive';
+    case Detective = 'detective';
+    case Corrective = 'corrective';
+    case Compensating = 'compensating';
+    case Administrative = 'administrative';
+    case Technical = 'technical';
+}
+```
+
+---
+
+# 3014. ComplianceControlState
+
+```php id="nkow72"
+enum ComplianceControlState: string
+{
+    case Draft = 'draft';
+    case Active = 'active';
+    case Suspended = 'suspended';
+    case Deprecated = 'deprecated';
+    case Retired = 'retired';
+}
+```
+
+---
+
+# 3015. Control mapping model
+
+Cada mapping deberá relacionar:
+
+* framework;
+* requirement;
+* control;
+* implementation;
+* evidence;
+* owner;
+* frequency;
+* applicability;
+* exceptions.
+
+---
+
+# 3016. ComplianceControlMapping
+
+```php id="hsv9ae"
+final readonly class ComplianceControlMapping
+{
+    public function __construct(
+        public string $mappingId,
+        public string $frameworkId,
+        public string $requirementId,
+        public string $controlId,
+        public array $implementationReferences,
+        public array $evidenceTypes,
+        public ComplianceApplicability $applicability,
+        public DateTimeImmutable $effectiveAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3017. ComplianceApplicability
+
+```php id="qfsnii"
+enum ComplianceApplicability: string
+{
+    case Required = 'required';
+    case Conditional = 'conditional';
+    case Optional = 'optional';
+    case NotApplicable = 'not_applicable';
+}
+```
+
+---
+
+# 3018. Control ownership
+
+Todo control deberá tener:
+
+* business owner;
+* technical owner;
+* evidence owner;
+* remediation owner;
+* approver;
+* review cadence.
+
+---
+
+# 3019. Control versioning
+
+Cambios en controles deberán conservar:
+
+* previous version;
+* effective date;
+* rationale;
+* approver;
+* affected tenants;
+* migration requirements;
+* evidence continuity.
+
+---
+
+# 3020. Control implementation status
+
+El sistema deberá diferenciar:
+
+* designed;
+* implemented;
+* operating;
+* monitored;
+* failing;
+* remediating;
+* retired.
+
+---
+
+# 3021. NIST identity assurance alignment
+
+VoltStack deberá permitir mapear sus niveles internos hacia modelos de assurance reconocidos.
+
+---
+
+# 3022. Assurance mapping boundaries
+
+El framework no deberá declarar equivalencia normativa automática.
+
+El mapping deberá documentar:
+
+* requisitos cubiertos;
+* requisitos parciales;
+* gaps;
+* compensating controls;
+* tenant-specific assumptions.
+
+---
+
+# 3023. IdentityAssuranceMapping
+
+```php id="09ivnj"
+final readonly class IdentityAssuranceMapping
+{
+    public function __construct(
+        public IdentityProofingLevel $internalProofingLevel,
+        public AuthenticationAssuranceLevel $internalAuthenticationLevel,
+        public FederationAssuranceLevel $internalFederationLevel,
+        public string $externalFramework,
+        public string $externalLevel,
+        public array $coverage,
+        public array $gaps,
+    ) {
+    }
+}
+```
+
+---
+
+# 3024. Proofing compliance evidence
+
+La evidencia de proofing deberá demostrar:
+
+* proceso aplicado;
+* assurance requerido;
+* assurance alcanzado;
+* fuentes verificadas;
+* decision;
+* reviewer cuando aplique;
+* expiration;
+* revocation status.
+
+---
+
+# 3025. Authentication compliance evidence
+
+Deberá demostrar:
+
+* autenticación exitosa;
+* método utilizado;
+* assurance alcanzado;
+* policy version;
+* MFA enforcement;
+* risk decision;
+* session issuance;
+* tenant context.
+
+---
+
+# 3026. Session compliance evidence
+
+Deberá demostrar:
+
+* creation;
+* lifetime;
+* idle timeout;
+* absolute timeout;
+* privilege elevation;
+* revocation;
+* termination;
+* propagation;
+* residual use detection.
+
+---
+
+# 3027. ISO-aligned identity controls
+
+VoltStack deberá soportar controles relacionados con:
+
+* identity management;
+* authentication information;
+* access rights;
+* privileged access;
+* segregation of duties;
+* logging;
+* monitoring;
+* lifecycle management;
+* supplier identity access.
+
+---
+
+# 3028. SOC-aligned control evidence
+
+El framework deberá poder demostrar:
+
+* control design;
+* operating effectiveness;
+* test period;
+* exceptions;
+* remediation;
+* reviewer;
+* evidence integrity;
+* population completeness.
+
+---
+
+# 3029. GDPR identity protection architecture
+
+Cuando aplique, VoltStack deberá soportar:
+
+* lawful basis;
+* purpose limitation;
+* minimization;
+* accuracy;
+* storage limitation;
+* security;
+* transparency;
+* data subject rights;
+* accountability.
+
+---
+
+# 3030. Lawful basis metadata
+
+Toda operación que procese datos personales sensibles deberá poder asociarse a:
+
+* lawful basis;
+* processing purpose;
+* controller;
+* processor;
+* retention rule;
+* jurisdiction;
+* data category.
+
+---
+
+# 3031. IdentityProcessingPurpose
+
+```php id="8x8ib4"
+final readonly class IdentityProcessingPurpose
+{
+    public function __construct(
+        public string $purposeId,
+        public string $name,
+        public string $lawfulBasis,
+        public array $allowedDataCategories,
+        public array $allowedOperations,
+        public DateInterval $retention,
+        public array $jurisdictions,
+    ) {
+    }
+}
+```
+
+---
+
+# 3032. Purpose-bound identity access
+
+El acceso a datos de identidad deberá validar:
+
+* actor;
+* purpose;
+* tenant;
+* data category;
+* retention state;
+* legal restrictions;
+* authorization;
+* audit requirement.
+
+---
+
+# 3033. Identity data minimization
+
+Los controladores, servicios y reportes deberán solicitar solo atributos necesarios para la operación.
+
+---
+
+# 3034. Field-level identity policies
+
+El sistema deberá permitir controlar acceso por atributo.
+
+Ejemplos:
+
+* legal name;
+* email;
+* phone;
+* government identifier;
+* recovery contact;
+* biometric reference;
+* risk score;
+* investigation status.
+
+---
+
+# 3035. Privacy rights handling architecture
+
+VoltStack deberá soportar workflows para derechos de privacidad aplicables.
+
+---
+
+# 3036. IdentityPrivacyRightsRequest
+
+```php id="3f8py6"
+final readonly class IdentityPrivacyRightsRequest
+{
+    public function __construct(
+        public string $requestId,
+        public IdentityIdentifier $identityId,
+        public PrivacyRightType $type,
+        public string $jurisdiction,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3037. PrivacyRightType
+
+```php id="blh5y4"
+enum PrivacyRightType: string
+{
+    case Access = 'access';
+    case Rectification = 'rectification';
+    case Erasure = 'erasure';
+    case Restriction = 'restriction';
+    case Portability = 'portability';
+    case Objection = 'objection';
+    case ConsentWithdrawal = 'consent_withdrawal';
+}
+```
+
+---
+
+# 3038. Privacy request verification
+
+Antes de ejecutar un derecho deberá verificarse la identidad del solicitante con assurance proporcional al riesgo.
+
+---
+
+# 3039. Privacy request scope
+
+El sistema deberá resolver:
+
+* identity records;
+* credentials metadata;
+* session history;
+* recovery history;
+* device records;
+* audit events;
+* lifecycle records;
+* support cases;
+* federation mappings;
+* derived risk profiles.
+
+---
+
+# 3040. Privacy rights limitations
+
+Una solicitud podrá limitarse por:
+
+* legal obligation;
+* fraud prevention;
+* security investigation;
+* legal hold;
+* contractual requirement;
+* rights of others;
+* system integrity.
+
+---
+
+# 3041. Identity data portability
+
+Los exports deberán ser:
+
+* machine-readable;
+* scoped;
+* integrity-protected;
+* encrypted;
+* time-limited;
+* audited;
+* tenant-isolated.
+
+---
+
+# 3042. PortableIdentityPackage
+
+```php id="myollf"
+final readonly class PortableIdentityPackage
+{
+    public function __construct(
+        public string $packageId,
+        public IdentityIdentifier $identityId,
+        public array $includedCategories,
+        public string $format,
+        public string $digest,
+        public string $encryptionReference,
+        public DateTimeImmutable $generatedAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3043. Identity rectification
+
+La corrección de datos deberá preservar:
+
+* previous value;
+* new value;
+* source;
+* reason;
+* approver cuando aplique;
+* effective date;
+* downstream propagation.
+
+---
+
+# 3044. Identity erasure architecture
+
+La eliminación deberá coordinar:
+
+* lifecycle state;
+* legal holds;
+* credentials;
+* sessions;
+* tenant memberships;
+* devices;
+* recovery data;
+* derived profiles;
+* downstream systems;
+* backups.
+
+---
+
+# 3045. Erasure vs anonymization
+
+VoltStack deberá distinguir entre:
+
+* logical deletion;
+* physical deletion;
+* anonymization;
+* pseudonymization;
+* cryptographic erasure;
+* archival restriction.
+
+---
+
+# 3046. IdentityErasurePlan
+
+```php id="4y68c6"
+final readonly class IdentityErasurePlan
+{
+    public function __construct(
+        public IdentityIdentifier $identityId,
+        public array $dataStores,
+        public array $blockedByLegalHolds,
+        public array $anonymizationActions,
+        public array $deletionActions,
+        public array $verificationSteps,
+        public DateTimeImmutable $scheduledAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3047. Data residency architecture
+
+VoltStack deberá permitir restringir almacenamiento y procesamiento por región.
+
+---
+
+# 3048. IdentityDataResidencyPolicy
+
+```php id="f01jkg"
+final readonly class IdentityDataResidencyPolicy
+{
+    public function __construct(
+        public string $policyId,
+        public string $tenantId,
+        public array $allowedRegions,
+        public array $prohibitedRegions,
+        public array $dataCategories,
+        public array $approvedTransferMechanisms,
+        public DateTimeImmutable $effectiveAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3049. Residency enforcement points
+
+La residencia deberá validarse en:
+
+* storage selection;
+* backup placement;
+* telemetry export;
+* identity proofing providers;
+* federation connectors;
+* support tooling;
+* analytics;
+* disaster recovery;
+* data export.
+
+---
+
+# 3050. Cross-border identity transfers
+
+Toda transferencia deberá registrar:
+
+* source region;
+* destination region;
+* data categories;
+* purpose;
+* transfer mechanism;
+* processor;
+* authorization;
+* retention;
+* encryption state.
+
+---
+
+# 3051. Data transfer policy engine
+
+```php id="rkjwdt"
+interface IdentityDataTransferPolicyEngineInterface
+{
+    public function evaluate(
+        IdentityDataTransferRequest $request
+    ): IdentityDataTransferDecision;
+}
+```
+
+---
+
+# 3052. Identity records retention
+
+Cada registro deberá tener un perfil de retención explícito.
+
+---
+
+# 3053. IdentityRetentionProfile
+
+```php id="b3g1kn"
+final readonly class IdentityRetentionProfile
+{
+    public function __construct(
+        public string $profileId,
+        public IdentityRecordCategory $category,
+        public DateInterval $activeRetention,
+        public DateInterval $archiveRetention,
+        public RetentionDisposition $disposition,
+        public array $jurisdictionOverrides,
+    ) {
+    }
+}
+```
+
+---
+
+# 3054. IdentityRecordCategory
+
+```php id="tt9zvb"
+enum IdentityRecordCategory: string
+{
+    case CoreIdentity = 'core_identity';
+    case CredentialMetadata = 'credential_metadata';
+    case SessionHistory = 'session_history';
+    case RecoveryEvidence = 'recovery_evidence';
+    case ProofingEvidence = 'proofing_evidence';
+    case LifecycleHistory = 'lifecycle_history';
+    case AuditEvidence = 'audit_evidence';
+    case SecurityIncident = 'security_incident';
+    case DeviceRecord = 'device_record';
+    case FederationRecord = 'federation_record';
+}
+```
+
+---
+
+# 3055. RetentionDisposition
+
+```php id="6p59sq"
+enum RetentionDisposition: string
+{
+    case Delete = 'delete';
+    case Anonymize = 'anonymize';
+    case Archive = 'archive';
+    case CryptographicErase = 'cryptographic_erase';
+    case ManualReview = 'manual_review';
+}
+```
+
+---
+
+# 3056. Retention precedence
+
+Cuando existan múltiples reglas, deberá aplicarse una resolución explícita basada en:
+
+* jurisdiction;
+* legal hold;
+* contract;
+* regulation;
+* tenant policy;
+* incident;
+* privacy request;
+* record category.
+
+---
+
+# 3057. Retention scheduler
+
+```php id="78jyli"
+interface IdentityRetentionSchedulerInterface
+{
+    public function schedule(
+        IdentityRetentionSubject $subject
+    ): IdentityRetentionSchedule;
+
+    public function executeDueActions(
+        DateTimeImmutable $asOf
+    ): IdentityRetentionExecutionReport;
+}
+```
+
+---
+
+# 3058. Retention execution safeguards
+
+Toda eliminación deberá:
+
+* reevaluar legal holds;
+* verificar record ownership;
+* confirmar tenant scope;
+* preservar audit evidence;
+* generar digest;
+* emitir event;
+* validar downstream completion.
+
+---
+
+# 3059. Legal hold architecture
+
+Un legal hold deberá suspender eliminación o alteración de registros específicos.
+
+---
+
+# 3060. IdentityLegalHold
+
+```php id="ouees9"
+final readonly class IdentityLegalHold
+{
+    public function __construct(
+        public string $holdId,
+        public string $tenantId,
+        public array $subjects,
+        public array $recordCategories,
+        public string $reason,
+        public IdentityIdentifier|string $issuedBy,
+        public DateTimeImmutable $effectiveAt,
+        public ?DateTimeImmutable $expiresAt,
+        public IdentityLegalHoldState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3061. IdentityLegalHoldState
+
+```php id="x24fme"
+enum IdentityLegalHoldState: string
+{
+    case Draft = 'draft';
+    case Active = 'active';
+    case PartiallyReleased = 'partially_released';
+    case Released = 'released';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 3062. Legal hold targeting
+
+Un hold podrá aplicarse a:
+
+* una identidad;
+* múltiples identidades;
+* tenant;
+* incident;
+* credential family;
+* session set;
+* lifecycle window;
+* recovery case;
+* data category.
+
+---
+
+# 3063. Legal hold enforcement
+
+El hold deberá bloquear:
+
+* deletion;
+* anonymization;
+* cryptographic erasure;
+* destructive compaction;
+* retention expiration;
+* evidence overwrite;
+* backup disposal cuando aplique.
+
+---
+
+# 3064. Legal hold release
+
+La liberación deberá:
+
+* verificar authority;
+* registrar reason;
+* conservar evidence;
+* reevaluar retention;
+* reprogramar disposition;
+* notificar owners.
+
+---
+
+# 3065. Evidence preservation architecture
+
+La evidencia de cumplimiento deberá ser:
+
+* completa;
+* reproducible;
+* integrity-protected;
+* attributable;
+* time-bounded;
+* tenant-scoped;
+* reviewable.
+
+---
+
+# 3066. IdentityComplianceEvidencePackage
+
+```php id="0hdz9m"
+final readonly class IdentityComplianceEvidencePackage
+{
+    public function __construct(
+        public string $packageId,
+        public string $tenantId,
+        public array $controlIds,
+        public array $evidenceItems,
+        public string $digest,
+        public string $signatureReference,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3067. ComplianceEvidenceItem
+
+```php id="3q2xdg"
+final readonly class ComplianceEvidenceItem
+{
+    public function __construct(
+        public string $evidenceId,
+        public string $controlId,
+        public ComplianceEvidenceType $type,
+        public string $reference,
+        public DateTimeImmutable $periodStart,
+        public DateTimeImmutable $periodEnd,
+        public string $collector,
+        public string $digest,
+    ) {
+    }
+}
+```
+
+---
+
+# 3068. ComplianceEvidenceType
+
+```php id="edm93z"
+enum ComplianceEvidenceType: string
+{
+    case Configuration = 'configuration';
+    case Policy = 'policy';
+    case AuditLog = 'audit_log';
+    case TestResult = 'test_result';
+    case AccessReview = 'access_review';
+    case Attestation = 'attestation';
+    case IncidentRecord = 'incident_record';
+    case Metric = 'metric';
+    case Approval = 'approval';
+}
+```
+
+---
+
+# 3069. Evidence population completeness
+
+La evidencia deberá demostrar que la población analizada es completa y no una muestra arbitraria no documentada.
+
+---
+
+# 3070. Evidence chain of custody
+
+Toda evidencia deberá registrar:
+
+* collector;
+* source;
+* timestamp;
+* transformation;
+* storage location;
+* access history;
+* digest;
+* signature;
+* export history.
+
+---
+
+# 3071. Access certification architecture
+
+VoltStack deberá soportar campañas periódicas para certificar acceso.
+
+---
+
+# 3072. AccessCertificationCampaign
+
+```php id="xmx4pq"
+final readonly class AccessCertificationCampaign
+{
+    public function __construct(
+        public string $campaignId,
+        public string $tenantId,
+        public AccessCertificationScope $scope,
+        public array $reviewers,
+        public DateTimeImmutable $startsAt,
+        public DateTimeImmutable $endsAt,
+        public AccessCertificationCampaignState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3073. AccessCertificationScope
+
+```php id="ri3bgp"
+enum AccessCertificationScope: string
+{
+    case AllIdentities = 'all_identities';
+    case PrivilegedIdentities = 'privileged_identities';
+    case Application = 'application';
+    case Role = 'role';
+    case Resource = 'resource';
+    case Tenant = 'tenant';
+    case HighRiskAccess = 'high_risk_access';
+}
+```
+
+---
+
+# 3074. AccessCertificationCampaignState
+
+```php id="lpc7a9"
+enum AccessCertificationCampaignState: string
+{
+    case Draft = 'draft';
+    case Scheduled = 'scheduled';
+    case Active = 'active';
+    case Overdue = 'overdue';
+    case Completed = 'completed';
+    case Cancelled = 'cancelled';
+}
+```
+
+---
+
+# 3075. Certification review item
+
+```php id="4pudcx"
+final readonly class AccessCertificationReviewItem
+{
+    public function __construct(
+        public string $itemId,
+        public IdentityIdentifier $identityId,
+        public string $accessReference,
+        public AccessCertificationDecision $decision,
+        public ?string $justification,
+        public ?IdentityIdentifier $reviewedBy,
+        public ?DateTimeImmutable $reviewedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3076. AccessCertificationDecision
+
+```php id="grtcb3"
+enum AccessCertificationDecision: string
+{
+    case Pending = 'pending';
+    case Approve = 'approve';
+    case Revoke = 'revoke';
+    case Modify = 'modify';
+    case Escalate = 'escalate';
+    case NotApplicable = 'not_applicable';
+}
+```
+
+---
+
+# 3077. Certification reviewer selection
+
+Los reviewers deberán seleccionarse según:
+
+* manager;
+* resource owner;
+* application owner;
+* role owner;
+* data owner;
+* privileged access owner;
+* compliance;
+* independent reviewer.
+
+---
+
+# 3078. Reviewer conflict prevention
+
+Un usuario no deberá certificar:
+
+* su propio acceso privilegiado;
+* acceso que él mismo asignó;
+* acceso bajo investigación;
+* excepciones que él aprobó;
+* recursos que no controla.
+
+---
+
+# 3079. Certification evidence
+
+Cada decisión deberá registrar:
+
+* reviewer;
+* current access;
+* usage history;
+* risk indicators;
+* entitlement source;
+* decision;
+* justification;
+* timestamp;
+* policy version.
+
+---
+
+# 3080. Certification remediation
+
+Las decisiones de revoke o modify deberán generar acciones rastreables con SLA.
+
+---
+
+# 3081. Overdue certification handling
+
+Las campañas vencidas podrán activar:
+
+* escalation;
+* temporary restriction;
+* automatic revocation para acceso de alto riesgo;
+* compliance exception;
+* executive notification.
+
+---
+
+# 3082. Privileged access review architecture
+
+Los accesos privilegiados deberán revisarse con mayor frecuencia y evidencia reforzada.
+
+---
+
+# 3083. PrivilegedAccessReview
+
+```php id="wl5922"
+final readonly class PrivilegedAccessReview
+{
+    public function __construct(
+        public string $reviewId,
+        public IdentityIdentifier $identityId,
+        public array $privileges,
+        public array $usageEvidence,
+        public array $riskSignals,
+        public AccessCertificationDecision $decision,
+        public IdentityIdentifier $reviewedBy,
+        public DateTimeImmutable $reviewedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3084. Privileged review requirements
+
+Deberán considerarse:
+
+* actual usage;
+* last use;
+* business need;
+* role owner;
+* break-glass usage;
+* SoD conflicts;
+* incidents;
+* inactive privileges;
+* temporary grants;
+* standing privilege.
+
+---
+
+# 3085. Standing privilege reduction
+
+VoltStack deberá favorecer:
+
+* just-in-time access;
+* time-bound privilege;
+* approval-based elevation;
+* session-bound privilege;
+* purpose-bound privilege;
+* automatic expiration.
+
+---
+
+# 3086. Segregation of duties architecture
+
+El sistema deberá detectar y prevenir combinaciones de acceso incompatibles.
+
+---
+
+# 3087. SegregationOfDutiesRule
+
+```php id="5jb58a"
+final readonly class SegregationOfDutiesRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $name,
+        public array $conflictingEntitlements,
+        public SegregationOfDutiesRuleType $type,
+        public ThreatSeverity $severity,
+        public array $allowedCompensatingControls,
+        public SegregationOfDutiesRuleState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3088. SegregationOfDutiesRuleType
+
+```php id="snqg16"
+enum SegregationOfDutiesRuleType: string
+{
+    case Static = 'static';
+    case Dynamic = 'dynamic';
+    case Transactional = 'transactional';
+    case CrossApplication = 'cross_application';
+    case CrossTenant = 'cross_tenant';
+}
+```
+
+---
+
+# 3089. SoD evaluation points
+
+Las reglas deberán evaluarse durante:
+
+* access request;
+* role assignment;
+* lifecycle change;
+* tenant transfer;
+* privilege elevation;
+* delegation;
+* access certification;
+* policy change;
+* recovery;
+* break-glass activation.
+
+---
+
+# 3090. SegregationOfDutiesViolation
+
+```php id="id3e2k"
+final readonly class SegregationOfDutiesViolation
+{
+    public function __construct(
+        public string $violationId,
+        public IdentityIdentifier $identityId,
+        public string $ruleId,
+        public array $conflictingAccess,
+        public ThreatSeverity $severity,
+        public SoDViolationState $state,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3091. SoDViolationState
+
+```php id="rh4uo6"
+enum SoDViolationState: string
+{
+    case Detected = 'detected';
+    case Blocked = 'blocked';
+    case UnderReview = 'under_review';
+    case ExceptionApproved = 'exception_approved';
+    case Remediating = 'remediating';
+    case Resolved = 'resolved';
+}
+```
+
+---
+
+# 3092. Dynamic SoD
+
+La segregación dinámica deberá considerar acciones dentro de una transacción o ventana temporal.
+
+Ejemplo:
+
+```text id="xqtxu6"
+Create Vendor
+      +
+Approve Vendor
+      +
+Authorize Payment
+```
+
+---
+
+# 3093. Compensating controls for SoD
+
+Una excepción podrá requerir:
+
+* secondary approval;
+* enhanced logging;
+* session recording;
+* transaction limits;
+* independent review;
+* short expiration;
+* continuous monitoring.
+
+---
+
+# 3094. Policy attestation architecture
+
+Los responsables deberán poder atestiguar:
+
+* conocimiento;
+* aceptación;
+* revisión;
+* cumplimiento;
+* exception ownership;
+* remediation status.
+
+---
+
+# 3095. IdentityPolicyAttestation
+
+```php id="z9u1vn"
+final readonly class IdentityPolicyAttestation
+{
+    public function __construct(
+        public string $attestationId,
+        public string $policyId,
+        public string $policyVersion,
+        public IdentityIdentifier $attestedBy,
+        public IdentityPolicyAttestationType $type,
+        public DateTimeImmutable $attestedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3096. IdentityPolicyAttestationType
+
+```php id="7go5kz"
+enum IdentityPolicyAttestationType: string
+{
+    case Acknowledged = 'acknowledged';
+    case Accepted = 'accepted';
+    case Reviewed = 'reviewed';
+    case Compliant = 'compliant';
+    case ExceptionOwned = 'exception_owned';
+}
+```
+
+---
+
+# 3097. Compliance exception architecture
+
+Toda desviación deberá gestionarse formalmente.
+
+---
+
+# 3098. IdentityComplianceException
+
+```php id="3s559o"
+final readonly class IdentityComplianceException
+{
+    public function __construct(
+        public string $exceptionId,
+        public string $tenantId,
+        public array $controlIds,
+        public string $reason,
+        public ThreatSeverity $risk,
+        public array $compensatingControls,
+        public IdentityIdentifier $owner,
+        public IdentityIdentifier $approvedBy,
+        public DateTimeImmutable $effectiveAt,
+        public DateTimeImmutable $expiresAt,
+        public ComplianceExceptionState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3099. Continuous control monitoring and audit events
+
+VoltStack deberá monitorizar continuamente:
+
+* control configuration;
+* enforcement status;
+* evidence freshness;
+* exception expiry;
+* certification completion;
+* privileged review status;
+* SoD violations;
+* retention execution;
+* legal hold enforcement;
+* policy drift;
+* residency violations;
+* privacy request SLA.
+
+Eventos recomendados:
+
+* `IdentityComplianceEvaluationStarted`;
+* `IdentityComplianceEvaluationCompleted`;
+* `ComplianceControlActivated`;
+* `ComplianceControlFailed`;
+* `ComplianceEvidenceCollected`;
+* `ComplianceEvidenceIntegrityVerified`;
+* `IdentityPrivacyRightsRequestReceived`;
+* `IdentityPrivacyRightsRequestVerified`;
+* `IdentityDataExportGenerated`;
+* `IdentityRectificationCompleted`;
+* `IdentityErasureScheduled`;
+* `IdentityErasureCompleted`;
+* `IdentityDataResidencyViolationDetected`;
+* `IdentityRetentionActionScheduled`;
+* `IdentityRetentionActionExecuted`;
+* `IdentityLegalHoldApplied`;
+* `IdentityLegalHoldReleased`;
+* `AccessCertificationCampaignStarted`;
+* `AccessCertificationDecisionRecorded`;
+* `AccessCertificationRemediationOpened`;
+* `PrivilegedAccessReviewCompleted`;
+* `SegregationOfDutiesViolationDetected`;
+* `SegregationOfDutiesExceptionApproved`;
+* `IdentityPolicyAttested`;
+* `IdentityComplianceExceptionCreated`;
+* `IdentityComplianceExceptionExpired`;
+* `IdentityContinuousControlFailureDetected`;
+* `IdentityRegulatoryReportGenerated`.
+
+---
+
+# 3100. Resultado de esta entrega
+
+Esta entrega establece:
+
+```text id="ntr1gg"
+Identity Security Compliance Architecture
+Compliance Control Framework Abstraction
+Control Mapping and Ownership
+Control Versioning
+NIST Identity Assurance Alignment
+Identity Proofing Compliance Evidence
+Authentication and Session Compliance Evidence
+ISO-Aligned Identity Controls
+SOC-Aligned Evidence
+GDPR Identity Protection Architecture
+Lawful Basis Metadata
+Purpose-Bound Identity Access
+Field-Level Identity Policies
+Privacy Rights Handling
+Identity Data Portability
+Identity Rectification
+Identity Erasure Architecture
+Anonymization and Cryptographic Erasure
+Data Residency Enforcement
+Cross-Border Identity Transfers
+Identity Records Retention
+Retention Scheduling
+Legal Hold Architecture
+Evidence Preservation
+Evidence Chain of Custody
+Access Certification Campaigns
+Reviewer Conflict Prevention
+Certification Remediation
+Privileged Access Reviews
+Standing Privilege Reduction
+Segregation of Duties
+Dynamic SoD
+Compensating Controls
+Policy Attestations
+Compliance Exceptions
+Continuous Control Monitoring
+Identity Compliance Audit Events
+```
+
+La siguiente entrega continuará con:
+
+```text id="lmjbd2"
+CONTROLLER_SECURITY_MODEL_PART_05
+Entrega 32
+
+- Identity security governance architecture
+- Security ownership model
+- Policy hierarchy
+- Security decision rights
+- Identity risk acceptance
+- Exception governance
+- Identity architecture review
+- Security design review
+- Threat modeling governance
+- Identity change management
+- Security release gates
+- Identity security maturity model
+- Capability assessment
+- Governance metrics
+- Executive reporting
+- Tenant governance boundaries
+- Third-party identity governance
+- Security roadmap
+- Final architectural principles
+- Part 05 closure
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_05.md
+
+## Authentication, Session & Identity Security
+
+**Documento:** Parte 05
+**Entrega:** 32 de 32
+**Cobertura:** Secciones **3101–3200**
+**Continuación de:** `CONTROLLER_SECURITY_MODEL_PART_05.md — Entrega 31`
+
+---
+
+# 3101. Identity Security Governance Architecture
+
+VoltStack deberá incorporar una arquitectura formal de **Identity Security Governance**, responsable de definir cómo se toman, aprueban, implementan, revisan y auditan las decisiones relacionadas con:
+
+* identidad;
+* autenticación;
+* sesiones;
+* credenciales;
+* recovery;
+* lifecycle;
+* federación;
+* privilegios;
+* observabilidad;
+* cumplimiento;
+* incident response;
+* excepciones;
+* riesgo residual.
+
+El gobierno deberá separar claramente autoridad, responsabilidad, ejecución y supervisión.
+
+---
+
+# 3102. Governance objectives
+
+La arquitectura deberá garantizar:
+
+* decisiones consistentes;
+* ownership explícito;
+* trazabilidad;
+* separación de funciones;
+* reducción de excepciones permanentes;
+* control multi-tenant;
+* evolución segura;
+* accountability;
+* gestión de riesgo;
+* revisión independiente;
+* alineación con negocio;
+* mejora continua.
+
+---
+
+# 3103. Governance principles
+
+VoltStack deberá aplicar:
+
+* explicit ownership;
+* decision rights;
+* least authority;
+* dual control;
+* independent review;
+* policy supremacy;
+* evidence-based decisions;
+* time-bound exceptions;
+* risk transparency;
+* continuous reassessment;
+* tenant isolation;
+* secure defaults.
+
+---
+
+# 3104. Governance threat model
+
+Deberán contemplarse:
+
+* policy capture;
+* concentration of authority;
+* shadow exceptions;
+* undocumented overrides;
+* stale ownership;
+* bypass de revisión;
+* release sin seguridad;
+* conflict of interest;
+* tenant overreach;
+* third-party dependency risk;
+* risk acceptance indefinida;
+* métricas manipuladas;
+* architecture drift;
+* governance fatigue.
+
+---
+
+# 3105. Governance operating model
+
+```text
+Business Requirement
+      ↓
+Identity Security Policy
+      ↓
+Architecture Decision
+      ↓
+Technical Control
+      ↓
+Implementation
+      ↓
+Verification
+      ↓
+Operational Monitoring
+      ↓
+Risk Review
+      ↓
+Governance Attestation
+```
+
+---
+
+# 3106. IdentitySecurityGovernanceService
+
+```php
+interface IdentitySecurityGovernanceServiceInterface
+{
+    public function evaluateDecision(
+        IdentitySecurityGovernanceDecisionRequest $request
+    ): IdentitySecurityGovernanceDecision;
+
+    public function registerException(
+        IdentitySecurityGovernanceExceptionRequest $request
+    ): IdentitySecurityGovernanceException;
+
+    public function assessMaturity(
+        IdentitySecurityMaturityAssessmentRequest $request
+    ): IdentitySecurityMaturityAssessment;
+}
+```
+
+---
+
+# 3107. IdentitySecurityGovernanceDecisionRequest
+
+```php
+final readonly class IdentitySecurityGovernanceDecisionRequest
+{
+    public function __construct(
+        public string $decisionId,
+        public string $tenantId,
+        public IdentitySecurityGovernanceDecisionType $type,
+        public array $affectedCapabilities,
+        public array $riskContext,
+        public IdentityIdentifier|string $requestedBy,
+        public DateTimeImmutable $requestedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3108. IdentitySecurityGovernanceDecisionType
+
+```php
+enum IdentitySecurityGovernanceDecisionType: string
+{
+    case PolicyApproval = 'policy_approval';
+    case ArchitectureApproval = 'architecture_approval';
+    case RiskAcceptance = 'risk_acceptance';
+    case ExceptionApproval = 'exception_approval';
+    case ReleaseApproval = 'release_approval';
+    case CapabilityRetirement = 'capability_retirement';
+    case TenantOverride = 'tenant_override';
+    case EmergencyDecision = 'emergency_decision';
+}
+```
+
+---
+
+# 3109. IdentitySecurityGovernanceDecision
+
+```php
+final readonly class IdentitySecurityGovernanceDecision
+{
+    public function __construct(
+        public string $decisionId,
+        public bool $approved,
+        public array $conditions,
+        public array $requiredActions,
+        public array $approvers,
+        public array $evidenceReferences,
+        public DateTimeImmutable $decidedAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3110. Security ownership model
+
+Cada capability deberá tener ownership explícito.
+
+---
+
+# 3111. Identity security ownership roles
+
+Deberán definirse, como mínimo:
+
+* business owner;
+* security owner;
+* architecture owner;
+* technical owner;
+* operations owner;
+* compliance owner;
+* data owner;
+* tenant owner;
+* incident owner;
+* control owner.
+
+---
+
+# 3112. IdentitySecurityOwnershipAssignment
+
+```php
+final readonly class IdentitySecurityOwnershipAssignment
+{
+    public function __construct(
+        public string $assignmentId,
+        public string $capabilityId,
+        public IdentitySecurityOwnershipRole $role,
+        public IdentityIdentifier|string $owner,
+        public DateTimeImmutable $effectiveAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3113. IdentitySecurityOwnershipRole
+
+```php
+enum IdentitySecurityOwnershipRole: string
+{
+    case Business = 'business';
+    case Security = 'security';
+    case Architecture = 'architecture';
+    case Technical = 'technical';
+    case Operations = 'operations';
+    case Compliance = 'compliance';
+    case Data = 'data';
+    case Tenant = 'tenant';
+    case Incident = 'incident';
+    case Control = 'control';
+}
+```
+
+---
+
+# 3114. Ownership lifecycle
+
+Todo ownership deberá soportar:
+
+* assignment;
+* delegation;
+* temporary substitution;
+* transfer;
+* expiration;
+* revocation;
+* recertification.
+
+---
+
+# 3115. Ownership vacancy prevention
+
+Una capability crítica no deberá permanecer sin owner activo.
+
+---
+
+# 3116. Ownership conflict detection
+
+El sistema deberá detectar combinaciones incompatibles, como:
+
+* requester y approver;
+* implementer y auditor;
+* exception owner y final reviewer;
+* control owner y evidence validator;
+* tenant administrator y global reviewer.
+
+---
+
+# 3117. Policy hierarchy
+
+VoltStack deberá implementar una jerarquía explícita de políticas.
+
+---
+
+# 3118. Policy precedence model
+
+```text
+Law and Regulation
+      ↓
+Platform Security Policy
+      ↓
+Framework Security Baseline
+      ↓
+Environment Policy
+      ↓
+Tenant Policy
+      ↓
+Application Policy
+      ↓
+Resource Policy
+      ↓
+Session or Transaction Policy
+```
+
+---
+
+# 3119. Policy supremacy
+
+Una política inferior no podrá debilitar una política superior salvo excepción formalmente autorizada.
+
+---
+
+# 3120. IdentitySecurityPolicyLayer
+
+```php
+enum IdentitySecurityPolicyLayer: int
+{
+    case Regulation = 700;
+    case Platform = 600;
+    case Framework = 500;
+    case Environment = 400;
+    case Tenant = 300;
+    case Application = 200;
+    case Resource = 100;
+    case Transaction = 50;
+}
+```
+
+---
+
+# 3121. Policy resolution
+
+```php
+interface IdentitySecurityPolicyResolverInterface
+{
+    public function resolve(
+        IdentitySecurityPolicyResolutionRequest $request
+    ): IdentitySecurityEffectivePolicy;
+}
+```
+
+---
+
+# 3122. IdentitySecurityEffectivePolicy
+
+```php
+final readonly class IdentitySecurityEffectivePolicy
+{
+    public function __construct(
+        public array $appliedPolicies,
+        public array $resolvedRequirements,
+        public array $denials,
+        public array $mandatoryControls,
+        public array $conflicts,
+        public string $effectivePolicyDigest,
+    ) {
+    }
+}
+```
+
+---
+
+# 3123. Policy conflict resolution
+
+Los conflictos deberán resolverse mediante:
+
+* higher-layer precedence;
+* deny-overrides;
+* stronger-assurance preference;
+* narrower scope;
+* explicit legal override;
+* governance escalation.
+
+---
+
+# 3124. Policy change governance
+
+Todo cambio deberá registrar:
+
+* author;
+* rationale;
+* security impact;
+* affected tenants;
+* migration plan;
+* approvers;
+* test evidence;
+* effective date;
+* rollback plan.
+
+---
+
+# 3125. Emergency policy changes
+
+Los cambios de emergencia deberán:
+
+* limitar alcance;
+* expirar;
+* generar alertas;
+* requerir revisión posterior;
+* conservar evidencia;
+* no convertirse en configuración permanente automáticamente.
+
+---
+
+# 3126. Security decision rights
+
+VoltStack deberá definir quién puede decidir cada categoría de seguridad.
+
+---
+
+# 3127. Decision rights matrix
+
+La matriz deberá cubrir:
+
+* policy approval;
+* architecture approval;
+* exception approval;
+* risk acceptance;
+* emergency override;
+* privileged recovery;
+* tenant override;
+* control retirement;
+* release approval;
+* incident closure.
+
+---
+
+# 3128. IdentitySecurityDecisionRight
+
+```php
+final readonly class IdentitySecurityDecisionRight
+{
+    public function __construct(
+        public string $rightId,
+        public IdentitySecurityGovernanceDecisionType $decisionType,
+        public array $eligibleRoles,
+        public int $minimumApprovers,
+        public bool $independentReviewRequired,
+        public bool $tenantScoped,
+        public ThreatSeverity $maximumRiskAuthority,
+    ) {
+    }
+}
+```
+
+---
+
+# 3129. Decision authority limits
+
+Una identidad no deberá aprobar decisiones fuera de:
+
+* su tenant;
+* su riesgo autorizado;
+* su capability;
+* su periodo de delegación;
+* su conflicto de interés;
+* su jurisdiction.
+
+---
+
+# 3130. Delegated governance authority
+
+La delegación deberá ser:
+
+* explícita;
+* temporal;
+* scope-bound;
+* auditable;
+* revocable;
+* no subdelegable por defecto.
+
+---
+
+# 3131. Identity risk governance
+
+Todo riesgo relevante deberá registrarse y evaluarse formalmente.
+
+---
+
+# 3132. IdentitySecurityRisk
+
+```php
+final readonly class IdentitySecurityRisk
+{
+    public function __construct(
+        public string $riskId,
+        public string $tenantId,
+        public string $title,
+        public string $description,
+        public ThreatSeverity $inherentSeverity,
+        public ThreatSeverity $residualSeverity,
+        public array $affectedCapabilities,
+        public array $controls,
+        public IdentityIdentifier|string $owner,
+        public IdentitySecurityRiskState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3133. IdentitySecurityRiskState
+
+```php
+enum IdentitySecurityRiskState: string
+{
+    case Identified = 'identified';
+    case Assessed = 'assessed';
+    case Treating = 'treating';
+    case Accepted = 'accepted';
+    case Transferred = 'transferred';
+    case Avoided = 'avoided';
+    case Closed = 'closed';
+    case Reopened = 'reopened';
+}
+```
+
+---
+
+# 3134. Risk treatment options
+
+El tratamiento deberá diferenciar:
+
+* mitigate;
+* avoid;
+* transfer;
+* accept;
+* defer;
+* monitor.
+
+---
+
+# 3135. Identity risk acceptance
+
+La aceptación deberá ser excepcional y explícita.
+
+---
+
+# 3136. IdentitySecurityRiskAcceptance
+
+```php
+final readonly class IdentitySecurityRiskAcceptance
+{
+    public function __construct(
+        public string $acceptanceId,
+        public string $riskId,
+        public ThreatSeverity $acceptedResidualRisk,
+        public string $businessJustification,
+        public array $conditions,
+        public IdentityIdentifier $acceptedBy,
+        public DateTimeImmutable $effectiveAt,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3137. Risk acceptance requirements
+
+Deberá incluir:
+
+* risk owner;
+* business rationale;
+* residual risk;
+* affected assets;
+* compensating controls;
+* review date;
+* expiration;
+* revocation conditions.
+
+---
+
+# 3138. Risk acceptance boundaries
+
+No deberán aceptarse sin escalamiento especial riesgos que impliquen:
+
+* cross-tenant exposure;
+* authentication bypass;
+* unrestricted privilege escalation;
+* secret disclosure;
+* legal violation;
+* irreversible data loss;
+* systemic fail-open behavior.
+
+---
+
+# 3139. Expired risk acceptance
+
+Una aceptación vencida deberá volver automáticamente a estado no resuelto.
+
+---
+
+# 3140. Exception governance
+
+Toda excepción deberá administrarse como un objeto lifecycle.
+
+---
+
+# 3141. IdentitySecurityGovernanceException
+
+```php
+final readonly class IdentitySecurityGovernanceException
+{
+    public function __construct(
+        public string $exceptionId,
+        public string $tenantId,
+        public array $policyReferences,
+        public string $justification,
+        public ThreatSeverity $risk,
+        public array $compensatingControls,
+        public IdentityIdentifier $owner,
+        public IdentityIdentifier $approvedBy,
+        public DateTimeImmutable $effectiveAt,
+        public DateTimeImmutable $expiresAt,
+        public GovernanceExceptionState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3142. GovernanceExceptionState
+
+```php
+enum GovernanceExceptionState: string
+{
+    case Requested = 'requested';
+    case UnderReview = 'under_review';
+    case Approved = 'approved';
+    case Rejected = 'rejected';
+    case Active = 'active';
+    case Expired = 'expired';
+    case Revoked = 'revoked';
+    case Remediated = 'remediated';
+}
+```
+
+---
+
+# 3143. Exception minimum requirements
+
+Toda excepción deberá contener:
+
+* scope;
+* affected controls;
+* rationale;
+* risk;
+* owner;
+* approver;
+* expiration;
+* compensating controls;
+* monitoring;
+* remediation plan.
+
+---
+
+# 3144. Exception anti-patterns
+
+VoltStack deberá detectar:
+
+* exceptions without expiry;
+* repeatedly renewed exceptions;
+* broad tenant-wide scope;
+* missing compensating controls;
+* self-approved exceptions;
+* inactive owners;
+* absent remediation.
+
+---
+
+# 3145. Exception renewal
+
+La renovación deberá tratarse como una nueva decisión, no como extensión automática.
+
+---
+
+# 3146. Exception revocation
+
+Una excepción deberá revocarse ante:
+
+* incident;
+* scope change;
+* control availability;
+* regulatory change;
+* owner departure;
+* compensating control failure;
+* risk increase.
+
+---
+
+# 3147. Identity architecture review
+
+Los cambios relevantes deberán someterse a revisión arquitectónica.
+
+---
+
+# 3148. IdentityArchitectureReviewRequest
+
+```php
+final readonly class IdentityArchitectureReviewRequest
+{
+    public function __construct(
+        public string $reviewId,
+        public string $changeId,
+        public array $affectedDomains,
+        public array $architectureArtifacts,
+        public array $threatModels,
+        public array $controlMappings,
+        public IdentityIdentifier|string $submittedBy,
+        public DateTimeImmutable $submittedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3149. Architecture review scope
+
+Deberá revisar:
+
+* trust boundaries;
+* identity flows;
+* authentication;
+* sessions;
+* credentials;
+* tenant isolation;
+* recovery;
+* lifecycle;
+* failure modes;
+* observability;
+* compliance;
+* rollback.
+
+---
+
+# 3150. IdentityArchitectureReviewDecision
+
+```php
+final readonly class IdentityArchitectureReviewDecision
+{
+    public function __construct(
+        public string $reviewId,
+        public ArchitectureReviewState $state,
+        public array $findings,
+        public array $conditions,
+        public array $requiredChanges,
+        public array $reviewers,
+        public DateTimeImmutable $decidedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3151. ArchitectureReviewState
+
+```php
+enum ArchitectureReviewState: string
+{
+    case Draft = 'draft';
+    case InReview = 'in_review';
+    case ChangesRequired = 'changes_required';
+    case ConditionallyApproved = 'conditionally_approved';
+    case Approved = 'approved';
+    case Rejected = 'rejected';
+}
+```
+
+---
+
+# 3152. Independent architecture review
+
+Cambios de alto riesgo deberán incluir un reviewer que no haya diseñado ni implementado la solución.
+
+---
+
+# 3153. Security design review
+
+Toda capability nueva deberá pasar por security design review antes de implementación completa.
+
+---
+
+# 3154. Security design review checklist
+
+Deberá cubrir:
+
+* assets;
+* actors;
+* entry points;
+* trust boundaries;
+* abuse cases;
+* privilege model;
+* data classification;
+* tenant scope;
+* secret handling;
+* failure behavior;
+* auditability;
+* recovery.
+
+---
+
+# 3155. Security design review outputs
+
+La revisión deberá producir:
+
+* findings;
+* required controls;
+* residual risks;
+* test requirements;
+* logging requirements;
+* release conditions;
+* owner assignments.
+
+---
+
+# 3156. Threat modeling governance
+
+VoltStack deberá mantener threat models versionados para cada dominio crítico.
+
+---
+
+# 3157. IdentityThreatModel
+
+```php
+final readonly class IdentityThreatModel
+{
+    public function __construct(
+        public string $modelId,
+        public string $capabilityId,
+        public string $version,
+        public array $assets,
+        public array $actors,
+        public array $trustBoundaries,
+        public array $threats,
+        public array $controls,
+        public DateTimeImmutable $reviewedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3158. Threat model review triggers
+
+Deberá revisarse cuando exista:
+
+* new authentication method;
+* new identity provider;
+* tenant model change;
+* credential format change;
+* recovery workflow change;
+* privileged access change;
+* incident;
+* architectural boundary change;
+* regulatory change.
+
+---
+
+# 3159. Threat model ownership
+
+Cada modelo deberá tener:
+
+* author;
+* security reviewer;
+* technical owner;
+* business owner;
+* next review date.
+
+---
+
+# 3160. Threat scenario traceability
+
+Cada amenaza deberá vincularse con:
+
+* control;
+* test;
+* telemetry;
+* alert;
+* response playbook;
+* residual risk.
+
+---
+
+# 3161. Identity change management
+
+Los cambios deberán seguir un lifecycle gobernado.
+
+---
+
+# 3162. IdentitySecurityChange
+
+```php
+final readonly class IdentitySecurityChange
+{
+    public function __construct(
+        public string $changeId,
+        public IdentitySecurityChangeType $type,
+        public array $affectedCapabilities,
+        public ThreatSeverity $risk,
+        public array $dependencies,
+        public array $rollbackActions,
+        public IdentitySecurityChangeState $state,
+        public DateTimeImmutable $scheduledAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3163. IdentitySecurityChangeType
+
+```php
+enum IdentitySecurityChangeType: string
+{
+    case Policy = 'policy';
+    case Configuration = 'configuration';
+    case Architecture = 'architecture';
+    case Credential = 'credential';
+    case Federation = 'federation';
+    case TenantModel = 'tenant_model';
+    case Cryptography = 'cryptography';
+    case Emergency = 'emergency';
+}
+```
+
+---
+
+# 3164. IdentitySecurityChangeState
+
+```php
+enum IdentitySecurityChangeState: string
+{
+    case Proposed = 'proposed';
+    case Assessed = 'assessed';
+    case Approved = 'approved';
+    case Scheduled = 'scheduled';
+    case Deploying = 'deploying';
+    case Validating = 'validating';
+    case Completed = 'completed';
+    case RolledBack = 'rolled_back';
+    case Failed = 'failed';
+}
+```
+
+---
+
+# 3165. Change risk assessment
+
+Deberá considerar:
+
+* blast radius;
+* tenant count;
+* privilege impact;
+* authentication impact;
+* rollback complexity;
+* irreversible effects;
+* dependency maturity;
+* observability;
+* compliance impact.
+
+---
+
+# 3166. Change segregation of duties
+
+El autor de un cambio crítico no deberá ser el único approver ni validador.
+
+---
+
+# 3167. Change deployment strategy
+
+Cambios de alto riesgo deberán favorecer:
+
+* shadow mode;
+* feature flags;
+* canary tenants;
+* staged rollout;
+* dual validation;
+* automatic rollback;
+* kill switch.
+
+---
+
+# 3168. Emergency change governance
+
+Los emergency changes deberán incluir:
+
+* incident linkage;
+* narrow scope;
+* temporary implementation;
+* explicit owner;
+* post-implementation review;
+* retrospective approval;
+* remediation plan.
+
+---
+
+# 3169. Security release gates
+
+Ninguna release crítica deberá avanzar sin cumplir gates definidos.
+
+---
+
+# 3170. IdentitySecurityReleaseGate
+
+```php
+final readonly class IdentitySecurityReleaseGate
+{
+    public function __construct(
+        public string $gateId,
+        public string $name,
+        public array $requiredChecks,
+        public ThreatSeverity $minimumRiskLevel,
+        public bool $blocking,
+        public ReleaseGateState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 3171. ReleaseGateState
+
+```php
+enum ReleaseGateState: string
+{
+    case Pending = 'pending';
+    case Passed = 'passed';
+    case Failed = 'failed';
+    case Waived = 'waived';
+    case Expired = 'expired';
+}
+```
+
+---
+
+# 3172. Mandatory security release gates
+
+Podrán incluir:
+
+* architecture review;
+* threat model;
+* security tests;
+* tenant isolation tests;
+* regression suite;
+* compliance mapping;
+* telemetry verification;
+* rollback validation;
+* owner approval;
+* residual risk acceptance.
+
+---
+
+# 3173. Release waiver governance
+
+Un waiver deberá:
+
+* ser excepcional;
+* tener owner;
+* indicar riesgo;
+* definir compensating controls;
+* expirar;
+* requerir remediation;
+* quedar auditado.
+
+---
+
+# 3174. Release evidence package
+
+```php
+final readonly class IdentitySecurityReleaseEvidencePackage
+{
+    public function __construct(
+        public string $releaseId,
+        public array $gateResults,
+        public array $testReports,
+        public array $reviewDecisions,
+        public array $riskAcceptances,
+        public string $digest,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3175. Post-release verification
+
+Después del despliegue deberán verificarse:
+
+* authentication success;
+* denial behavior;
+* session integrity;
+* tenant isolation;
+* telemetry;
+* alerting;
+* policy resolution;
+* error rate;
+* rollback readiness.
+
+---
+
+# 3176. Identity security maturity model
+
+VoltStack deberá definir un modelo de madurez para evaluar capacidades.
+
+---
+
+# 3177. IdentitySecurityMaturityLevel
+
+```php
+enum IdentitySecurityMaturityLevel: int
+{
+    case Initial = 1;
+    case Managed = 2;
+    case Defined = 3;
+    case Measured = 4;
+    case Adaptive = 5;
+}
+```
+
+---
+
+# 3178. Maturity level: Initial
+
+Características:
+
+* controles reactivos;
+* procesos manuales;
+* ownership informal;
+* evidencia incompleta;
+* alta dependencia de individuos;
+* baja consistencia.
+
+---
+
+# 3179. Maturity level: Managed
+
+Características:
+
+* procesos repetibles;
+* owners identificados;
+* controles básicos;
+* documentación parcial;
+* métricas operativas iniciales;
+* excepciones registradas.
+
+---
+
+# 3180. Maturity level: Defined
+
+Características:
+
+* políticas versionadas;
+* arquitectura establecida;
+* procesos estandarizados;
+* threat models;
+* testing formal;
+* governance multi-tenant.
+
+---
+
+# 3181. Maturity level: Measured
+
+Características:
+
+* métricas confiables;
+* continuous control monitoring;
+* risk quantification;
+* automated evidence;
+* release gates;
+* maturity tracking.
+
+---
+
+# 3182. Maturity level: Adaptive
+
+Características:
+
+* detección dinámica;
+* policy adaptation gobernada;
+* automated response;
+* predictive risk;
+* continuous optimization;
+* closed-loop governance.
+
+---
+
+# 3183. Identity security capability domains
+
+La madurez deberá evaluarse por dominio:
+
+* authentication;
+* session security;
+* credential security;
+* recovery;
+* lifecycle;
+* federation;
+* privileged access;
+* observability;
+* testing;
+* compliance;
+* governance;
+* incident response.
+
+---
+
+# 3184. IdentitySecurityMaturityAssessment
+
+```php
+final readonly class IdentitySecurityMaturityAssessment
+{
+    public function __construct(
+        public string $assessmentId,
+        public string $tenantId,
+        public array $domainScores,
+        public IdentitySecurityMaturityLevel $overallLevel,
+        public array $gaps,
+        public array $recommendedInitiatives,
+        public DateTimeImmutable $assessedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3185. Capability assessment evidence
+
+La evaluación deberá utilizar:
+
+* policy coverage;
+* control operation;
+* test results;
+* incidents;
+* metrics;
+* exceptions;
+* certifications;
+* architecture reviews;
+* audit findings.
+
+---
+
+# 3186. Maturity scoring safeguards
+
+El score no deberá ocultar riesgos críticos mediante promedios.
+
+Una falla crítica deberá destacarse independientemente del promedio general.
+
+---
+
+# 3187. Governance metrics
+
+Métricas recomendadas:
+
+* policies without owner;
+* overdue policy reviews;
+* active exceptions;
+* expired exceptions;
+* accepted risks;
+* overdue risk treatments;
+* architecture review lead time;
+* release gate failures;
+* waiver rate;
+* control ownership gaps;
+* remediation SLA compliance;
+* maturity progression.
+
+---
+
+# 3188. Governance key risk indicators
+
+KRIs recomendados:
+
+* privileged access without review;
+* high-risk exception concentration;
+* emergency change frequency;
+* repeated waiver usage;
+* unresolved cross-tenant findings;
+* stale threat models;
+* failed compensating controls;
+* missing incident owners.
+
+---
+
+# 3189. Executive reporting
+
+VoltStack deberá producir reportes ejecutivos enfocados en riesgo y tendencia.
+
+---
+
+# 3190. IdentitySecurityExecutiveReport
+
+```php
+final readonly class IdentitySecurityExecutiveReport
+{
+    public function __construct(
+        public string $reportId,
+        public string $tenantId,
+        public array $topRisks,
+        public array $materialIncidents,
+        public array $governanceMetrics,
+        public array $maturityTrends,
+        public array $requiredDecisions,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3191. Executive report boundaries
+
+El reporte deberá evitar:
+
+* detalles técnicos innecesarios;
+* PII;
+* raw secrets;
+* investigation-sensitive data;
+* cross-tenant exposure;
+* métricas sin contexto.
+
+---
+
+# 3192. Tenant governance boundaries
+
+Cada tenant deberá poder gobernar su configuración sin debilitar la baseline global.
+
+---
+
+# 3193. Tenant governance capabilities
+
+Podrán incluir:
+
+* stronger authentication;
+* shorter session lifetimes;
+* stricter recovery;
+* additional approvals;
+* local access reviews;
+* regional retention;
+* tenant-specific notifications;
+* custom risk thresholds.
+
+---
+
+# 3194. Tenant governance restrictions
+
+Un tenant no deberá poder:
+
+* desactivar controles globales obligatorios;
+* acceder a otro tenant;
+* alterar audit evidence global;
+* cambiar trust anchors compartidos;
+* reducir cryptographic minimums;
+* omitir incident reporting obligatorio.
+
+---
+
+# 3195. Third-party identity governance
+
+Los proveedores externos deberán gestionarse bajo gobierno explícito.
+
+---
+
+# 3196. ThirdPartyIdentityProviderGovernanceRecord
+
+```php
+final readonly class ThirdPartyIdentityProviderGovernanceRecord
+{
+    public function __construct(
+        public string $providerId,
+        public ThirdPartyIdentityProviderType $type,
+        public array $supportedCapabilities,
+        public array $securityRequirements,
+        public array $dataRegions,
+        public array $contractualControls,
+        public ThirdPartyGovernanceState $state,
+        public DateTimeImmutable $lastReviewedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3197. Third-party governance requirements
+
+Deberán evaluarse:
+
+* security posture;
+* assurance support;
+* breach notification;
+* data residency;
+* subcontractors;
+* key management;
+* availability;
+* exit strategy;
+* portability;
+* audit rights;
+* incident cooperation.
+
+---
+
+# 3198. Identity security roadmap
+
+La evolución recomendada deberá organizarse en fases:
+
+```text
+Phase 1 — Baseline Security
+Authentication, sessions, credentials, tenant isolation
+
+Phase 2 — Assurance and Recovery
+MFA, proofing, recovery, lifecycle controls
+
+Phase 3 — Detection and Response
+Telemetry, account takeover detection, incident containment
+
+Phase 4 — Continuous Assurance
+Testing, compliance automation, access certification
+
+Phase 5 — Adaptive Governance
+Risk-driven policy, maturity optimization, predictive controls
+```
+
+---
+
+# 3199. Final architectural principles and audit events
+
+Principios finales de la Parte 05:
+
+1. La identidad es un dominio de seguridad, no un simple registro de usuario.
+2. Autenticación no equivale automáticamente a autorización.
+3. Toda sesión representa confianza temporal y revocable.
+4. Toda credencial debe tener lifecycle, owner y propósito.
+5. Recovery debe ser tan seguro como la autenticación que reemplaza.
+6. La recuperación de identidad no restaura privilegios automáticamente.
+7. El tenant context forma parte de la identidad efectiva.
+8. Toda acción sensible debe ser policy-driven.
+9. Todo control crítico debe fallar de forma segura.
+10. Toda decisión relevante debe producir evidencia.
+11. Las excepciones deben expirar.
+12. El riesgo aceptado debe ser explícito.
+13. La observabilidad no debe comprometer la privacidad.
+14. La seguridad debe probarse bajo condiciones adversariales.
+15. La gobernanza debe separar decisión, ejecución y supervisión.
+16. La arquitectura debe ser portable, extensible y crypto-agile.
+17. La seguridad de identidad debe mejorar continuamente.
+
+Eventos recomendados:
+
+* `IdentitySecurityOwnerAssigned`;
+* `IdentitySecurityOwnershipTransferred`;
+* `IdentitySecurityPolicyApproved`;
+* `IdentitySecurityPolicyConflictDetected`;
+* `IdentitySecurityGovernanceDecisionRequested`;
+* `IdentitySecurityGovernanceDecisionApproved`;
+* `IdentitySecurityGovernanceDecisionRejected`;
+* `IdentitySecurityRiskIdentified`;
+* `IdentitySecurityRiskAccepted`;
+* `IdentitySecurityRiskAcceptanceExpired`;
+* `IdentitySecurityExceptionRequested`;
+* `IdentitySecurityExceptionApproved`;
+* `IdentitySecurityExceptionRevoked`;
+* `IdentityArchitectureReviewStarted`;
+* `IdentityArchitectureReviewCompleted`;
+* `IdentityThreatModelUpdated`;
+* `IdentitySecurityChangeApproved`;
+* `IdentitySecurityEmergencyChangeExecuted`;
+* `IdentitySecurityReleaseGatePassed`;
+* `IdentitySecurityReleaseGateFailed`;
+* `IdentitySecurityReleaseWaiverApproved`;
+* `IdentitySecurityMaturityAssessed`;
+* `IdentitySecurityExecutiveReportGenerated`;
+* `TenantIdentityGovernancePolicyChanged`;
+* `ThirdPartyIdentityProviderReviewed`.
+
+---
+
+# 3200. Cierre de CONTROLLER_SECURITY_MODEL_PART_05
+
+La Parte 05 establece una arquitectura integral para proteger el dominio de identidad dentro de VoltStack.
+
+Incluye:
+
+```text
+Authentication Security
+Session Security
+Credential Security
+Identity Assurance
+Identity Proofing
+Secure Recovery
+Account Security Operations
+Account Takeover Detection
+Identity Lifecycle Security
+Federation Security
+Privileged Identity Security
+Multi-Tenant Identity Isolation
+Security Observability
+Detection Engineering
+Identity Security Testing
+Compliance Architecture
+Privacy and Retention
+Access Certification
+Segregation of Duties
+Risk Governance
+Exception Governance
+Architecture Reviews
+Threat Modeling
+Change Management
+Security Release Gates
+Identity Security Maturity
+Executive Governance
+Third-Party Identity Governance
+```
+
+## Resultado arquitectónico final
+
+VoltStack dispondrá de un modelo donde:
+
+```text
+Identity
+   ↓
+Proofing
+   ↓
+Authentication
+   ↓
+Session
+   ↓
+Authorization Context
+   ↓
+Privileged or Sensitive Action
+   ↓
+Telemetry
+   ↓
+Detection
+   ↓
+Response
+   ↓
+Recovery
+   ↓
+Governance
+   ↓
+Continuous Assurance
+```
+
+## Invariante central
+
+```text
+Ninguna identidad, sesión, credencial, recuperación,
+elevación de privilegios o decisión administrativa
+deberá operar fuera de policy, tenant context,
+assurance, trazabilidad y gobierno explícito.
+```
+
+## Estado del documento
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_05.md
+Status: COMPLETE
+Sections: 1–3200
+Final Delivery: 32
+Domain: Authentication, Session & Identity Security
+```
