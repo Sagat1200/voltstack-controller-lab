@@ -14975,3 +14975,7148 @@ Continuará con:
 - FrankenPHP security integration
 ```
 
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 13 de varias
+**Cobertura:** Secciones **1201–1300**
+
+---
+
+# 1201. Advanced Controller Runtime Security Architecture
+
+VoltStack deberá incorporar seguridad dentro del runtime donde se ejecutan los controladores.
+
+La seguridad no deberá limitarse a:
+
+* autenticación;
+* autorización;
+* validación.
+
+También deberá controlar:
+
+* ejecución;
+* memoria;
+* CPU;
+* concurrencia;
+* aislamiento;
+* recursos externos.
+
+---
+
+# 1202. Runtime Security Model
+
+Modelo:
+
+```text id="m4q8x2"
+Request
+
+↓
+
+Secure Runtime Context
+
+↓
+
+Controller Execution
+
+↓
+
+Resource Monitoring
+
+↓
+
+Security Enforcement
+
+↓
+
+Response
+```
+
+---
+
+# 1203. Runtime Security Objectives
+
+El runtime deberá garantizar:
+
+* aislamiento entre requests;
+* límites de consumo;
+* prevención de abuso;
+* ejecución controlada;
+* recuperación ante fallos.
+
+---
+
+# 1204. Controller Runtime Context
+
+Cada ejecución deberá tener un contexto aislado.
+
+```php id="7x2m9q"
+final readonly class ControllerRuntimeContext
+{
+    public function __construct(
+        public string $executionId,
+        public SecurityContext $security,
+        public ResourceLimits $limits,
+        public RuntimeState $state,
+    ) {
+    }
+}
+```
+
+---
+
+# 1205. Execution Identity
+
+Cada ejecución deberá poseer:
+
+* identificador único;
+* trace;
+* tenant;
+* actor;
+* permisos;
+* límites.
+
+---
+
+# 1206. Runtime Isolation Principles
+
+VoltStack deberá evitar:
+
+```text id="8q3m5x"
+Request A
+
+↓
+
+State Leakage
+
+↓
+
+Request B
+```
+
+---
+
+# 1207. Persistent Runtime Security
+
+Debido al soporte de runtimes persistentes como FrankenPHP:
+
+El framework deberá controlar:
+
+* estado global;
+* servicios singleton;
+* variables estáticas;
+* cachés;
+* objetos persistentes.
+
+---
+
+# 1208. Long Running Process Threats
+
+Un proceso persistente puede generar:
+
+* fuga de memoria;
+* contaminación de contexto;
+* datos cruzados;
+* acumulación de estado.
+
+---
+
+# 1209. Request State Isolation
+
+Cada request deberá limpiar:
+
+* usuario actual;
+* tenant;
+* autorización;
+* sesión;
+* variables temporales.
+
+---
+
+# 1210. Runtime Reset Manager
+
+```php id="2m8x5q"
+interface RuntimeResetManagerInterface
+{
+    public function reset(): void;
+}
+```
+
+---
+
+# 1211. Reset Responsibilities
+
+Debe limpiar:
+
+* container scoped instances;
+* security context;
+* request data;
+* authorization cache local.
+
+---
+
+# 1212. Scoped Dependency Container
+
+VoltStack deberá diferenciar:
+
+```text id="5q9m3x"
+Application Singleton
+
+↓
+
+Request Scoped Object
+
+↓
+
+Transient Object
+```
+
+---
+
+# 1213. Security Scoped Services
+
+Servicios sensibles deberán ser scoped:
+
+Ejemplo:
+
+```text id="m7x2q8"
+CurrentUser
+
+CurrentTenant
+
+AuthorizationContext
+
+RequestIdentity
+```
+
+---
+
+# 1214. Runtime Container Security
+
+El contenedor deberá evitar:
+
+* resolver servicios no autorizados;
+* modificar bindings críticos;
+* acceso privilegiado.
+
+---
+
+# 1215. Secure Service Resolution
+
+```php id="9x4m7q"
+interface SecureResolverInterface
+{
+    public function resolve(
+        string $service,
+        SecurityContext $context
+    ): mixed;
+}
+```
+
+---
+
+# 1216. Controller Sandbox Concept
+
+VoltStack podrá implementar aislamiento lógico.
+
+---
+
+# 1217. Sandbox Objectives
+
+Controlar:
+
+* acceso filesystem;
+* servicios;
+* red;
+* ejecución;
+* memoria.
+
+---
+
+# 1218. Controller Capability Sandbox
+
+Un controlador podrá recibir únicamente capacidades necesarias.
+
+Ejemplo:
+
+```text id="3m8q6x"
+InvoiceController
+
+HAS:
+
+invoice.read
+
+HAS NOT:
+
+system.execute
+```
+
+---
+
+# 1219. Capability Injection
+
+El framework deberá inyectar recursos autorizados.
+
+---
+
+# 1220. Restricted Service Access
+
+Ejemplo:
+
+Un controlador web:
+
+Permitido:
+
+```text id="q5x8m2"
+MailService.send()
+```
+
+No permitido:
+
+```text id="8m3q7x"
+Kernel.shutdown()
+```
+
+---
+
+# 1221. Runtime Resource Limits
+
+Cada ejecución podrá tener límites.
+
+---
+
+# 1222. ResourceLimits
+
+```php id="4x9m7q"
+final readonly class ResourceLimits
+{
+    public function __construct(
+        public int $memory,
+        public int $cpuTime,
+        public int $queries,
+        public int $externalCalls,
+    ) {
+    }
+}
+```
+
+---
+
+# 1223. Memory Limits
+
+Controlar:
+
+* objetos;
+* arrays grandes;
+* cargas masivas;
+* archivos.
+
+---
+
+# 1224. Memory Monitoring
+
+Registrar:
+
+* memoria inicial;
+* memoria pico;
+* crecimiento;
+* fugas.
+
+---
+
+# 1225. Memory Leak Detection
+
+Especialmente importante en:
+
+* FrankenPHP worker mode;
+* Octane-like runtime;
+* procesos persistentes.
+
+---
+
+# 1226. Automatic Runtime Recycling
+
+Cuando un worker alcance:
+
+* memoria máxima;
+* cantidad requests;
+* tiempo activo.
+
+deberá reciclarse.
+
+---
+
+# 1227. CPU Execution Limits
+
+Controlar:
+
+* loops;
+* cálculos excesivos;
+* procesos largos.
+
+---
+
+# 1228. Timeout Management
+
+Cada controlador deberá tener:
+
+* timeout global;
+* timeout por operación;
+* timeout externo.
+
+---
+
+# 1229. Timeout Policy
+
+Ejemplo:
+
+```text id="6m8q3x"
+Normal Request
+
+30 seconds
+
+
+Critical Operation
+
+120 seconds
+```
+
+---
+
+# 1230. Timeout Enforcement
+
+Cuando exceda:
+
+```text id="x7q2m9"
+Terminate
+
+↓
+
+Audit
+
+↓
+
+Return Safe Error
+```
+
+---
+
+# 1231. Database Resource Security
+
+Controlar:
+
+* número queries;
+* tiempo;
+* volumen;
+* conexiones.
+
+---
+
+# 1232. Query Limit Policy
+
+Ejemplo:
+
+```text id="9m3x5q"
+Maximum:
+
+100 queries/request
+```
+
+---
+
+# 1233. N+1 Detection Security
+
+El exceso de consultas puede ser un ataque DoS.
+
+---
+
+# 1234. External Call Limits
+
+Controlar:
+
+* APIs;
+* servicios;
+* webhooks;
+* storage.
+
+---
+
+# 1235. External Resource Budget
+
+Ejemplo:
+
+```text id="5x8m2q"
+Controller
+
+Maximum:
+
+10 external calls
+```
+
+---
+
+# 1236. Concurrency Security Architecture
+
+VoltStack deberá controlar ejecución concurrente.
+
+---
+
+# 1237. Concurrency Threats
+
+Riesgos:
+
+* race conditions;
+* doble ejecución;
+* estados inconsistentes;
+* escalamiento.
+
+---
+
+# 1238. Request Concurrency Control
+
+Permitir:
+
+* locks;
+* throttling;
+* queues;
+* idempotency.
+
+---
+
+# 1239. Idempotency Security
+
+Operaciones críticas deberán soportar:
+
+```text id="7m4x8q"
+Same Request
+
+↓
+
+Same Result
+```
+
+---
+
+# 1240. Idempotency Key
+
+```php id="2x9m6q"
+final readonly class IdempotencyKey
+{
+    public function __construct(
+        public string $value,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1241. Race Condition Protection
+
+Usar:
+
+* mutex;
+* distributed locks;
+* transactions.
+
+---
+
+# 1242. Security Lock Manager
+
+```php id="8m5q3x"
+interface SecurityLockManagerInterface
+{
+    public function acquire(
+        string $resource
+    ): Lock;
+}
+```
+
+---
+
+# 1243. Worker Security Architecture
+
+Los workers deberán tener identidad propia.
+
+---
+
+# 1244. Worker Identity
+
+```php id="6q8m4x"
+final readonly class WorkerIdentity
+{
+    public function __construct(
+        public string $workerId,
+        public array $capabilities,
+        public string $environment,
+    ) {
+    }
+}
+```
+
+---
+
+# 1245. Worker Permission Scope
+
+Un worker deberá tener solamente:
+
+* jobs necesarios;
+* tenants permitidos;
+* acciones requeridas.
+
+---
+
+# 1246. Queue Job Security
+
+Antes de ejecutar:
+
+```text id="4m7x9q"
+Job
+
+↓
+
+Validate Signature
+
+↓
+
+Validate Identity
+
+↓
+
+Authorize
+
+↓
+
+Execute
+```
+
+---
+
+# 1247. Job Payload Security
+
+Proteger:
+
+* manipulación;
+* serialización;
+* datos sensibles.
+
+---
+
+# 1248. Secure Job Serialization
+
+Evitar:
+
+* objetos arbitrarios;
+* ejecución no deseada;
+* payload malicioso.
+
+---
+
+# 1249. Worker Isolation
+
+Separar:
+
+* workers críticos;
+* workers públicos;
+* workers internos.
+
+---
+
+# 1250. FrankenPHP Security Integration
+
+VoltStack deberá diseñarse considerando FrankenPHP desde inicio.
+
+---
+
+# 1251. FrankenPHP Runtime Model
+
+El modelo permite:
+
+* workers persistentes;
+* menor bootstrap;
+* mayor rendimiento.
+
+---
+
+# 1252. Security Implications
+
+Requiere controlar:
+
+* estado persistente;
+* memoria;
+* objetos;
+* contexto.
+
+---
+
+# 1253. Worker Lifecycle Security
+
+Ciclo:
+
+```text id="9x2m6q"
+Worker Start
+
+↓
+
+Load Framework
+
+↓
+
+Receive Request
+
+↓
+
+Reset State
+
+↓
+
+Execute
+
+↓
+
+Cleanup
+
+↓
+
+Next Request
+```
+
+---
+
+# 1254. FrankenPHP Worker Isolation
+
+Cada request deberá reiniciar:
+
+* usuario;
+* tenant;
+* autorización;
+* request container.
+
+---
+
+# 1255. Persistent Service Security
+
+Servicios singleton deberán clasificarse:
+
+```text id="3m7x8q"
+Safe Persistent
+
+Unsafe Persistent
+
+Request Scoped
+```
+
+---
+
+# 1256. Safe Persistent Examples
+
+Permitidos:
+
+* configuración;
+* metadata;
+* compilados;
+* cache.
+
+---
+
+# 1257. Unsafe Persistent Examples
+
+No mantener:
+
+* usuario actual;
+* sesión;
+* permisos;
+* request.
+
+---
+
+# 1258. Runtime Security Health
+
+Monitorear:
+
+* memoria;
+* workers;
+* errores;
+* reinicios;
+* tiempos.
+
+---
+
+# 1259. Runtime Security Events
+
+Eventos:
+
+```text id="7q3m9x"
+RuntimeMemoryLimitReached
+
+WorkerRestarted
+
+ExecutionTimeout
+
+ResourceLimitExceeded
+
+StateLeakDetected
+
+ConcurrentExecutionBlocked
+```
+
+---
+
+# 1260. Runtime Security Result
+
+Esta entrega establece:
+
+```text id="m8x4q2"
+Runtime Security Context
+
+Persistent Runtime Safety
+
+Container Isolation
+
+Controller Sandbox
+
+Resource Limits
+
+Memory Protection
+
+Timeout Control
+
+Concurrency Security
+
+Worker Security
+
+FrankenPHP Integration
+```
+
+---
+
+# 1261. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 14`
+
+Continuará con:
+
+```text id="q7m2x8"
+- Controller security architecture for SPA/runtime protocol
+- Frontend authorization synchronization
+- Hydration security
+- Volt Protocol security
+- Component authorization
+- Client trust boundaries
+- Reactive state security
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 14 de varias
+**Cobertura:** Secciones **1301–1400**
+
+---
+
+# 1301. SPA Runtime Security Architecture
+
+VoltStack deberá integrar seguridad dentro del modelo SPA Runtime.
+
+El frontend reactivo no deberá considerarse una zona confiable.
+
+Todo estado enviado al cliente deberá considerarse:
+
+```text
+id="a8x3m7"
+Visible
+
+≠
+
+Authorized
+```
+
+---
+
+# 1302. SPA Security Principles
+
+El sistema deberá aplicar:
+
+* backend as security authority;
+* frontend as execution client;
+* server-side authorization;
+* secure hydration;
+* state validation;
+* event authorization.
+
+---
+
+# 1303. Client Trust Boundary
+
+Arquitectura:
+
+```text
+id="q7m2x9"
+
+Browser
+
+(Untrusted)
+
+↓
+
+Volt Runtime
+
+↓
+
+Transport Layer
+
+↓
+
+Controller Security Layer
+
+↓
+
+Application Core
+
+(Trusted)
+```
+
+---
+
+# 1304. Backend Security Authority
+
+VoltStack deberá mantener:
+
+* permisos;
+* policies;
+* roles;
+* ownership;
+* reglas críticas.
+
+El frontend únicamente deberá recibir:
+
+* capacidades permitidas;
+* estado autorizado;
+* acciones disponibles.
+
+---
+
+# 1305. SPA Authorization Model
+
+Modelo:
+
+```text
+id="p5m8x2"
+
+User
+
++
+
+Session
+
++
+
+Component
+
++
+
+Action
+
++
+
+State
+
+=
+
+Authorization Decision
+```
+
+---
+
+# 1306. Volt Protocol Security Layer
+
+El protocolo de comunicación deberá incluir seguridad.
+
+Ejemplo:
+
+```json
+{
+    "component":"InvoiceTable",
+    "state":{},
+    "actions":[],
+    "security":{
+        "token":"",
+        "permissions":[]
+    }
+}
+```
+
+---
+
+# 1307. Protocol Security Metadata
+
+Cada payload podrá incluir:
+
+* component identity;
+* state checksum;
+* expiration;
+* capabilities;
+* version;
+* signature.
+
+---
+
+# 1308. Protocol Integrity Validation
+
+El servidor deberá validar:
+
+* origen;
+* versión;
+* integridad;
+* contexto;
+* autorización.
+
+---
+
+# 1309. Hydration Security Architecture
+
+La hidratación deberá considerarse una operación privilegiada.
+
+---
+
+# 1310. Hydration Threat Model
+
+Amenazas:
+
+* manipulación del estado;
+* modificación de parámetros;
+* replay;
+* escalamiento;
+* exposición de datos.
+
+---
+
+# 1311. Secure Hydration Flow
+
+```text
+id="m3q8x1"
+
+Server State
+
+↓
+
+Serialize
+
+↓
+
+Sign / Protect
+
+↓
+
+Client Receives
+
+↓
+
+Hydration Request
+
+↓
+
+Validate
+
+↓
+
+Restore State
+```
+
+---
+
+# 1312. Hydration Payload Security
+
+El payload deberá incluir:
+
+```text
+id="x8m4q7"
+
+Component ID
+
+State Version
+
+Checksum
+
+Security Context
+
+Expiration
+```
+
+---
+
+# 1313. State Integrity Validation
+
+Evitar:
+
+```text
+id="7m2x9q"
+
+Client modifies:
+
+price = 1
+
+↓
+
+Server accepts
+```
+
+---
+
+# 1314. Signed Component State
+
+VoltStack podrá firmar estados sensibles.
+
+Ejemplo:
+
+```php
+final readonly class SignedComponentState
+{
+    public function __construct(
+        public array $state,
+        public string $signature,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1315. State Validation Pipeline
+
+```text
+id="4x7m9p"
+
+Incoming State
+
+↓
+
+Signature Validation
+
+↓
+
+Schema Validation
+
+↓
+
+Authorization Check
+
+↓
+
+State Merge
+
+↓
+
+Execution
+```
+
+---
+
+# 1316. Reactive State Security
+
+Los estados reactivos deberán clasificarse.
+
+---
+
+# 1317. State Classification
+
+Tipos:
+
+```text
+id="9m5x2q"
+
+Public State
+
+UI State
+
+User State
+
+Sensitive State
+
+Restricted State
+```
+
+---
+
+# 1318. Public State
+
+Ejemplo:
+
+```text
+theme
+
+language
+
+layout
+```
+
+Sin restricciones especiales.
+
+---
+
+# 1319. Sensitive State
+
+Ejemplos:
+
+```text
+customer_id
+
+approval_status
+
+financial_values
+
+permissions
+```
+
+Debe validarse siempre.
+
+---
+
+# 1320. Restricted State
+
+Nunca deberá viajar al cliente:
+
+```text
+password hashes
+
+private keys
+
+security rules
+
+internal secrets
+```
+
+---
+
+# 1321. Component Authorization Model
+
+Los componentes deberán tener seguridad propia.
+
+---
+
+# 1322. Component Security Definition
+
+```php
+final readonly class ComponentSecurityDefinition
+{
+    public function __construct(
+        public string $component,
+        public array $permissions,
+        public array $policies,
+        public array $actions,
+    ) {
+    }
+}
+```
+
+---
+
+# 1323. Component Permission Example
+
+```text
+Component:
+
+InvoiceApproval
+
+
+Requires:
+
+invoice.view
+
+invoice.approve
+```
+
+---
+
+# 1324. Component Action Authorization
+
+Cada acción del componente deberá autorizarse.
+
+Ejemplo:
+
+```text
+Button:
+
+Approve Invoice
+
+↓
+
+Check Permission
+
+↓
+
+Execute
+```
+
+---
+
+# 1325. Event Authorization
+
+Los eventos frontend deberán validarse.
+
+---
+
+# 1326. Client Event Security
+
+Un evento recibido:
+
+```json
+{
+ "event":"deleteInvoice",
+ "id":100
+}
+```
+
+no deberá ejecutarse directamente.
+
+---
+
+# 1327. Secure Event Pipeline
+
+```text
+id="6q3m8x"
+
+Client Event
+
+↓
+
+Event Resolver
+
+↓
+
+Authorization
+
+↓
+
+Validation
+
+↓
+
+Action Execution
+```
+
+---
+
+# 1328. Event Replay Protection
+
+Eventos críticos deberán incluir:
+
+* nonce;
+* timestamp;
+* sequence;
+* signature.
+
+---
+
+# 1329. Reactive Action Security
+
+Acciones reactivas deberán respetar:
+
+* permisos;
+* políticas;
+* tenant;
+* ownership.
+
+---
+
+# 1330. Live Interaction Security Model
+
+Ejemplo:
+
+```text
+User clicks button
+
+↓
+
+Frontend sends action
+
+↓
+
+Backend validates
+
+↓
+
+Controller executes
+
+↓
+
+State updates
+```
+
+---
+
+# 1331. Client Capability Model
+
+El backend podrá entregar capacidades.
+
+Ejemplo:
+
+```json
+{
+ "capabilities":[
+    "invoice.view",
+    "invoice.approve"
+ ]
+}
+```
+
+---
+
+# 1332. Capability Limitations
+
+Las capacidades:
+
+NO sustituyen:
+
+* autorización backend;
+* policies;
+* ownership.
+
+---
+
+# 1333. Frontend Permission Hints
+
+El frontend podrá usar permisos para:
+
+* ocultar botones;
+* mejorar UX;
+* evitar acciones imposibles.
+
+---
+
+# 1334. Security Rule
+
+Regla:
+
+```text
+Hidden Button
+
+≠
+
+Security Control
+```
+
+---
+
+# 1335. Server Enforcement Required
+
+Toda acción debe validar nuevamente.
+
+---
+
+# 1336. SPA Route Security
+
+Las rutas SPA deberán protegerse.
+
+---
+
+# 1337. Frontend Route Metadata
+
+El manifest podrá contener:
+
+```json
+{
+ "route":"/admin/users",
+ "permission":"users.manage"
+}
+```
+
+---
+
+# 1338. Frontend Route Limitation
+
+El manifest no es autoridad.
+
+Solo sirve para:
+
+* navegación;
+* UX;
+* optimización.
+
+---
+
+# 1339. Server Route Verification
+
+Siempre:
+
+```text
+SPA Navigation
+
+↓
+
+Backend Authorization
+
+↓
+
+Response
+```
+
+---
+
+# 1340. Component Visibility Security
+
+Un componente puede estar:
+
+* visible;
+* oculto;
+* deshabilitado;
+* restringido.
+
+---
+
+# 1341. Visibility vs Authorization
+
+Diferenciar:
+
+```text
+Hidden
+
+=
+
+UX Decision
+
+
+Denied
+
+=
+
+Security Decision
+```
+
+---
+
+# 1342. Secure Component Rendering
+
+El renderer deberá evaluar:
+
+```text
+Component
+
+↓
+
+Security Metadata
+
+↓
+
+Authorization
+
+↓
+
+Render
+```
+
+---
+
+# 1343. Unauthorized Component Handling
+
+Opciones:
+
+* no renderizar;
+* placeholder;
+* error;
+* redirect.
+
+---
+
+# 1344. Sensitive Component Protection
+
+Ejemplos:
+
+* administración;
+* pagos;
+* configuración;
+* usuarios.
+
+---
+
+# 1345. SPA Session Security
+
+Controlar:
+
+* expiración;
+* renovación;
+* invalidación;
+* riesgo.
+
+---
+
+# 1346. Session Synchronization
+
+Backend y frontend deberán compartir:
+
+* estado;
+* expiración;
+* versión.
+
+---
+
+# 1347. Session Revocation
+
+Cuando ocurre:
+
+* logout;
+* incidente;
+* cambio privilegios.
+
+Debe:
+
+```text
+Invalidate
+
+↓
+
+Notify Runtime
+
+↓
+
+Clear State
+```
+
+---
+
+# 1348. Client Storage Security
+
+Evitar almacenar:
+
+* tokens sensibles;
+* permisos críticos;
+* secretos.
+
+---
+
+# 1349. Browser Security Model
+
+Aplicar:
+
+* CSP;
+* SameSite;
+* Secure Cookies;
+* HttpOnly.
+
+---
+
+# 1350. SPA Data Exposure Prevention
+
+No enviar:
+
+* datos no utilizados;
+* permisos globales;
+* información administrativa.
+
+---
+
+# 1351. Minimal State Principle
+
+Enviar:
+
+```text
+Necesario
+
++
+
+Autorizado
+```
+
+---
+
+# 1352. Protocol Version Security
+
+El Volt Protocol deberá versionarse.
+
+---
+
+# 1353. Protocol Compatibility Validation
+
+Validar:
+
+* versión;
+* esquema;
+* capabilities.
+
+---
+
+# 1354. Protocol Downgrade Protection
+
+Evitar:
+
+```text
+New Client
+
+↓
+
+Old Insecure Protocol
+```
+
+---
+
+# 1355. Runtime Security Middleware
+
+El runtime frontend podrá incluir:
+
+* validación;
+* expiración;
+* refresh;
+* cleanup.
+
+---
+
+# 1356. Security Bridge Architecture
+
+```text
+id="5m8q2x"
+
+Frontend Runtime
+
+↓
+
+Security Bridge
+
+↓
+
+Backend Authorization Engine
+```
+
+---
+
+# 1357. React Integration Security
+
+Para `voltstack/react`:
+
+React podrá consumir componentes, pero:
+
+* permisos vienen del backend;
+* acciones se validan servidor;
+* estado sensible permanece servidor.
+
+---
+
+# 1358. React Component Boundary
+
+Modelo:
+
+```text
+React Component
+
+↓
+
+Volt Protocol
+
+↓
+
+Controller
+
+↓
+
+Policy Engine
+```
+
+---
+
+# 1359. Hydration Attack Prevention
+
+Prevenir:
+
+* modificar props;
+* alterar IDs;
+* cambiar acciones;
+* falsificar estado.
+
+---
+
+# 1360. Component Identity Protection
+
+Cada componente deberá tener:
+
+* ID;
+* versión;
+* firma opcional;
+* contexto.
+
+---
+
+# 1361. Security Events SPA
+
+Eventos:
+
+```text
+HydrationFailed
+
+StateTamperingDetected
+
+UnauthorizedComponentAction
+
+InvalidClientEvent
+
+ProtocolMismatch
+
+SessionRevoked
+```
+
+---
+
+# 1362. SPA Security Testing
+
+Pruebas:
+
+* modificar payload;
+* cambiar permisos;
+* alterar estado;
+* replay events;
+* manipular rutas.
+
+---
+
+# 1363. SPA Security Result
+
+Esta entrega establece:
+
+```text
+SPA Runtime Security
+
+Volt Protocol Security
+
+Hydration Protection
+
+Reactive State Security
+
+Component Authorization
+
+Event Authorization
+
+Client Trust Boundary
+
+Frontend/Backend Security Separation
+```
+
+---
+
+# 1364. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 15`
+
+Continuará con:
+
+```text
+- Advanced API gateway security
+- Edge authorization
+- Rate limiting security
+- Bot protection
+- DDoS considerations
+- Request fingerprinting
+- Threat intelligence integration
+- Adaptive security controls
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 15 de varias
+**Cobertura:** Secciones **1401–1500**
+
+---
+
+# 1401. Advanced Edge Security Architecture
+
+VoltStack deberá contemplar seguridad en la capa perimetral antes de que una solicitud llegue al controlador.
+
+La arquitectura deberá proteger:
+
+* infraestructura;
+* runtime;
+* aplicación;
+* datos;
+* usuarios.
+
+---
+
+# 1402. Edge Security Model
+
+Modelo:
+
+```text id="x8m3q7"
+Client
+
+↓
+
+Edge Layer
+
+↓
+
+Gateway Security
+
+↓
+
+HTTP Kernel
+
+↓
+
+Controller Security
+
+↓
+
+Application
+```
+
+---
+
+# 1403. Edge Security Objectives
+
+El sistema deberá:
+
+* bloquear amenazas tempranas;
+* reducir carga del backend;
+* filtrar tráfico malicioso;
+* aplicar políticas globales;
+* mejorar disponibilidad.
+
+---
+
+# 1404. Edge Security Components
+
+VoltStack deberá permitir:
+
+```text id="q7m2x8"
+Request Firewall
+
+Rate Limiter
+
+Bot Detector
+
+Threat Analyzer
+
+IP Reputation
+
+Geo Filter
+
+API Gateway
+
+Security Cache
+```
+
+---
+
+# 1405. API Gateway Security Architecture
+
+El gateway será un punto inicial de control.
+
+---
+
+# 1406. Gateway Responsibilities
+
+Debe manejar:
+
+* autenticación inicial;
+* validación de tokens;
+* límites;
+* routing;
+* protección DDoS;
+* observabilidad.
+
+---
+
+# 1407. Gateway Security Pipeline
+
+```text id="4m8x2q"
+Request
+
+↓
+
+Threat Detection
+
+↓
+
+Identity Validation
+
+↓
+
+Rate Limit
+
+↓
+
+Policy Check
+
+↓
+
+Forward
+```
+
+---
+
+# 1408. Gateway vs Controller Authorization
+
+Diferencia:
+
+Gateway:
+
+```text id="6x9m3q"
+Can this request enter?
+```
+
+Controller:
+
+```text id="m2q7x5"
+Can this user perform this action?
+```
+
+---
+
+# 1409. Layered Authorization
+
+Modelo:
+
+```text id="8q4m1x"
+Edge
+
+↓
+
+Gateway
+
+↓
+
+Controller
+
+↓
+
+Domain
+
+↓
+
+Data
+```
+
+---
+
+# 1410. Request Firewall Architecture
+
+VoltStack podrá incluir reglas preventivas.
+
+---
+
+# 1411. Request Firewall Purpose
+
+Detectar:
+
+* payloads maliciosos;
+* patrones conocidos;
+* abuso;
+* anomalías.
+
+---
+
+# 1412. Firewall Rule Model
+
+```php id="3x8m7q"
+final readonly class FirewallRule
+{
+    public function __construct(
+        public string $id,
+        public string $pattern,
+        public FirewallAction $action,
+        public int $priority,
+    ) {
+    }
+}
+```
+
+---
+
+# 1413. Firewall Actions
+
+```php id="9m5x2q"
+enum FirewallAction: string
+{
+    case Allow = 'allow';
+    case Block = 'block';
+    case Challenge = 'challenge';
+    case Monitor = 'monitor';
+}
+```
+
+---
+
+# 1414. Firewall Detection Types
+
+Detectar:
+
+* IP;
+* headers;
+* payload;
+* frecuencia;
+* comportamiento.
+
+---
+
+# 1415. Positive Security Model
+
+Preferido:
+
+```text id="7q3m8x"
+Allow Known Good
+
+Reject Unknown
+```
+
+---
+
+# 1416. Negative Security Model
+
+Basado en:
+
+```text id="m8x4q2"
+Block Known Bad
+```
+
+---
+
+# 1417. Hybrid Firewall Model
+
+VoltStack deberá soportar ambos.
+
+---
+
+# 1418. Rate Limiting Security Architecture
+
+El control de frecuencia será parte de autorización.
+
+---
+
+# 1419. Rate Limit Objectives
+
+Proteger contra:
+
+* abuso;
+* fuerza bruta;
+* consumo excesivo;
+* DDoS lógico.
+
+---
+
+# 1420. Rate Limit Dimensions
+
+Puede aplicarse por:
+
+```text id="2x7m9q"
+IP
+
+User
+
+Tenant
+
+Token
+
+API Client
+
+Resource
+
+Action
+```
+
+---
+
+# 1421. RateLimitPolicy
+
+```php id="5m8q3x"
+final readonly class RateLimitPolicy
+{
+    public function __construct(
+        public string $resource,
+        public int $limit,
+        public int $window,
+        public string $identifier,
+    ) {
+    }
+}
+```
+
+---
+
+# 1422. Rate Limit Algorithms
+
+Soportar:
+
+* fixed window;
+* sliding window;
+* token bucket;
+* leaky bucket.
+
+---
+
+# 1423. Token Bucket Model
+
+Ejemplo:
+
+```text id="8m4x7q"
+Bucket
+
+100 tokens
+
+↓
+
+Each request consumes 1
+
+↓
+
+Refill
+```
+
+---
+
+# 1424. Adaptive Rate Limiting
+
+Los límites podrán cambiar según:
+
+* riesgo;
+* usuario;
+* comportamiento;
+* incidente.
+
+---
+
+# 1425. Risk-Based Rate Limiting
+
+Ejemplo:
+
+Usuario normal:
+
+```text id="m7x2q9"
+100 requests/min
+```
+
+Usuario sospechoso:
+
+```text id="q3m8x5"
+10 requests/min
+```
+
+---
+
+# 1426. Rate Limit Headers
+
+Responder:
+
+```text id="6x9m2q"
+Limit
+
+Remaining
+
+Reset
+```
+
+---
+
+# 1427. Rate Limit Events
+
+Eventos:
+
+```text id="p4m7x8"
+RateLimitExceeded
+
+RateLimitAdjusted
+
+SuspiciousTrafficDetected
+```
+
+---
+
+# 1428. Bot Protection Architecture
+
+VoltStack deberá diferenciar usuarios humanos y automatizados.
+
+---
+
+# 1429. Bot Threats
+
+Incluye:
+
+* scraping;
+* credential stuffing;
+* automated abuse;
+* API harvesting.
+
+---
+
+# 1430. Bot Detection Signals
+
+Usar:
+
+* comportamiento;
+* frecuencia;
+* headers;
+* fingerprints;
+* navegación.
+
+---
+
+# 1431. BotClassification
+
+```php id="7m2x5q"
+enum BotClassification: string
+{
+    case Human = 'human';
+    case Unknown = 'unknown';
+    case Automated = 'automated';
+    case Malicious = 'malicious';
+}
+```
+
+---
+
+# 1432. Bot Challenge System
+
+Acciones:
+
+* CAPTCHA;
+* MFA;
+* delay;
+* verification;
+* block.
+
+---
+
+# 1433. Behavioral Analysis
+
+Analizar:
+
+* velocidad;
+* patrones;
+* secuencia;
+* repetición.
+
+---
+
+# 1434. Credential Stuffing Protection
+
+Proteger:
+
+* login;
+* reset password;
+* APIs sensibles.
+
+---
+
+# 1435. Login Abuse Prevention
+
+Aplicar:
+
+* rate limit;
+* risk score;
+* progressive delay.
+
+---
+
+# 1436. Request Fingerprinting Architecture
+
+VoltStack podrá crear una huella de solicitud.
+
+---
+
+# 1437. Fingerprint Components
+
+Puede incluir:
+
+```text id="9x4m7q"
+IP
+
+User Agent
+
+Device
+
+Headers
+
+Behavior
+
+Network
+```
+
+---
+
+# 1438. RequestFingerprint
+
+```php id="2m8x5q"
+final readonly class RequestFingerprint
+{
+    public function __construct(
+        public string $hash,
+        public array $signals,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1439. Fingerprint Usage
+
+Usos:
+
+* detectar anomalías;
+* asociar sesiones;
+* identificar abuso.
+
+---
+
+# 1440. Fingerprint Privacy
+
+No deberá utilizarse para:
+
+* seguimiento innecesario;
+* identificación invasiva;
+* almacenamiento excesivo.
+
+---
+
+# 1441. IP Reputation Security
+
+Evaluar:
+
+* reputación;
+* historial;
+* comportamiento.
+
+---
+
+# 1442. IP Reputation Levels
+
+```php id="8m3q7x"
+enum ReputationLevel: string
+{
+    case Trusted = 'trusted';
+    case Neutral = 'neutral';
+    case Suspicious = 'suspicious';
+    case Malicious = 'malicious';
+}
+```
+
+---
+
+# 1443. Reputation Sources
+
+Integración con:
+
+* listas internas;
+* proveedores externos;
+* inteligencia propia.
+
+---
+
+# 1444. Geo Security Controls
+
+Permitir:
+
+* restricciones regionales;
+* cumplimiento;
+* control empresarial.
+
+---
+
+# 1445. Geo Policy Example
+
+```text id="5x9m2q"
+Allow Admin Access
+
+Only:
+
+Corporate Regions
+```
+
+---
+
+# 1446. Geo Security Limitations
+
+No confiar únicamente en:
+
+* IP;
+* GPS;
+* ubicación declarada.
+
+---
+
+# 1447. Threat Intelligence Integration
+
+VoltStack podrá consumir señales externas.
+
+---
+
+# 1448. Threat Intelligence Data
+
+Ejemplos:
+
+* IP maliciosas;
+* dominios;
+* patrones;
+* vulnerabilidades.
+
+---
+
+# 1449. Threat Intelligence Provider
+
+```php id="3m7x8q"
+interface ThreatIntelligenceProviderInterface
+{
+    public function analyze(
+        RequestContext $context
+    ): ThreatAssessment;
+}
+```
+
+---
+
+# 1450. Threat Assessment
+
+```php id="9q5m2x"
+final readonly class ThreatAssessment
+{
+    public function __construct(
+        public float $score,
+        public array $signals,
+        public ThreatLevel $level,
+    ) {
+    }
+}
+```
+
+---
+
+# 1451. Adaptive Security Architecture
+
+VoltStack deberá ajustar controles dinámicamente.
+
+---
+
+# 1452. Adaptive Security Model
+
+```text id="6m8x3q"
+Observe
+
+↓
+
+Analyze
+
+↓
+
+Decide
+
+↓
+
+Adapt
+
+↓
+
+Learn
+```
+
+---
+
+# 1453. Adaptive Controls
+
+Puede modificar:
+
+* rate limits;
+* MFA;
+* sesiones;
+* permisos;
+* desafíos.
+
+---
+
+# 1454. Security Response Actions
+
+Acciones:
+
+```text id="8q2m5x"
+Allow
+
+Challenge
+
+Slow Down
+
+Limit
+
+Block
+
+Revoke
+```
+
+---
+
+# 1455. Risk-Based Enforcement
+
+Ejemplo:
+
+Riesgo bajo:
+
+```text id="4m7x9q"
+Normal Access
+```
+
+Riesgo alto:
+
+```text id="m8x2q5"
+Step-Up Authentication
+```
+
+---
+
+# 1456. Request Anomaly Detection
+
+Detectar:
+
+* cambios repentinos;
+* volumen extraño;
+* secuencia anormal.
+
+---
+
+# 1457. Behavioral Baseline
+
+Crear patrones:
+
+* usuario;
+* servicio;
+* tenant.
+
+---
+
+# 1458. Anomaly Score
+
+```php id="7x3m9q"
+final readonly class AnomalyScore
+{
+    public function __construct(
+        public float $score,
+        public array $reasons,
+    ) {
+    }
+}
+```
+
+---
+
+# 1459. Security Automation
+
+Automatizar:
+
+* bloqueo;
+* alerta;
+* revisión;
+* aislamiento.
+
+---
+
+# 1460. Edge Security Events
+
+Eventos:
+
+```text id="9m4x7q"
+FirewallBlocked
+
+BotDetected
+
+RateLimitExceeded
+
+ThreatDetected
+
+FingerprintChanged
+
+SuspiciousRequest
+
+AdaptiveControlApplied
+```
+
+---
+
+# 1461. Edge Security Monitoring
+
+Métricas:
+
+* solicitudes bloqueadas;
+* ataques detectados;
+* latencia;
+* falsos positivos.
+
+---
+
+# 1462. False Positive Management
+
+Debe permitir:
+
+* excepciones;
+* revisión;
+* aprendizaje.
+
+---
+
+# 1463. Security Rule Lifecycle
+
+```text id="5m8x2q"
+Draft
+
+↓
+
+Testing
+
+↓
+
+Active
+
+↓
+
+Monitoring
+
+↓
+
+Retired
+```
+
+---
+
+# 1464. Edge Security Testing
+
+Probar:
+
+* abuso;
+* automatización;
+* bypass;
+* payloads maliciosos.
+
+---
+
+# 1465. Edge Security Result
+
+Esta entrega establece:
+
+```text id="2x7m9q"
+API Gateway Security
+
+Request Firewall
+
+Rate Limiting
+
+Bot Protection
+
+Fingerprinting
+
+IP Reputation
+
+Threat Intelligence
+
+Adaptive Security
+```
+
+---
+
+# 1466. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 16`
+
+Continuará con:
+
+```text id="8m3q7x"
+- Cryptographic security model
+- Encryption architecture
+- Key management
+- Secrets handling
+- Token protection
+- Data-at-rest security
+- Data-in-transit security
+- Cryptographic lifecycle
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 16 de varias
+**Cobertura:** Secciones **1501–1600**
+
+---
+
+# 1501. Cryptographic Security Architecture
+
+VoltStack deberá incorporar una arquitectura criptográfica transversal.
+
+La criptografía deberá proteger:
+
+* identidad;
+* comunicación;
+* datos;
+* sesiones;
+* tokens;
+* secretos;
+* evidencias;
+* configuraciones.
+
+---
+
+# 1502. Cryptographic Security Principles
+
+La arquitectura deberá cumplir:
+
+```text id="7m4x8q"
+Confidentiality
+
++
+
+Integrity
+
++
+
+Authenticity
+
++
+
+Non Repudiation
+
++
+
+Key Management
+```
+
+---
+
+# 1503. Cryptographic Security Layers
+
+Modelo:
+
+```text id="5x8m2q"
+Application Encryption
+
+↓
+
+Framework Security Layer
+
+↓
+
+Transport Security
+
+↓
+
+Storage Encryption
+
+↓
+
+Infrastructure Encryption
+```
+
+---
+
+# 1504. Cryptographic Service Abstraction
+
+VoltStack no deberá depender directamente de librerías criptográficas.
+
+Debe existir una abstracción.
+
+---
+
+# 1505. Crypto Service Interface
+
+```php id="8q3m7x"
+interface CryptoServiceInterface
+{
+    public function encrypt(
+        string $data,
+        EncryptionContext $context
+    ): EncryptedValue;
+
+
+    public function decrypt(
+        EncryptedValue $value
+    ): string;
+}
+```
+
+---
+
+# 1506. Crypto Providers
+
+Soportar:
+
+```text id="2m7x9q"
+OpenSSL
+
+Sodium
+
+Hardware Security Module
+
+Cloud KMS
+
+Custom Provider
+```
+
+---
+
+# 1507. Encryption Context
+
+Debe definir:
+
+* propósito;
+* algoritmo;
+* clave;
+* versión;
+* propietario;
+* clasificación.
+
+---
+
+# 1508. EncryptionContext
+
+```php id="6m8q4x"
+final readonly class EncryptionContext
+{
+    public function __construct(
+        public string $purpose,
+        public string $keyId,
+        public string $algorithm,
+        public string $classification,
+    ) {
+    }
+}
+```
+
+---
+
+# 1509. Cryptographic Algorithm Policy
+
+VoltStack deberá controlar algoritmos permitidos.
+
+---
+
+# 1510. Approved Algorithms
+
+Ejemplos:
+
+Cifrado simétrico:
+
+```text id="9x4m7q"
+AES-256-GCM
+
+ChaCha20-Poly1305
+```
+
+Hash:
+
+```text id="3m8q5x"
+SHA-256
+
+SHA-512
+```
+
+Password:
+
+```text id="7q2m9x"
+Argon2id
+```
+
+---
+
+# 1511. Weak Algorithm Blocking
+
+Bloquear:
+
+* MD5;
+* SHA1;
+* DES;
+* algoritmos obsoletos.
+
+---
+
+# 1512. Encryption at Rest Architecture
+
+Los datos almacenados deberán poder cifrarse.
+
+---
+
+# 1513. Data Encryption Layers
+
+```text id="8m2x5q"
+Database Encryption
+
++
+
+Application Encryption
+
++
+
+Field Encryption
+
++
+
+Storage Encryption
+```
+
+---
+
+# 1514. Database Encryption
+
+Puede incluir:
+
+* discos cifrados;
+* columnas cifradas;
+* datos sensibles cifrados.
+
+---
+
+# 1515. Field-Level Encryption
+
+Campos sensibles:
+
+```text id="4m8x2q"
+Personal ID
+
+Financial Data
+
+Secrets
+
+Private Information
+```
+
+---
+
+# 1516. Encrypted Field Definition
+
+```php id="6x9m3q"
+#[Encrypted(
+    algorithm:'AES-256-GCM'
+)]
+private string $bankAccount;
+```
+
+---
+
+# 1517. Transparent Encryption
+
+El framework podrá manejar:
+
+```text id="m7q2x8"
+Application
+
+↓
+
+Encrypt Automatically
+
+↓
+
+Storage
+```
+
+---
+
+# 1518. Encryption Metadata
+
+Debe almacenar:
+
+* algoritmo;
+* versión;
+* key id;
+* timestamp.
+
+---
+
+# 1519. Encryption Versioning
+
+Permitir:
+
+```text id="5m8x7q"
+Key v1
+
+↓
+
+Key v2
+
+↓
+
+Re-encryption
+```
+
+---
+
+# 1520. Data-in-Transit Security
+
+Toda comunicación sensible deberá protegerse.
+
+---
+
+# 1521. Transport Security
+
+Requerir:
+
+* TLS;
+* certificados válidos;
+* protocolos seguros.
+
+---
+
+# 1522. TLS Policy
+
+Configurar:
+
+* versión mínima;
+* cipher suites;
+* certificados.
+
+---
+
+# 1523. Certificate Management
+
+Debe soportar:
+
+* emisión;
+* renovación;
+* expiración;
+* revocación.
+
+---
+
+# 1524. Certificate Validation
+
+Validar:
+
+* cadena;
+* autoridad;
+* fecha;
+* hostname.
+
+---
+
+# 1525. Internal Service Encryption
+
+Las comunicaciones internas deberán protegerse.
+
+Ejemplo:
+
+```text id="8q5m2x"
+Controller
+
+↓
+
+Service
+
+↓
+
+Database
+```
+
+---
+
+# 1526. Mutual TLS Support
+
+Para servicios críticos:
+
+```text id="3m7x9q"
+Service A
+
++
+
+Certificate
+
+↓
+
+Service B
+```
+
+---
+
+# 1527. Secret Management Architecture
+
+VoltStack deberá manejar secretos correctamente.
+
+---
+
+# 1528. Secret Types
+
+Ejemplos:
+
+```text id="7x2m8q"
+API Keys
+
+Database Passwords
+
+Encryption Keys
+
+Tokens
+
+Certificates
+
+Private Keys
+```
+
+---
+
+# 1529. Secret Storage Rules
+
+Nunca almacenar:
+
+```text id="4m9x2q"
+.env committed
+
+Source Code
+
+Database Plain Text
+```
+
+---
+
+# 1530. Secret Provider Interface
+
+```php id="9m5x3q"
+interface SecretProviderInterface
+{
+    public function get(
+        string $name
+    ): SecretValue;
+}
+```
+
+---
+
+# 1531. Secret Providers
+
+Soportar:
+
+```text id="2x8m7q"
+Environment
+
+Vault
+
+Cloud Secret Manager
+
+KMS
+
+Custom Provider
+```
+
+---
+
+# 1532. Secret Rotation
+
+Los secretos deberán rotarse.
+
+---
+
+# 1533. Rotation Policies
+
+Definir:
+
+* frecuencia;
+* responsable;
+* impacto;
+* validación.
+
+---
+
+# 1534. Secret Lifecycle
+
+```text id="8m3q5x"
+Created
+
+↓
+
+Stored
+
+↓
+
+Used
+
+↓
+
+Rotated
+
+↓
+
+Revoked
+
+↓
+
+Destroyed
+```
+
+---
+
+# 1535. Secret Access Control
+
+Un secreto deberá tener:
+
+* propietario;
+* permisos;
+* auditoría;
+* expiración.
+
+---
+
+# 1536. Secret Access Event
+
+Registrar:
+
+* quién;
+* cuándo;
+* propósito;
+* servicio.
+
+---
+
+# 1537. Key Management Architecture
+
+Las claves requieren ciclo propio.
+
+---
+
+# 1538. Key Management Components
+
+```text id="5m7x9q"
+Key Generation
+
+Key Storage
+
+Key Usage
+
+Key Rotation
+
+Key Revocation
+
+Key Destruction
+```
+
+---
+
+# 1539. Key Management Service
+
+```php id="7q3m8x"
+interface KeyManagementServiceInterface
+{
+    public function generate(): EncryptionKey;
+
+    public function rotate(
+        string $keyId
+    ): EncryptionKey;
+
+    public function revoke(
+        string $keyId
+    ): void;
+}
+```
+
+---
+
+# 1540. Key Types
+
+Separar:
+
+```text id="3x8m5q"
+Master Keys
+
+Data Keys
+
+Session Keys
+
+Signing Keys
+
+Token Keys
+```
+
+---
+
+# 1541. Key Hierarchy
+
+Modelo:
+
+```text id="6m9x2q"
+Master Key
+
+↓
+
+Data Encryption Keys
+
+↓
+
+Encrypted Data
+```
+
+---
+
+# 1542. Key Separation Principle
+
+No reutilizar:
+
+* misma clave;
+* múltiples propósitos;
+* múltiples ambientes.
+
+---
+
+# 1543. Environment Key Isolation
+
+Separar:
+
+```text id="9m4x7q"
+Development
+
+Testing
+
+Production
+```
+
+---
+
+# 1544. Token Cryptographic Security
+
+Los tokens deberán protegerse.
+
+---
+
+# 1545. Token Signing
+
+Usar:
+
+* claves privadas;
+* algoritmos seguros;
+* rotación.
+
+---
+
+# 1546. Token Encryption
+
+Para información sensible:
+
+```text id="4m8x3q"
+Signed Token
+
++
+
+Encrypted Claims
+```
+
+---
+
+# 1547. Token Key Rotation
+
+Debe soportar:
+
+* key identifiers;
+* transición;
+* invalidación.
+
+---
+
+# 1548. Session Cryptography
+
+Las sesiones deberán proteger:
+
+* cookies;
+* identifiers;
+* tokens internos.
+
+---
+
+# 1549. Session Identifier Security
+
+Debe ser:
+
+* aleatorio;
+* largo;
+* impredecible;
+* temporal.
+
+---
+
+# 1550. Password Security
+
+VoltStack deberá usar:
+
+```text id="7x5m2q"
+Argon2id
+```
+
+como algoritmo recomendado.
+
+---
+
+# 1551. Password Hashing Rules
+
+Nunca:
+
+* almacenar passwords;
+* cifrarlos reversiblemente;
+* registrar valores.
+
+---
+
+# 1552. Password Upgrade Strategy
+
+Permitir:
+
+```text id="3m9x6q"
+Old Hash
+
+↓
+
+User Login
+
+↓
+
+New Hash
+```
+
+---
+
+# 1553. Cryptographic Audit
+
+Registrar:
+
+* uso de claves;
+* rotaciones;
+* accesos;
+* fallos.
+
+---
+
+# 1554. Crypto Events
+
+Eventos:
+
+```text id="8m2x7q"
+KeyGenerated
+
+KeyRotated
+
+KeyRevoked
+
+SecretAccessed
+
+EncryptionFailed
+
+CertificateExpired
+```
+
+---
+
+# 1555. Cryptographic Failure Handling
+
+Ante fallo:
+
+```text id="5x9m3q"
+Fail Secure
+
++
+
+Alert
+
++
+
+Audit
+```
+
+---
+
+# 1556. Backup Encryption
+
+Los respaldos deberán cifrarse.
+
+---
+
+# 1557. Backup Key Management
+
+Las claves de backup deberán estar separadas.
+
+---
+
+# 1558. Data Recovery Security
+
+La recuperación deberá requerir:
+
+* autorización;
+* auditoría;
+* aprobación.
+
+---
+
+# 1559. Cryptographic Performance
+
+Optimizar:
+
+* cache seguro;
+* hardware acceleration;
+* streaming encryption.
+
+---
+
+# 1560. Cryptographic Result
+
+Esta entrega establece:
+
+```text id="2m8x5q"
+Crypto Abstraction
+
+Encryption Architecture
+
+Key Management
+
+Secret Management
+
+Token Protection
+
+TLS Security
+
+Certificate Lifecycle
+
+Field Encryption
+
+Cryptographic Auditing
+```
+
+---
+
+# 1561. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 17`
+
+Continuará con:
+
+```text id="9m4x7q"
+- Security architecture for background execution
+- Jobs security
+- Queue authorization
+- Scheduler security
+- Command security
+- Worker isolation
+- Long-running task protection
+```
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 17 de varias
+**Cobertura:** Secciones **1601–1700**
+
+---
+
+# 1601. Background Execution Security Architecture
+
+VoltStack deberá extender el modelo de seguridad de controladores hacia procesos en segundo plano.
+
+Los procesos asíncronos también deberán estar sujetos a:
+
+* identidad;
+* autorización;
+* aislamiento;
+* auditoría;
+* límites;
+* trazabilidad.
+
+---
+
+# 1602. Background Execution Threat Model
+
+Los procesos en segundo plano presentan riesgos:
+
+```text id="7m3x8q"
+Unauthorized Job Execution
+
++
+
+Payload Manipulation
+
++
+
+Privilege Escalation
+
++
+
+Data Leakage
+
++
+
+Resource Abuse
+```
+
+---
+
+# 1603. Secure Async Execution Model
+
+Modelo:
+
+```text id="5x8m2q"
+Controller Request
+
+↓
+
+Authorized Action
+
+↓
+
+Dispatch Job
+
+↓
+
+Signed Payload
+
+↓
+
+Secure Worker
+
+↓
+
+Execution
+
+↓
+
+Audit
+```
+
+---
+
+# 1604. Job Security Principles
+
+Todo Job deberá tener:
+
+* identidad;
+* origen;
+* permisos;
+* contexto;
+* integridad;
+* expiración.
+
+---
+
+# 1605. Secure Job Identity
+
+Cada job deberá identificarse.
+
+```php id="8q4m7x"
+final readonly class JobIdentity
+{
+    public function __construct(
+        public string $jobId,
+        public string $type,
+        public string $origin,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1606. Job Execution Context
+
+Un job deberá transportar contexto seguro:
+
+```text id="3m9x5q"
+User
+
+Tenant
+
+Organization
+
+Permissions
+
+Trace ID
+
+Purpose
+```
+
+---
+
+# 1607. Job Context Validation
+
+Antes de ejecutar:
+
+```text id="6x2m8q"
+Validate Signature
+
+↓
+
+Validate Expiration
+
+↓
+
+Resolve Identity
+
+↓
+
+Authorize
+
+↓
+
+Execute
+```
+
+---
+
+# 1608. Queue Security Architecture
+
+Las colas deberán ser consideradas infraestructura crítica.
+
+---
+
+# 1609. Queue Threats
+
+Proteger contra:
+
+* modificación de mensajes;
+* inyección de jobs;
+* repetición;
+* lectura no autorizada;
+* ejecución falsa.
+
+---
+
+# 1610. Queue Message Integrity
+
+Los mensajes podrán incluir:
+
+* firma;
+* hash;
+* timestamp;
+* versión.
+
+---
+
+# 1611. Secure Job Payload
+
+Ejemplo:
+
+```php id="4m7x9q"
+final readonly class SecureJobPayload
+{
+    public function __construct(
+        public array $data,
+        public string $signature,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1612. Job Serialization Security
+
+No permitir:
+
+* objetos arbitrarios;
+* ejecución dinámica;
+* clases desconocidas.
+
+---
+
+# 1613. Safe Job Deserialization
+
+Proceso:
+
+```text id="9x3m7q"
+Serialized Data
+
+↓
+
+Schema Validation
+
+↓
+
+Allowed Type Check
+
+↓
+
+Object Creation
+```
+
+---
+
+# 1614. Queue Authorization Model
+
+Cada job deberá responder:
+
+```text id="2m8x6q"
+Who created me?
+
+Who can execute me?
+
+What can I access?
+```
+
+---
+
+# 1615. Job Permission Model
+
+Ejemplo:
+
+```text id="7q4m9x"
+ReportExportJob
+
+Requires:
+
+report.export
+```
+
+---
+
+# 1616. Worker Authorization
+
+Los workers deberán tener permisos limitados.
+
+---
+
+# 1617. Worker Capability Model
+
+```text id="5m8x2q"
+Worker
+
+HAS
+
+email.send
+
+report.generate
+
+
+DOES NOT HAVE
+
+user.delete
+```
+
+---
+
+# 1618. Worker Identity Validation
+
+Antes de ejecutar:
+
+```text id="8x3m7q"
+Worker Identity
+
+↓
+
+Capability Check
+
+↓
+
+Job Authorization
+```
+
+---
+
+# 1619. Worker Isolation
+
+Separar:
+
+* workers públicos;
+* workers administrativos;
+* workers críticos.
+
+---
+
+# 1620. Queue Tenant Isolation
+
+Un worker deberá respetar:
+
+```text id="3m9x6q"
+Tenant A Job
+
+≠
+
+Tenant B Data
+```
+
+---
+
+# 1621. Multi Tenant Queue Security
+
+Opciones:
+
+* colas separadas;
+* namespaces;
+* filtros;
+* contexto obligatorio.
+
+---
+
+# 1622. Job Ownership
+
+Cada job deberá tener:
+
+* creador;
+* organización;
+* tenant;
+* propósito.
+
+---
+
+# 1623. Job Expiration
+
+Jobs sensibles deberán expirar.
+
+Ejemplo:
+
+```text id="6m8x4q"
+Export Request
+
+Valid:
+
+15 minutes
+```
+
+---
+
+# 1624. Replay Protection
+
+Evitar:
+
+```text id="9q2m7x"
+Same Job
+
+↓
+
+Executed Twice
+```
+
+---
+
+# 1625. Job Idempotency
+
+Los jobs críticos deberán soportar:
+
+* claves únicas;
+* locks;
+* estado previo.
+
+---
+
+# 1626. Job State Machine
+
+```text id="4x8m3q"
+Created
+
+↓
+
+Queued
+
+↓
+
+Processing
+
+↓
+
+Completed
+
+↓
+
+Failed
+```
+
+---
+
+# 1627. Job Failure Security
+
+Cuando falla:
+
+* registrar;
+* ocultar datos sensibles;
+* controlar retry.
+
+---
+
+# 1628. Retry Security
+
+Evitar:
+
+* loops infinitos;
+* consumo excesivo;
+* repetición peligrosa.
+
+---
+
+# 1629. Retry Policy
+
+```php id="7m2x9q"
+final readonly class RetryPolicy
+{
+    public function __construct(
+        public int $maxAttempts,
+        public int $delay,
+        public bool $exponentialBackoff,
+    ) {
+    }
+}
+```
+
+---
+
+# 1630. Dead Letter Queue Security
+
+Los jobs fallidos deberán aislarse.
+
+---
+
+# 1631. Dead Letter Protection
+
+Debe incluir:
+
+* acceso restringido;
+* auditoría;
+* eliminación controlada.
+
+---
+
+# 1632. Scheduler Security Architecture
+
+El scheduler ejecuta tareas privilegiadas.
+
+---
+
+# 1633. Scheduler Threats
+
+Riesgos:
+
+* ejecución no autorizada;
+* modificación de tareas;
+* abuso de frecuencia.
+
+---
+
+# 1634. Scheduled Task Identity
+
+Cada tarea deberá tener identidad.
+
+---
+
+# 1635. ScheduledTask Definition
+
+```php id="5x7m9q"
+final readonly class ScheduledTask
+{
+    public function __construct(
+        public string $name,
+        public string $schedule,
+        public array $permissions,
+        public bool $enabled,
+    ) {
+    }
+}
+```
+
+---
+
+# 1636. Scheduler Authorization
+
+Antes de ejecutar:
+
+```text id="8m4x2q"
+Task Definition
+
+↓
+
+Permission Validation
+
+↓
+
+Execution
+```
+
+---
+
+# 1637. Scheduler Change Control
+
+Modificar tareas requiere:
+
+* permisos;
+* auditoría;
+* aprobación.
+
+---
+
+# 1638. Command Security Architecture
+
+Los comandos CLI también requieren protección.
+
+---
+
+# 1639. Command Threat Model
+
+Riesgos:
+
+* ejecución accidental;
+* privilegios excesivos;
+* exposición de datos.
+
+---
+
+# 1640. Command Authorization
+
+Ejemplo:
+
+```php id="3m7x8q"
+#[RequiresPermission(
+    "system.cache.clear"
+)]
+class CacheClearCommand
+{
+
+}
+```
+
+---
+
+# 1641. Console User Context
+
+Los comandos deberán conocer:
+
+* usuario;
+* operador;
+* ambiente;
+* propósito.
+
+---
+
+# 1642. Production Command Protection
+
+Comandos críticos requieren:
+
+* confirmación;
+* autorización;
+* auditoría.
+
+---
+
+# 1643. Dangerous Command Controls
+
+Ejemplos:
+
+```text id="6x9m4q"
+database.drop
+
+tenant.delete
+
+key.rotate
+```
+
+---
+
+# 1644. Command Execution Audit
+
+Registrar:
+
+* operador;
+* comando;
+* argumentos seguros;
+* resultado.
+
+---
+
+# 1645. Background Resource Security
+
+Los procesos deben tener límites.
+
+---
+
+# 1646. Worker Resource Limits
+
+Controlar:
+
+* memoria;
+* CPU;
+* tiempo;
+* conexiones.
+
+---
+
+# 1647. Long Running Task Security
+
+Tareas largas deberán:
+
+* reportar progreso;
+* renovar contexto;
+* validar permisos.
+
+---
+
+# 1648. Context Expiration
+
+Un job largo deberá revisar:
+
+```text id="9m2x7q"
+Permission Still Valid?
+```
+
+---
+
+# 1649. Privilege Revocation During Execution
+
+Si cambia autorización:
+
+```text id="4m8x3q"
+Stop
+
+or
+
+Reduce Capability
+```
+
+---
+
+# 1650. Distributed Worker Security
+
+Para múltiples nodos:
+
+```text id="7x3m9q"
+Worker A
+
+Worker B
+
+Worker C
+```
+
+todos deberán validar identidad.
+
+---
+
+# 1651. Worker Communication Security
+
+Usar:
+
+* TLS;
+* autenticación;
+* firma.
+
+---
+
+# 1652. Queue Broker Security
+
+Proteger:
+
+* Redis;
+* RabbitMQ;
+* SQS;
+* Kafka.
+
+---
+
+# 1653. Broker Access Control
+
+Separar:
+
+* lectura;
+* escritura;
+* administración.
+
+---
+
+# 1654. Background Audit Model
+
+Registrar:
+
+* creación;
+* ejecución;
+* fallo;
+* cancelación.
+
+---
+
+# 1655. Background Security Events
+
+Eventos:
+
+```text id="2m8x5q"
+JobCreated
+
+JobAuthorized
+
+JobRejected
+
+JobExecuted
+
+JobFailed
+
+WorkerStarted
+
+WorkerStopped
+
+ScheduledTaskExecuted
+
+CommandExecuted
+```
+
+---
+
+# 1656. Background Security Monitoring
+
+Medir:
+
+* jobs fallidos;
+* tiempos;
+* consumo;
+* accesos.
+
+---
+
+# 1657. Queue Abuse Detection
+
+Detectar:
+
+* generación masiva;
+* loops;
+* patrones anormales.
+
+---
+
+# 1658. Automatic Protection
+
+Acciones:
+
+* pausar cola;
+* bloquear productor;
+* limitar worker.
+
+---
+
+# 1659. FrankenPHP Worker Security Integration
+
+Los workers persistentes deberán aplicar:
+
+* reset de contexto;
+* límites;
+* aislamiento.
+
+---
+
+# 1660. Persistent Job Worker Safety
+
+Después de cada job:
+
+```text id="8q4m7x"
+Clear Context
+
+↓
+
+Release Resources
+
+↓
+
+Reset Container
+
+↓
+
+Continue
+```
+
+---
+
+# 1661. Background Security Result
+
+Esta entrega establece:
+
+```text id="5m9x2q"
+Secure Jobs
+
+Queue Authorization
+
+Worker Security
+
+Scheduler Protection
+
+Command Authorization
+
+Task Isolation
+
+Retry Safety
+
+Background Auditing
+```
+
+---
+
+# 1662. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 18`
+
+Continuará con:
+
+```text id="7x3m8q"
+- Database security integration
+- Query authorization
+- Row level security
+- Data access policies
+- Repository security
+- ORM security
+- Transaction security
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 18 de varias
+**Cobertura:** Secciones **1701–1800**
+
+---
+
+# 1701. Database Security Integration Architecture
+
+VoltStack deberá integrar seguridad desde el controlador hasta la capa de persistencia.
+
+La autorización no deberá terminar cuando el controlador acepta una petición.
+
+Debe continuar hasta los datos.
+
+---
+
+# 1702. Defense in Depth Data Security
+
+Modelo:
+
+```text id="5m8x2q"
+HTTP Request
+
+↓
+
+Controller Security
+
+↓
+
+Domain Authorization
+
+↓
+
+Repository Security
+
+↓
+
+Query Security
+
+↓
+
+Database Security
+```
+
+---
+
+# 1703. Database Security Principles
+
+La capa de datos deberá garantizar:
+
+* aislamiento;
+* mínima exposición;
+* validación;
+* trazabilidad;
+* integridad.
+
+---
+
+# 1704. Data Access Threat Model
+
+Amenazas:
+
+```text id="8x3m7q"
+Unauthorized Query
+
++
+
+Tenant Data Leakage
+
++
+
+Privilege Escalation
+
++
+
+Mass Data Exposure
+
++
+
+Injection
+```
+
+---
+
+# 1705. Secure Data Access Model
+
+Regla:
+
+```text id="4m9x2q"
+Authorized User
+
+≠
+
+Authorized Data
+```
+
+---
+
+# 1706. Data Authorization Layers
+
+VoltStack deberá soportar:
+
+```text id="7q2m8x"
+Resource Authorization
+
+↓
+
+Query Authorization
+
+↓
+
+Record Authorization
+
+↓
+
+Field Authorization
+```
+
+---
+
+# 1707. Resource Authorization
+
+Ejemplo:
+
+Usuario puede acceder:
+
+```text id="9m3x5q"
+Invoices
+```
+
+pero no:
+
+```text id="2x8m7q"
+Payroll
+```
+
+---
+
+# 1708. Query Authorization
+
+La consulta debe considerar:
+
+* usuario;
+* tenant;
+* permisos;
+* políticas.
+
+---
+
+# 1709. Secure Query Context
+
+```php id="6m8x3q"
+final readonly class QuerySecurityContext
+{
+    public function __construct(
+        public Identity $identity,
+        public TenantContext $tenant,
+        public array $permissions,
+        public array $policies,
+    ) {
+    }
+}
+```
+
+---
+
+# 1710. Secure Query Builder
+
+VoltStack deberá extender el generador de consultas.
+
+---
+
+# 1711. Query Security Pipeline
+
+```text id="3x7m9q"
+Query Request
+
+↓
+
+Security Context
+
+↓
+
+Policy Injection
+
+↓
+
+Tenant Filter
+
+↓
+
+Execute
+
+↓
+
+Audit
+```
+
+---
+
+# 1712. Automatic Security Constraints
+
+Ejemplo:
+
+Código:
+
+```php id="8m4q2x"
+Invoice::query()
+    ->get();
+```
+
+Internamente:
+
+```sql id="5q8m3x"
+SELECT *
+FROM invoices
+WHERE tenant_id = ?
+```
+
+---
+
+# 1713. Global Security Scopes
+
+Inspirado en Laravel:
+
+```php id="7x2m9q"
+class TenantScope
+{
+    public function apply($query)
+    {
+
+    }
+}
+```
+
+---
+
+# 1714. Security Scope Types
+
+VoltStack deberá soportar:
+
+```text id="4m8x7q"
+Tenant Scope
+
+Organization Scope
+
+Ownership Scope
+
+Visibility Scope
+
+Compliance Scope
+```
+
+---
+
+# 1715. Scope Composition
+
+Ejemplo:
+
+```text id="9q3m6x"
+Tenant
+
++
+
+Department
+
++
+
+Ownership
+
+=
+
+Accessible Data
+```
+
+---
+
+# 1716. Row Level Security Architecture
+
+VoltStack deberá soportar RLS.
+
+---
+
+# 1717. Row Level Security Concept
+
+La base de datos puede limitar filas directamente.
+
+Ejemplo:
+
+```text id="2m7x9q"
+User A
+
+↓
+
+Only Own Records
+```
+
+---
+
+# 1718. Database RLS Integration
+
+Motores compatibles:
+
+* PostgreSQL RLS;
+* políticas SQL;
+* filtros ORM.
+
+---
+
+# 1719. RLS Policy Model
+
+```php id="5x8m2q"
+final readonly class RowPolicy
+{
+    public function __construct(
+        public string $table,
+        public string $condition,
+    ) {
+    }
+}
+```
+
+---
+
+# 1720. RLS Enforcement Levels
+
+Niveles:
+
+```text id="8m3x7q"
+Application Only
+
+Hybrid
+
+Database Enforced
+```
+
+---
+
+# 1721. Hybrid Authorization Model
+
+Modelo recomendado:
+
+```text id="3m9x5q"
+Application Policy
+
++
+
+Database Protection
+```
+
+---
+
+# 1722. Repository Security Architecture
+
+Los repositorios deberán incorporar seguridad.
+
+---
+
+# 1723. Secure Repository Principle
+
+Un repositorio no debe asumir que el controlador ya validó.
+
+---
+
+# 1724. Repository Security Interface
+
+```php id="7q4m8x"
+interface SecureRepositoryInterface
+{
+    public function findAuthorized(
+        mixed $id,
+        SecurityContext $context
+    ): mixed;
+}
+```
+
+---
+
+# 1725. Repository Access Rules
+
+Debe validar:
+
+* existencia;
+* tenant;
+* ownership;
+* permisos.
+
+---
+
+# 1726. Secure Find Operation
+
+Incorrecto:
+
+```php id="9m2x6q"
+User::find($id);
+```
+
+Seguro:
+
+```php id="4x8m3q"
+UserRepository::findAuthorized(
+    $id,
+    $context
+);
+```
+
+---
+
+# 1727. ORM Security Architecture
+
+VoltStack ORM deberá incluir seguridad nativa.
+
+---
+
+# 1728. Secure Entity Model
+
+Las entidades podrán declarar:
+
+```php id="6m9x2q"
+#[SecurityPolicy(
+    "invoice.access"
+)]
+class Invoice
+{
+
+}
+```
+
+---
+
+# 1729. Entity Authorization Metadata
+
+Incluye:
+
+* permisos;
+* ownership;
+* clasificación;
+* campos sensibles.
+
+---
+
+# 1730. Relationship Security
+
+Las relaciones deberán protegerse.
+
+Ejemplo:
+
+```php id="8x2m7q"
+$user->orders()
+```
+
+debe filtrar según autorización.
+
+---
+
+# 1731. Secure Relationship Loading
+
+Evitar:
+
+```text id="5m8q3x"
+Load All Relations
+
+↓
+
+Filter Later
+```
+
+---
+
+# 1732. Authorization-Aware ORM
+
+Modelo:
+
+```text id="3q7m9x"
+Query
+
+↓
+
+ORM
+
+↓
+
+Policy
+
+↓
+
+Database
+```
+
+---
+
+# 1733. Field Level Security
+
+Algunos campos requieren protección.
+
+---
+
+# 1734. Sensitive Field Definition
+
+Ejemplo:
+
+```php id="7m4x8q"
+#[Sensitive]
+private string $salary;
+```
+
+---
+
+# 1735. Field Access Policy
+
+Ejemplo:
+
+```text id="2x9m6q"
+HR Manager
+
+CAN READ
+
+salary
+
+
+Employee
+
+CANNOT READ
+```
+
+---
+
+# 1736. Secure Serialization
+
+Antes de enviar:
+
+```text id="5m8q2x"
+Entity
+
+↓
+
+Field Policy
+
+↓
+
+Serializer
+
+↓
+
+Response
+```
+
+---
+
+# 1737. Data Masking
+
+Ejemplo:
+
+Original:
+
+```text id="8q3m7x"
+123456789
+```
+
+Salida:
+
+```text id="4m9x2q"
+*****6789
+```
+
+---
+
+# 1738. Database Transaction Security
+
+Las transacciones deberán considerar seguridad.
+
+---
+
+# 1739. Secure Transaction Context
+
+```php id="6x8m3q"
+Transaction::run(
+    $context,
+    function(){
+
+    }
+);
+```
+
+---
+
+# 1740. Transaction Authorization
+
+Antes de confirmar:
+
+Validar:
+
+* permisos;
+* estado;
+* reglas.
+
+---
+
+# 1741. Transaction Race Protection
+
+Proteger:
+
+* doble aprobación;
+* cambios simultáneos;
+* estados inválidos.
+
+---
+
+# 1742. Optimistic Lock Security
+
+Usar:
+
+```text id="9m3x7q"
+Version Field
+```
+
+---
+
+# 1743. Pessimistic Lock Security
+
+Para operaciones críticas:
+
+```sql id="2x7m8q"
+SELECT FOR UPDATE
+```
+
+---
+
+# 1744. Database Audit Integration
+
+Registrar:
+
+* consultas críticas;
+* modificaciones;
+* accesos sensibles.
+
+---
+
+# 1745. Query Audit Events
+
+Eventos:
+
+```text id="7m5x2q"
+SensitiveQueryExecuted
+
+RecordAccessed
+
+RecordModified
+
+MassExportDetected
+```
+
+---
+
+# 1746. Bulk Operation Security
+
+Operaciones masivas requieren:
+
+* permisos elevados;
+* límites;
+* auditoría.
+
+---
+
+# 1747. Bulk Query Protection
+
+Evitar:
+
+```text id="3x8m9q"
+Export All Customers
+```
+
+sin autorización.
+
+---
+
+# 1748. Data Export Security
+
+Exportaciones deberán incluir:
+
+* propósito;
+* aprobación;
+* expiración.
+
+---
+
+# 1749. Database Backup Security
+
+Los respaldos deberán:
+
+* cifrarse;
+* auditarse;
+* limitar acceso.
+
+---
+
+# 1750. Migration Security
+
+Las migraciones deberán proteger:
+
+* cambios destructivos;
+* pérdida datos;
+* permisos.
+
+---
+
+# 1751. Migration Authorization
+
+Ejemplo:
+
+```text id="8m4x7q"
+Drop Column
+
+Requires:
+
+Database Administrator
+```
+
+---
+
+# 1752. Schema Security
+
+Controlar:
+
+* creación tablas;
+* índices;
+* permisos.
+
+---
+
+# 1753. Database Credential Security
+
+Nunca:
+
+* credenciales hardcoded;
+* exposición logs;
+* compartir ambientes.
+
+---
+
+# 1754. Connection Security
+
+Usar:
+
+* TLS;
+* certificados;
+* usuarios mínimos.
+
+---
+
+# 1755. Database Least Privilege
+
+La aplicación no debería usar:
+
+```text id="5m8x3q"
+root
+```
+
+---
+
+# 1756. Database Role Separation
+
+Separar:
+
+```text id="9x2m7q"
+Application User
+
+Migration User
+
+Admin User
+
+Audit User
+```
+
+---
+
+# 1757. ORM Query Monitoring
+
+Detectar:
+
+* queries lentas;
+* consultas masivas;
+* patrones extraños.
+
+---
+
+# 1758. Data Access Anomaly Detection
+
+Ejemplo:
+
+Usuario normalmente:
+
+```text id="4m8x9q"
+100 records/day
+```
+
+Ahora:
+
+```text id="7m2x5q"
+100000 records
+```
+
+---
+
+# 1759. Security Result
+
+Esta arquitectura establece:
+
+```text id="8m3x7q"
+Query Authorization
+
+Row Level Security
+
+Secure Repository
+
+ORM Protection
+
+Field Security
+
+Transaction Security
+
+Database Auditing
+
+Data Isolation
+```
+
+---
+
+# 1760. Database Security Outcome
+
+El controlador VoltStack quedará conectado a una cadena completa:
+
+```text id="3m9x5q"
+Controller
+
+↓
+
+Policy Engine
+
+↓
+
+Repository
+
+↓
+
+ORM
+
+↓
+
+Database
+
+↓
+
+Audit
+```
+
+---
+
+# 1761. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 19`
+
+Continuará con:
+
+```text id="7x4m8q"
+- File system security
+- Storage authorization
+- Upload protection
+- Cloud storage security
+- S3/GCS/R2/MinIO integration
+- Encryption storage model
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 19 de varias
+**Cobertura:** Secciones **1801–1900**
+
+---
+
+# 1801. File System Security Architecture
+
+VoltStack deberá incorporar seguridad dentro del manejo de archivos.
+
+Los archivos representan un activo crítico porque pueden contener:
+
+* información privada;
+* documentos empresariales;
+* datos regulados;
+* archivos ejecutables;
+* evidencia.
+
+---
+
+# 1802. File Security Principles
+
+El sistema deberá garantizar:
+
+```text id="8m3x7q"
+Confidentiality
+
++
+
+Integrity
+
++
+
+Authorization
+
++
+
+Isolation
+
++
+
+Traceability
+```
+
+---
+
+# 1803. File Security Threat Model
+
+Amenazas:
+
+```text id="5x2m8q"
+Unauthorized Download
+
++
+
+Malicious Upload
+
++
+
+Path Traversal
+
++
+
+Data Leakage
+
++
+
+Storage Abuse
+```
+
+---
+
+# 1804. File Security Layers
+
+Arquitectura:
+
+```text id="7m9x3q"
+Controller
+
+↓
+
+File Security Layer
+
+↓
+
+Storage Abstraction
+
+↓
+
+Storage Driver
+
+↓
+
+Physical Storage
+```
+
+---
+
+# 1805. File Authorization Model
+
+Un archivo deberá tener autorización propia.
+
+---
+
+# 1806. File Access Decision
+
+Modelo:
+
+```text id="4x8m2q"
+User
+
++
+
+Tenant
+
++
+
+File Metadata
+
++
+
+Policy
+
+=
+
+Access Decision
+```
+
+---
+
+# 1807. File Identity Model
+
+Cada archivo deberá tener identidad.
+
+```php id="9m3x7q"
+final readonly class FileIdentity
+{
+    public function __construct(
+        public string $fileId,
+        public string $storageKey,
+        public string $tenantId,
+        public string $ownerId,
+    ) {
+    }
+}
+```
+
+---
+
+# 1808. File Metadata Security
+
+Metadata:
+
+* propietario;
+* clasificación;
+* tenant;
+* permisos;
+* expiración.
+
+---
+
+# 1809. File Classification Model
+
+Tipos:
+
+```text id="2m8x5q"
+Public
+
+Internal
+
+Confidential
+
+Sensitive
+
+Restricted
+```
+
+---
+
+# 1810. File Ownership Security
+
+Todo archivo deberá tener:
+
+* owner;
+* creator;
+* organization;
+* tenant.
+
+---
+
+# 1811. File Permission Model
+
+Permisos:
+
+```text id="6m9x4q"
+file.read
+
+file.write
+
+file.share
+
+file.delete
+
+file.download
+```
+
+---
+
+# 1812. File Policy Engine Integration
+
+Ejemplo:
+
+```text id="8x3m7q"
+Can user download file?
+
+↓
+
+Check:
+
+Identity
+
+Tenant
+
+Permission
+
+Policy
+
+Purpose
+```
+
+---
+
+# 1813. Secure Storage Abstraction
+
+VoltStack deberá abstraer almacenamiento.
+
+---
+
+# 1814. Storage Interface
+
+```php id="5m7x2q"
+interface SecureStorageInterface
+{
+    public function put(
+        FileUpload $file,
+        StorageContext $context
+    ): StoredFile;
+
+
+    public function get(
+        string $id,
+        SecurityContext $context
+    ): File;
+}
+```
+
+---
+
+# 1815. Storage Drivers
+
+Soportar:
+
+```text id="7q3m8x"
+Local Storage
+
+Amazon S3
+
+Google Cloud Storage
+
+Cloudflare R2
+
+MinIO
+
+Azure Blob
+```
+
+---
+
+# 1816. Storage Security Context
+
+Debe contener:
+
+* usuario;
+* tenant;
+* propósito;
+* permisos.
+
+---
+
+# 1817. Multi-Tenant Storage Isolation
+
+Modelo:
+
+```text id="3m8x5q"
+Tenant A
+
+/
+
+files
+
+
+Tenant B
+
+/
+
+files
+```
+
+---
+
+# 1818. Storage Isolation Strategies
+
+Soportar:
+
+```text id="8m2x7q"
+Separate Bucket
+
+Prefix Isolation
+
+Separate Database
+
+Encryption Isolation
+```
+
+---
+
+# 1819. Tenant Storage Resolver
+
+```php id="6x9m3q"
+interface TenantStorageResolverInterface
+{
+    public function resolve(
+        TenantContext $tenant
+    ): StorageDisk;
+}
+```
+
+---
+
+# 1820. Path Traversal Protection
+
+Nunca permitir:
+
+```text id="4m7x9q"
+../../secret.txt
+```
+
+---
+
+# 1821. Secure Path Generator
+
+El sistema deberá generar:
+
+```text id="9x2m5q"
+tenant/
+
+year/
+
+uuid/
+
+file
+```
+
+---
+
+# 1822. File Name Sanitization
+
+Eliminar:
+
+* rutas;
+* caracteres peligrosos;
+* nombres reservados.
+
+---
+
+# 1823. Upload Security Architecture
+
+Los uploads deberán pasar por validación completa.
+
+---
+
+# 1824. Upload Pipeline
+
+```text id="5m8x3q"
+Incoming File
+
+↓
+
+Size Validation
+
+↓
+
+Type Validation
+
+↓
+
+Security Scan
+
+↓
+
+Authorization
+
+↓
+
+Storage
+
+↓
+
+Audit
+```
+
+---
+
+# 1825. File Size Limits
+
+Controlar:
+
+* usuario;
+* tenant;
+* endpoint;
+* tipo archivo.
+
+---
+
+# 1826. MIME Validation
+
+No confiar únicamente en:
+
+```text id="7m3x8q"
+extension
+```
+
+---
+
+# 1827. Content Inspection
+
+Validar:
+
+* contenido real;
+* firma del archivo;
+* estructura.
+
+---
+
+# 1828. Dangerous File Blocking
+
+Bloquear:
+
+* ejecutables;
+* scripts;
+* archivos sospechosos.
+
+---
+
+# 1829. Malware Scanning Integration
+
+Permitir integración:
+
+* antivirus;
+* sandbox;
+* servicios externos.
+
+---
+
+# 1830. Upload Authorization
+
+Antes de almacenar:
+
+Validar:
+
+```text id="2x8m7q"
+Can Upload?
+
+Allowed Type?
+
+Allowed Size?
+
+Allowed Location?
+```
+
+---
+
+# 1831. Temporary Upload Storage
+
+Los archivos temporales deberán:
+
+* expirar;
+* aislarse;
+* limpiarse.
+
+---
+
+# 1832. Upload Token Security
+
+Los tokens temporales deberán tener:
+
+* expiración;
+* scope;
+* propósito.
+
+---
+
+# 1833. Download Security Architecture
+
+Descargar archivos requiere autorización.
+
+---
+
+# 1834. Secure Download Flow
+
+```text id="8m4x2q"
+Request File
+
+↓
+
+Resolve Identity
+
+↓
+
+Check Permission
+
+↓
+
+Generate Access
+
+↓
+
+Stream File
+```
+
+---
+
+# 1835. Temporary Download URLs
+
+Soportar:
+
+* URLs firmadas;
+* expiración;
+* restricciones.
+
+---
+
+# 1836. Signed URL Security
+
+Debe incluir:
+
+* archivo;
+* tiempo;
+* firma;
+* propósito.
+
+---
+
+# 1837. File Sharing Security
+
+Compartir archivos requiere:
+
+* permiso;
+* expiración;
+* destinatario;
+* auditoría.
+
+---
+
+# 1838. External File Access
+
+Debe controlar:
+
+* invitados;
+* clientes;
+* proveedores.
+
+---
+
+# 1839. File Access Revocation
+
+Debe permitir:
+
+```text id="6m8x3q"
+Invalidate Link
+
+↓
+
+Remove Access
+
+↓
+
+Audit
+```
+
+---
+
+# 1840. Storage Encryption Architecture
+
+Los archivos sensibles deberán cifrarse.
+
+---
+
+# 1841. Encryption Strategies
+
+Soportar:
+
+```text id="9m3x7q"
+Storage Encryption
+
++
+
+Application Encryption
+
++
+
+Client Side Encryption
+```
+
+---
+
+# 1842. Object Encryption
+
+Cada archivo podrá tener:
+
+* clave;
+* versión;
+* metadata.
+
+---
+
+# 1843. Encryption Metadata
+
+```php id="3x8m5q"
+final readonly class FileEncryptionMetadata
+{
+    public function __construct(
+        public string $algorithm,
+        public string $keyId,
+        public string $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 1844. Cloud Storage Security
+
+Integración segura con proveedores externos.
+
+---
+
+# 1845. AWS S3 Security
+
+Considerar:
+
+* IAM mínimo;
+* bucket policies;
+* encryption;
+* private buckets.
+
+---
+
+# 1846. Google Cloud Storage Security
+
+Considerar:
+
+* service accounts;
+* IAM roles;
+* signed URLs;
+* encryption.
+
+---
+
+# 1847. Cloudflare R2 Security
+
+Considerar:
+
+* access keys;
+* bucket isolation;
+* policies.
+
+---
+
+# 1848. MinIO Security
+
+Considerar:
+
+* usuarios;
+* políticas;
+* TLS;
+* cifrado.
+
+---
+
+# 1849. Storage Credentials Security
+
+Nunca almacenar:
+
+* keys en código;
+* secretos visibles;
+* credenciales compartidas.
+
+---
+
+# 1850. Storage Access Policies
+
+Ejemplo:
+
+```text id="7m2x9q"
+Invoice Files
+
+Only:
+
+Billing Department
+```
+
+---
+
+# 1851. File Audit Architecture
+
+Registrar:
+
+* subida;
+* lectura;
+* descarga;
+* compartición;
+* eliminación.
+
+---
+
+# 1852. File Audit Event
+
+```php id="5x8m3q"
+final readonly class FileAuditEvent
+{
+    public function __construct(
+        public string $action,
+        public string $fileId,
+        public string $actor,
+    ) {
+    }
+}
+```
+
+---
+
+# 1853. Storage Abuse Protection
+
+Controlar:
+
+* cantidad archivos;
+* tamaño total;
+* frecuencia.
+
+---
+
+# 1854. Storage Quotas
+
+Por:
+
+* usuario;
+* tenant;
+* organización.
+
+---
+
+# 1855. File Lifecycle Security
+
+Estados:
+
+```text id="8m3x7q"
+Created
+
+↓
+
+Stored
+
+↓
+
+Shared
+
+↓
+
+Archived
+
+↓
+
+Deleted
+```
+
+---
+
+# 1856. Secure Deletion
+
+Eliminar:
+
+* referencias;
+* versiones;
+* copias temporales.
+
+---
+
+# 1857. Retention Policies
+
+Aplicar:
+
+* conservación;
+* expiración;
+* eliminación automática.
+
+---
+
+# 1858. Legal Hold Support
+
+Para entornos empresariales:
+
+Bloquear eliminación durante investigación.
+
+---
+
+# 1859. File Recovery Security
+
+Recuperar archivos requiere:
+
+* autorización;
+* auditoría.
+
+---
+
+# 1860. File Security Monitoring
+
+Métricas:
+
+* accesos;
+* descargas;
+* volumen;
+* anomalías.
+
+---
+
+# 1861. File Threat Detection
+
+Detectar:
+
+* descargas masivas;
+* accesos extraños;
+* patrones anormales.
+
+---
+
+# 1862. File Security Events
+
+Eventos:
+
+```text id="4m9x2q"
+FileUploaded
+
+FileValidated
+
+FileRejected
+
+FileDownloaded
+
+FileShared
+
+FileRevoked
+
+StorageViolationDetected
+```
+
+---
+
+# 1863. Controller Integration
+
+Los controladores deberán usar:
+
+```text id="7x3m8q"
+Controller
+
+↓
+
+File Policy
+
+↓
+
+Secure Storage
+
+↓
+
+Audit
+```
+
+---
+
+# 1864. File Security Testing
+
+Pruebas:
+
+* path traversal;
+* upload bypass;
+* unauthorized download;
+* tenant leakage.
+
+---
+
+# 1865. File Security Result
+
+Esta entrega establece:
+
+```text id="9m2x7q"
+Secure File Identity
+
+Storage Authorization
+
+Upload Security
+
+Download Security
+
+Cloud Storage Protection
+
+Encryption
+
+Multi Tenant Isolation
+
+File Auditing
+```
+
+---
+
+# 1866. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 20`
+
+Continuará con:
+
+```text id="5m8x3q"
+- Communication security
+- Internal APIs
+- Service-to-service authentication
+- Microservice security
+- Event security
+- Message integrity
+- Distributed trust model
+```
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 20 de varias
+**Cobertura:** Secciones **1901–2000**
+
+---
+
+# 1901. Distributed Communication Security Architecture
+
+VoltStack deberá considerar que una aplicación moderna puede estar compuesta por:
+
+* módulos internos;
+* servicios independientes;
+* workers;
+* APIs externas;
+* sistemas empresariales;
+* eventos distribuidos.
+
+Cada comunicación deberá considerarse un punto potencial de ataque.
+
+---
+
+# 1902. Distributed Security Principles
+
+La comunicación deberá garantizar:
+
+```text id="5m8x2q"
+Authentication
+
++
+
+Authorization
+
++
+
+Integrity
+
++
+
+Confidentiality
+
++
+
+Traceability
+```
+
+---
+
+# 1903. Communication Trust Model
+
+Regla fundamental:
+
+```text id="8x3m7q"
+Internal Network
+
+≠
+
+Trusted Network
+```
+
+---
+
+# 1904. Service Communication Model
+
+Arquitectura:
+
+```text id="4m9x2q"
+Service A
+
+↓
+
+Authentication
+
+↓
+
+Authorization
+
+↓
+
+Encrypted Channel
+
+↓
+
+Service B
+```
+
+---
+
+# 1905. Service Identity Architecture
+
+Cada servicio deberá tener identidad propia.
+
+Ejemplo:
+
+```text id="7q3m8x"
+billing-service
+
+notification-service
+
+storage-service
+
+analytics-worker
+```
+
+---
+
+# 1906. Service Identity Definition
+
+```php id="3x8m5q"
+final readonly class ServiceIdentity
+{
+    public function __construct(
+        public string $serviceId,
+        public string $name,
+        public array $capabilities,
+        public string $environment,
+    ) {
+    }
+}
+```
+
+---
+
+# 1907. Service Authentication
+
+Soportar:
+
+* OAuth2 Client Credentials;
+* JWT Service Tokens;
+* Mutual TLS;
+* API Keys rotables.
+
+---
+
+# 1908. Service Token Model
+
+Ejemplo:
+
+```json id="6m8x3q"
+{
+ "service":"billing",
+ "scope":[
+    "invoice.read",
+    "invoice.create"
+ ]
+}
+```
+
+---
+
+# 1909. Service Authorization
+
+Autenticación:
+
+```text id="9m2x7q"
+Who are you?
+```
+
+Autorización:
+
+```text id="5x8m3q"
+What can you do?
+```
+
+---
+
+# 1910. Service Permission Model
+
+Los servicios deberán tener permisos limitados.
+
+---
+
+# 1911. Service Capability Security
+
+Ejemplo:
+
+```text id="8m4x2q"
+Email Worker
+
+CAN:
+
+email.send
+
+
+CANNOT:
+
+user.delete
+```
+
+---
+
+# 1912. Service-to-Service Policy Engine
+
+Las llamadas internas deberán pasar por políticas.
+
+---
+
+# 1913. Internal API Security
+
+Las APIs internas deberán aplicar:
+
+* autenticación;
+* autorización;
+* validación;
+* auditoría.
+
+---
+
+# 1914. Internal API Gateway
+
+Arquitectura:
+
+```text id="2m7x9q"
+Internal Request
+
+↓
+
+Gateway
+
+↓
+
+Policy Check
+
+↓
+
+Service
+```
+
+---
+
+# 1915. Internal Request Context
+
+Debe incluir:
+
+* servicio origen;
+* usuario delegado;
+* tenant;
+* trace;
+* propósito.
+
+---
+
+# 1916. Delegated User Context
+
+Ejemplo:
+
+```text id="7x3m8q"
+Support Service
+
+acts for
+
+Customer User
+```
+
+---
+
+# 1917. Impersonation Security
+
+La suplantación deberá:
+
+* requerir autorización;
+* tener duración limitada;
+* auditarse.
+
+---
+
+# 1918. Service Impersonation Model
+
+```php id="4m8x7q"
+final readonly class DelegatedIdentity
+{
+    public function __construct(
+        public string $service,
+        public string $user,
+        public string $purpose,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 1919. Mutual TLS Architecture
+
+Para servicios críticos:
+
+```text id="8m2x5q"
+Service A Certificate
+
+↓
+
+Validation
+
+↓
+
+Service B Certificate
+```
+
+---
+
+# 1920. Certificate Identity Mapping
+
+Un certificado deberá mapearse:
+
+```text id="3x9m7q"
+Certificate
+
+↓
+
+Service Identity
+
+↓
+
+Permissions
+```
+
+---
+
+# 1921. Internal Encryption
+
+Toda comunicación sensible deberá usar:
+
+* TLS;
+* certificados;
+* claves rotables.
+
+---
+
+# 1922. Distributed Trust Boundaries
+
+Separar:
+
+```text id="6m8x2q"
+Application Boundary
+
+Service Boundary
+
+Tenant Boundary
+
+Organization Boundary
+```
+
+---
+
+# 1923. Event Security Architecture
+
+Los eventos también deberán protegerse.
+
+---
+
+# 1924. Event Threat Model
+
+Amenazas:
+
+```text id="9x3m7q"
+Fake Event
+
++
+
+Modified Payload
+
++
+
+Replay
+
++
+
+Unauthorized Consumer
+```
+
+---
+
+# 1925. Secure Event Model
+
+```text id="4m7x8q"
+Producer
+
+↓
+
+Signed Event
+
+↓
+
+Broker
+
+↓
+
+Authorized Consumer
+
+↓
+
+Processing
+```
+
+---
+
+# 1926. Event Identity
+
+Cada evento deberá tener:
+
+* id;
+* origen;
+* versión;
+* timestamp.
+
+---
+
+# 1927. Event Envelope
+
+```php id="7m2x9q"
+final readonly class EventEnvelope
+{
+    public function __construct(
+        public string $eventId,
+        public string $type,
+        public string $source,
+        public array $payload,
+        public string $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 1928. Event Signature Validation
+
+Validar:
+
+* origen;
+* firma;
+* expiración;
+* versión.
+
+---
+
+# 1929. Event Authorization
+
+Un consumidor deberá estar autorizado.
+
+Ejemplo:
+
+```text id="5x8m3q"
+InvoiceCreated
+
+Allowed:
+
+Billing Service
+
+
+Denied:
+
+Analytics Admin
+```
+
+---
+
+# 1930. Event Consumer Permissions
+
+Definir:
+
+* eventos permitidos;
+* acciones;
+* datos visibles.
+
+---
+
+# 1931. Event Payload Security
+
+Los eventos deberán evitar:
+
+* datos excesivos;
+* información sensible;
+* secretos.
+
+---
+
+# 1932. Event Data Minimization
+
+Enviar:
+
+```text id="8m4x2q"
+Required Data Only
+```
+
+---
+
+# 1933. Event Encryption
+
+Eventos sensibles podrán cifrarse.
+
+---
+
+# 1934. Message Broker Security
+
+Proteger:
+
+* colas;
+* topics;
+* streams.
+
+---
+
+# 1935. Broker Authorization
+
+Separar:
+
+```text id="3m7x9q"
+Producer Permissions
+
+Consumer Permissions
+
+Admin Permissions
+```
+
+---
+
+# 1936. Message Integrity
+
+Los mensajes deberán incluir:
+
+* hash;
+* firma;
+* versión.
+
+---
+
+# 1937. Replay Attack Prevention
+
+Usar:
+
+* event id;
+* timestamp;
+* nonce;
+* almacenamiento de eventos procesados.
+
+---
+
+# 1938. Event Ordering Security
+
+Para eventos críticos:
+
+Controlar:
+
+* secuencia;
+* versión;
+* dependencia.
+
+---
+
+# 1939. Distributed Transaction Security
+
+Operaciones distribuidas deberán proteger consistencia.
+
+---
+
+# 1940. Saga Security Model
+
+Para procesos largos:
+
+```text id="7x4m8q"
+Step 1
+
+↓
+
+Step 2
+
+↓
+
+Compensation
+```
+
+---
+
+# 1941. Compensation Security
+
+Las acciones reversas deberán:
+
+* estar autorizadas;
+* auditarse;
+* limitarse.
+
+---
+
+# 1942. Distributed Lock Security
+
+Evitar:
+
+* doble procesamiento;
+* estados corruptos.
+
+---
+
+# 1943. Service Mesh Security
+
+VoltStack podrá integrarse con:
+
+* service mesh;
+* proxies seguros;
+* identidad distribuida.
+
+---
+
+# 1944. Service Mesh Policies
+
+Controlar:
+
+* quién llama;
+* qué endpoint;
+* frecuencia;
+* datos.
+
+---
+
+# 1945. Distributed Rate Limiting
+
+Aplicar límites por:
+
+* servicio;
+* usuario;
+* tenant;
+* operación.
+
+---
+
+# 1946. Communication Audit
+
+Registrar:
+
+* llamadas;
+* identidad;
+* autorización;
+* resultado.
+
+---
+
+# 1947. Distributed Trace Security
+
+El trace deberá propagarse:
+
+```text id="2m8x5q"
+Request
+
+↓
+
+Service A
+
+↓
+
+Service B
+
+↓
+
+Database
+```
+
+---
+
+# 1948. Trace Data Protection
+
+No incluir:
+
+* secretos;
+* tokens;
+* información privada.
+
+---
+
+# 1949. Communication Security Events
+
+Eventos:
+
+```text id="6m3x8q"
+ServiceAuthenticated
+
+ServiceAuthorizationDenied
+
+InvalidMessageSignature
+
+EventRejected
+
+ReplayDetected
+
+CertificateFailure
+```
+
+---
+
+# 1950. Communication Failure Handling
+
+Ante fallo:
+
+```text id="9x4m2q"
+Fail Secure
+
++
+
+Retry Controlled
+
++
+
+Audit
+```
+
+---
+
+# 1951. External Integration Security
+
+Integraciones externas deberán usar:
+
+* identidad;
+* tokens;
+* scopes;
+* expiración.
+
+---
+
+# 1952. Third Party Trust Model
+
+Un tercero deberá tener:
+
+* contrato;
+* permisos;
+* límites.
+
+---
+
+# 1953. Partner API Security
+
+Aplicar:
+
+* rate limit;
+* scopes;
+* auditoría.
+
+---
+
+# 1954. Webhook Communication Security
+
+Validar:
+
+* firma;
+* origen;
+* timestamp;
+* evento.
+
+---
+
+# 1955. Secure Callback Model
+
+```text id="5m8x3q"
+External System
+
+↓
+
+Signed Callback
+
+↓
+
+Validation
+
+↓
+
+Processing
+```
+
+---
+
+# 1956. Communication Secrets
+
+Proteger:
+
+* API keys;
+* certificados;
+* tokens.
+
+---
+
+# 1957. Communication Key Rotation
+
+Debe soportar:
+
+* renovación;
+* transición;
+* revocación.
+
+---
+
+# 1958. Distributed Security Monitoring
+
+Analizar:
+
+* tráfico;
+* errores;
+* patrones.
+
+---
+
+# 1959. Communication Security Analytics
+
+Detectar:
+
+* servicios comprometidos;
+* abuso;
+* anomalías.
+
+---
+
+# 1960. Communication Security Result
+
+Esta entrega establece:
+
+```text id="8m4x2q"
+Service Identity
+
+Internal API Security
+
+mTLS Support
+
+Event Security
+
+Message Integrity
+
+Broker Protection
+
+Distributed Trust
+
+Service Communication Audit
+```
+
+---
+
+# 1961. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 21`
+
+Continuará con:
+
+```text id="3x7m9q"
+- Advanced compliance security
+- Enterprise governance
+- Security policies lifecycle
+- Risk management
+- Security posture
+- Continuous compliance
+```
