@@ -1,7 +1,6 @@
 # VoltStack Controller System
 
-
-### Project Context
+## Project Context
 
 **Versión del documento:** 1.0  
 **Estado:** Draft  
@@ -67,7 +66,6 @@ Ningún componente del sistema deberá depender directamente de otro.
 
 Por ejemplo:
 
-```
 Controller
 
 NO conoce
@@ -81,7 +79,6 @@ Container
 View Engine
 Volt Runtime
 SPA Runtime
-```
 
 Toda comunicación se realizará mediante contratos (Contracts) y servicios del Container.
 
@@ -93,7 +90,6 @@ Cada parte del sistema deberá poder reemplazarse completamente.
 
 Ejemplo:
 
-```
 Controller Resolver
 
 ↓
@@ -103,7 +99,6 @@ Puede sustituirse
 ↓
 
 Custom Resolver
-```
 
 Lo mismo aplica para:
 
@@ -181,7 +176,6 @@ Estas responsabilidades pertenecen a otros módulos del framework.
 
 El sistema Controller interactúa con prácticamente todos los subsistemas de VoltStack.
 
-```
 Http Request
       │
       ▼
@@ -210,7 +204,6 @@ Response Factory
       │
       ▼
 Http Response
-```
 
 ---
 
@@ -288,7 +281,6 @@ User $user
 
 Soporte para:
 
-```
 Volt Views
 
 SSR
@@ -298,7 +290,6 @@ SPA
 Components
 
 Fragments
-```
 
 ---
 

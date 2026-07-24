@@ -1,6 +1,5 @@
 # Motor unificado de metadatos de VoltStack
 
-
 **Versión:** 1.0
 **Estado:** Draft
 **Módulo principal:** `VoltStack\Support\Metadata`

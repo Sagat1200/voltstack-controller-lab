@@ -1,6 +1,5 @@
 # Sistema de invocación de controladores de VoltStack
 
-
 **Versión:** 1.0
 **Estado:** Draft
 **Módulo:** `VoltStack\Quantum\Controllers\Invocation`

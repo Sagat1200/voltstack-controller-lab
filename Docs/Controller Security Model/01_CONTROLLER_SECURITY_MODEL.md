@@ -1,4 +1,4 @@
-# Controller Security Model - Part 1: Security Foundations & Threat Model
+# Controller Security Model - Part 01: Security Foundations & Threat Model
 
 **Versión:** 1.0
 **Estado:** Draft arquitectónico

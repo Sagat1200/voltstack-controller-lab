@@ -1,6 +1,5 @@
 # Ciclo de vida y estado de ejecución de controladores en VoltStack
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Lifecycle`

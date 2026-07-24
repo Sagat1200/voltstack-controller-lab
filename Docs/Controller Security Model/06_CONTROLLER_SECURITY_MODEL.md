@@ -1,6 +1,4 @@
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+# Controller Security Model - Part 06: Controller Authorization, Policy Enforcement & Resource Access Security
 
 **Documento:** Parte 06
 **Entrega:** 1 de varias
@@ -9,7 +7,9 @@
 
 ---
 
-# 1. Propósito del documento
+## Entrega 1
+
+### 1. Propósito del documento
 
 `CONTROLLER_SECURITY_MODEL_PART_06.md` define la arquitectura integral de autorización para los controladores, acciones, recursos y operaciones protegidas de VoltStack.
 
@@ -33,7 +33,7 @@ La autorización no deberá implementarse como una condición dispersa dentro de
 
 ---
 
-# 2. Alcance de la Parte 06
+### 2. Alcance de la Parte 06
 
 La Parte 06 cubrirá:
 
@@ -65,7 +65,7 @@ La Parte 06 cubrirá:
 
 ---
 
-# 3. Objetivos arquitectónicos
+### 3. Objetivos arquitectónicos
 
 La arquitectura deberá garantizar:
 
@@ -87,7 +87,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 4. Principio de autorización explícita
+### 4. Principio de autorización explícita
 
 Toda operación protegida deberá requerir una decisión de autorización explícita.
 
@@ -103,7 +103,7 @@ Deny
 
 ---
 
-# 5. Autenticación y autorización
+### 5. Autenticación y autorización
 
 VoltStack deberá separar estrictamente:
 
@@ -122,7 +122,7 @@ Una identidad autenticada no deberá recibir acceso implícito a recursos.
 
 ---
 
-# 6. Invariante principal de autorización
+### 6. Invariante principal de autorización
 
 ```text
 Ninguna acción protegida podrá ejecutarse
@@ -132,7 +132,7 @@ tenant-scoped y aplicada por un enforcement point.
 
 ---
 
-# 7. Authorization threat model
+### 7. Authorization threat model
 
 La arquitectura deberá considerar:
 
@@ -157,7 +157,7 @@ La arquitectura deberá considerar:
 
 ---
 
-# 8. Authorization trust boundaries
+### 8. Authorization trust boundaries
 
 Deberán identificarse límites entre:
 
@@ -174,7 +174,7 @@ Deberán identificarse límites entre:
 
 ---
 
-# 9. Authorization domain model
+### 9. Authorization domain model
 
 El dominio deberá representar, como mínimo:
 
@@ -195,7 +195,7 @@ Enforcement Result
 
 ---
 
-# 10. Actor
+### 10. Actor
 
 Un actor representa la entidad que solicita ejecutar una acción.
 
@@ -214,7 +214,7 @@ Podrá ser:
 
 ---
 
-# 11. AuthorizationActor
+### 11. AuthorizationActor
 
 ```php
 interface AuthorizationActorInterface
@@ -233,7 +233,7 @@ interface AuthorizationActorInterface
 
 ---
 
-# 12. AuthorizationActorType
+### 12. AuthorizationActorType
 
 ```php
 enum AuthorizationActorType: string
@@ -252,7 +252,7 @@ enum AuthorizationActorType: string
 
 ---
 
-# 13. Action
+### 13. Action
 
 Una acción representa la operación solicitada sobre un recurso.
 
@@ -272,7 +272,7 @@ Ejemplos:
 
 ---
 
-# 14. AuthorizationAction
+### 14. AuthorizationAction
 
 ```php
 final readonly class AuthorizationAction
@@ -294,7 +294,7 @@ final readonly class AuthorizationAction
 
 ---
 
-# 15. AuthorizationActionRisk
+### 15. AuthorizationActionRisk
 
 ```php
 enum AuthorizationActionRisk: string
@@ -309,7 +309,7 @@ enum AuthorizationActionRisk: string
 
 ---
 
-# 16. Resource
+### 16. Resource
 
 Un recurso representa el objeto, entidad, servicio o capacidad sobre el cual se solicita acceso.
 
@@ -332,7 +332,7 @@ Podrá ser:
 
 ---
 
-# 17. AuthorizationResource
+### 17. AuthorizationResource
 
 ```php
 interface AuthorizationResourceInterface
@@ -353,7 +353,7 @@ interface AuthorizationResourceInterface
 
 ---
 
-# 18. ResourceSecurityClassification
+### 18. ResourceSecurityClassification
 
 ```php
 enum ResourceSecurityClassification: string
@@ -368,7 +368,7 @@ enum ResourceSecurityClassification: string
 
 ---
 
-# 19. Environment
+### 19. Environment
 
 El entorno representa las condiciones externas bajo las cuales se solicita acceso.
 
@@ -388,7 +388,7 @@ Podrá incluir:
 
 ---
 
-# 20. AuthorizationEnvironment
+### 20. AuthorizationEnvironment
 
 ```php
 final readonly class AuthorizationEnvironment
@@ -409,13 +409,13 @@ final readonly class AuthorizationEnvironment
 
 ---
 
-# 21. AuthorizationContext
+### 21. AuthorizationContext
 
 El contexto deberá unir actor, acción, recurso, tenant y entorno.
 
 ---
 
-# 22. AuthorizationRequest
+### 22. AuthorizationRequest
 
 ```php
 final readonly class AuthorizationRequest
@@ -435,7 +435,7 @@ final readonly class AuthorizationRequest
 
 ---
 
-# 23. TenantAuthorizationContext
+### 23. TenantAuthorizationContext
 
 ```php
 final readonly class TenantAuthorizationContext
@@ -452,7 +452,7 @@ final readonly class TenantAuthorizationContext
 
 ---
 
-# 24. TenantContextSource
+### 24. TenantContextSource
 
 ```php
 enum TenantContextSource: string
@@ -469,7 +469,7 @@ enum TenantContextSource: string
 
 ---
 
-# 25. Tenant context verification
+### 25. Tenant context verification
 
 El tenant context deberá validarse antes de la evaluación de acceso.
 
@@ -485,7 +485,7 @@ La validación deberá comprobar:
 
 ---
 
-# 26. Authorization architecture components
+### 26. Authorization architecture components
 
 La arquitectura deberá separar:
 
@@ -499,7 +499,7 @@ Policy Audit Point
 
 ---
 
-# 27. Policy Administration Point
+### 27. Policy Administration Point
 
 El **Policy Administration Point**, o PAP, será responsable de:
 
@@ -515,7 +515,7 @@ El **Policy Administration Point**, o PAP, será responsable de:
 
 ---
 
-# 28. Policy Information Point
+### 28. Policy Information Point
 
 El **Policy Information Point**, o PIP, proporcionará atributos necesarios para evaluar políticas.
 
@@ -534,7 +534,7 @@ Podrá obtener información de:
 
 ---
 
-# 29. Policy Decision Point
+### 29. Policy Decision Point
 
 El **Policy Decision Point**, o PDP, evaluará políticas y producirá una decisión.
 
@@ -542,7 +542,7 @@ No deberá ejecutar directamente la acción protegida.
 
 ---
 
-# 30. Policy Enforcement Point
+### 30. Policy Enforcement Point
 
 El **Policy Enforcement Point**, o PEP, aplicará la decisión antes, durante o después de la operación.
 
@@ -559,7 +559,7 @@ Ejemplos:
 
 ---
 
-# 31. Policy Audit Point
+### 31. Policy Audit Point
 
 El **Policy Audit Point** registrará:
 
@@ -577,7 +577,7 @@ El **Policy Audit Point** registrará:
 
 ---
 
-# 32. Authorization flow
+### 32. Authorization flow
 
 ```text
 Request
@@ -605,7 +605,7 @@ Audit
 
 ---
 
-# 33. AuthorizationService
+### 33. AuthorizationService
 
 ```php
 interface AuthorizationServiceInterface
@@ -626,7 +626,7 @@ interface AuthorizationServiceInterface
 
 ---
 
-# 34. AuthorizationDecision
+### 34. AuthorizationDecision
 
 ```php
 final readonly class AuthorizationDecision
@@ -648,7 +648,7 @@ final readonly class AuthorizationDecision
 
 ---
 
-# 35. AuthorizationDecisionEffect
+### 35. AuthorizationDecisionEffect
 
 ```php
 enum AuthorizationDecisionEffect: string
@@ -664,7 +664,7 @@ enum AuthorizationDecisionEffect: string
 
 ---
 
-# 36. Deny by default
+### 36. Deny by default
 
 Los efectos:
 
@@ -678,7 +678,7 @@ deberán convertirse en denegación, salvo una política explícita que determin
 
 ---
 
-# 37. Permit decision
+### 37. Permit decision
 
 Una decisión `Permit` deberá ser válida únicamente para:
 
@@ -692,7 +692,7 @@ Una decisión `Permit` deberá ser válida únicamente para:
 
 ---
 
-# 38. PermitWithRestrictions
+### 38. PermitWithRestrictions
 
 Una decisión podrá permitir acceso bajo restricciones como:
 
@@ -707,7 +707,7 @@ Una decisión podrá permitir acceso bajo restricciones como:
 
 ---
 
-# 39. Challenge decision
+### 39. Challenge decision
 
 Una decisión `Challenge` podrá requerir:
 
@@ -722,7 +722,7 @@ Una decisión `Challenge` podrá requerir:
 
 ---
 
-# 40. Authorization obligations
+### 40. Authorization obligations
 
 Una obligación es una acción obligatoria asociada a la decisión.
 
@@ -739,7 +739,7 @@ Ejemplos:
 
 ---
 
-# 41. AuthorizationObligation
+### 41. AuthorizationObligation
 
 ```php
 final readonly class AuthorizationObligation
@@ -756,7 +756,7 @@ final readonly class AuthorizationObligation
 
 ---
 
-# 42. ObligationExecutionPhase
+### 42. ObligationExecutionPhase
 
 ```php
 enum ObligationExecutionPhase: string
@@ -771,7 +771,7 @@ enum ObligationExecutionPhase: string
 
 ---
 
-# 43. Obligation failure
+### 43. Obligation failure
 
 Si una obligación obligatoria no puede ejecutarse, la acción deberá denegarse o compensarse según policy.
 
@@ -779,7 +779,7 @@ Las obligaciones opcionales podrán producir advice sin bloquear la operación.
 
 ---
 
-# 44. Authorization advice
+### 44. Authorization advice
 
 El advice deberá representar recomendaciones no obligatorias.
 
@@ -793,13 +793,13 @@ Ejemplos:
 
 ---
 
-# 45. Authorization reason codes
+### 45. Authorization reason codes
 
 Las decisiones deberán utilizar códigos estables y machine-readable.
 
 ---
 
-# 46. AuthorizationReasonCode
+### 46. AuthorizationReasonCode
 
 ```php
 enum AuthorizationReasonCode: string
@@ -823,7 +823,7 @@ enum AuthorizationReasonCode: string
 
 ---
 
-# 47. Public authorization response
+### 47. Public authorization response
 
 Las respuestas públicas no deberán revelar:
 
@@ -838,7 +838,7 @@ Las respuestas públicas no deberán revelar:
 
 ---
 
-# 48. Internal decision explanation
+### 48. Internal decision explanation
 
 Los operadores autorizados podrán acceder a una explicación más detallada para:
 
@@ -851,7 +851,7 @@ Los operadores autorizados podrán acceder a una explicación más detallada par
 
 ---
 
-# 49. AuthorizationDecisionExplanation
+### 49. AuthorizationDecisionExplanation
 
 ```php
 final readonly class AuthorizationDecisionExplanation
@@ -871,13 +871,13 @@ final readonly class AuthorizationDecisionExplanation
 
 ---
 
-# 50. Explanation security
+### 50. Explanation security
 
 La explicación deberá estar protegida por autorización propia y nunca incluir secretos, credenciales o atributos innecesarios.
 
 ---
 
-# 51. Policy model
+### 51. Policy model
 
 Una política deberá declarar:
 
@@ -894,7 +894,7 @@ Una política deberá declarar:
 
 ---
 
-# 52. AuthorizationPolicy
+### 52. AuthorizationPolicy
 
 ```php
 final readonly class AuthorizationPolicy
@@ -917,7 +917,7 @@ final readonly class AuthorizationPolicy
 
 ---
 
-# 53. AuthorizationPolicyState
+### 53. AuthorizationPolicyState
 
 ```php
 enum AuthorizationPolicyState: string
@@ -934,7 +934,7 @@ enum AuthorizationPolicyState: string
 
 ---
 
-# 54. AuthorizationPolicyTarget
+### 54. AuthorizationPolicyTarget
 
 ```php
 final readonly class AuthorizationPolicyTarget
@@ -952,7 +952,7 @@ final readonly class AuthorizationPolicyTarget
 
 ---
 
-# 55. Policy target matching
+### 55. Policy target matching
 
 Una política solo deberá evaluarse completamente cuando su target sea aplicable.
 
@@ -969,7 +969,7 @@ El target deberá permitir filtrar por:
 
 ---
 
-# 56. Authorization rule
+### 56. Authorization rule
 
 ```php
 final readonly class AuthorizationRule
@@ -988,7 +988,7 @@ final readonly class AuthorizationRule
 
 ---
 
-# 57. AuthorizationCondition
+### 57. AuthorizationCondition
 
 ```php
 interface AuthorizationConditionInterface
@@ -1001,7 +1001,7 @@ interface AuthorizationConditionInterface
 
 ---
 
-# 58. AuthorizationConditionResult
+### 58. AuthorizationConditionResult
 
 ```php
 final readonly class AuthorizationConditionResult
@@ -1018,7 +1018,7 @@ final readonly class AuthorizationConditionResult
 
 ---
 
-# 59. AuthorizationEvaluationContext
+### 59. AuthorizationEvaluationContext
 
 ```php
 final readonly class AuthorizationEvaluationContext
@@ -1038,13 +1038,13 @@ final readonly class AuthorizationEvaluationContext
 
 ---
 
-# 60. Policy combining algorithms
+### 60. Policy combining algorithms
 
 VoltStack deberá soportar distintos algoritmos para combinar reglas y políticas.
 
 ---
 
-# 61. PolicyCombiningAlgorithm
+### 61. PolicyCombiningAlgorithm
 
 ```php
 enum PolicyCombiningAlgorithm: string
@@ -1061,7 +1061,7 @@ enum PolicyCombiningAlgorithm: string
 
 ---
 
-# 62. DenyOverrides
+### 62. DenyOverrides
 
 `DenyOverrides` deberá utilizarse como algoritmo predeterminado para dominios sensibles.
 
@@ -1069,13 +1069,13 @@ Cualquier regla aplicable con efecto `Deny` deberá prevalecer.
 
 ---
 
-# 63. PermitOverrides
+### 63. PermitOverrides
 
 `PermitOverrides` solo deberá utilizarse cuando el dominio lo permita explícitamente y el riesgo esté documentado.
 
 ---
 
-# 64. FirstApplicable
+### 64. FirstApplicable
 
 `FirstApplicable` deberá depender de un orden determinista y versionado.
 
@@ -1083,7 +1083,7 @@ No deberá utilizarse cuando la precedencia pueda resultar ambigua.
 
 ---
 
-# 65. HighestPriority
+### 65. HighestPriority
 
 Las prioridades deberán:
 
@@ -1095,13 +1095,13 @@ Las prioridades deberán:
 
 ---
 
-# 66. Policy conflict
+### 66. Policy conflict
 
 Existe conflicto cuando dos políticas aplicables producen efectos incompatibles sin resolución determinista.
 
 ---
 
-# 67. PolicyConflict
+### 67. PolicyConflict
 
 ```php
 final readonly class PolicyConflict
@@ -1119,7 +1119,7 @@ final readonly class PolicyConflict
 
 ---
 
-# 68. PolicyConflictSeverity
+### 68. PolicyConflictSeverity
 
 ```php
 enum PolicyConflictSeverity: string
@@ -1133,7 +1133,7 @@ enum PolicyConflictSeverity: string
 
 ---
 
-# 69. Conflict resolution
+### 69. Conflict resolution
 
 Los conflictos no resueltos deberán producir:
 
@@ -1145,7 +1145,7 @@ Los conflictos no resueltos deberán producir:
 
 ---
 
-# 70. Policy lifecycle
+### 70. Policy lifecycle
 
 ```text
 Draft
@@ -1169,7 +1169,7 @@ Retire
 
 ---
 
-# 71. Policy validation
+### 71. Policy validation
 
 Antes de publicarse, una política deberá validarse respecto a:
 
@@ -1188,7 +1188,7 @@ Antes de publicarse, una política deberá validarse respecto a:
 
 ---
 
-# 72. AuthorizationPolicyValidator
+### 72. AuthorizationPolicyValidator
 
 ```php
 interface AuthorizationPolicyValidatorInterface
@@ -1202,7 +1202,7 @@ interface AuthorizationPolicyValidatorInterface
 
 ---
 
-# 73. AuthorizationPolicyValidationResult
+### 73. AuthorizationPolicyValidationResult
 
 ```php
 final readonly class AuthorizationPolicyValidationResult
@@ -1221,7 +1221,7 @@ final readonly class AuthorizationPolicyValidationResult
 
 ---
 
-# 74. Policy immutability
+### 74. Policy immutability
 
 Una versión publicada de una política deberá ser inmutable.
 
@@ -1229,7 +1229,7 @@ Toda modificación deberá producir una nueva versión.
 
 ---
 
-# 75. Policy version identity
+### 75. Policy version identity
 
 La identidad de una policy version deberá incluir:
 
@@ -1242,7 +1242,7 @@ La identidad de una policy version deberá incluir:
 
 ---
 
-# 76. Policy publication
+### 76. Policy publication
 
 La publicación deberá ser:
 
@@ -1256,7 +1256,7 @@ La publicación deberá ser:
 
 ---
 
-# 77. Shadow policy evaluation
+### 77. Shadow policy evaluation
 
 Una política en estado `Shadow` podrá evaluarse sin afectar la decisión final.
 
@@ -1270,7 +1270,7 @@ Deberá utilizarse para:
 
 ---
 
-# 78. Shadow evaluation safety
+### 78. Shadow evaluation safety
 
 Los resultados shadow no deberán:
 
@@ -1282,7 +1282,7 @@ Los resultados shadow no deberán:
 
 ---
 
-# 79. Policy rollback
+### 79. Policy rollback
 
 VoltStack deberá poder regresar a una versión anterior cuando:
 
@@ -1294,19 +1294,19 @@ VoltStack deberá poder regresar a una versión anterior cuando:
 
 ---
 
-# 80. RBAC architecture
+### 80. RBAC architecture
 
 VoltStack deberá soportar **Role-Based Access Control** como modelo base de asignación de permisos.
 
 ---
 
-# 81. Role
+### 81. Role
 
 Un rol agrupa permisos relacionados con una función organizacional o técnica.
 
 ---
 
-# 82. AuthorizationRole
+### 82. AuthorizationRole
 
 ```php
 final readonly class AuthorizationRole
@@ -1326,7 +1326,7 @@ final readonly class AuthorizationRole
 
 ---
 
-# 83. AuthorizationRoleType
+### 83. AuthorizationRoleType
 
 ```php
 enum AuthorizationRoleType: string
@@ -1343,7 +1343,7 @@ enum AuthorizationRoleType: string
 
 ---
 
-# 84. AuthorizationRoleState
+### 84. AuthorizationRoleState
 
 ```php
 enum AuthorizationRoleState: string
@@ -1358,13 +1358,13 @@ enum AuthorizationRoleState: string
 
 ---
 
-# 85. Permission
+### 85. Permission
 
 Un permiso deberá representar una autorización atómica o suficientemente específica.
 
 ---
 
-# 86. AuthorizationPermission
+### 86. AuthorizationPermission
 
 ```php
 final readonly class AuthorizationPermission
@@ -1382,7 +1382,7 @@ final readonly class AuthorizationPermission
 
 ---
 
-# 87. AuthorizationPermissionRisk
+### 87. AuthorizationPermissionRisk
 
 ```php
 enum AuthorizationPermissionRisk: string
@@ -1396,7 +1396,7 @@ enum AuthorizationPermissionRisk: string
 
 ---
 
-# 88. Permission naming
+### 88. Permission naming
 
 La convención recomendada será:
 
@@ -1416,7 +1416,7 @@ tenant.member.assign-role
 
 ---
 
-# 89. Role assignment
+### 89. Role assignment
 
 ```php
 final readonly class RoleAssignment
@@ -1437,7 +1437,7 @@ final readonly class RoleAssignment
 
 ---
 
-# 90. RoleAssignmentSource
+### 90. RoleAssignmentSource
 
 ```php
 enum RoleAssignmentSource: string
@@ -1454,7 +1454,7 @@ enum RoleAssignmentSource: string
 
 ---
 
-# 91. Time-bound role assignments
+### 91. Time-bound role assignments
 
 Los roles sensibles deberán favorecer asignaciones:
 
@@ -1466,7 +1466,7 @@ Los roles sensibles deberán favorecer asignaciones:
 
 ---
 
-# 92. Role hierarchy
+### 92. Role hierarchy
 
 VoltStack podrá soportar herencia de roles.
 
@@ -1480,7 +1480,7 @@ La jerarquía deberá:
 
 ---
 
-# 93. RoleHierarchyResolver
+### 93. RoleHierarchyResolver
 
 ```php
 interface RoleHierarchyResolverInterface
@@ -1494,7 +1494,7 @@ interface RoleHierarchyResolverInterface
 
 ---
 
-# 94. ResolvedRoleHierarchy
+### 94. ResolvedRoleHierarchy
 
 ```php
 final readonly class ResolvedRoleHierarchy
@@ -1512,7 +1512,7 @@ final readonly class ResolvedRoleHierarchy
 
 ---
 
-# 95. Role cycle detection
+### 95. Role cycle detection
 
 La publicación o modificación de roles deberá rechazar ciclos como:
 
@@ -1522,7 +1522,7 @@ Role A → Role B → Role C → Role A
 
 ---
 
-# 96. Role explosion prevention
+### 96. Role explosion prevention
 
 VoltStack deberá evitar que RBAC se convierta en una proliferación incontrolada de roles.
 
@@ -1537,7 +1537,7 @@ Deberá favorecer:
 
 ---
 
-# 97. Static and contextual roles
+### 97. Static and contextual roles
 
 Los roles deberán distinguirse entre:
 
@@ -1551,7 +1551,7 @@ Los roles deberán distinguirse entre:
 
 ---
 
-# 98. RBAC limitations
+### 98. RBAC limitations
 
 RBAC no deberá utilizarse como único modelo cuando la decisión dependa de:
 
@@ -1566,7 +1566,7 @@ RBAC no deberá utilizarse como único modelo cuando la decisión dependa de:
 
 ---
 
-# 99. Authorization audit events
+### 99. Authorization audit events
 
 Eventos iniciales recomendados:
 
@@ -1591,7 +1591,7 @@ Eventos iniciales recomendados:
 
 ---
 
-# 100. Resultado de esta entrega
+### 100. Resultado de esta entrega
 
 Esta entrega establece:
 
@@ -1633,9 +1633,7 @@ Role Explosion Prevention
 Authorization Audit Events
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 2
 
 **Documento:** Parte 06
 **Entrega:** 2 de varias
@@ -1643,7 +1641,7 @@ Authorization Audit Events
 
 ---
 
-# 101. Advanced RBAC Architecture
+### 101. Advanced RBAC Architecture
 
 El RBAC básico basado únicamente en:
 
@@ -1667,7 +1665,7 @@ VoltStack deberá implementar un modelo RBAC avanzado capaz de manejar:
 
 ---
 
-# 102. Advanced RBAC model
+### 102. Advanced RBAC model
 
 El modelo extendido será:
 
@@ -1689,7 +1687,7 @@ Authorization Decision
 
 ---
 
-# 103. RBAC entities
+### 103. RBAC entities
 
 El sistema deberá separar:
 
@@ -1704,7 +1702,7 @@ El sistema deberá separar:
 
 ---
 
-# 104. Role Definition
+### 104. Role Definition
 
 Un rol define una agrupación lógica de permisos.
 
@@ -1712,7 +1710,7 @@ No representa directamente una autorización final.
 
 ---
 
-# 105. Role Definition structure
+### 105. Role Definition structure
 
 ```php
 final readonly class RoleDefinition
@@ -1732,7 +1730,7 @@ final readonly class RoleDefinition
 
 ---
 
-# 106. Role criticality
+### 106. Role criticality
 
 Los roles deberán clasificarse según impacto.
 
@@ -1748,7 +1746,7 @@ enum RoleCriticality: string
 
 ---
 
-# 107. Critical role examples
+### 107. Critical role examples
 
 Ejemplos:
 
@@ -1764,7 +1762,7 @@ audit.viewer
 
 ---
 
-# 108. Critical role restrictions
+### 108. Critical role restrictions
 
 Los roles críticos deberán requerir:
 
@@ -1778,7 +1776,7 @@ Los roles críticos deberán requerir:
 
 ---
 
-# 109. Role assignment constraints
+### 109. Role assignment constraints
 
 Una asignación de rol podrá contener restricciones.
 
@@ -1793,7 +1791,7 @@ Ejemplos:
 
 ---
 
-# 110. RoleConstraint
+### 110. RoleConstraint
 
 ```php
 final readonly class RoleConstraint
@@ -1810,7 +1808,7 @@ final readonly class RoleConstraint
 
 ---
 
-# 111. Constraint types
+### 111. Constraint types
 
 VoltStack deberá soportar:
 
@@ -1828,7 +1826,7 @@ Transaction Constraint
 
 ---
 
-# 112. Temporal role constraint
+### 112. Temporal role constraint
 
 Ejemplo:
 
@@ -1845,7 +1843,7 @@ Outside schedule
 
 ---
 
-# 113. Device-based role constraint
+### 113. Device-based role constraint
 
 Un rol podrá requerir:
 
@@ -1857,7 +1855,7 @@ Un rol podrá requerir:
 
 ---
 
-# 114. Network-based role constraint
+### 114. Network-based role constraint
 
 Ejemplos:
 
@@ -1878,7 +1876,7 @@ Anonymous Proxy
 
 ---
 
-# 115. Tenant scoped roles
+### 115. Tenant scoped roles
 
 Los roles deberán estar asociados al contexto donde tienen validez.
 
@@ -1900,7 +1898,7 @@ Aunque el nombre sea igual, son roles diferentes.
 
 ---
 
-# 116. Cross-tenant role prevention
+### 116. Cross-tenant role prevention
 
 Un rol asignado en:
 
@@ -1916,13 +1914,13 @@ Tenant B
 
 ---
 
-# 117. Role activation model
+### 117. Role activation model
 
 Los roles privilegiados no deberán estar permanentemente activos.
 
 ---
 
-# 118. Just-In-Time Role Activation
+### 118. Just-In-Time Role Activation
 
 Modelo:
 
@@ -1942,7 +1940,7 @@ Automatic Expiration
 
 ---
 
-# 119. RoleActivationRequest
+### 119. RoleActivationRequest
 
 ```php
 final readonly class RoleActivationRequest
@@ -1962,7 +1960,7 @@ final readonly class RoleActivationRequest
 
 ---
 
-# 120. RoleActivationDecision
+### 120. RoleActivationDecision
 
 ```php
 final readonly class RoleActivationDecision
@@ -1980,7 +1978,7 @@ final readonly class RoleActivationDecision
 
 ---
 
-# 121. Activation requirements
+### 121. Activation requirements
 
 Una activación privilegiada podrá requerir:
 
@@ -1994,7 +1992,7 @@ Una activación privilegiada podrá requerir:
 
 ---
 
-# 122. Activation lifetime
+### 122. Activation lifetime
 
 Toda activación deberá tener:
 
@@ -2007,7 +2005,7 @@ Toda activación deberá tener:
 
 ---
 
-# 123. Role session binding
+### 123. Role session binding
 
 Un rol temporal podrá vincularse a una sesión específica.
 
@@ -2027,7 +2025,7 @@ database.operator
 
 ---
 
-# 124. Session role model
+### 124. Session role model
 
 ```php
 final readonly class SessionRole
@@ -2045,7 +2043,7 @@ final readonly class SessionRole
 
 ---
 
-# 125. Session role revocation
+### 125. Session role revocation
 
 Debe ocurrir cuando:
 
@@ -2058,7 +2056,7 @@ Debe ocurrir cuando:
 
 ---
 
-# 126. Dynamic roles
+### 126. Dynamic roles
 
 Los roles dinámicos son roles calculados mediante atributos.
 
@@ -2079,7 +2077,7 @@ Finance Analyst Role
 
 ---
 
-# 127. DynamicRoleResolver
+### 127. DynamicRoleResolver
 
 ```php
 interface DynamicRoleResolverInterface
@@ -2093,7 +2091,7 @@ interface DynamicRoleResolverInterface
 
 ---
 
-# 128. Dynamic role risks
+### 128. Dynamic role risks
 
 Los roles dinámicos deberán controlar:
 
@@ -2106,7 +2104,7 @@ Los roles dinámicos deberán controlar:
 
 ---
 
-# 129. Dynamic role freshness
+### 129. Dynamic role freshness
 
 Los atributos usados para calcular roles deberán tener:
 
@@ -2118,7 +2116,7 @@ Los atributos usados para calcular roles deberán tener:
 
 ---
 
-# 130. Role expiration
+### 130. Role expiration
 
 Los roles deberán poder expirar por:
 
@@ -2131,7 +2129,7 @@ Los roles deberán poder expirar por:
 
 ---
 
-# 131. Role inheritance
+### 131. Role inheritance
 
 La herencia permite reutilizar permisos.
 
@@ -2151,7 +2149,7 @@ Employee
 
 ---
 
-# 132. Role inheritance restrictions
+### 132. Role inheritance restrictions
 
 La herencia deberá impedir:
 
@@ -2163,7 +2161,7 @@ La herencia deberá impedir:
 
 ---
 
-# 133. Role inheritance analysis
+### 133. Role inheritance analysis
 
 Antes de activar un rol:
 
@@ -2175,7 +2173,7 @@ VoltStack deberá poder responder:
 
 ---
 
-# 134. Effective Permission Resolver
+### 134. Effective Permission Resolver
 
 ```php
 interface EffectivePermissionResolverInterface
@@ -2189,7 +2187,7 @@ interface EffectivePermissionResolverInterface
 
 ---
 
-# 135. EffectivePermissionSet
+### 135. EffectivePermissionSet
 
 ```php
 final readonly class EffectivePermissionSet
@@ -2206,7 +2204,7 @@ final readonly class EffectivePermissionSet
 
 ---
 
-# 136. Permission composition
+### 136. Permission composition
 
 Los permisos deberán poder combinar:
 
@@ -2218,7 +2216,7 @@ Los permisos deberán poder combinar:
 
 ---
 
-# 137. Permission expression
+### 137. Permission expression
 
 Ejemplo:
 
@@ -2240,7 +2238,7 @@ risk < medium
 
 ---
 
-# 138. Negative permissions
+### 138. Negative permissions
 
 VoltStack deberá soportar denegaciones explícitas.
 
@@ -2255,7 +2253,6 @@ Permission:
 
 document.view
 
-
 Deny:
 
 document.view.confidential
@@ -2263,13 +2260,13 @@ document.view.confidential
 
 ---
 
-# 139. Negative permission precedence
+### 139. Negative permission precedence
 
 Las denegaciones deberán prevalecer cuando exista conflicto.
 
 ---
 
-# 140. Permission conflict
+### 140. Permission conflict
 
 Ejemplo:
 
@@ -2278,7 +2275,6 @@ Role A
 
 Allow:
 delete.user
-
 
 Role B
 
@@ -2294,7 +2290,7 @@ DENY
 
 ---
 
-# 141. Permission governance
+### 141. Permission governance
 
 Los permisos deberán tener:
 
@@ -2308,7 +2304,7 @@ Los permisos deberán tener:
 
 ---
 
-# 142. Permission lifecycle
+### 142. Permission lifecycle
 
 ```text
 Created
@@ -2326,7 +2322,7 @@ Removed
 
 ---
 
-# 143. Permission discovery
+### 143. Permission discovery
 
 VoltStack deberá permitir analizar:
 
@@ -2338,13 +2334,13 @@ VoltStack deberá permitir analizar:
 
 ---
 
-# 144. Role mining
+### 144. Role mining
 
 El framework podrá analizar patrones para descubrir roles.
 
 ---
 
-# 145. Role mining inputs
+### 145. Role mining inputs
 
 Podrán utilizarse:
 
@@ -2358,7 +2354,7 @@ Podrán utilizarse:
 
 ---
 
-# 146. Role mining output
+### 146. Role mining output
 
 Ejemplo:
 
@@ -2376,7 +2372,7 @@ report.export
 
 ---
 
-# 147. Role mining safeguards
+### 147. Role mining safeguards
 
 El resultado deberá ser:
 
@@ -2388,7 +2384,7 @@ El resultado deberá ser:
 
 ---
 
-# 148. Role optimization
+### 148. Role optimization
 
 El sistema deberá detectar:
 
@@ -2400,7 +2396,7 @@ El sistema deberá detectar:
 
 ---
 
-# 149. Privilege creep detection
+### 149. Privilege creep detection
 
 Ejemplo:
 
@@ -2421,7 +2417,7 @@ Debe generar revisión.
 
 ---
 
-# 150. Role governance model
+### 150. Role governance model
 
 Cada rol deberá tener:
 
@@ -2435,7 +2431,7 @@ Cada rol deberá tener:
 
 ---
 
-# 151. Role owner
+### 151. Role owner
 
 El owner deberá ser responsable de:
 
@@ -2447,13 +2443,13 @@ El owner deberá ser responsable de:
 
 ---
 
-# 152. Role certification
+### 152. Role certification
 
 Los roles críticos deberán revisarse periódicamente.
 
 ---
 
-# 153. Role certification event
+### 153. Role certification event
 
 ```php
 final readonly class RoleCertification
@@ -2471,7 +2467,7 @@ final readonly class RoleCertification
 
 ---
 
-# 154. Role approval workflow
+### 154. Role approval workflow
 
 ```text
 Request
@@ -2487,7 +2483,7 @@ Publication
 
 ---
 
-# 155. RBAC limitations
+### 155. RBAC limitations
 
 RBAC no resuelve completamente:
 
@@ -2502,7 +2498,7 @@ Por eso VoltStack deberá soportar ABAC.
 
 ---
 
-# 156. ABAC Architecture Introduction
+### 156. ABAC Architecture Introduction
 
 ABAC permite tomar decisiones usando atributos.
 
@@ -2523,7 +2519,7 @@ Authorization Decision
 
 ---
 
-# 157. ABAC components
+### 157. ABAC components
 
 VoltStack deberá implementar:
 
@@ -2537,7 +2533,7 @@ VoltStack deberá implementar:
 
 ---
 
-# 158. ABAC model
+### 158. ABAC model
 
 ```text
 Subject
@@ -2553,7 +2549,7 @@ Resource Enforcement
 
 ---
 
-# 159. Subject attributes
+### 159. Subject attributes
 
 Representan características del actor.
 
@@ -2570,7 +2566,7 @@ Ejemplos:
 
 ---
 
-# 160. SubjectAttribute
+### 160. SubjectAttribute
 
 ```php
 final readonly class SubjectAttribute
@@ -2589,7 +2585,7 @@ final readonly class SubjectAttribute
 
 ---
 
-# 161. Resource attributes
+### 161. Resource attributes
 
 Representan características del recurso.
 
@@ -2604,7 +2600,7 @@ Ejemplos:
 
 ---
 
-# 162. ResourceAttribute
+### 162. ResourceAttribute
 
 ```php
 final readonly class ResourceAttribute
@@ -2621,7 +2617,7 @@ final readonly class ResourceAttribute
 
 ---
 
-# 163. Action attributes
+### 163. Action attributes
 
 Representan características de la operación.
 
@@ -2636,7 +2632,7 @@ Ejemplos:
 
 ---
 
-# 164. Environment attributes
+### 164. Environment attributes
 
 Representan contexto.
 
@@ -2651,7 +2647,7 @@ Ejemplos:
 
 ---
 
-# 165. AttributeTrustLevel
+### 165. AttributeTrustLevel
 
 ```php
 enum AttributeTrustLevel: string
@@ -2666,7 +2662,7 @@ enum AttributeTrustLevel: string
 
 ---
 
-# 166. Attribute source governance
+### 166. Attribute source governance
 
 Cada atributo deberá conocer:
 
@@ -2679,7 +2675,7 @@ Cada atributo deberá conocer:
 
 ---
 
-# 167. Attribute freshness
+### 167. Attribute freshness
 
 Los atributos sensibles deberán tener TTL.
 
@@ -2694,7 +2690,7 @@ TTL:
 
 ---
 
-# 168. Stale attribute handling
+### 168. Stale attribute handling
 
 Un atributo expirado podrá:
 
@@ -2705,7 +2701,7 @@ Un atributo expirado podrá:
 
 ---
 
-# 169. Attribute normalization
+### 169. Attribute normalization
 
 Diferentes fuentes deberán normalizar:
 
@@ -2722,7 +2718,7 @@ a una representación común.
 
 ---
 
-# 170. Attribute conflict resolution
+### 170. Attribute conflict resolution
 
 Cuando existan múltiples valores:
 
@@ -2738,7 +2734,7 @@ deberá existir una política de resolución.
 
 ---
 
-# 171. Attribute conflict rules
+### 171. Attribute conflict rules
 
 Podrán usar:
 
@@ -2750,7 +2746,7 @@ Podrán usar:
 
 ---
 
-# 172. Attribute resolver
+### 172. Attribute resolver
 
 ```php
 interface AttributeResolverInterface
@@ -2764,7 +2760,7 @@ interface AttributeResolverInterface
 
 ---
 
-# 173. ResolvedAttribute
+### 173. ResolvedAttribute
 
 ```php
 final readonly class ResolvedAttribute
@@ -2782,13 +2778,13 @@ final readonly class ResolvedAttribute
 
 ---
 
-# 174. ABAC condition language
+### 174. ABAC condition language
 
 VoltStack deberá definir una representación segura de condiciones.
 
 ---
 
-# 175. Condition example
+### 175. Condition example
 
 ```text
 subject.department == "finance"
@@ -2804,7 +2800,7 @@ environment.deviceTrust == "verified"
 
 ---
 
-# 176. Condition operators
+### 176. Condition operators
 
 Soportar:
 
@@ -2821,7 +2817,7 @@ Soportar:
 
 ---
 
-# 177. Condition security
+### 177. Condition security
 
 El lenguaje deberá impedir:
 
@@ -2834,7 +2830,7 @@ El lenguaje deberá impedir:
 
 ---
 
-# 178. ABAC Policy Example
+### 178. ABAC Policy Example
 
 ```text
 Permit
@@ -2853,7 +2849,7 @@ subject.tenant == resource.tenant
 
 ---
 
-# 179. ABAC evaluation
+### 179. ABAC evaluation
 
 El motor deberá:
 
@@ -2866,7 +2862,7 @@ El motor deberá:
 
 ---
 
-# 180. ABAC failure behavior
+### 180. ABAC failure behavior
 
 Si falta un atributo crítico:
 
@@ -2880,7 +2876,7 @@ Deny
 
 ---
 
-# 181. ABAC performance considerations
+### 181. ABAC performance considerations
 
 Deberá soportar:
 
@@ -2893,7 +2889,7 @@ Deberá soportar:
 
 ---
 
-# 182. Attribute cache security
+### 182. Attribute cache security
 
 El cache deberá incluir:
 
@@ -2905,7 +2901,7 @@ El cache deberá incluir:
 
 ---
 
-# 183. ABAC observability
+### 183. ABAC observability
 
 Debe registrar:
 
@@ -2918,7 +2914,7 @@ Debe registrar:
 
 ---
 
-# 184. ABAC testing
+### 184. ABAC testing
 
 Las pruebas deberán cubrir:
 
@@ -2930,7 +2926,7 @@ Las pruebas deberán cubrir:
 
 ---
 
-# 185. RBAC + ABAC hybrid model
+### 185. RBAC + ABAC hybrid model
 
 VoltStack deberá permitir combinar:
 
@@ -2952,7 +2948,7 @@ Final Decision
 
 ---
 
-# 186. Hybrid authorization example
+### 186. Hybrid authorization example
 
 ```text
 Role:
@@ -2960,7 +2956,6 @@ manager
 
 Permission:
 invoice.approve
-
 
 Condition:
 
@@ -2973,7 +2968,7 @@ device.trust == high
 
 ---
 
-# 187. Hybrid evaluation order
+### 187. Hybrid evaluation order
 
 Orden recomendado:
 
@@ -2995,7 +2990,7 @@ Final Policy Decision
 
 ---
 
-# 188. Authorization model selection
+### 188. Authorization model selection
 
 El framework deberá permitir elegir:
 
@@ -3007,7 +3002,7 @@ El framework deberá permitir elegir:
 
 ---
 
-# 189. Authorization model metadata
+### 189. Authorization model metadata
 
 Cada recurso podrá declarar:
 
@@ -3023,7 +3018,7 @@ AuthorizationModel::ABAC
 
 ---
 
-# 190. AuthorizationModel
+### 190. AuthorizationModel
 
 ```php
 enum AuthorizationModel: string
@@ -3038,7 +3033,7 @@ enum AuthorizationModel: string
 
 ---
 
-# 191. Resource authorization strategy
+### 191. Resource authorization strategy
 
 Cada recurso deberá definir:
 
@@ -3051,7 +3046,7 @@ Cada recurso deberá definir:
 
 ---
 
-# 192. AuthorizationStrategy
+### 192. AuthorizationStrategy
 
 ```php
 final readonly class AuthorizationStrategy
@@ -3068,7 +3063,7 @@ final readonly class AuthorizationStrategy
 
 ---
 
-# 193. Future extensions
+### 193. Future extensions
 
 La arquitectura permitirá añadir:
 
@@ -3081,7 +3076,7 @@ La arquitectura permitirá añadir:
 
 ---
 
-# 194. Authorization audit events
+### 194. Authorization audit events
 
 Eventos adicionales:
 
@@ -3104,7 +3099,7 @@ HybridAuthorizationEvaluated
 
 ---
 
-# 195. Security invariants
+### 195. Security invariants
 
 Debe mantenerse:
 
@@ -3122,7 +3117,7 @@ No Access
 
 ---
 
-# 196. Arquitectural outcome
+### 196. Arquitectural outcome
 
 Esta entrega establece:
 
@@ -3147,7 +3142,7 @@ Hybrid Authorization
 
 ---
 
-# 197. Próxima entrega
+### 197. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 3`
 
@@ -3167,9 +3162,7 @@ Continuará con:
 - Data filtering authorization
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 3
 
 **Documento:** Parte 06
 **Entrega:** 3 de varias
@@ -3177,7 +3170,7 @@ Continuará con:
 
 ---
 
-# 201. Relationship-Based Access Control (ReBAC) Architecture
+### 201. Relationship-Based Access Control (ReBAC) Architecture
 
 VoltStack deberá incorporar soporte para **Relationship-Based Access Control (ReBAC)** como modelo avanzado de autorización.
 
@@ -3211,7 +3204,7 @@ Authorization Decision
 
 ---
 
-# 202. Motivación de ReBAC
+### 202. Motivación de ReBAC
 
 RBAC responde:
 
@@ -3227,7 +3220,7 @@ ReBAC responde:
 
 ---
 
-# 203. Casos de uso ReBAC
+### 203. Casos de uso ReBAC
 
 Ejemplos:
 
@@ -3243,7 +3236,7 @@ Ejemplos:
 
 ---
 
-# 204. ReBAC Architecture Components
+### 204. ReBAC Architecture Components
 
 VoltStack deberá implementar:
 
@@ -3259,7 +3252,7 @@ Relationship Audit System
 
 ---
 
-# 205. Relationship Model
+### 205. Relationship Model
 
 Una relación deberá representarse como:
 
@@ -3283,7 +3276,7 @@ Invoice-100
 
 ---
 
-# 206. RelationshipTuple
+### 206. RelationshipTuple
 
 ```php id="3n4hxb"
 final readonly class RelationshipTuple
@@ -3302,7 +3295,7 @@ final readonly class RelationshipTuple
 
 ---
 
-# 207. Relationship components
+### 207. Relationship components
 
 Una relación contiene:
 
@@ -3346,7 +3339,7 @@ document:456
 
 ---
 
-# 208. Relationship namespaces
+### 208. Relationship namespaces
 
 Para evitar colisiones:
 
@@ -3368,7 +3361,7 @@ user:100#owner@document:500
 
 ---
 
-# 209. Relationship types
+### 209. Relationship types
 
 ```php id="b47q1x"
 enum RelationshipType: string
@@ -3387,7 +3380,7 @@ enum RelationshipType: string
 
 ---
 
-# 210. Relationship graph
+### 210. Relationship graph
 
 VoltStack deberá representar relaciones como un grafo dirigido.
 
@@ -3407,7 +3400,7 @@ Project
 
 ---
 
-# 211. RelationshipGraph
+### 211. RelationshipGraph
 
 ```php id="u3k7pg"
 interface RelationshipGraphInterface
@@ -3427,7 +3420,7 @@ interface RelationshipGraphInterface
 
 ---
 
-# 212. Graph traversal security
+### 212. Graph traversal security
 
 El recorrido del grafo deberá controlar:
 
@@ -3440,7 +3433,7 @@ El recorrido del grafo deberá controlar:
 
 ---
 
-# 213. Relationship cycles
+### 213. Relationship cycles
 
 Ejemplo peligroso:
 
@@ -3462,7 +3455,7 @@ Debe detectarse.
 
 ---
 
-# 214. Relationship cycle prevention
+### 214. Relationship cycle prevention
 
 El sistema deberá impedir:
 
@@ -3473,13 +3466,13 @@ El sistema deberá impedir:
 
 ---
 
-# 215. Relationship Resolver
+### 215. Relationship Resolver
 
 El resolver determinará si una relación existe.
 
 ---
 
-# 216. RelationshipResolverInterface
+### 216. RelationshipResolverInterface
 
 ```php id="90y3dz"
 interface RelationshipResolverInterface
@@ -3492,7 +3485,7 @@ interface RelationshipResolverInterface
 
 ---
 
-# 217. RelationshipCheckRequest
+### 217. RelationshipCheckRequest
 
 ```php id="8m0wz1"
 final readonly class RelationshipCheckRequest
@@ -3509,7 +3502,7 @@ final readonly class RelationshipCheckRequest
 
 ---
 
-# 218. RelationshipCheckResult
+### 218. RelationshipCheckResult
 
 ```php id="kjy0s9"
 final readonly class RelationshipCheckResult
@@ -3526,7 +3519,7 @@ final readonly class RelationshipCheckResult
 
 ---
 
-# 219. Relationship authorization example
+### 219. Relationship authorization example
 
 Política:
 
@@ -3544,7 +3537,7 @@ document
 
 ---
 
-# 220. Relationship Policy Language
+### 220. Relationship Policy Language
 
 VoltStack deberá permitir expresar:
 
@@ -3560,7 +3553,7 @@ user:100 HAS owner TO document:500
 
 ---
 
-# 221. Relation inheritance
+### 221. Relation inheritance
 
 Las relaciones podrán derivarse.
 
@@ -3580,7 +3573,7 @@ viewer
 
 ---
 
-# 222. Relation inheritance rules
+### 222. Relation inheritance rules
 
 Deberán:
 
@@ -3592,7 +3585,7 @@ Deberán:
 
 ---
 
-# 223. Relationship Expansion
+### 223. Relationship Expansion
 
 Antes de evaluar acceso:
 
@@ -3608,7 +3601,7 @@ podrá expandirse a relaciones efectivas.
 
 ---
 
-# 224. EffectiveRelationshipSet
+### 224. EffectiveRelationshipSet
 
 ```php id="h8n2dk"
 final readonly class EffectiveRelationshipSet
@@ -3625,7 +3618,7 @@ final readonly class EffectiveRelationshipSet
 
 ---
 
-# 225. ReBAC + RBAC
+### 225. ReBAC + RBAC
 
 VoltStack deberá permitir:
 
@@ -3652,7 +3645,7 @@ Approve Budget
 
 ---
 
-# 226. ReBAC + ABAC
+### 226. ReBAC + ABAC
 
 También deberá soportar:
 
@@ -3680,13 +3673,13 @@ Project classification <= clearance
 
 ---
 
-# 227. Ownership Authorization
+### 227. Ownership Authorization
 
 Ownership es una relación especial.
 
 ---
 
-# 228. Resource ownership model
+### 228. Resource ownership model
 
 Cada recurso podrá tener:
 
@@ -3698,7 +3691,7 @@ Cada recurso podrá tener:
 
 ---
 
-# 229. ResourceOwnership
+### 229. ResourceOwnership
 
 ```php id="jdqv9r"
 final readonly class ResourceOwnership
@@ -3716,7 +3709,7 @@ final readonly class ResourceOwnership
 
 ---
 
-# 230. OwnershipType
+### 230. OwnershipType
 
 ```php id="2n1b6z"
 enum OwnershipType: string
@@ -3731,7 +3724,7 @@ enum OwnershipType: string
 
 ---
 
-# 231. Ownership rules
+### 231. Ownership rules
 
 El ownership deberá:
 
@@ -3743,7 +3736,7 @@ El ownership deberá:
 
 ---
 
-# 232. Ownership transfer
+### 232. Ownership transfer
 
 Una transferencia deberá evaluar:
 
@@ -3756,7 +3749,7 @@ Una transferencia deberá evaluar:
 
 ---
 
-# 233. OwnershipTransferRequest
+### 233. OwnershipTransferRequest
 
 ```php id="0ks1g9"
 final readonly class OwnershipTransferRequest
@@ -3774,7 +3767,7 @@ final readonly class OwnershipTransferRequest
 
 ---
 
-# 234. Ownership inheritance
+### 234. Ownership inheritance
 
 Ejemplo:
 
@@ -3792,7 +3785,7 @@ Document Owner
 
 ---
 
-# 235. Ownership limitations
+### 235. Ownership limitations
 
 El ownership no deberá:
 
@@ -3804,13 +3797,13 @@ El ownership no deberá:
 
 ---
 
-# 236. Delegated Authorization
+### 236. Delegated Authorization
 
 VoltStack deberá soportar autorización delegada.
 
 ---
 
-# 237. Delegation model
+### 237. Delegation model
 
 Una identidad puede permitir temporalmente que otra identidad actúe en su nombre.
 
@@ -3830,7 +3823,7 @@ Assistant
 
 ---
 
-# 238. Delegation object
+### 238. Delegation object
 
 ```php id="j8s5xo"
 final readonly class AuthorizationDelegation
@@ -3850,7 +3843,7 @@ final readonly class AuthorizationDelegation
 
 ---
 
-# 239. Delegation constraints
+### 239. Delegation constraints
 
 Una delegación deberá limitar:
 
@@ -3865,7 +3858,7 @@ Una delegación deberá limitar:
 
 ---
 
-# 240. Delegation abuse prevention
+### 240. Delegation abuse prevention
 
 Debe impedir:
 
@@ -3877,7 +3870,7 @@ Debe impedir:
 
 ---
 
-# 241. Delegation chain
+### 241. Delegation chain
 
 Si:
 
@@ -3891,7 +3884,7 @@ deberá existir política explícita.
 
 ---
 
-# 242. Delegation depth
+### 242. Delegation depth
 
 VoltStack deberá limitar:
 
@@ -3903,7 +3896,7 @@ según riesgo.
 
 ---
 
-# 243. Delegation audit
+### 243. Delegation audit
 
 Registrar:
 
@@ -3918,13 +3911,13 @@ Registrar:
 
 ---
 
-# 244. Capability-Based Authorization
+### 244. Capability-Based Authorization
 
 VoltStack deberá soportar seguridad basada en capacidades.
 
 ---
 
-# 245. Capability model
+### 245. Capability model
 
 Una capability representa:
 
@@ -3938,7 +3931,7 @@ Ability to perform action
 
 ---
 
-# 246. Capability example
+### 246. Capability example
 
 ```
 cap:file.upload.project123
@@ -3958,7 +3951,7 @@ project123
 
 ---
 
-# 247. AuthorizationCapability
+### 247. AuthorizationCapability
 
 ```php id="2t3mnb"
 final readonly class AuthorizationCapability
@@ -3977,7 +3970,7 @@ final readonly class AuthorizationCapability
 
 ---
 
-# 248. Capability properties
+### 248. Capability properties
 
 Debe incluir:
 
@@ -3992,7 +3985,7 @@ Debe incluir:
 
 ---
 
-# 249. Capability security advantages
+### 249. Capability security advantages
 
 Permite:
 
@@ -4004,7 +3997,7 @@ Permite:
 
 ---
 
-# 250. Capability risks
+### 250. Capability risks
 
 Debe prevenir:
 
@@ -4016,7 +4009,7 @@ Debe prevenir:
 
 ---
 
-# 251. Capability binding
+### 251. Capability binding
 
 Una capability podrá vincularse a:
 
@@ -4029,7 +4022,7 @@ Una capability podrá vincularse a:
 
 ---
 
-# 252. Capability revocation
+### 252. Capability revocation
 
 Debe soportar:
 
@@ -4041,7 +4034,7 @@ Debe soportar:
 
 ---
 
-# 253. Capability + RBAC
+### 253. Capability + RBAC
 
 Ejemplo:
 
@@ -4055,7 +4048,7 @@ Temporary customer impersonation
 
 ---
 
-# 254. Capability + ABAC
+### 254. Capability + ABAC
 
 Ejemplo:
 
@@ -4069,7 +4062,7 @@ device.trust == high
 
 ---
 
-# 255. Capability audit
+### 255. Capability audit
 
 Registrar:
 
@@ -4082,13 +4075,13 @@ Registrar:
 
 ---
 
-# 256. Field-Level Authorization
+### 256. Field-Level Authorization
 
 VoltStack deberá proteger atributos individuales.
 
 ---
 
-# 257. Field authorization examples
+### 257. Field authorization examples
 
 Ejemplos:
 
@@ -4109,7 +4102,7 @@ security_score
 
 ---
 
-# 258. FieldAuthorizationRule
+### 258. FieldAuthorizationRule
 
 ```php id="x1n6w9"
 final readonly class FieldAuthorizationRule
@@ -4126,7 +4119,7 @@ final readonly class FieldAuthorizationRule
 
 ---
 
-# 259. FieldAccessMode
+### 259. FieldAccessMode
 
 ```php id="6c8z9p"
 enum FieldAccessMode: string
@@ -4140,7 +4133,7 @@ enum FieldAccessMode: string
 
 ---
 
-# 260. Field masking
+### 260. Field masking
 
 Ejemplo:
 
@@ -4158,7 +4151,7 @@ Respuesta:
 
 ---
 
-# 261. Field authorization pipeline
+### 261. Field authorization pipeline
 
 ```text
 Load Resource
@@ -4182,7 +4175,7 @@ Serialize Response
 
 ---
 
-# 262. Field authorization enforcement points
+### 262. Field authorization enforcement points
 
 Debe aplicarse en:
 
@@ -4195,13 +4188,13 @@ Debe aplicarse en:
 
 ---
 
-# 263. Row-Level Authorization
+### 263. Row-Level Authorization
 
 Permite restringir registros completos.
 
 ---
 
-# 264. Row security example
+### 264. Row security example
 
 Usuario:
 
@@ -4224,7 +4217,7 @@ Only tenant=A rows
 
 ---
 
-# 265. RowAuthorizationPolicy
+### 265. RowAuthorizationPolicy
 
 ```php id="y2q1pf"
 final readonly class RowAuthorizationPolicy
@@ -4240,7 +4233,7 @@ final readonly class RowAuthorizationPolicy
 
 ---
 
-# 266. RowSecurityMode
+### 266. RowSecurityMode
 
 ```php id="4st1aw"
 enum RowSecurityMode: string
@@ -4253,13 +4246,13 @@ enum RowSecurityMode: string
 
 ---
 
-# 267. ORM integration
+### 267. ORM integration
 
 El framework deberá permitir aplicar autorización antes de ejecutar consultas.
 
 ---
 
-# 268. Query Authorization Pipeline
+### 268. Query Authorization Pipeline
 
 ```text
 Controller
@@ -4287,7 +4280,7 @@ Result
 
 ---
 
-# 269. Bulk authorization
+### 269. Bulk authorization
 
 Operaciones masivas deberán evaluarse cuidadosamente.
 
@@ -4299,7 +4292,7 @@ Delete 10,000 records
 
 ---
 
-# 270. BulkAuthorizationRequest
+### 270. BulkAuthorizationRequest
 
 ```php id="j7n1rd"
 final readonly class BulkAuthorizationRequest
@@ -4315,7 +4308,7 @@ final readonly class BulkAuthorizationRequest
 
 ---
 
-# 271. BulkAuthorizationMode
+### 271. BulkAuthorizationMode
 
 ```php id="l1k3ak"
 enum BulkAuthorizationMode: string
@@ -4328,7 +4321,7 @@ enum BulkAuthorizationMode: string
 
 ---
 
-# 272. Bulk security rules
+### 272. Bulk security rules
 
 Para operaciones críticas:
 
@@ -4340,7 +4333,7 @@ deberá ser obligatorio.
 
 ---
 
-# 273. Partial authorization
+### 273. Partial authorization
 
 Si solo algunos recursos están permitidos:
 
@@ -4353,7 +4346,7 @@ Debe:
 
 ---
 
-# 274. Resource filtering
+### 274. Resource filtering
 
 La autorización podrá transformar resultados:
 
@@ -4369,7 +4362,7 @@ Allowed:
 
 ---
 
-# 275. Authorization-aware queries
+### 275. Authorization-aware queries
 
 VoltStack deberá soportar:
 
@@ -4385,7 +4378,7 @@ Apply active authorization policies
 
 ---
 
-# 276. Authorization consistency
+### 276. Authorization consistency
 
 Las decisiones deberán mantener consistencia entre:
 
@@ -4400,7 +4393,7 @@ Las decisiones deberán mantener consistencia entre:
 
 ---
 
-# 277. Background authorization
+### 277. Background authorization
 
 Los procesos automáticos deberán tener:
 
@@ -4412,13 +4405,13 @@ Los procesos automáticos deberán tener:
 
 ---
 
-# 278. Service-to-service authorization
+### 278. Service-to-service authorization
 
 Los servicios deberán autenticarse y autorizarse mutuamente.
 
 ---
 
-# 279. Authorization events
+### 279. Authorization events
 
 Nuevos eventos:
 
@@ -4442,7 +4435,7 @@ BulkAuthorizationEvaluated
 
 ---
 
-# 280. Security invariants
+### 280. Security invariants
 
 ```text
 No Relationship
@@ -4466,7 +4459,7 @@ No Access
 
 ---
 
-# 281. Resultado de esta entrega
+### 281. Resultado de esta entrega
 
 Esta entrega agrega:
 
@@ -4493,7 +4486,7 @@ Service Authorization
 
 ---
 
-# 282. Próxima entrega
+### 282. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 4`
 
@@ -4514,9 +4507,7 @@ Continuará con:
 - Distributed authorization consistency
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 4
 
 **Documento:** Parte 06
 **Entrega:** 4 de varias
@@ -4524,7 +4515,7 @@ Continuará con:
 
 ---
 
-# 301. Contextual Authorization Architecture
+### 301. Contextual Authorization Architecture
 
 VoltStack deberá implementar autorización contextual como una capa adicional sobre RBAC, ABAC y ReBAC.
 
@@ -4545,7 +4536,7 @@ También deberá considerar:
 
 ---
 
-# 302. Contextual authorization model
+### 302. Contextual authorization model
 
 Modelo:
 
@@ -4569,7 +4560,7 @@ Authorization Decision
 
 ---
 
-# 303. Context dimensions
+### 303. Context dimensions
 
 El contexto podrá incluir:
 
@@ -4587,7 +4578,7 @@ Tenant Context
 
 ---
 
-# 304. AuthorizationContextProvider
+### 304. AuthorizationContextProvider
 
 ```php id="6cv4lo"
 interface AuthorizationContextProviderInterface
@@ -4600,7 +4591,7 @@ interface AuthorizationContextProviderInterface
 
 ---
 
-# 305. Temporal context
+### 305. Temporal context
 
 Las políticas podrán depender del tiempo.
 
@@ -4615,7 +4606,7 @@ Ejemplos:
 
 ---
 
-# 306. Temporal policy example
+### 306. Temporal policy example
 
 ```text id="ax3q8m"
 Allow:
@@ -4631,7 +4622,7 @@ CurrentTime between
 
 ---
 
-# 307. Time zone security
+### 307. Time zone security
 
 El sistema deberá considerar:
 
@@ -4643,7 +4634,7 @@ El sistema deberá considerar:
 
 ---
 
-# 308. Geographical context
+### 308. Geographical context
 
 Podrán utilizarse:
 
@@ -4655,7 +4646,7 @@ Podrán utilizarse:
 
 ---
 
-# 309. Location-based authorization
+### 309. Location-based authorization
 
 Ejemplo:
 
@@ -4669,7 +4660,7 @@ Location = Corporate Data Center
 
 ---
 
-# 310. Location security risks
+### 310. Location security risks
 
 No deberá confiarse únicamente en:
 
@@ -4682,7 +4673,7 @@ Deberá existir nivel de confianza.
 
 ---
 
-# 311. Network context
+### 311. Network context
 
 Debe considerar:
 
@@ -4695,7 +4686,7 @@ Debe considerar:
 
 ---
 
-# 312. NetworkTrustLevel
+### 312. NetworkTrustLevel
 
 ```php id="q3mp1k"
 enum NetworkTrustLevel: string
@@ -4710,7 +4701,7 @@ enum NetworkTrustLevel: string
 
 ---
 
-# 313. Device context
+### 313. Device context
 
 El dispositivo podrá aportar:
 
@@ -4723,7 +4714,7 @@ El dispositivo podrá aportar:
 
 ---
 
-# 314. DeviceTrustContext
+### 314. DeviceTrustContext
 
 ```php id="f3tq2a"
 final readonly class DeviceTrustContext
@@ -4740,7 +4731,7 @@ final readonly class DeviceTrustContext
 
 ---
 
-# 315. DeviceTrustLevel
+### 315. DeviceTrustLevel
 
 ```php id="t2w9k6"
 enum DeviceTrustLevel: string
@@ -4756,7 +4747,7 @@ enum DeviceTrustLevel: string
 
 ---
 
-# 316. Application context
+### 316. Application context
 
 Una decisión puede depender de:
 
@@ -4770,7 +4761,7 @@ Una decisión puede depender de:
 
 ---
 
-# 317. Transaction context
+### 317. Transaction context
 
 Las operaciones financieras o críticas deberán incluir:
 
@@ -4783,7 +4774,7 @@ Las operaciones financieras o críticas deberán incluir:
 
 ---
 
-# 318. TransactionRiskContext
+### 318. TransactionRiskContext
 
 ```php id="9i2vwx"
 final readonly class TransactionRiskContext
@@ -4801,7 +4792,7 @@ final readonly class TransactionRiskContext
 
 ---
 
-# 319. TransactionRiskLevel
+### 319. TransactionRiskLevel
 
 ```php id="2o0g5f"
 enum TransactionRiskLevel: string
@@ -4815,7 +4806,7 @@ enum TransactionRiskLevel: string
 
 ---
 
-# 320. Business context
+### 320. Business context
 
 Puede incluir:
 
@@ -4827,13 +4818,13 @@ Puede incluir:
 
 ---
 
-# 321. Risk-Based Authorization Architecture
+### 321. Risk-Based Authorization Architecture
 
 VoltStack deberá permitir decisiones basadas en riesgo dinámico.
 
 ---
 
-# 322. Risk authorization model
+### 322. Risk authorization model
 
 ```text id="xv4jbn"
 Request
@@ -4857,7 +4848,7 @@ Authorization Decision
 
 ---
 
-# 323. Risk factors
+### 323. Risk factors
 
 El cálculo podrá considerar:
 
@@ -4873,7 +4864,7 @@ El cálculo podrá considerar:
 
 ---
 
-# 324. AuthorizationRiskEngine
+### 324. AuthorizationRiskEngine
 
 ```php id="w7p4bd"
 interface AuthorizationRiskEngineInterface
@@ -4886,7 +4877,7 @@ interface AuthorizationRiskEngineInterface
 
 ---
 
-# 325. AuthorizationRiskAssessment
+### 325. AuthorizationRiskAssessment
 
 ```php id="n3h9py"
 final readonly class AuthorizationRiskAssessment
@@ -4904,7 +4895,7 @@ final readonly class AuthorizationRiskAssessment
 
 ---
 
-# 326. RiskLevel
+### 326. RiskLevel
 
 ```php id="m9a1sk"
 enum RiskLevel: string
@@ -4919,7 +4910,7 @@ enum RiskLevel: string
 
 ---
 
-# 327. Risk thresholds
+### 327. Risk thresholds
 
 Las políticas podrán definir:
 
@@ -4939,7 +4930,7 @@ Require MFA
 
 ---
 
-# 328. Risk-based decisions
+### 328. Risk-based decisions
 
 Ejemplo:
 
@@ -4963,7 +4954,7 @@ Challenge MFA
 
 ---
 
-# 329. Risk signal model
+### 329. Risk signal model
 
 Cada señal deberá contener:
 
@@ -4975,7 +4966,7 @@ Cada señal deberá contener:
 
 ---
 
-# 330. RiskSignal
+### 330. RiskSignal
 
 ```php id="b3n6mx"
 final readonly class RiskSignal
@@ -4993,7 +4984,7 @@ final readonly class RiskSignal
 
 ---
 
-# 331. Continuous Authorization
+### 331. Continuous Authorization
 
 VoltStack deberá soportar autorización continua.
 
@@ -5001,7 +4992,7 @@ La autorización no deberá considerarse válida indefinidamente.
 
 ---
 
-# 332. Traditional authorization model
+### 332. Traditional authorization model
 
 Modelo tradicional:
 
@@ -5019,7 +5010,7 @@ Session Ends
 
 ---
 
-# 333. Continuous authorization model
+### 333. Continuous authorization model
 
 Modelo moderno:
 
@@ -5049,7 +5040,7 @@ Revoke if required
 
 ---
 
-# 334. Authorization Re-evaluation triggers
+### 334. Authorization Re-evaluation triggers
 
 Debe reevaluarse cuando:
 
@@ -5064,7 +5055,7 @@ Debe reevaluarse cuando:
 
 ---
 
-# 335. ContinuousAuthorizationMonitor
+### 335. ContinuousAuthorizationMonitor
 
 ```php id="rm8n4p"
 interface ContinuousAuthorizationMonitorInterface
@@ -5077,7 +5068,7 @@ interface ContinuousAuthorizationMonitorInterface
 
 ---
 
-# 336. ContinuousAuthorizationDecision
+### 336. ContinuousAuthorizationDecision
 
 ```php id="4j5nq1"
 final readonly class ContinuousAuthorizationDecision
@@ -5094,7 +5085,7 @@ final readonly class ContinuousAuthorizationDecision
 
 ---
 
-# 337. Continuous actions
+### 337. Continuous actions
 
 Puede producir:
 
@@ -5107,19 +5098,19 @@ Puede producir:
 
 ---
 
-# 338. Session risk monitoring
+### 338. Session risk monitoring
 
 Las sesiones críticas deberán monitorearse continuamente.
 
 ---
 
-# 339. Step-Up Authorization
+### 339. Step-Up Authorization
 
 Step-up authorization permite elevar assurance antes de una acción sensible.
 
 ---
 
-# 340. Step-up examples
+### 340. Step-up examples
 
 Ejemplos:
 
@@ -5131,7 +5122,7 @@ Ejemplos:
 
 ---
 
-# 341. StepUpAuthorizationRequest
+### 341. StepUpAuthorizationRequest
 
 ```php id="txx6zv"
 final readonly class StepUpAuthorizationRequest
@@ -5146,7 +5137,7 @@ final readonly class StepUpAuthorizationRequest
 
 ---
 
-# 342. StepUpRequirement
+### 342. StepUpRequirement
 
 ```php id="6oh8um"
 final readonly class StepUpRequirement
@@ -5162,7 +5153,7 @@ final readonly class StepUpRequirement
 
 ---
 
-# 343. Step-up factors
+### 343. Step-up factors
 
 Podrán incluir:
 
@@ -5175,7 +5166,7 @@ Podrán incluir:
 
 ---
 
-# 344. Step-up expiration
+### 344. Step-up expiration
 
 La elevación deberá tener:
 
@@ -5186,13 +5177,13 @@ La elevación deberá tener:
 
 ---
 
-# 345. Privileged Authorization Architecture
+### 345. Privileged Authorization Architecture
 
 Los privilegios elevados deberán tratarse como una categoría especial.
 
 ---
 
-# 346. Privileged action definition
+### 346. Privileged action definition
 
 Ejemplos:
 
@@ -5206,7 +5197,7 @@ export sensitive data
 
 ---
 
-# 347. PrivilegedAuthorizationPolicy
+### 347. PrivilegedAuthorizationPolicy
 
 ```php id="j0z1x9"
 final readonly class PrivilegedAuthorizationPolicy
@@ -5223,7 +5214,7 @@ final readonly class PrivilegedAuthorizationPolicy
 
 ---
 
-# 348. Privileged access requirements
+### 348. Privileged access requirements
 
 Puede requerir:
 
@@ -5237,13 +5228,13 @@ Puede requerir:
 
 ---
 
-# 349. Break-Glass Authorization
+### 349. Break-Glass Authorization
 
 VoltStack deberá soportar acceso de emergencia controlado.
 
 ---
 
-# 350. Break-glass principles
+### 350. Break-glass principles
 
 Debe ser:
 
@@ -5255,7 +5246,7 @@ Debe ser:
 
 ---
 
-# 351. BreakGlassRequest
+### 351. BreakGlassRequest
 
 ```php id="1j2x7h"
 final readonly class BreakGlassRequest
@@ -5273,7 +5264,7 @@ final readonly class BreakGlassRequest
 
 ---
 
-# 352. Break-glass restrictions
+### 352. Break-glass restrictions
 
 No deberá:
 
@@ -5285,7 +5276,7 @@ No deberá:
 
 ---
 
-# 353. Break-glass monitoring
+### 353. Break-glass monitoring
 
 Debe registrar:
 
@@ -5298,13 +5289,13 @@ Debe registrar:
 
 ---
 
-# 354. Impersonation Security
+### 354. Impersonation Security
 
 VoltStack deberá controlar la suplantación administrativa.
 
 ---
 
-# 355. Impersonation model
+### 355. Impersonation model
 
 Ejemplo:
 
@@ -5318,7 +5309,7 @@ Customer User
 
 ---
 
-# 356. Impersonation requirements
+### 356. Impersonation requirements
 
 Debe requerir:
 
@@ -5331,7 +5322,7 @@ Debe requerir:
 
 ---
 
-# 357. ImpersonationRequest
+### 357. ImpersonationRequest
 
 ```php id="z5g1x2"
 final readonly class ImpersonationRequest
@@ -5349,7 +5340,7 @@ final readonly class ImpersonationRequest
 
 ---
 
-# 358. Impersonation restrictions
+### 358. Impersonation restrictions
 
 Nunca deberá permitir:
 
@@ -5361,13 +5352,13 @@ Nunca deberá permitir:
 
 ---
 
-# 359. Service Authorization Architecture
+### 359. Service Authorization Architecture
 
 Los servicios internos deberán ser tratados como identidades.
 
 ---
 
-# 360. Service Identity
+### 360. Service Identity
 
 Ejemplos:
 
@@ -5379,7 +5370,7 @@ Ejemplos:
 
 ---
 
-# 361. ServiceAuthorizationContext
+### 361. ServiceAuthorizationContext
 
 ```php id="9p1r8k"
 final readonly class ServiceAuthorizationContext
@@ -5396,7 +5387,7 @@ final readonly class ServiceAuthorizationContext
 
 ---
 
-# 362. Service-to-service authorization
+### 362. Service-to-service authorization
 
 Debe validar:
 
@@ -5409,13 +5400,13 @@ Debe validar:
 
 ---
 
-# 363. API Authorization
+### 363. API Authorization
 
 Las APIs deberán utilizar autorización explícita.
 
 ---
 
-# 364. API authorization factors
+### 364. API authorization factors
 
 Considerar:
 
@@ -5429,7 +5420,7 @@ Considerar:
 
 ---
 
-# 365. Token Scope Security
+### 365. Token Scope Security
 
 Los scopes deberán ser:
 
@@ -5450,7 +5441,7 @@ admin.*
 
 ---
 
-# 366. Scope validation
+### 366. Scope validation
 
 El scope deberá evaluarse junto con:
 
@@ -5461,13 +5452,13 @@ El scope deberá evaluarse junto con:
 
 ---
 
-# 367. Authorization Caching Architecture
+### 367. Authorization Caching Architecture
 
 VoltStack deberá soportar cache de decisiones.
 
 ---
 
-# 368. Cache objective
+### 368. Cache objective
 
 Reducir:
 
@@ -5478,7 +5469,7 @@ Reducir:
 
 ---
 
-# 369. AuthorizationCacheEntry
+### 369. AuthorizationCacheEntry
 
 ```php id="8bf3x9"
 final readonly class AuthorizationCacheEntry
@@ -5496,7 +5487,7 @@ final readonly class AuthorizationCacheEntry
 
 ---
 
-# 370. Cache key requirements
+### 370. Cache key requirements
 
 Debe incluir:
 
@@ -5509,7 +5500,7 @@ Debe incluir:
 
 ---
 
-# 371. Cache security
+### 371. Cache security
 
 Nunca deberá compartir:
 
@@ -5520,7 +5511,7 @@ Nunca deberá compartir:
 
 ---
 
-# 372. Cache invalidation
+### 372. Cache invalidation
 
 Debe ocurrir cuando:
 
@@ -5534,13 +5525,13 @@ Debe ocurrir cuando:
 
 ---
 
-# 373. Distributed Authorization Consistency
+### 373. Distributed Authorization Consistency
 
 En sistemas distribuidos deberá existir estrategia consistente.
 
 ---
 
-# 374. Consistency models
+### 374. Consistency models
 
 Soportar:
 
@@ -5551,7 +5542,7 @@ Soportar:
 
 ---
 
-# 375. Critical authorization consistency
+### 375. Critical authorization consistency
 
 Para operaciones críticas:
 
@@ -5561,7 +5552,7 @@ Strong Consistency Required
 
 ---
 
-# 376. Non-critical authorization
+### 376. Non-critical authorization
 
 Para operaciones informativas:
 
@@ -5571,7 +5562,7 @@ Eventual Consistency Acceptable
 
 ---
 
-# 377. Authorization synchronization events
+### 377. Authorization synchronization events
 
 Eventos:
 
@@ -5587,7 +5578,7 @@ RiskChanged
 
 ---
 
-# 378. Distributed enforcement
+### 378. Distributed enforcement
 
 Los puntos de enforcement deberán recibir:
 
@@ -5599,7 +5590,7 @@ Los puntos de enforcement deberán recibir:
 
 ---
 
-# 379. Authorization failure modes
+### 379. Authorization failure modes
 
 Errores deberán manejar:
 
@@ -5612,7 +5603,7 @@ Errores deberán manejar:
 
 ---
 
-# 380. Secure failure behavior
+### 380. Secure failure behavior
 
 Regla:
 
@@ -5628,7 +5619,7 @@ salvo política explícita.
 
 ---
 
-# 381. Authorization availability tradeoff
+### 381. Authorization availability tradeoff
 
 VoltStack deberá permitir configurar:
 
@@ -5638,7 +5629,7 @@ VoltStack deberá permitir configurar:
 
 ---
 
-# 382. Degraded authorization mode
+### 382. Degraded authorization mode
 
 Solo deberá existir para:
 
@@ -5649,7 +5640,7 @@ Solo deberá existir para:
 
 ---
 
-# 383. Authorization observability
+### 383. Authorization observability
 
 Registrar:
 
@@ -5663,7 +5654,7 @@ Registrar:
 
 ---
 
-# 384. Authorization Metrics
+### 384. Authorization Metrics
 
 Métricas:
 
@@ -5677,7 +5668,7 @@ Métricas:
 
 ---
 
-# 385. Security invariants
+### 385. Security invariants
 
 ```text id="1qz7e4"
 High Risk Action
@@ -5697,7 +5688,7 @@ Audit Evidence
 
 ---
 
-# 386. Resultado de la entrega
+### 386. Resultado de la entrega
 
 Esta entrega establece:
 
@@ -5720,7 +5711,7 @@ Authorization Observability
 
 ---
 
-# 387. Próxima entrega
+### 387. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 5`
 
@@ -5740,9 +5731,7 @@ Continuará con:
 - Authorization testing architecture
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 5
 
 **Documento:** Parte 06
 **Entrega:** 5 de varias
@@ -5750,7 +5739,7 @@ Continuará con:
 
 ---
 
-# 401. Authorization Enforcement Architecture
+### 401. Authorization Enforcement Architecture
 
 La autorización dentro de VoltStack deberá estar integrada en el ciclo de ejecución del framework.
 
@@ -5775,7 +5764,7 @@ El framework deberá proporcionar enforcement automático mediante:
 
 ---
 
-# 402. Controller authorization pipeline
+### 402. Controller authorization pipeline
 
 Flujo:
 
@@ -5817,7 +5806,7 @@ Audit
 
 ---
 
-# 403. Authorization Enforcement Points (PEP)
+### 403. Authorization Enforcement Points (PEP)
 
 VoltStack deberá implementar múltiples puntos de enforcement:
 
@@ -5843,7 +5832,7 @@ Event Layer
 
 ---
 
-# 404. Defense in depth authorization
+### 404. Defense in depth authorization
 
 La autorización crítica no deberá depender de un único punto.
 
@@ -5871,13 +5860,13 @@ Secure Access
 
 ---
 
-# 405. Authorization Middleware Architecture
+### 405. Authorization Middleware Architecture
 
 El middleware será uno de los principales PEP del framework.
 
 ---
 
-# 406. AuthorizationMiddleware
+### 406. AuthorizationMiddleware
 
 ```php id="v3wq91"
 final class AuthorizationMiddleware
@@ -5904,7 +5893,7 @@ final class AuthorizationMiddleware
 
 ---
 
-# 407. Middleware responsibilities
+### 407. Middleware responsibilities
 
 El middleware deberá:
 
@@ -5919,7 +5908,7 @@ El middleware deberá:
 
 ---
 
-# 408. Middleware ordering
+### 408. Middleware ordering
 
 La posición del middleware será crítica.
 
@@ -5955,7 +5944,7 @@ Controller Execution
 
 ---
 
-# 409. Authentication vs Authorization middleware
+### 409. Authentication vs Authorization middleware
 
 Authentication responde:
 
@@ -5973,7 +5962,7 @@ No deberán mezclarse.
 
 ---
 
-# 410. Authorization Middleware Configuration
+### 410. Authorization Middleware Configuration
 
 Ejemplo:
 
@@ -5995,13 +5984,13 @@ return [
 
 ---
 
-# 411. Route Authorization
+### 411. Route Authorization
 
 Las rutas podrán declarar requisitos de autorización.
 
 ---
 
-# 412. Route authorization metadata
+### 412. Route authorization metadata
 
 Ejemplo conceptual:
 
@@ -6017,7 +6006,7 @@ Route::get(
 
 ---
 
-# 413. RouteAuthorizationDefinition
+### 413. RouteAuthorizationDefinition
 
 ```php id="c8z0ql"
 final readonly class RouteAuthorizationDefinition
@@ -6035,7 +6024,7 @@ final readonly class RouteAuthorizationDefinition
 
 ---
 
-# 414. Route authorization limitations
+### 414. Route authorization limitations
 
 La autorización de ruta no será suficiente cuando exista:
 
@@ -6047,13 +6036,13 @@ La autorización de ruta no será suficiente cuando exista:
 
 ---
 
-# 415. Controller Authorization
+### 415. Controller Authorization
 
 Los controladores podrán declarar seguridad mediante metadata.
 
 ---
 
-# 416. ControllerAuthorizationMetadata
+### 416. ControllerAuthorizationMetadata
 
 ```php id="u9k4la"
 final readonly class ControllerAuthorizationMetadata
@@ -6071,7 +6060,7 @@ final readonly class ControllerAuthorizationMetadata
 
 ---
 
-# 417. Authorization Attributes
+### 417. Authorization Attributes
 
 VoltStack deberá soportar atributos PHP nativos.
 
@@ -6089,7 +6078,7 @@ class InvoiceController
 
 ---
 
-# 418. Authorize Attribute
+### 418. Authorize Attribute
 
 ```php id="k6n1dz"
 #[Attribute(
@@ -6109,7 +6098,7 @@ final class Authorize
 
 ---
 
-# 419. Method-level authorization
+### 419. Method-level authorization
 
 Permite:
 
@@ -6125,7 +6114,6 @@ class InvoiceController
 
     }
 
-
     #[Authorize(
         permission:'invoice.delete'
     )]
@@ -6139,7 +6127,7 @@ class InvoiceController
 
 ---
 
-# 420. Controller inheritance
+### 420. Controller inheritance
 
 Las políticas deberán poder heredarse:
 
@@ -6149,7 +6137,6 @@ BaseController
 Authorization:
 
 authenticated
-
 
 ↓
 
@@ -6162,7 +6149,7 @@ invoice.manage
 
 ---
 
-# 421. Authorization inheritance rules
+### 421. Authorization inheritance rules
 
 Deberá definirse:
 
@@ -6174,13 +6161,13 @@ Deberá definirse:
 
 ---
 
-# 422. Action Authorization
+### 422. Action Authorization
 
 Una acción representa la unidad ejecutable.
 
 ---
 
-# 423. ActionAuthorizationContext
+### 423. ActionAuthorizationContext
 
 ```php id="6x2i0q"
 final readonly class ActionAuthorizationContext
@@ -6197,7 +6184,7 @@ final readonly class ActionAuthorizationContext
 
 ---
 
-# 424. Action policies
+### 424. Action policies
 
 Ejemplo:
 
@@ -6215,7 +6202,7 @@ public function update(
 
 ---
 
-# 425. Parameter-aware authorization
+### 425. Parameter-aware authorization
 
 VoltStack deberá poder utilizar parámetros del método.
 
@@ -6243,7 +6230,7 @@ Action
 
 ---
 
-# 426. Controller Parameter Resolver Integration
+### 426. Controller Parameter Resolver Integration
 
 Flujo:
 
@@ -6269,7 +6256,7 @@ Controller Invocation
 
 ---
 
-# 427. Resource-aware authorization
+### 427. Resource-aware authorization
 
 Ejemplo:
 
@@ -6284,7 +6271,7 @@ public function update(
 
 ---
 
-# 428. Authorization Resource Resolver
+### 428. Authorization Resource Resolver
 
 ```php id="u5f1ld"
 interface AuthorizationResourceResolverInterface
@@ -6297,7 +6284,7 @@ interface AuthorizationResourceResolverInterface
 
 ---
 
-# 429. Authorization before binding
+### 429. Authorization before binding
 
 Para recursos sensibles:
 
@@ -6322,7 +6309,7 @@ puede ser necesario para evitar:
 
 ---
 
-# 430. Authorization after binding
+### 430. Authorization after binding
 
 Para ownership:
 
@@ -6344,13 +6331,13 @@ Authorization
 
 ---
 
-# 431. Authorization Compiler
+### 431. Authorization Compiler
 
 VoltStack deberá compilar metadata de autorización.
 
 ---
 
-# 432. Authorization compilation objective
+### 432. Authorization compilation objective
 
 Reducir:
 
@@ -6361,7 +6348,7 @@ Reducir:
 
 ---
 
-# 433. Authorization compilation pipeline
+### 433. Authorization compilation pipeline
 
 ```text id="6p3x9d"
 Controller
@@ -6389,7 +6376,7 @@ Runtime Execution
 
 ---
 
-# 434. CompiledAuthorizationDefinition
+### 434. CompiledAuthorizationDefinition
 
 ```php id="p9k2aa"
 final readonly class CompiledAuthorizationDefinition
@@ -6406,7 +6393,7 @@ final readonly class CompiledAuthorizationDefinition
 
 ---
 
-# 435. Authorization cache artifact
+### 435. Authorization cache artifact
 
 Ejemplo:
 
@@ -6422,7 +6409,7 @@ routes.php
 
 ---
 
-# 436. Authorization preloading
+### 436. Authorization preloading
 
 En producción:
 
@@ -6444,13 +6431,13 @@ Serve Requests
 
 ---
 
-# 437. Policy preloading
+### 437. Policy preloading
 
 Las políticas frecuentes podrán cargarse anticipadamente.
 
 ---
 
-# 438. Policy dependency graph
+### 438. Policy dependency graph
 
 VoltStack deberá conocer:
 
@@ -6472,7 +6459,7 @@ Providers
 
 ---
 
-# 439. Authorization optimization
+### 439. Authorization optimization
 
 Objetivos:
 
@@ -6484,7 +6471,7 @@ Objetivos:
 
 ---
 
-# 440. Authorization Fast Path
+### 440. Authorization Fast Path
 
 Operaciones simples podrán utilizar:
 
@@ -6500,7 +6487,7 @@ sin ejecutar todo el motor.
 
 ---
 
-# 441. Authorization Slow Path
+### 441. Authorization Slow Path
 
 Casos complejos:
 
@@ -6518,7 +6505,7 @@ Full Policy Engine
 
 ---
 
-# 442. Authorization Decision Cache Strategy
+### 442. Authorization Decision Cache Strategy
 
 Cachear:
 
@@ -6535,18 +6522,16 @@ No cachear indiscriminadamente:
 
 ---
 
-# 443. Authorization cache levels
+### 443. Authorization cache levels
 
 ```text id="x6k8qa"
 L1
 
 Request Memory Cache
 
-
 L2
 
 Application Cache
-
 
 L3
 
@@ -6555,7 +6540,7 @@ Distributed Cache
 
 ---
 
-# 444. Request authorization cache
+### 444. Request authorization cache
 
 Durante una misma request:
 
@@ -6573,7 +6558,7 @@ Evaluate once
 
 ---
 
-# 445. Distributed authorization cache
+### 445. Distributed authorization cache
 
 Debe incluir:
 
@@ -6586,7 +6571,7 @@ Debe incluir:
 
 ---
 
-# 446. Authorization invalidation events
+### 446. Authorization invalidation events
 
 Eventos:
 
@@ -6608,7 +6593,7 @@ CapabilityRevoked
 
 ---
 
-# 447. Authorization compiler safety
+### 447. Authorization compiler safety
 
 La compilación deberá validar:
 
@@ -6620,13 +6605,13 @@ La compilación deberá validar:
 
 ---
 
-# 448. Authorization metadata registry
+### 448. Authorization metadata registry
 
 VoltStack deberá mantener un registro central.
 
 ---
 
-# 449. AuthorizationRegistry
+### 449. AuthorizationRegistry
 
 ```php id="0d9h8v"
 interface AuthorizationRegistryInterface
@@ -6634,7 +6619,6 @@ interface AuthorizationRegistryInterface
     public function register(
         AuthorizationDefinition $definition
     ): void;
-
 
     public function resolve(
         string $target
@@ -6644,7 +6628,7 @@ interface AuthorizationRegistryInterface
 
 ---
 
-# 450. Authorization definition discovery
+### 450. Authorization definition discovery
 
 Podrá descubrir:
 
@@ -6657,7 +6641,7 @@ Podrá descubrir:
 
 ---
 
-# 451. Module authorization isolation
+### 451. Module authorization isolation
 
 Cada módulo podrá definir:
 
@@ -6669,7 +6653,7 @@ Cada módulo podrá definir:
 
 ---
 
-# 452. ModuleAuthorizationManifest
+### 452. ModuleAuthorizationManifest
 
 ```php id="f4r2e1"
 final readonly class ModuleAuthorizationManifest
@@ -6687,7 +6671,7 @@ final readonly class ModuleAuthorizationManifest
 
 ---
 
-# 453. Package authorization discovery
+### 453. Package authorization discovery
 
 Los paquetes externos podrán registrar:
 
@@ -6699,7 +6683,7 @@ conceptualmente.
 
 ---
 
-# 454. Authorization namespace isolation
+### 454. Authorization namespace isolation
 
 Evitar:
 
@@ -6713,7 +6697,7 @@ packageB.user.delete
 
 ---
 
-# 455. Permission namespaces
+### 455. Permission namespaces
 
 Formato recomendado:
 
@@ -6729,13 +6713,13 @@ voltstack.billing.invoice.approve
 
 ---
 
-# 456. Authorization testing architecture
+### 456. Authorization testing architecture
 
 La autorización deberá probarse como dominio independiente.
 
 ---
 
-# 457. Authorization tests
+### 457. Authorization tests
 
 Debe cubrir:
 
@@ -6751,7 +6735,7 @@ Debe cubrir:
 
 ---
 
-# 458. AuthorizationTestContext
+### 458. AuthorizationTestContext
 
 ```php id="1n8d7s"
 final readonly class AuthorizationTestContext
@@ -6768,7 +6752,7 @@ final readonly class AuthorizationTestContext
 
 ---
 
-# 459. Policy simulation
+### 459. Policy simulation
 
 Antes de activar políticas:
 
@@ -6790,7 +6774,7 @@ Publish
 
 ---
 
-# 460. Authorization dry-run mode
+### 460. Authorization dry-run mode
 
 Permite:
 
@@ -6800,7 +6784,7 @@ Permite:
 
 ---
 
-# 461. Authorization regression testing
+### 461. Authorization regression testing
 
 Cambios de policy deberán comparar:
 
@@ -6820,7 +6804,7 @@ y detectar impacto.
 
 ---
 
-# 462. Authorization mutation testing
+### 462. Authorization mutation testing
 
 El framework podrá probar:
 
@@ -6832,7 +6816,7 @@ Para verificar robustez.
 
 ---
 
-# 463. Authorization security tests
+### 463. Authorization security tests
 
 Debe incluir:
 
@@ -6845,13 +6829,13 @@ Debe incluir:
 
 ---
 
-# 464. Authorization observability integration
+### 464. Authorization observability integration
 
 Toda decisión importante deberá producir eventos.
 
 ---
 
-# 465. AuthorizationEvent
+### 465. AuthorizationEvent
 
 ```php id="v8m2aq"
 final readonly class AuthorizationEvent
@@ -6870,18 +6854,16 @@ final readonly class AuthorizationEvent
 
 ---
 
-# 466. Authorization logging levels
+### 466. Authorization logging levels
 
 ```text id="m8j3pc"
 Low Risk
 
 Summary
 
-
 Medium Risk
 
 Decision
-
 
 High Risk
 
@@ -6890,7 +6872,7 @@ Full Evidence
 
 ---
 
-# 467. Privacy-aware authorization logging
+### 467. Privacy-aware authorization logging
 
 No deberá almacenar:
 
@@ -6901,7 +6883,7 @@ No deberá almacenar:
 
 ---
 
-# 468. Authorization performance metrics
+### 468. Authorization performance metrics
 
 Medir:
 
@@ -6914,7 +6896,7 @@ Medir:
 
 ---
 
-# 469. Authorization health monitoring
+### 469. Authorization health monitoring
 
 Alertar:
 
@@ -6926,7 +6908,7 @@ Alertar:
 
 ---
 
-# 470. Authorization governance integration
+### 470. Authorization governance integration
 
 Toda policy deberá tener:
 
@@ -6938,7 +6920,7 @@ Toda policy deberá tener:
 
 ---
 
-# 471. Authorization change approval
+### 471. Authorization change approval
 
 Cambios críticos requieren:
 
@@ -6949,7 +6931,7 @@ Cambios críticos requieren:
 
 ---
 
-# 472. Authorization rollback
+### 472. Authorization rollback
 
 Debe permitir:
 
@@ -6959,7 +6941,7 @@ Debe permitir:
 
 ---
 
-# 473. Authorization deployment strategy
+### 473. Authorization deployment strategy
 
 Recomendado:
 
@@ -6985,7 +6967,7 @@ Production
 
 ---
 
-# 474. Authorization canary release
+### 474. Authorization canary release
 
 Aplicar nuevas políticas primero a:
 
@@ -6995,7 +6977,7 @@ Aplicar nuevas políticas primero a:
 
 ---
 
-# 475. Authorization emergency disable
+### 475. Authorization emergency disable
 
 Debe existir mecanismo para:
 
@@ -7005,7 +6987,7 @@ Debe existir mecanismo para:
 
 ---
 
-# 476. Authorization emergency controls
+### 476. Authorization emergency controls
 
 Deben ser:
 
@@ -7016,7 +6998,7 @@ Deben ser:
 
 ---
 
-# 477. Authorization architecture result
+### 477. Authorization architecture result
 
 Esta entrega establece:
 
@@ -7039,9 +7021,7 @@ Authorization Observability
 Governance Integration
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 6
 
 **Documento:** Parte 06
 **Entrega:** 6 de varias
@@ -7049,7 +7029,7 @@ Governance Integration
 
 ---
 
-# 501. Data Authorization Security Architecture
+### 501. Data Authorization Security Architecture
 
 VoltStack deberá implementar una capa de autorización específica para proteger datos.
 
@@ -7073,7 +7053,7 @@ La seguridad deberá mantenerse aunque un actor intente acceder mediante:
 
 ---
 
-# 502. Data authorization principle
+### 502. Data authorization principle
 
 Regla fundamental:
 
@@ -7089,7 +7069,7 @@ Un usuario puede estar autorizado a ejecutar una acción, pero no necesariamente
 
 ---
 
-# 503. Data authorization layers
+### 503. Data authorization layers
 
 VoltStack deberá proteger datos en múltiples niveles:
 
@@ -7119,7 +7099,7 @@ Storage Layer
 
 ---
 
-# 504. Data Authorization Model
+### 504. Data Authorization Model
 
 El modelo deberá combinar:
 
@@ -7157,7 +7137,7 @@ Data Access Decision
 
 ---
 
-# 505. Data resource abstraction
+### 505. Data resource abstraction
 
 Los datos deberán representarse como recursos autorizables.
 
@@ -7175,7 +7155,7 @@ Ejemplos:
 
 ---
 
-# 506. DataAuthorizationResource
+### 506. DataAuthorizationResource
 
 ```php id="g5k2pp"
 final readonly class DataAuthorizationResource
@@ -7193,7 +7173,7 @@ final readonly class DataAuthorizationResource
 
 ---
 
-# 507. DataClassification
+### 507. DataClassification
 
 ```php id="z1m8qs"
 enum DataClassification: string
@@ -7209,7 +7189,7 @@ enum DataClassification: string
 
 ---
 
-# 508. Data classification importance
+### 508. Data classification importance
 
 La clasificación deberá influir en:
 
@@ -7223,7 +7203,7 @@ La clasificación deberá influir en:
 
 ---
 
-# 509. Data ownership authorization
+### 509. Data ownership authorization
 
 Los datos deberán poder asociarse a:
 
@@ -7236,7 +7216,7 @@ Los datos deberán poder asociarse a:
 
 ---
 
-# 510. Data ownership example
+### 510. Data ownership example
 
 ```text id="4f9y8w"
 Invoice
@@ -7253,7 +7233,7 @@ Confidential
 
 ---
 
-# 511. ORM Authorization Integration
+### 511. ORM Authorization Integration
 
 VoltStack deberá integrar autorización con ORM.
 
@@ -7263,7 +7243,7 @@ Evitar que una consulta válida técnicamente entregue datos no autorizados.
 
 ---
 
-# 512. ORM authorization pipeline
+### 512. ORM authorization pipeline
 
 ```text id="3q8k1m"
 Model Request
@@ -7291,7 +7271,7 @@ Result Filtering
 
 ---
 
-# 513. Authorized Query Builder
+### 513. Authorized Query Builder
 
 VoltStack deberá proporcionar una abstracción conceptual:
 
@@ -7307,7 +7287,7 @@ Apply active authorization policies
 
 ---
 
-# 514. AuthorizedQueryBuilder
+### 514. AuthorizedQueryBuilder
 
 ```php id="9p3v0k"
 interface AuthorizedQueryBuilderInterface
@@ -7316,9 +7296,7 @@ interface AuthorizedQueryBuilderInterface
         AuthorizationContext $context
     ): self;
 
-
     public function applyPolicies(): self;
-
 
     public function execute(): mixed;
 }
@@ -7326,7 +7304,7 @@ interface AuthorizedQueryBuilderInterface
 
 ---
 
-# 515. Query Policy Injection
+### 515. Query Policy Injection
 
 Las políticas podrán modificar consultas.
 
@@ -7350,7 +7328,7 @@ AND owner_id = ?
 
 ---
 
-# 516. QueryPolicy
+### 516. QueryPolicy
 
 ```php id="0f7xq9"
 final readonly class QueryPolicy
@@ -7366,7 +7344,7 @@ final readonly class QueryPolicy
 
 ---
 
-# 517. QueryPolicyMode
+### 517. QueryPolicyMode
 
 ```php id="w8m2a4"
 enum QueryPolicyMode: string
@@ -7380,13 +7358,13 @@ enum QueryPolicyMode: string
 
 ---
 
-# 518. Query authorization security
+### 518. Query authorization security
 
 La inyección de políticas deberá ocurrir antes de ejecutar la consulta.
 
 ---
 
-# 519. Preventing unauthorized data loading
+### 519. Preventing unauthorized data loading
 
 Debe evitar:
 
@@ -7402,7 +7380,7 @@ Porque primero carga el dato.
 
 ---
 
-# 520. Secure pattern
+### 520. Secure pattern
 
 Preferido:
 
@@ -7414,13 +7392,13 @@ Invoice::authorized()
 
 ---
 
-# 521. Row-Level Security Architecture
+### 521. Row-Level Security Architecture
 
 VoltStack deberá soportar seguridad a nivel de fila.
 
 ---
 
-# 522. Row authorization purpose
+### 522. Row authorization purpose
 
 Controlar:
 
@@ -7431,7 +7409,7 @@ Controlar:
 
 ---
 
-# 523. RowPolicy example
+### 523. RowPolicy example
 
 ```text id="8k0w4c"
 User:
@@ -7447,7 +7425,7 @@ tenant_id = A
 
 ---
 
-# 524. RowAuthorizationEngine
+### 524. RowAuthorizationEngine
 
 ```php id="4j2m8r"
 interface RowAuthorizationEngineInterface
@@ -7461,7 +7439,7 @@ interface RowAuthorizationEngineInterface
 
 ---
 
-# 525. Row policy conditions
+### 525. Row policy conditions
 
 Podrán usar:
 
@@ -7474,7 +7452,7 @@ Podrán usar:
 
 ---
 
-# 526. Row filtering modes
+### 526. Row filtering modes
 
 ```text id="2x7v9q"
 Strict Filtering
@@ -7488,7 +7466,7 @@ Full Denial
 
 ---
 
-# 527. Row-level security example
+### 527. Row-level security example
 
 Documento:
 
@@ -7499,7 +7477,6 @@ Tenant A
 
 Visible
 
-
 Document 2
 
 Tenant B
@@ -7509,7 +7486,7 @@ Hidden
 
 ---
 
-# 528. Database Row Security Integration
+### 528. Database Row Security Integration
 
 Cuando sea posible:
 
@@ -7527,7 +7504,7 @@ Defense in Depth
 
 ---
 
-# 529. Database native RLS
+### 529. Database native RLS
 
 VoltStack podrá integrarse con:
 
@@ -7538,19 +7515,19 @@ VoltStack podrá integrarse con:
 
 ---
 
-# 530. Database bypass prevention
+### 530. Database bypass prevention
 
 Usuarios de aplicación no deberán tener acceso administrativo directo a la base.
 
 ---
 
-# 531. Column-Level Authorization
+### 531. Column-Level Authorization
 
 Los campos deberán poder protegerse individualmente.
 
 ---
 
-# 532. Column security examples
+### 532. Column security examples
 
 Campos sensibles:
 
@@ -7568,7 +7545,7 @@ bank_account
 
 ---
 
-# 533. ColumnAuthorizationPolicy
+### 533. ColumnAuthorizationPolicy
 
 ```php id="7r4x1m"
 final readonly class ColumnAuthorizationPolicy
@@ -7585,7 +7562,7 @@ final readonly class ColumnAuthorizationPolicy
 
 ---
 
-# 534. ColumnProtectionMode
+### 534. ColumnProtectionMode
 
 ```php id="p0w9zx"
 enum ColumnProtectionMode: string
@@ -7600,7 +7577,7 @@ enum ColumnProtectionMode: string
 
 ---
 
-# 535. Column masking
+### 535. Column masking
 
 Ejemplo:
 
@@ -7618,7 +7595,7 @@ Respuesta:
 
 ---
 
-# 536. Dynamic masking
+### 536. Dynamic masking
 
 El masking podrá depender de:
 
@@ -7630,7 +7607,7 @@ El masking podrá depender de:
 
 ---
 
-# 537. Data transformation authorization
+### 537. Data transformation authorization
 
 Ejemplo:
 
@@ -7648,13 +7625,13 @@ J*** S*****
 
 ---
 
-# 538. Serialization Authorization
+### 538. Serialization Authorization
 
 La autorización deberá aplicarse al serializar respuestas.
 
 ---
 
-# 539. Secure serialization pipeline
+### 539. Secure serialization pipeline
 
 ```text id="8h2q6n"
 Model
@@ -7682,7 +7659,7 @@ Response
 
 ---
 
-# 540. Authorization-aware Serializer
+### 540. Authorization-aware Serializer
 
 ```php id="x2m8j7"
 interface AuthorizationAwareSerializerInterface
@@ -7696,13 +7673,13 @@ interface AuthorizationAwareSerializerInterface
 
 ---
 
-# 541. Export Authorization
+### 541. Export Authorization
 
 Las exportaciones requieren controles adicionales.
 
 ---
 
-# 542. Export risks
+### 542. Export risks
 
 Incluyen:
 
@@ -7714,7 +7691,7 @@ Incluyen:
 
 ---
 
-# 543. ExportAuthorizationPolicy
+### 543. ExportAuthorizationPolicy
 
 ```php id="7q5p1z"
 final readonly class ExportAuthorizationPolicy
@@ -7732,7 +7709,7 @@ final readonly class ExportAuthorizationPolicy
 
 ---
 
-# 544. Export limits
+### 544. Export limits
 
 Podrán limitar:
 
@@ -7745,7 +7722,7 @@ Podrán limitar:
 
 ---
 
-# 545. Export approval workflow
+### 545. Export approval workflow
 
 Para datos sensibles:
 
@@ -7775,7 +7752,7 @@ Expiration
 
 ---
 
-# 546. Export expiration
+### 546. Export expiration
 
 Los archivos exportados deberán tener:
 
@@ -7786,13 +7763,13 @@ Los archivos exportados deberán tener:
 
 ---
 
-# 547. File Authorization Architecture
+### 547. File Authorization Architecture
 
 Los archivos deberán tratarse como recursos protegidos.
 
 ---
 
-# 548. File security model
+### 548. File security model
 
 Incluye:
 
@@ -7806,7 +7783,7 @@ Incluye:
 
 ---
 
-# 549. FileAuthorizationResource
+### 549. FileAuthorizationResource
 
 ```php id="0y6c9v"
 final readonly class FileAuthorizationResource
@@ -7824,7 +7801,7 @@ final readonly class FileAuthorizationResource
 
 ---
 
-# 550. File access policies
+### 550. File access policies
 
 Ejemplo:
 
@@ -7842,13 +7819,13 @@ User has document.viewer role
 
 ---
 
-# 551. Storage Authorization
+### 551. Storage Authorization
 
 La autorización deberá extenderse al almacenamiento.
 
 ---
 
-# 552. Storage security layers
+### 552. Storage security layers
 
 ```text id="r4v9n2"
 Application Policy
@@ -7868,7 +7845,7 @@ Object Permission
 
 ---
 
-# 553. Storage isolation
+### 553. Storage isolation
 
 En multi-tenant:
 
@@ -7877,7 +7854,6 @@ Tenant A
 
 bucket/prefix A
 
-
 Tenant B
 
 bucket/prefix B
@@ -7885,7 +7861,7 @@ bucket/prefix B
 
 ---
 
-# 554. Storage access tokens
+### 554. Storage access tokens
 
 Los tokens temporales deberán incluir:
 
@@ -7898,7 +7874,7 @@ Los tokens temporales deberán incluir:
 
 ---
 
-# 555. Signed URL Authorization
+### 555. Signed URL Authorization
 
 Antes de generar:
 
@@ -7920,13 +7896,13 @@ Download
 
 ---
 
-# 556. Event Authorization
+### 556. Event Authorization
 
 Los eventos también requieren autorización.
 
 ---
 
-# 557. Event security model
+### 557. Event security model
 
 Debe controlar:
 
@@ -7937,7 +7913,7 @@ Debe controlar:
 
 ---
 
-# 558. EventAuthorizationPolicy
+### 558. EventAuthorizationPolicy
 
 ```php id="v8s3j4"
 final readonly class EventAuthorizationPolicy
@@ -7954,13 +7930,13 @@ final readonly class EventAuthorizationPolicy
 
 ---
 
-# 559. Queue Authorization
+### 559. Queue Authorization
 
 Los workers deberán operar bajo identidad propia.
 
 ---
 
-# 560. QueueWorkerIdentity
+### 560. QueueWorkerIdentity
 
 ```php id="5q9x0d"
 final readonly class QueueWorkerIdentity
@@ -7976,7 +7952,7 @@ final readonly class QueueWorkerIdentity
 
 ---
 
-# 561. Job authorization
+### 561. Job authorization
 
 Antes de ejecutar:
 
@@ -7998,7 +7974,7 @@ Execute
 
 ---
 
-# 562. Scheduled Task Authorization
+### 562. Scheduled Task Authorization
 
 Los comandos programados deberán tener:
 
@@ -8009,7 +7985,7 @@ Los comandos programados deberán tener:
 
 ---
 
-# 563. Background Data Access
+### 563. Background Data Access
 
 Los procesos internos deberán respetar:
 
@@ -8020,7 +7996,7 @@ Los procesos internos deberán respetar:
 
 ---
 
-# 564. System account security
+### 564. System account security
 
 Las cuentas internas deberán:
 
@@ -8031,7 +8007,7 @@ Las cuentas internas deberán:
 
 ---
 
-# 565. Data access observability
+### 565. Data access observability
 
 Registrar:
 
@@ -8044,7 +8020,7 @@ Registrar:
 
 ---
 
-# 566. Sensitive data access events
+### 566. Sensitive data access events
 
 Eventos:
 
@@ -8068,7 +8044,7 @@ StorageTokenRevoked
 
 ---
 
-# 567. Data authorization testing
+### 567. Data authorization testing
 
 Pruebas:
 
@@ -8081,7 +8057,7 @@ Pruebas:
 
 ---
 
-# 568. Data authorization invariants
+### 568. Data authorization invariants
 
 ```text id="k2s7m5"
 Authorized Action
@@ -8093,7 +8069,7 @@ Authorized Data Access
 
 ---
 
-# 569. Data authorization performance
+### 569. Data authorization performance
 
 Optimizar:
 
@@ -8105,7 +8081,7 @@ Optimizar:
 
 ---
 
-# 570. Data authorization result
+### 570. Data authorization result
 
 Esta entrega establece:
 
@@ -8130,7 +8106,7 @@ Data Access Observability
 
 ---
 
-# 571. Próxima entrega
+### 571. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 7`
 
@@ -8149,9 +8125,7 @@ Continuará con:
 - Zero Trust authorization model
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 7
 
 **Documento:** Parte 06
 **Entrega:** 7 de varias
@@ -8159,7 +8133,7 @@ Continuará con:
 
 ---
 
-# 601. API Authorization Security Architecture
+### 601. API Authorization Security Architecture
 
 VoltStack deberá implementar un sistema completo de autorización para APIs modernas.
 
@@ -8178,7 +8152,7 @@ La seguridad de API deberá considerar:
 
 ---
 
-# 602. API authorization model
+### 602. API authorization model
 
 Modelo:
 
@@ -8212,7 +8186,7 @@ API Authorization Decision
 
 ---
 
-# 603. API Authorization Layers
+### 603. API Authorization Layers
 
 La autorización API deberá ejecutarse en:
 
@@ -8246,7 +8220,7 @@ Data Layer
 
 ---
 
-# 604. API Security Principles
+### 604. API Security Principles
 
 VoltStack deberá aplicar:
 
@@ -8261,7 +8235,7 @@ VoltStack deberá aplicar:
 
 ---
 
-# 605. API Resource Model
+### 605. API Resource Model
 
 Cada endpoint deberá ser considerado un recurso autorizable.
 
@@ -8277,7 +8251,7 @@ invoice.collection.read
 
 ---
 
-# 606. API Authorization Definition
+### 606. API Authorization Definition
 
 ```php
 final readonly class ApiAuthorizationDefinition
@@ -8295,7 +8269,7 @@ final readonly class ApiAuthorizationDefinition
 
 ---
 
-# 607. Endpoint Authorization
+### 607. Endpoint Authorization
 
 Una API podrá requerir:
 
@@ -8335,7 +8309,7 @@ ownership.policy
 
 ---
 
-# 608. API Middleware Pipeline
+### 608. API Middleware Pipeline
 
 ```text
 Request
@@ -8375,13 +8349,13 @@ Controller Execution
 
 ---
 
-# 609. OAuth2 Authorization Architecture
+### 609. OAuth2 Authorization Architecture
 
 VoltStack deberá soportar OAuth2 como protocolo de autorización delegado.
 
 ---
 
-# 610. OAuth2 Concepts
+### 610. OAuth2 Concepts
 
 Componentes:
 
@@ -8397,7 +8371,7 @@ Resource Server
 
 ---
 
-# 611. OAuth2 Integration Model
+### 611. OAuth2 Integration Model
 
 ```text
 Client
@@ -8421,7 +8395,7 @@ Resource Access
 
 ---
 
-# 612. OAuth2 Grant Types
+### 612. OAuth2 Grant Types
 
 Soportar:
 
@@ -8433,7 +8407,7 @@ Soportar:
 
 ---
 
-# 613. Authorization Code Flow
+### 613. Authorization Code Flow
 
 Flujo:
 
@@ -8463,7 +8437,7 @@ API Access
 
 ---
 
-# 614. PKCE Support
+### 614. PKCE Support
 
 Para clientes públicos:
 
@@ -8479,7 +8453,7 @@ Proof Key for Code Exchange
 
 ---
 
-# 615. PKCE Security
+### 615. PKCE Security
 
 Previene:
 
@@ -8489,7 +8463,7 @@ Previene:
 
 ---
 
-# 616. Client Credentials Flow
+### 616. Client Credentials Flow
 
 Para comunicación máquina-a-máquina:
 
@@ -8511,7 +8485,7 @@ Service B
 
 ---
 
-# 617. Service Client Identity
+### 617. Service Client Identity
 
 Los clientes deberán tener identidad propia.
 
@@ -8527,7 +8501,7 @@ integration-crm
 
 ---
 
-# 618. OAuth Client Model
+### 618. OAuth Client Model
 
 ```php
 final readonly class OAuthClient
@@ -8545,7 +8519,7 @@ final readonly class OAuthClient
 
 ---
 
-# 619. ClientSecurityLevel
+### 619. ClientSecurityLevel
 
 ```php
 enum ClientSecurityLevel: string
@@ -8559,7 +8533,7 @@ enum ClientSecurityLevel: string
 
 ---
 
-# 620. Client authorization rules
+### 620. Client authorization rules
 
 Un cliente deberá estar limitado por:
 
@@ -8572,7 +8546,7 @@ Un cliente deberá estar limitado por:
 
 ---
 
-# 621. OAuth Scope Architecture
+### 621. OAuth Scope Architecture
 
 Los scopes representan capacidades delegadas.
 
@@ -8588,7 +8562,7 @@ customer.export
 
 ---
 
-# 622. Scope design principles
+### 622. Scope design principles
 
 Los scopes deberán ser:
 
@@ -8600,7 +8574,7 @@ Los scopes deberán ser:
 
 ---
 
-# 623. Scope hierarchy
+### 623. Scope hierarchy
 
 Permitido:
 
@@ -8618,7 +8592,7 @@ admin.*
 
 ---
 
-# 624. Scope Resolver
+### 624. Scope Resolver
 
 ```php
 interface ScopeResolverInterface
@@ -8631,7 +8605,7 @@ interface ScopeResolverInterface
 
 ---
 
-# 625. Scope Enforcement
+### 625. Scope Enforcement
 
 Un scope nunca deberá ser suficiente por sí mismo.
 
@@ -8659,7 +8633,7 @@ Access
 
 ---
 
-# 626. Scope Abuse Prevention
+### 626. Scope Abuse Prevention
 
 Prevenir:
 
@@ -8670,13 +8644,13 @@ Prevenir:
 
 ---
 
-# 627. JWT Authorization Architecture
+### 627. JWT Authorization Architecture
 
 VoltStack deberá soportar tokens JWT.
 
 ---
 
-# 628. JWT Validation Pipeline
+### 628. JWT Validation Pipeline
 
 ```text
 JWT Received
@@ -8708,7 +8682,7 @@ Authorization
 
 ---
 
-# 629. JWT Claims
+### 629. JWT Claims
 
 Claims importantes:
 
@@ -8727,7 +8701,7 @@ permissions
 
 ---
 
-# 630. JWT Security Rules
+### 630. JWT Security Rules
 
 Validar siempre:
 
@@ -8740,7 +8714,7 @@ Validar siempre:
 
 ---
 
-# 631. Algorithm Restriction
+### 631. Algorithm Restriction
 
 No permitir:
 
@@ -8752,7 +8726,7 @@ ni algoritmos no autorizados.
 
 ---
 
-# 632. JWT Key Management
+### 632. JWT Key Management
 
 Debe soportar:
 
@@ -8764,7 +8738,7 @@ Debe soportar:
 
 ---
 
-# 633. Token Lifetime Strategy
+### 633. Token Lifetime Strategy
 
 Tokens:
 
@@ -8773,7 +8747,6 @@ Access Token
 
 Short Life
 
-
 Refresh Token
 
 Longer Life
@@ -8781,7 +8754,7 @@ Longer Life
 
 ---
 
-# 634. Refresh Token Security
+### 634. Refresh Token Security
 
 Debe incluir:
 
@@ -8792,7 +8765,7 @@ Debe incluir:
 
 ---
 
-# 635. Token Revocation
+### 635. Token Revocation
 
 Revocar cuando:
 
@@ -8804,7 +8777,7 @@ Revocar cuando:
 
 ---
 
-# 636. Token Exchange
+### 636. Token Exchange
 
 Permitir intercambio controlado:
 
@@ -8822,7 +8795,7 @@ Limited Scope
 
 ---
 
-# 637. Token Binding
+### 637. Token Binding
 
 Tokens podrán vincularse a:
 
@@ -8833,7 +8806,7 @@ Tokens podrán vincularse a:
 
 ---
 
-# 638. API Claims Authorization
+### 638. API Claims Authorization
 
 Claims adicionales:
 
@@ -8853,7 +8826,7 @@ podrán alimentar ABAC.
 
 ---
 
-# 639. API Tenant Authorization
+### 639. API Tenant Authorization
 
 Cada request API deberá resolver:
 
@@ -8864,7 +8837,7 @@ Cada request API deberá resolver:
 
 ---
 
-# 640. Tenant Claim Validation
+### 640. Tenant Claim Validation
 
 Nunca confiar únicamente en:
 
@@ -8878,7 +8851,7 @@ Debe validarse contra identidad real.
 
 ---
 
-# 641. API Multi-Tenant Security
+### 641. API Multi-Tenant Security
 
 Prevenir:
 
@@ -8896,13 +8869,13 @@ Denied
 
 ---
 
-# 642. Webhook Authorization Architecture
+### 642. Webhook Authorization Architecture
 
 Los webhooks deberán tener seguridad propia.
 
 ---
 
-# 643. Webhook Threats
+### 643. Webhook Threats
 
 Considerar:
 
@@ -8914,13 +8887,13 @@ Considerar:
 
 ---
 
-# 644. Webhook Identity
+### 644. Webhook Identity
 
 Cada webhook sender deberá identificarse.
 
 ---
 
-# 645. Webhook Signature Validation
+### 645. Webhook Signature Validation
 
 Modelo:
 
@@ -8942,7 +8915,7 @@ Trusted Message
 
 ---
 
-# 646. Webhook Request Validation
+### 646. Webhook Request Validation
 
 Validar:
 
@@ -8955,7 +8928,7 @@ Validar:
 
 ---
 
-# 647. Webhook Authorization Policy
+### 647. Webhook Authorization Policy
 
 ```php
 final readonly class WebhookAuthorizationPolicy
@@ -8972,7 +8945,7 @@ final readonly class WebhookAuthorizationPolicy
 
 ---
 
-# 648. Webhook Replay Protection
+### 648. Webhook Replay Protection
 
 Usar:
 
@@ -8982,7 +8955,7 @@ Usar:
 
 ---
 
-# 649. External Integration Authorization
+### 649. External Integration Authorization
 
 Integraciones externas deberán tener:
 
@@ -8994,7 +8967,7 @@ Integraciones externas deberán tener:
 
 ---
 
-# 650. Integration Client Model
+### 650. Integration Client Model
 
 ```php
 final readonly class IntegrationClient
@@ -9012,7 +8985,7 @@ final readonly class IntegrationClient
 
 ---
 
-# 651. Integration lifecycle
+### 651. Integration lifecycle
 
 ```text
 Created
@@ -9036,7 +9009,7 @@ Revoked
 
 ---
 
-# 652. Integration Permissions
+### 652. Integration Permissions
 
 Nunca otorgar:
 
@@ -9048,7 +9021,7 @@ por defecto.
 
 ---
 
-# 653. API Rate Authorization
+### 653. API Rate Authorization
 
 El límite también forma parte de autorización.
 
@@ -9064,7 +9037,7 @@ Maximum 1000 records/hour
 
 ---
 
-# 654. Authorization Quotas
+### 654. Authorization Quotas
 
 Permitir:
 
@@ -9075,7 +9048,7 @@ Permitir:
 
 ---
 
-# 655. QuotaAuthorizationPolicy
+### 655. QuotaAuthorizationPolicy
 
 ```php
 final readonly class QuotaAuthorizationPolicy
@@ -9091,7 +9064,7 @@ final readonly class QuotaAuthorizationPolicy
 
 ---
 
-# 656. API Abuse Detection
+### 656. API Abuse Detection
 
 Integrar:
 
@@ -9102,7 +9075,7 @@ Integrar:
 
 ---
 
-# 657. Service Mesh Authorization
+### 657. Service Mesh Authorization
 
 Para arquitecturas distribuidas:
 
@@ -9120,7 +9093,7 @@ Authorization Layer
 
 ---
 
-# 658. Service Identity Security
+### 658. Service Identity Security
 
 Cada servicio deberá tener:
 
@@ -9131,7 +9104,7 @@ Cada servicio deberá tener:
 
 ---
 
-# 659. Mutual Authorization
+### 659. Mutual Authorization
 
 No basta:
 
@@ -9151,7 +9124,7 @@ Service authorized
 
 ---
 
-# 660. Internal API Authorization
+### 660. Internal API Authorization
 
 Aplicar:
 
@@ -9162,13 +9135,13 @@ Aplicar:
 
 ---
 
-# 661. Zero Trust Authorization Model
+### 661. Zero Trust Authorization Model
 
 VoltStack deberá alinearse con Zero Trust.
 
 ---
 
-# 662. Zero Trust Principles
+### 662. Zero Trust Principles
 
 ```text
 Never Trust
@@ -9178,7 +9151,7 @@ Always Verify
 
 ---
 
-# 663. Zero Trust Decision Model
+### 663. Zero Trust Decision Model
 
 Cada request:
 
@@ -9208,7 +9181,7 @@ Decision
 
 ---
 
-# 664. Continuous Verification
+### 664. Continuous Verification
 
 Validar continuamente:
 
@@ -9220,13 +9193,13 @@ Validar continuamente:
 
 ---
 
-# 665. Zero Trust for APIs
+### 665. Zero Trust for APIs
 
 Una API interna no deberá asumir confianza por ubicación.
 
 ---
 
-# 666. Internal Network Security
+### 666. Internal Network Security
 
 La red:
 
@@ -9240,7 +9213,7 @@ Trusted
 
 ---
 
-# 667. Zero Trust Service Access
+### 667. Zero Trust Service Access
 
 Requiere:
 
@@ -9252,7 +9225,7 @@ Requiere:
 
 ---
 
-# 668. API Security Observability
+### 668. API Security Observability
 
 Registrar:
 
@@ -9264,7 +9237,7 @@ Registrar:
 
 ---
 
-# 669. API Authorization Metrics
+### 669. API Authorization Metrics
 
 Métricas:
 
@@ -9277,7 +9250,7 @@ Métricas:
 
 ---
 
-# 670. API Security Events
+### 670. API Security Events
 
 Eventos:
 
@@ -9305,7 +9278,7 @@ ServiceAuthorizationFailed
 
 ---
 
-# 671. API Testing Strategy
+### 671. API Testing Strategy
 
 Pruebas:
 
@@ -9318,7 +9291,7 @@ Pruebas:
 
 ---
 
-# 672. API Authorization Simulation
+### 672. API Authorization Simulation
 
 Permitir:
 
@@ -9346,7 +9319,7 @@ Deny
 
 ---
 
-# 673. Security Regression Testing
+### 673. Security Regression Testing
 
 Cada cambio de seguridad deberá validar:
 
@@ -9357,13 +9330,13 @@ Cada cambio de seguridad deberá validar:
 
 ---
 
-# 674. API Policy Versioning
+### 674. API Policy Versioning
 
 Las políticas API deberán versionarse.
 
 ---
 
-# 675. API Compatibility
+### 675. API Compatibility
 
 Cambios deberán considerar:
 
@@ -9373,7 +9346,7 @@ Cambios deberán considerar:
 
 ---
 
-# 676. Authorization Migration Strategy
+### 676. Authorization Migration Strategy
 
 Ejemplo:
 
@@ -9395,7 +9368,7 @@ Disable v1
 
 ---
 
-# 677. API Authorization Performance
+### 677. API Authorization Performance
 
 Optimizar:
 
@@ -9406,7 +9379,7 @@ Optimizar:
 
 ---
 
-# 678. Authorization Edge Caching
+### 678. Authorization Edge Caching
 
 Permitir cache seguro en:
 
@@ -9416,7 +9389,7 @@ Permitir cache seguro en:
 
 ---
 
-# 679. Security Result
+### 679. Security Result
 
 Esta entrega establece:
 
@@ -9437,7 +9410,7 @@ API Observability
 
 ---
 
-# 680. Próxima entrega
+### 680. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 8`
 
@@ -9456,9 +9429,7 @@ Continuará con:
 - Security governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 8
 
 **Documento:** Parte 06
 **Entrega:** 8 de varias
@@ -9466,7 +9437,7 @@ Continuará con:
 
 ---
 
-# 701. Security Policy Engine Architecture
+### 701. Security Policy Engine Architecture
 
 VoltStack deberá implementar un motor de políticas independiente del sistema de autorización.
 
@@ -9490,7 +9461,7 @@ Enforcement
 
 ---
 
-# 702. Policy Engine Responsibilities
+### 702. Policy Engine Responsibilities
 
 El motor será responsable de:
 
@@ -9511,7 +9482,7 @@ No deberá:
 
 ---
 
-# 703. Policy Engine Components
+### 703. Policy Engine Components
 
 Arquitectura:
 
@@ -9545,7 +9516,7 @@ Decision Generator
 
 ---
 
-# 704. Policy Engine Interfaces
+### 704. Policy Engine Interfaces
 
 ```php id="v8m2qs"
 interface PolicyEngineInterface
@@ -9558,7 +9529,7 @@ interface PolicyEngineInterface
 
 ---
 
-# 705. Policy Repository
+### 705. Policy Repository
 
 El repositorio almacena:
 
@@ -9572,7 +9543,7 @@ El repositorio almacena:
 
 ---
 
-# 706. Policy Storage Drivers
+### 706. Policy Storage Drivers
 
 VoltStack deberá permitir:
 
@@ -9590,7 +9561,7 @@ Git-based Policy Store
 
 ---
 
-# 707. Policy Loading Strategy
+### 707. Policy Loading Strategy
 
 Las políticas podrán cargarse:
 
@@ -9602,7 +9573,7 @@ Las políticas podrán cargarse:
 
 ---
 
-# 708. Policy Loader
+### 708. Policy Loader
 
 ```php id="2s7h4p"
 interface PolicyLoaderInterface
@@ -9615,7 +9586,7 @@ interface PolicyLoaderInterface
 
 ---
 
-# 709. Policy Dependency Resolution
+### 709. Policy Dependency Resolution
 
 Una política podrá depender de:
 
@@ -9627,7 +9598,7 @@ Una política podrá depender de:
 
 ---
 
-# 710. Policy Dependency Graph
+### 710. Policy Dependency Graph
 
 Ejemplo:
 
@@ -9649,7 +9620,7 @@ RiskPolicy
 
 ---
 
-# 711. Policy Graph Validation
+### 711. Policy Graph Validation
 
 Debe detectar:
 
@@ -9660,7 +9631,7 @@ Debe detectar:
 
 ---
 
-# 712. Policy Language Design
+### 712. Policy Language Design
 
 VoltStack deberá definir un lenguaje declarativo.
 
@@ -9673,7 +9644,7 @@ Objetivos:
 
 ---
 
-# 713. Policy Representation Options
+### 713. Policy Representation Options
 
 Soportar:
 
@@ -9691,7 +9662,7 @@ DSL
 
 ---
 
-# 714. Recommended Policy DSL
+### 714. Recommended Policy DSL
 
 Ejemplo conceptual:
 
@@ -9714,7 +9685,7 @@ policy invoice.approve {
 
 ---
 
-# 715. Policy Language Principles
+### 715. Policy Language Principles
 
 El lenguaje deberá ser:
 
@@ -9726,7 +9697,7 @@ El lenguaje deberá ser:
 
 ---
 
-# 716. Policy Security Restrictions
+### 716. Policy Security Restrictions
 
 No permitir:
 
@@ -9737,13 +9708,13 @@ No permitir:
 
 ---
 
-# 717. Policy AST Architecture
+### 717. Policy AST Architecture
 
 Las políticas deberán transformarse en un árbol sintáctico.
 
 ---
 
-# 718. Policy Compilation Flow
+### 718. Policy Compilation Flow
 
 ```text
 Policy Source
@@ -9779,7 +9750,7 @@ Runtime
 
 ---
 
-# 719. PolicyAST
+### 719. PolicyAST
 
 ```php id="p2z6k1"
 final readonly class PolicyAST
@@ -9795,7 +9766,7 @@ final readonly class PolicyAST
 
 ---
 
-# 720. AST Node Types
+### 720. AST Node Types
 
 Tipos:
 
@@ -9819,7 +9790,7 @@ ObligationNode
 
 ---
 
-# 721. RuleNode
+### 721. RuleNode
 
 Representa una regla individual.
 
@@ -9838,7 +9809,7 @@ final readonly class RuleNode
 
 ---
 
-# 722. ConditionNode
+### 722. ConditionNode
 
 Representa una condición.
 
@@ -9850,7 +9821,7 @@ user.department == finance
 
 ---
 
-# 723. AttributeNode
+### 723. AttributeNode
 
 Representa acceso a atributos.
 
@@ -9862,7 +9833,7 @@ subject.clearance
 
 ---
 
-# 724. AST Validation
+### 724. AST Validation
 
 Validar:
 
@@ -9875,7 +9846,7 @@ Validar:
 
 ---
 
-# 725. Policy Compiler Architecture
+### 725. Policy Compiler Architecture
 
 El compilador convierte:
 
@@ -9889,7 +9860,7 @@ Executable Authorization Program
 
 ---
 
-# 726. PolicyCompilerInterface
+### 726. PolicyCompilerInterface
 
 ```php id="n6p1yr"
 interface PolicyCompilerInterface
@@ -9902,7 +9873,7 @@ interface PolicyCompilerInterface
 
 ---
 
-# 727. CompiledPolicy
+### 727. CompiledPolicy
 
 ```php id="a1q9wx"
 final readonly class CompiledPolicy
@@ -9920,7 +9891,7 @@ final readonly class CompiledPolicy
 
 ---
 
-# 728. Policy Bytecode Concept
+### 728. Policy Bytecode Concept
 
 Las políticas podrán compilarse a instrucciones internas.
 
@@ -9936,13 +9907,13 @@ ALLOW
 
 ---
 
-# 729. Policy Runtime
+### 729. Policy Runtime
 
 El runtime ejecuta políticas compiladas.
 
 ---
 
-# 730. PolicyRuntimeInterface
+### 730. PolicyRuntimeInterface
 
 ```php id="b5j8m3"
 interface PolicyRuntimeInterface
@@ -9956,7 +9927,7 @@ interface PolicyRuntimeInterface
 
 ---
 
-# 731. Policy Evaluation Result
+### 731. Policy Evaluation Result
 
 ```php id="z6t4mq"
 final readonly class PolicyEvaluationResult
@@ -9973,7 +9944,7 @@ final readonly class PolicyEvaluationResult
 
 ---
 
-# 732. Policy Execution Model
+### 732. Policy Execution Model
 
 ```text
 Instruction
@@ -9993,7 +9964,7 @@ Effect Generation
 
 ---
 
-# 733. Short Circuit Evaluation
+### 733. Short Circuit Evaluation
 
 El runtime deberá optimizar:
 
@@ -10011,7 +9982,7 @@ cuando sea seguro.
 
 ---
 
-# 734. Lazy Attribute Resolution
+### 734. Lazy Attribute Resolution
 
 Los atributos deberán resolverse únicamente cuando sean necesarios.
 
@@ -10025,7 +9996,7 @@ No load expensive risk profile
 
 ---
 
-# 735. Policy Function System
+### 735. Policy Function System
 
 El motor podrá soportar funciones:
 
@@ -10045,7 +10016,7 @@ belongsToTenant()
 
 ---
 
-# 736. Policy Function Security
+### 736. Policy Function Security
 
 Las funciones deberán ser:
 
@@ -10056,7 +10027,7 @@ Las funciones deberán ser:
 
 ---
 
-# 737. PolicyFunctionRegistry
+### 737. PolicyFunctionRegistry
 
 ```php id="q8d3w2"
 interface PolicyFunctionRegistryInterface
@@ -10070,7 +10041,7 @@ interface PolicyFunctionRegistryInterface
 
 ---
 
-# 738. Policy Optimization Engine
+### 738. Policy Optimization Engine
 
 El compilador deberá optimizar:
 
@@ -10081,7 +10052,7 @@ El compilador deberá optimizar:
 
 ---
 
-# 739. Constant Folding
+### 739. Constant Folding
 
 Ejemplo:
 
@@ -10099,7 +10070,7 @@ true
 
 ---
 
-# 740. Rule Simplification
+### 740. Rule Simplification
 
 Ejemplo:
 
@@ -10121,7 +10092,7 @@ role=admin
 
 ---
 
-# 741. Dead Policy Detection
+### 741. Dead Policy Detection
 
 Detectar:
 
@@ -10131,7 +10102,7 @@ Detectar:
 
 ---
 
-# 742. Policy Performance Analysis
+### 742. Policy Performance Analysis
 
 Medir:
 
@@ -10142,7 +10113,7 @@ Medir:
 
 ---
 
-# 743. Policy Complexity Score
+### 743. Policy Complexity Score
 
 Cada política tendrá:
 
@@ -10160,7 +10131,7 @@ Execution Cost
 
 ---
 
-# 744. Policy Complexity Example
+### 744. Policy Complexity Example
 
 Simple:
 
@@ -10188,7 +10159,7 @@ transaction analysis
 
 ---
 
-# 745. Policy Execution Cache
+### 745. Policy Execution Cache
 
 Podrá cachear:
 
@@ -10199,7 +10170,7 @@ Podrá cachear:
 
 ---
 
-# 746. Policy Cache Invalidations
+### 746. Policy Cache Invalidations
 
 Cuando:
 
@@ -10210,13 +10181,13 @@ Cuando:
 
 ---
 
-# 747. External PDP Integration
+### 747. External PDP Integration
 
 VoltStack deberá permitir integración con motores externos.
 
 ---
 
-# 748. External PDP Model
+### 748. External PDP Model
 
 Ejemplo:
 
@@ -10242,7 +10213,7 @@ Enforcement
 
 ---
 
-# 749. External PDP Drivers
+### 749. External PDP Drivers
 
 Soportar:
 
@@ -10253,7 +10224,7 @@ Soportar:
 
 ---
 
-# 750. PDP Adapter Interface
+### 750. PDP Adapter Interface
 
 ```php id="e8s2nx"
 interface ExternalPdpAdapterInterface
@@ -10266,7 +10237,7 @@ interface ExternalPdpAdapterInterface
 
 ---
 
-# 751. OPA Inspired Architecture
+### 751. OPA Inspired Architecture
 
 VoltStack podrá inspirarse en motores como:
 
@@ -10277,7 +10248,7 @@ VoltStack podrá inspirarse en motores como:
 
 ---
 
-# 752. OPA Style Model
+### 752. OPA Style Model
 
 Separación:
 
@@ -10299,7 +10270,7 @@ Decision
 
 ---
 
-# 753. Policy Data Separation
+### 753. Policy Data Separation
 
 Las políticas no deberán contener datos dinámicos.
 
@@ -10317,7 +10288,7 @@ if role = manager
 
 ---
 
-# 754. Policy Data Provider
+### 754. Policy Data Provider
 
 Los datos dinámicos provienen de:
 
@@ -10328,13 +10299,13 @@ Los datos dinámicos provienen de:
 
 ---
 
-# 755. Policy Governance Architecture
+### 755. Policy Governance Architecture
 
 Toda política deberá tener gobierno.
 
 ---
 
-# 756. Policy Ownership
+### 756. Policy Ownership
 
 Cada política deberá tener:
 
@@ -10346,7 +10317,7 @@ Cada política deberá tener:
 
 ---
 
-# 757. Policy Metadata
+### 757. Policy Metadata
 
 ```php id="d7m9k1"
 final readonly class PolicyMetadata
@@ -10364,7 +10335,7 @@ final readonly class PolicyMetadata
 
 ---
 
-# 758. Policy Review Cycle
+### 758. Policy Review Cycle
 
 Las políticas críticas deberán revisarse:
 
@@ -10374,7 +10345,7 @@ Las políticas críticas deberán revisarse:
 
 ---
 
-# 759. Policy Approval Workflow
+### 759. Policy Approval Workflow
 
 ```text
 Draft
@@ -10398,7 +10369,7 @@ Publication
 
 ---
 
-# 760. Policy Change Management
+### 760. Policy Change Management
 
 Cambios deberán registrar:
 
@@ -10410,7 +10381,7 @@ Cambios deberán registrar:
 
 ---
 
-# 761. Policy Impact Analysis
+### 761. Policy Impact Analysis
 
 Antes de publicar:
 
@@ -10423,7 +10394,7 @@ Evaluar:
 
 ---
 
-# 762. Policy Simulation Engine
+### 762. Policy Simulation Engine
 
 Permitir:
 
@@ -10433,7 +10404,7 @@ Permitir:
 
 ---
 
-# 763. Policy Simulation Result
+### 763. Policy Simulation Result
 
 Debe mostrar:
 
@@ -10444,7 +10415,7 @@ Debe mostrar:
 
 ---
 
-# 764. Policy Canary Deployment
+### 764. Policy Canary Deployment
 
 Publicar progresivamente:
 
@@ -10462,7 +10433,7 @@ Production
 
 ---
 
-# 765. Policy Rollback Automation
+### 765. Policy Rollback Automation
 
 Debe permitir:
 
@@ -10472,7 +10443,7 @@ Debe permitir:
 
 ---
 
-# 766. Security Governance Metrics
+### 766. Security Governance Metrics
 
 Medir:
 
@@ -10484,7 +10455,7 @@ Medir:
 
 ---
 
-# 767. Policy Security Events
+### 767. Policy Security Events
 
 Eventos:
 
@@ -10506,7 +10477,7 @@ PolicyRollbackExecuted
 
 ---
 
-# 768. Policy Testing Architecture
+### 768. Policy Testing Architecture
 
 Debe incluir:
 
@@ -10517,7 +10488,7 @@ Debe incluir:
 
 ---
 
-# 769. Policy Unit Test Example
+### 769. Policy Unit Test Example
 
 ```text
 Given:
@@ -10528,7 +10499,6 @@ Resource Invoice
 
 Amount 5000
 
-
 Expected:
 
 Permit
@@ -10536,7 +10506,7 @@ Permit
 
 ---
 
-# 770. Policy Scenario Testing
+### 770. Policy Scenario Testing
 
 Casos completos:
 
@@ -10562,7 +10532,7 @@ Expected Decision
 
 ---
 
-# 771. Policy Mutation Testing
+### 771. Policy Mutation Testing
 
 Modificar reglas para comprobar:
 
@@ -10572,7 +10542,7 @@ Modificar reglas para comprobar:
 
 ---
 
-# 772. Policy Fuzz Testing
+### 772. Policy Fuzz Testing
 
 Generar:
 
@@ -10582,7 +10552,7 @@ Generar:
 
 ---
 
-# 773. Policy Security Review
+### 773. Policy Security Review
 
 Revisar:
 
@@ -10592,7 +10562,7 @@ Revisar:
 
 ---
 
-# 774. Policy Documentation Generation
+### 774. Policy Documentation Generation
 
 VoltStack podrá generar documentación automática:
 
@@ -10603,7 +10573,7 @@ VoltStack podrá generar documentación automática:
 
 ---
 
-# 775. Policy Visualization
+### 775. Policy Visualization
 
 Representar:
 
@@ -10625,7 +10595,7 @@ Effects
 
 ---
 
-# 776. Policy Dependency Visualization
+### 776. Policy Dependency Visualization
 
 Mostrar:
 
@@ -10643,7 +10613,7 @@ Identity Policy
 
 ---
 
-# 777. Policy Runtime Isolation
+### 777. Policy Runtime Isolation
 
 El runtime deberá evitar:
 
@@ -10654,13 +10624,13 @@ El runtime deberá evitar:
 
 ---
 
-# 778. Policy Timeout Control
+### 778. Policy Timeout Control
 
 Cada evaluación deberá tener límite.
 
 ---
 
-# 779. Policy Failure Handling
+### 779. Policy Failure Handling
 
 Si una política falla:
 
@@ -10672,7 +10642,7 @@ por defecto.
 
 ---
 
-# 780. Policy Engine Security Result
+### 780. Policy Engine Security Result
 
 Esta entrega establece:
 
@@ -10702,7 +10672,7 @@ Policy Testing
 
 ---
 
-# 781. Próxima entrega
+### 781. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 9`
 
@@ -10720,9 +10690,7 @@ Continuará con:
 - Enterprise security governance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 9
 
 **Documento:** Parte 06
 **Entrega:** 9 de varias
@@ -10730,7 +10698,7 @@ Continuará con:
 
 ---
 
-# 801. Security Audit Architecture
+### 801. Security Audit Architecture
 
 VoltStack deberá implementar un sistema de auditoría de seguridad independiente del sistema de logs tradicional.
 
@@ -10746,7 +10714,7 @@ La auditoría deberá responder:
 
 ---
 
-# 802. Audit vs Logging
+### 802. Audit vs Logging
 
 Logging:
 
@@ -10767,7 +10735,7 @@ Accountability
 
 ---
 
-# 803. Security Audit Principles
+### 803. Security Audit Principles
 
 El sistema deberá garantizar:
 
@@ -10781,7 +10749,7 @@ El sistema deberá garantizar:
 
 ---
 
-# 804. Security Audit Model
+### 804. Security Audit Model
 
 Modelo:
 
@@ -10815,7 +10783,7 @@ Audit Record
 
 ---
 
-# 805. SecurityAuditRecord
+### 805. SecurityAuditRecord
 
 ```php id="v8f4mk"
 final readonly class SecurityAuditRecord
@@ -10836,7 +10804,7 @@ final readonly class SecurityAuditRecord
 
 ---
 
-# 806. Audit Event Categories
+### 806. Audit Event Categories
 
 Clasificación:
 
@@ -10860,7 +10828,7 @@ Compliance Events
 
 ---
 
-# 807. Authentication Audit Events
+### 807. Authentication Audit Events
 
 Ejemplos:
 
@@ -10880,7 +10848,7 @@ TokenIssued
 
 ---
 
-# 808. Authorization Audit Events
+### 808. Authorization Audit Events
 
 Ejemplos:
 
@@ -10900,7 +10868,7 @@ DelegationUsed
 
 ---
 
-# 809. Data Access Audit Events
+### 809. Data Access Audit Events
 
 Registrar:
 
@@ -10913,7 +10881,7 @@ Registrar:
 
 ---
 
-# 810. Sensitive Data Access Audit
+### 810. Sensitive Data Access Audit
 
 Para datos sensibles registrar:
 
@@ -10935,7 +10903,7 @@ Risk
 
 ---
 
-# 811. Audit Evidence Model
+### 811. Audit Evidence Model
 
 La evidencia debe incluir:
 
@@ -10949,7 +10917,7 @@ La evidencia debe incluir:
 
 ---
 
-# 812. AuditEvidence
+### 812. AuditEvidence
 
 ```php id="n5w3t2"
 final readonly class AuditEvidence
@@ -10967,7 +10935,7 @@ final readonly class AuditEvidence
 
 ---
 
-# 813. Audit Integrity
+### 813. Audit Integrity
 
 Los registros deberán protegerse contra:
 
@@ -10978,7 +10946,7 @@ Los registros deberán protegerse contra:
 
 ---
 
-# 814. Audit Hash Chain
+### 814. Audit Hash Chain
 
 VoltStack podrá implementar cadenas de hash:
 
@@ -11002,7 +10970,7 @@ Hash(previous)
 
 ---
 
-# 815. Audit Signature
+### 815. Audit Signature
 
 Eventos críticos podrán firmarse.
 
@@ -11015,7 +10983,7 @@ Incluye:
 
 ---
 
-# 816. Immutable Audit Storage
+### 816. Immutable Audit Storage
 
 Opciones:
 
@@ -11026,7 +10994,7 @@ Opciones:
 
 ---
 
-# 817. Audit Retention Policies
+### 817. Audit Retention Policies
 
 Debe configurarse:
 
@@ -11038,7 +11006,7 @@ Debe configurarse:
 
 ---
 
-# 818. Audit Partitioning
+### 818. Audit Partitioning
 
 Separar por:
 
@@ -11050,7 +11018,7 @@ Separar por:
 
 ---
 
-# 819. Audit Privacy Protection
+### 819. Audit Privacy Protection
 
 No almacenar:
 
@@ -11061,7 +11029,7 @@ No almacenar:
 
 ---
 
-# 820. Audit Data Masking
+### 820. Audit Data Masking
 
 Ejemplo:
 
@@ -11079,13 +11047,13 @@ Audit:
 
 ---
 
-# 821. Security Event System
+### 821. Security Event System
 
 VoltStack deberá tener un sistema de eventos de seguridad.
 
 ---
 
-# 822. SecurityEvent
+### 822. SecurityEvent
 
 ```php id="f6m9a2"
 final readonly class SecurityEvent
@@ -11102,7 +11070,7 @@ final readonly class SecurityEvent
 
 ---
 
-# 823. Security Event Severity
+### 823. Security Event Severity
 
 ```php id="s3v7k8"
 enum SecuritySeverity: string
@@ -11117,7 +11085,7 @@ enum SecuritySeverity: string
 
 ---
 
-# 824. Security Event Pipeline
+### 824. Security Event Pipeline
 
 ```text id="p8w2m4"
 Event Generated
@@ -11145,7 +11113,7 @@ Response
 
 ---
 
-# 825. Security Event Subscribers
+### 825. Security Event Subscribers
 
 Podrán reaccionar:
 
@@ -11157,7 +11125,7 @@ Podrán reaccionar:
 
 ---
 
-# 826. Security Event Examples
+### 826. Security Event Examples
 
 ```text id="y7d1kp"
 PrivilegeEscalationAttempt
@@ -11175,13 +11143,13 @@ UnauthorizedAccessAttempt
 
 ---
 
-# 827. Security Incident Architecture
+### 827. Security Incident Architecture
 
 Los eventos críticos podrán generar incidentes.
 
 ---
 
-# 828. SecurityIncident
+### 828. SecurityIncident
 
 ```php id="h9k2q4"
 final readonly class SecurityIncident
@@ -11199,7 +11167,7 @@ final readonly class SecurityIncident
 
 ---
 
-# 829. Incident Lifecycle
+### 829. Incident Lifecycle
 
 ```text id="x2v7m9"
 Detected
@@ -11223,7 +11191,7 @@ Reviewed
 
 ---
 
-# 830. Incident Response Integration
+### 830. Incident Response Integration
 
 Debe permitir:
 
@@ -11234,7 +11202,7 @@ Debe permitir:
 
 ---
 
-# 831. Automated Security Response
+### 831. Automated Security Response
 
 Ejemplos:
 
@@ -11252,13 +11220,13 @@ Require MFA
 
 ---
 
-# 832. Forensic Architecture
+### 832. Forensic Architecture
 
 VoltStack deberá soportar investigación posterior.
 
 ---
 
-# 833. Forensic Evidence
+### 833. Forensic Evidence
 
 Debe conservar:
 
@@ -11271,7 +11239,7 @@ Debe conservar:
 
 ---
 
-# 834. Investigation Timeline
+### 834. Investigation Timeline
 
 Ejemplo:
 
@@ -11287,7 +11255,7 @@ Ejemplo:
 
 ---
 
-# 835. Evidence Correlation
+### 835. Evidence Correlation
 
 Relacionar:
 
@@ -11300,7 +11268,7 @@ Relacionar:
 
 ---
 
-# 836. Security Trace ID
+### 836. Security Trace ID
 
 Cada operación deberá tener:
 
@@ -11312,13 +11280,13 @@ para correlación.
 
 ---
 
-# 837. Compliance Architecture
+### 837. Compliance Architecture
 
 VoltStack deberá facilitar cumplimiento empresarial.
 
 ---
 
-# 838. Compliance Domains
+### 838. Compliance Domains
 
 Soportar conceptos de:
 
@@ -11330,7 +11298,7 @@ Soportar conceptos de:
 
 ---
 
-# 839. Compliance Control Model
+### 839. Compliance Control Model
 
 Cada control deberá mapear:
 
@@ -11352,7 +11320,7 @@ Evidence
 
 ---
 
-# 840. ComplianceControl
+### 840. ComplianceControl
 
 ```php id="m2x6v1"
 final readonly class ComplianceControl
@@ -11369,7 +11337,7 @@ final readonly class ComplianceControl
 
 ---
 
-# 841. Access Review Compliance
+### 841. Access Review Compliance
 
 Debe soportar:
 
@@ -11380,7 +11348,7 @@ Debe soportar:
 
 ---
 
-# 842. Access Certification
+### 842. Access Certification
 
 Proceso:
 
@@ -11402,7 +11370,7 @@ Evidence
 
 ---
 
-# 843. Segregation of Duties (SoD)
+### 843. Segregation of Duties (SoD)
 
 VoltStack deberá soportar separación de funciones.
 
@@ -11418,7 +11386,7 @@ Approver
 
 ---
 
-# 844. SoD Rules
+### 844. SoD Rules
 
 Evitar:
 
@@ -11428,7 +11396,7 @@ Evitar:
 
 ---
 
-# 845. SoD Policy
+### 845. SoD Policy
 
 ```php id="c9w5j3"
 final readonly class SegregationRule
@@ -11444,13 +11412,13 @@ final readonly class SegregationRule
 
 ---
 
-# 846. Privacy Authorization Model
+### 846. Privacy Authorization Model
 
 La privacidad deberá formar parte de autorización.
 
 ---
 
-# 847. Privacy Principles
+### 847. Privacy Principles
 
 Implementar:
 
@@ -11462,7 +11430,7 @@ Implementar:
 
 ---
 
-# 848. Purpose-Based Authorization
+### 848. Purpose-Based Authorization
 
 Un acceso puede requerir propósito.
 
@@ -11478,7 +11446,7 @@ Support Ticket Resolution
 
 ---
 
-# 849. AuthorizationPurpose
+### 849. AuthorizationPurpose
 
 ```php id="z3m7p9"
 final readonly class AuthorizationPurpose
@@ -11494,7 +11462,7 @@ final readonly class AuthorizationPurpose
 
 ---
 
-# 850. Purpose Binding
+### 850. Purpose Binding
 
 La autorización deberá poder limitarse:
 
@@ -11503,7 +11471,6 @@ Allowed:
 
 Customer Support
 
-
 Denied:
 
 Marketing Export
@@ -11511,7 +11478,7 @@ Marketing Export
 
 ---
 
-# 851. Consent Authorization
+### 851. Consent Authorization
 
 Para datos regulados:
 
@@ -11524,7 +11491,7 @@ Validar:
 
 ---
 
-# 852. Data Retention Authorization
+### 852. Data Retention Authorization
 
 Las políticas deberán controlar:
 
@@ -11534,7 +11501,7 @@ Las políticas deberán controlar:
 
 ---
 
-# 853. Privacy Events
+### 853. Privacy Events
 
 Ejemplos:
 
@@ -11552,7 +11519,7 @@ PersonalDataDeleted
 
 ---
 
-# 854. Data Subject Rights
+### 854. Data Subject Rights
 
 Soportar conceptos:
 
@@ -11564,13 +11531,13 @@ Soportar conceptos:
 
 ---
 
-# 855. Enterprise Security Governance
+### 855. Enterprise Security Governance
 
 VoltStack deberá permitir gobierno central.
 
 ---
 
-# 856. Security Governance Components
+### 856. Security Governance Components
 
 ```text id="a8m3x6"
 Policies
@@ -11590,7 +11557,7 @@ Compliance
 
 ---
 
-# 857. Security Ownership
+### 857. Security Ownership
 
 Todo componente crítico deberá tener:
 
@@ -11601,7 +11568,7 @@ Todo componente crítico deberá tener:
 
 ---
 
-# 858. Security Review Workflow
+### 858. Security Review Workflow
 
 ```text id="r4k7p2"
 Change Requested
@@ -11625,7 +11592,7 @@ Monitoring
 
 ---
 
-# 859. Security Dashboard Data
+### 859. Security Dashboard Data
 
 Debe mostrar:
 
@@ -11637,7 +11604,7 @@ Debe mostrar:
 
 ---
 
-# 860. Security Analytics
+### 860. Security Analytics
 
 Analizar:
 
@@ -11648,7 +11615,7 @@ Analizar:
 
 ---
 
-# 861. Security Reporting
+### 861. Security Reporting
 
 Generar:
 
@@ -11659,7 +11626,7 @@ Generar:
 
 ---
 
-# 862. Security Automation
+### 862. Security Automation
 
 Automatizar:
 
@@ -11670,7 +11637,7 @@ Automatizar:
 
 ---
 
-# 863. Security Policy Analytics
+### 863. Security Policy Analytics
 
 Analizar:
 
@@ -11681,7 +11648,7 @@ Analizar:
 
 ---
 
-# 864. Permission Analytics
+### 864. Permission Analytics
 
 Detectar:
 
@@ -11691,7 +11658,7 @@ Detectar:
 
 ---
 
-# 865. Role Analytics
+### 865. Role Analytics
 
 Detectar:
 
@@ -11701,7 +11668,7 @@ Detectar:
 
 ---
 
-# 866. Security Maturity Model
+### 866. Security Maturity Model
 
 VoltStack podrá clasificar:
 
@@ -11719,7 +11686,7 @@ Continuous
 
 ---
 
-# 867. Adaptive Security
+### 867. Adaptive Security
 
 Combinar:
 
@@ -11730,7 +11697,7 @@ Combinar:
 
 ---
 
-# 868. Security AI Assistance (Future)
+### 868. Security AI Assistance (Future)
 
 Posibles capacidades:
 
@@ -11740,7 +11707,7 @@ Posibles capacidades:
 
 ---
 
-# 869. AI Security Restrictions
+### 869. AI Security Restrictions
 
 La IA no deberá:
 
@@ -11750,7 +11717,7 @@ La IA no deberá:
 
 ---
 
-# 870. Security Governance Events
+### 870. Security Governance Events
 
 Eventos:
 
@@ -11770,7 +11737,7 @@ PrivacyRequestCreated
 
 ---
 
-# 871. Security Architecture Outcome
+### 871. Security Architecture Outcome
 
 Esta entrega establece:
 
@@ -11796,7 +11763,7 @@ Governance Model
 
 ---
 
-# 872. Próxima entrega
+### 872. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 10`
 
@@ -11814,9 +11781,7 @@ Continuará con:
 - Large-scale authorization architecture
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 10
 
 **Documento:** Parte 06
 **Entrega:** 10 de varias
@@ -11824,7 +11789,7 @@ Continuará con:
 
 ---
 
-# 901. Enterprise Authorization Architecture
+### 901. Enterprise Authorization Architecture
 
 VoltStack deberá soportar escenarios empresariales complejos donde una aplicación puede tener:
 
@@ -11838,7 +11803,7 @@ VoltStack deberá soportar escenarios empresariales complejos donde una aplicaci
 
 ---
 
-# 902. Enterprise Authorization Challenges
+### 902. Enterprise Authorization Challenges
 
 Los escenarios empresariales requieren resolver:
 
@@ -11869,7 +11834,7 @@ Advanced Authorization Model
 
 ---
 
-# 903. Multi-Organization Authorization Model
+### 903. Multi-Organization Authorization Model
 
 VoltStack deberá diferenciar:
 
@@ -11895,7 +11860,7 @@ Resource
 
 ---
 
-# 904. Organization Entity
+### 904. Organization Entity
 
 Una organización representa una unidad empresarial.
 
@@ -11910,7 +11875,7 @@ Puede contener:
 
 ---
 
-# 905. Organization Model
+### 905. Organization Model
 
 ```php id="w7k3m9"
 final readonly class Organization
@@ -11928,7 +11893,7 @@ final readonly class Organization
 
 ---
 
-# 906. OrganizationType
+### 906. OrganizationType
 
 ```php id="f8n2q6"
 enum OrganizationType: string
@@ -11943,7 +11908,7 @@ enum OrganizationType: string
 
 ---
 
-# 907. Organization Hierarchy
+### 907. Organization Hierarchy
 
 Debe soportar:
 
@@ -11970,7 +11935,7 @@ Team
 
 ---
 
-# 908. Organization Relationship
+### 908. Organization Relationship
 
 Las organizaciones pueden tener:
 
@@ -11982,7 +11947,7 @@ Las organizaciones pueden tener:
 
 ---
 
-# 909. Organization Authorization Context
+### 909. Organization Authorization Context
 
 El contexto deberá incluir:
 
@@ -12004,7 +11969,7 @@ Organization Policies
 
 ---
 
-# 910. Organization Isolation
+### 910. Organization Isolation
 
 Una organización no deberá acceder a otra salvo:
 
@@ -12015,7 +11980,7 @@ Una organización no deberá acceder a otra salvo:
 
 ---
 
-# 911. Enterprise Tenant Model
+### 911. Enterprise Tenant Model
 
 Un tenant empresarial podrá representar:
 
@@ -12027,7 +11992,7 @@ Un tenant empresarial podrá representar:
 
 ---
 
-# 912. Tenant Hierarchy
+### 912. Tenant Hierarchy
 
 Ejemplo:
 
@@ -12046,7 +12011,7 @@ Project Tenant
 
 ---
 
-# 913. Hierarchical Tenant Authorization
+### 913. Hierarchical Tenant Authorization
 
 Las políticas deberán soportar herencia:
 
@@ -12060,7 +12025,7 @@ Child Tenant Policy
 
 ---
 
-# 914. Tenant Policy Override
+### 914. Tenant Policy Override
 
 Los hijos podrán:
 
@@ -12071,7 +12036,7 @@ Los hijos podrán:
 
 ---
 
-# 915. Tenant Security Boundary
+### 915. Tenant Security Boundary
 
 Regla:
 
@@ -12085,13 +12050,13 @@ Security Boundary
 
 ---
 
-# 916. Enterprise Identity Federation
+### 916. Enterprise Identity Federation
 
 VoltStack deberá permitir identidades externas.
 
 ---
 
-# 917. Federation Model
+### 917. Federation Model
 
 ```text
 id="p6k8m2"
@@ -12112,7 +12077,7 @@ Authorization Engine
 
 ---
 
-# 918. Supported Federation Concepts
+### 918. Supported Federation Concepts
 
 Soportar:
 
@@ -12125,7 +12090,7 @@ Soportar:
 
 ---
 
-# 919. Identity Provider Model
+### 919. Identity Provider Model
 
 ```php id="g5m1z8"
 final readonly class IdentityProvider
@@ -12143,7 +12108,7 @@ final readonly class IdentityProvider
 
 ---
 
-# 920. IdentityProviderType
+### 920. IdentityProviderType
 
 ```php id="r2q7n5"
 enum IdentityProviderType: string
@@ -12158,7 +12123,7 @@ enum IdentityProviderType: string
 
 ---
 
-# 921. Provider Trust Level
+### 921. Provider Trust Level
 
 ```php id="m8v3k4"
 enum ProviderTrustLevel: string
@@ -12172,7 +12137,7 @@ enum ProviderTrustLevel: string
 
 ---
 
-# 922. Federation Trust Model
+### 922. Federation Trust Model
 
 La confianza deberá evaluar:
 
@@ -12185,13 +12150,13 @@ La confianza deberá evaluar:
 
 ---
 
-# 923. Identity Mapping Architecture
+### 923. Identity Mapping Architecture
 
 Una identidad externa deberá mapearse internamente.
 
 ---
 
-# 924. External Identity
+### 924. External Identity
 
 Ejemplo:
 
@@ -12205,7 +12170,7 @@ VoltStack User
 
 ---
 
-# 925. IdentityMapping
+### 925. IdentityMapping
 
 ```php id="v9m2x7"
 final readonly class IdentityMapping
@@ -12222,7 +12187,7 @@ final readonly class IdentityMapping
 
 ---
 
-# 926. Identity Attribute Mapping
+### 926. Identity Attribute Mapping
 
 Mapear:
 
@@ -12240,7 +12205,7 @@ organization.department
 
 ---
 
-# 927. Attribute Transformation
+### 927. Attribute Transformation
 
 Debe soportar:
 
@@ -12252,7 +12217,7 @@ Debe soportar:
 
 ---
 
-# 928. Federation Security Risks
+### 928. Federation Security Risks
 
 Prevenir:
 
@@ -12263,13 +12228,13 @@ Prevenir:
 
 ---
 
-# 929. Single Sign-On Architecture
+### 929. Single Sign-On Architecture
 
 VoltStack deberá soportar SSO empresarial.
 
 ---
 
-# 930. SSO Flow
+### 930. SSO Flow
 
 ```text
 id="u5k9w1"
@@ -12298,7 +12263,7 @@ Authorization
 
 ---
 
-# 931. SSO Security
+### 931. SSO Security
 
 Validar:
 
@@ -12311,7 +12276,7 @@ Validar:
 
 ---
 
-# 932. SSO Session Binding
+### 932. SSO Session Binding
 
 La sesión podrá asociarse a:
 
@@ -12322,7 +12287,7 @@ La sesión podrá asociarse a:
 
 ---
 
-# 933. Identity Assurance Level
+### 933. Identity Assurance Level
 
 ```php id="z7q4m8"
 enum IdentityAssuranceLevel: string
@@ -12336,7 +12301,7 @@ enum IdentityAssuranceLevel: string
 
 ---
 
-# 934. Assurance Based Authorization
+### 934. Assurance Based Authorization
 
 Ejemplo:
 
@@ -12352,13 +12317,13 @@ Assurance >= High
 
 ---
 
-# 935. SCIM Provisioning Architecture
+### 935. SCIM Provisioning Architecture
 
 VoltStack deberá soportar aprovisionamiento automático.
 
 ---
 
-# 936. SCIM Purpose
+### 936. SCIM Purpose
 
 Permite sincronizar:
 
@@ -12369,7 +12334,7 @@ Permite sincronizar:
 
 ---
 
-# 937. SCIM Flow
+### 937. SCIM Flow
 
 ```text
 id="n4p7s2"
@@ -12390,7 +12355,7 @@ Identity Store
 
 ---
 
-# 938. SCIM User Provisioning
+### 938. SCIM User Provisioning
 
 Operaciones:
 
@@ -12401,7 +12366,7 @@ Operaciones:
 
 ---
 
-# 939. SCIM Group Provisioning
+### 939. SCIM Group Provisioning
 
 Sincronizar:
 
@@ -12411,7 +12376,7 @@ Sincronizar:
 
 ---
 
-# 940. SCIM Security
+### 940. SCIM Security
 
 Validar:
 
@@ -12422,7 +12387,7 @@ Validar:
 
 ---
 
-# 941. Enterprise Group Mapping
+### 941. Enterprise Group Mapping
 
 Los grupos externos podrán mapearse:
 
@@ -12436,7 +12401,7 @@ VoltStack Role
 
 ---
 
-# 942. Group Mapping Rules
+### 942. Group Mapping Rules
 
 Ejemplo:
 
@@ -12445,7 +12410,6 @@ External:
 
 Finance Managers
 
-
 Internal:
 
 billing.approver
@@ -12453,7 +12417,7 @@ billing.approver
 
 ---
 
-# 943. Group Mapping Risks
+### 943. Group Mapping Risks
 
 Controlar:
 
@@ -12463,7 +12427,7 @@ Controlar:
 
 ---
 
-# 944. Role Federation
+### 944. Role Federation
 
 Los roles pueden provenir de:
 
@@ -12474,7 +12438,7 @@ Los roles pueden provenir de:
 
 ---
 
-# 945. Federated Role Mapping
+### 945. Federated Role Mapping
 
 ```php id="h2x8m4"
 final readonly class FederatedRoleMapping
@@ -12490,7 +12454,7 @@ final readonly class FederatedRoleMapping
 
 ---
 
-# 946. Federated Role Security
+### 946. Federated Role Security
 
 Nunca confiar directamente:
 
@@ -12504,7 +12468,7 @@ Internal Administrator
 
 ---
 
-# 947. External Authorization Trust
+### 947. External Authorization Trust
 
 Los permisos externos deberán pasar por:
 
@@ -12526,7 +12490,7 @@ Authorization Decision
 
 ---
 
-# 948. Enterprise Delegation
+### 948. Enterprise Delegation
 
 Permitir delegaciones entre organizaciones.
 
@@ -12546,7 +12510,7 @@ Vendor
 
 ---
 
-# 949. Cross Organization Authorization
+### 949. Cross Organization Authorization
 
 Requiere:
 
@@ -12558,7 +12522,7 @@ Requiere:
 
 ---
 
-# 950. Partner Access Model
+### 950. Partner Access Model
 
 Usuarios externos deberán tener:
 
@@ -12569,7 +12533,7 @@ Usuarios externos deberán tener:
 
 ---
 
-# 951. Vendor Access Security
+### 951. Vendor Access Security
 
 Los proveedores deberán usar:
 
@@ -12580,7 +12544,7 @@ Los proveedores deberán usar:
 
 ---
 
-# 952. Enterprise Access Gateway
+### 952. Enterprise Access Gateway
 
 VoltStack podrá incluir una capa:
 
@@ -12603,13 +12567,13 @@ Application
 
 ---
 
-# 953. Enterprise Policy Delegation
+### 953. Enterprise Policy Delegation
 
 Una organización podrá administrar sus propias políticas limitadas.
 
 ---
 
-# 954. Delegated Administration
+### 954. Delegated Administration
 
 Ejemplo:
 
@@ -12627,7 +12591,7 @@ Regional Admin
 
 ---
 
-# 955. Delegated Admin Restrictions
+### 955. Delegated Admin Restrictions
 
 Debe limitar:
 
@@ -12639,7 +12603,7 @@ Debe limitar:
 
 ---
 
-# 956. Large Scale Authorization
+### 956. Large Scale Authorization
 
 Para millones de identidades:
 
@@ -12653,7 +12617,7 @@ Optimizar:
 
 ---
 
-# 957. Authorization Partitioning
+### 957. Authorization Partitioning
 
 Separar:
 
@@ -12664,7 +12628,7 @@ Separar:
 
 ---
 
-# 958. Distributed Authorization Architecture
+### 958. Distributed Authorization Architecture
 
 ```text
 id="j4k9p2"
@@ -12681,7 +12645,7 @@ Local Enforcement
 
 ---
 
-# 959. Authorization Replication
+### 959. Authorization Replication
 
 Replicar:
 
@@ -12692,7 +12656,7 @@ Replicar:
 
 ---
 
-# 960. Replication Consistency
+### 960. Replication Consistency
 
 Definir:
 
@@ -12702,7 +12666,7 @@ Definir:
 
 ---
 
-# 961. Enterprise Authorization Cache
+### 961. Enterprise Authorization Cache
 
 Debe soportar:
 
@@ -12712,7 +12676,7 @@ Debe soportar:
 
 ---
 
-# 962. Authorization Search Index
+### 962. Authorization Search Index
 
 Puede indexar:
 
@@ -12723,7 +12687,7 @@ Puede indexar:
 
 ---
 
-# 963. Enterprise Authorization Analytics
+### 963. Enterprise Authorization Analytics
 
 Analizar:
 
@@ -12734,7 +12698,7 @@ Analizar:
 
 ---
 
-# 964. Access Intelligence
+### 964. Access Intelligence
 
 Detectar:
 
@@ -12744,7 +12708,7 @@ Detectar:
 
 ---
 
-# 965. Enterprise Security Dashboard
+### 965. Enterprise Security Dashboard
 
 Mostrar:
 
@@ -12756,7 +12720,7 @@ Mostrar:
 
 ---
 
-# 966. Enterprise Reporting
+### 966. Enterprise Reporting
 
 Generar:
 
@@ -12766,7 +12730,7 @@ Generar:
 
 ---
 
-# 967. Enterprise Security Automation
+### 967. Enterprise Security Automation
 
 Automatizar:
 
@@ -12778,7 +12742,7 @@ Automatizar:
 
 ---
 
-# 968. Identity Lifecycle Integration
+### 968. Identity Lifecycle Integration
 
 Eventos:
 
@@ -12792,7 +12756,7 @@ Employee Left Company
 
 ---
 
-# 969. Lifecycle Authorization
+### 969. Lifecycle Authorization
 
 Ejemplo:
 
@@ -12816,7 +12780,7 @@ Invalidate Tokens
 
 ---
 
-# 970. Joiner-Mover-Leaver Model
+### 970. Joiner-Mover-Leaver Model
 
 VoltStack deberá soportar:
 
@@ -12830,7 +12794,7 @@ Leaver
 
 ---
 
-# 971. Joiner Process
+### 971. Joiner Process
 
 Nuevo usuario:
 
@@ -12840,7 +12804,7 @@ Nuevo usuario:
 
 ---
 
-# 972. Mover Process
+### 972. Mover Process
 
 Cambio interno:
 
@@ -12849,7 +12813,7 @@ Cambio interno:
 
 ---
 
-# 973. Leaver Process
+### 973. Leaver Process
 
 Salida:
 
@@ -12859,7 +12823,7 @@ Salida:
 
 ---
 
-# 974. Enterprise Authorization Events
+### 974. Enterprise Authorization Events
 
 Eventos:
 
@@ -12885,7 +12849,7 @@ ExternalAccessRevoked
 
 ---
 
-# 975. Enterprise Security Invariants
+### 975. Enterprise Security Invariants
 
 ```text
 External Trust
@@ -12911,7 +12875,7 @@ Audit
 
 ---
 
-# 976. Enterprise Architecture Outcome
+### 976. Enterprise Architecture Outcome
 
 Esta entrega establece:
 
@@ -12941,7 +12905,7 @@ Identity Lifecycle
 
 ---
 
-# 977. Próxima entrega
+### 977. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 11`
 
@@ -12958,9 +12922,7 @@ Continuará con:
 - Runtime security enforcement
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 11
 
 **Documento:** Parte 06
 **Entrega:** 11 de varias
@@ -12968,7 +12930,7 @@ Continuará con:
 
 ---
 
-# 1001. Advanced Controller Security Integration
+### 1001. Advanced Controller Security Integration
 
 VoltStack deberá integrar la seguridad directamente dentro del ciclo de vida del controlador.
 
@@ -12976,7 +12938,7 @@ El controlador no deberá considerarse únicamente un punto de entrada HTTP, sin
 
 ---
 
-# 1002. Controller Security Lifecycle
+### 1002. Controller Security Lifecycle
 
 Flujo:
 
@@ -13022,7 +12984,7 @@ Response Security Processing
 
 ---
 
-# 1003. Secure Controller Principles
+### 1003. Secure Controller Principles
 
 Todo controlador deberá cumplir:
 
@@ -13036,13 +12998,13 @@ Todo controlador deberá cumplir:
 
 ---
 
-# 1004. Controller Security Context
+### 1004. Controller Security Context
 
 El controlador deberá recibir un contexto de seguridad.
 
 ---
 
-# 1005. SecurityContext Object
+### 1005. SecurityContext Object
 
 ```php id="7g4q1x"
 final readonly class SecurityContext
@@ -13060,7 +13022,7 @@ final readonly class SecurityContext
 
 ---
 
-# 1006. Security Context Availability
+### 1006. Security Context Availability
 
 El contexto deberá estar disponible para:
 
@@ -13073,7 +13035,7 @@ El contexto deberá estar disponible para:
 
 ---
 
-# 1007. Controller Security Injection
+### 1007. Controller Security Injection
 
 VoltStack deberá permitir:
 
@@ -13089,7 +13051,7 @@ public function update(
 
 ---
 
-# 1008. Security Context Immutability
+### 1008. Security Context Immutability
 
 El contexto deberá ser:
 
@@ -13100,7 +13062,7 @@ El contexto deberá ser:
 
 ---
 
-# 1009. Request Security Pipeline
+### 1009. Request Security Pipeline
 
 Antes de ejecutar un controlador:
 
@@ -13130,13 +13092,13 @@ Controller
 
 ---
 
-# 1010. Controller Security Guards
+### 1010. Controller Security Guards
 
 Los guards son validadores previos a ejecución.
 
 ---
 
-# 1011. Security Guard Interface
+### 1011. Security Guard Interface
 
 ```php id="9d5x7v"
 interface ControllerSecurityGuardInterface
@@ -13149,7 +13111,7 @@ interface ControllerSecurityGuardInterface
 
 ---
 
-# 1012. Security Guard Types
+### 1012. Security Guard Types
 
 VoltStack deberá soportar:
 
@@ -13171,7 +13133,7 @@ Output Guard
 
 ---
 
-# 1013. Identity Guard
+### 1013. Identity Guard
 
 Verifica:
 
@@ -13182,7 +13144,7 @@ Verifica:
 
 ---
 
-# 1014. IdentityGuard
+### 1014. IdentityGuard
 
 ```php id="8m1q6t"
 final class IdentityGuard
@@ -13198,7 +13160,7 @@ final class IdentityGuard
 
 ---
 
-# 1015. Tenant Guard
+### 1015. Tenant Guard
 
 Protege:
 
@@ -13208,7 +13170,7 @@ Protege:
 
 ---
 
-# 1016. TenantGuard Example
+### 1016. TenantGuard Example
 
 ```text id="6h4m9k"
 Request Tenant
@@ -13224,7 +13186,7 @@ Resource Tenant
 
 ---
 
-# 1017. Permission Guard
+### 1017. Permission Guard
 
 Evalúa permisos rápidos.
 
@@ -13240,7 +13202,7 @@ invoice.delete
 
 ---
 
-# 1018. Policy Guard
+### 1018. Policy Guard
 
 Ejecuta reglas complejas:
 
@@ -13251,7 +13213,7 @@ Ejecuta reglas complejas:
 
 ---
 
-# 1019. Risk Guard
+### 1019. Risk Guard
 
 Evalúa:
 
@@ -13261,7 +13223,7 @@ Evalúa:
 
 ---
 
-# 1020. Input Security Guard
+### 1020. Input Security Guard
 
 Protege entrada:
 
@@ -13272,7 +13234,7 @@ Protege entrada:
 
 ---
 
-# 1021. Output Security Guard
+### 1021. Output Security Guard
 
 Protege salida:
 
@@ -13283,13 +13245,13 @@ Protege salida:
 
 ---
 
-# 1022. Controller Security Interceptors
+### 1022. Controller Security Interceptors
 
 VoltStack deberá soportar interceptores de seguridad.
 
 ---
 
-# 1023. Interceptor Model
+### 1023. Interceptor Model
 
 ```text id="3h8w1s"
 Before Execution
@@ -13313,7 +13275,7 @@ Security Interceptor
 
 ---
 
-# 1024. SecurityInterceptorInterface
+### 1024. SecurityInterceptorInterface
 
 ```php id="j9v5m4"
 interface SecurityInterceptorInterface
@@ -13321,7 +13283,6 @@ interface SecurityInterceptorInterface
     public function before(
         ControllerExecutionContext $context
     ): void;
-
 
     public function after(
         ControllerExecutionResult $result
@@ -13331,7 +13292,7 @@ interface SecurityInterceptorInterface
 
 ---
 
-# 1025. Before Interceptors
+### 1025. Before Interceptors
 
 Ejecutan:
 
@@ -13342,7 +13303,7 @@ Ejecutan:
 
 ---
 
-# 1026. After Interceptors
+### 1026. After Interceptors
 
 Ejecutan:
 
@@ -13353,7 +13314,7 @@ Ejecutan:
 
 ---
 
-# 1027. Security Interceptor Priority
+### 1027. Security Interceptor Priority
 
 Orden:
 
@@ -13379,13 +13340,13 @@ Logging
 
 ---
 
-# 1028. Controller Execution Context
+### 1028. Controller Execution Context
 
 Representa toda la ejecución.
 
 ---
 
-# 1029. ControllerExecutionContext
+### 1029. ControllerExecutionContext
 
 ```php id="2n6p8q"
 final readonly class ControllerExecutionContext
@@ -13403,7 +13364,7 @@ final readonly class ControllerExecutionContext
 
 ---
 
-# 1030. Controller Action Security
+### 1030. Controller Action Security
 
 Cada método deberá poder tener seguridad independiente.
 
@@ -13421,7 +13382,6 @@ class ReportController
 
     }
 
-
     #[Authorize(
         permission:"report.export"
     )]
@@ -13435,7 +13395,7 @@ class ReportController
 
 ---
 
-# 1031. Action Security Metadata
+### 1031. Action Security Metadata
 
 Debe almacenar:
 
@@ -13447,7 +13407,7 @@ Debe almacenar:
 
 ---
 
-# 1032. Action Security Definition
+### 1032. Action Security Definition
 
 ```php id="m3q7x5"
 final readonly class ActionSecurityDefinition
@@ -13465,7 +13425,7 @@ final readonly class ActionSecurityDefinition
 
 ---
 
-# 1033. Secure Action Invocation
+### 1033. Secure Action Invocation
 
 Antes de llamar:
 
@@ -13487,7 +13447,7 @@ Execute
 
 ---
 
-# 1034. Action Invocation Guard
+### 1034. Action Invocation Guard
 
 ```php id="r5n7m8"
 interface ActionInvocationGuardInterface
@@ -13501,13 +13461,13 @@ interface ActionInvocationGuardInterface
 
 ---
 
-# 1035. Controller Parameter Security
+### 1035. Controller Parameter Security
 
 Los parámetros deberán validarse antes de ejecución.
 
 ---
 
-# 1036. Parameter Security Rules
+### 1036. Parameter Security Rules
 
 Validar:
 
@@ -13519,7 +13479,7 @@ Validar:
 
 ---
 
-# 1037. Secure Parameter Resolver
+### 1037. Secure Parameter Resolver
 
 ```php id="q8m4x1"
 interface SecureParameterResolverInterface
@@ -13533,7 +13493,7 @@ interface SecureParameterResolverInterface
 
 ---
 
-# 1038. Model Binding Security
+### 1038. Model Binding Security
 
 Evitar:
 
@@ -13553,7 +13513,7 @@ Discover forbidden
 
 ---
 
-# 1039. Secure Binding
+### 1039. Secure Binding
 
 Modelo:
 
@@ -13575,7 +13535,7 @@ Controller
 
 ---
 
-# 1040. Controller Threat Protection
+### 1040. Controller Threat Protection
 
 Los controladores deberán protegerse contra:
 
@@ -13587,7 +13547,7 @@ Los controladores deberán protegerse contra:
 
 ---
 
-# 1041. IDOR Protection
+### 1041. IDOR Protection
 
 Ejemplo:
 
@@ -13611,7 +13571,7 @@ Denied
 
 ---
 
-# 1042. Mass Assignment Security
+### 1042. Mass Assignment Security
 
 Los controladores deberán controlar:
 
@@ -13621,7 +13581,7 @@ Los controladores deberán controlar:
 
 ---
 
-# 1043. Secure Input Mapping
+### 1043. Secure Input Mapping
 
 ```php id="7q3x9m"
 final readonly class SecureInputMapper
@@ -13635,13 +13595,13 @@ final readonly class SecureInputMapper
 
 ---
 
-# 1044. Controller Output Security
+### 1044. Controller Output Security
 
 Las respuestas deberán pasar por seguridad.
 
 ---
 
-# 1045. Response Security Pipeline
+### 1045. Response Security Pipeline
 
 ```text id="6m8q1w"
 Controller Result
@@ -13665,7 +13625,7 @@ HTTP Response
 
 ---
 
-# 1046. Response Classification
+### 1046. Response Classification
 
 La respuesta podrá clasificarse:
 
@@ -13683,7 +13643,7 @@ Restricted
 
 ---
 
-# 1047. Response Security Headers
+### 1047. Response Security Headers
 
 Agregar:
 
@@ -13693,7 +13653,7 @@ Agregar:
 
 ---
 
-# 1048. Controller Audit Integration
+### 1048. Controller Audit Integration
 
 Cada ejecución importante deberá generar:
 
@@ -13713,7 +13673,7 @@ Result
 
 ---
 
-# 1049. Security Trace Propagation
+### 1049. Security Trace Propagation
 
 El trace deberá viajar por:
 
@@ -13726,7 +13686,7 @@ El trace deberá viajar por:
 
 ---
 
-# 1050. Controller Security Trace
+### 1050. Controller Security Trace
 
 ```php id="5m7q8x"
 final readonly class SecurityTrace
@@ -13741,13 +13701,13 @@ final readonly class SecurityTrace
 
 ---
 
-# 1051. Secure Controller Compilation
+### 1051. Secure Controller Compilation
 
 La seguridad deberá integrarse con el compilador de controladores.
 
 ---
 
-# 1052. Compilation Security Steps
+### 1052. Compilation Security Steps
 
 ```text id="4v8k2p"
 Controller Discovery
@@ -13771,7 +13731,7 @@ Compiled Controller
 
 ---
 
-# 1053. Compiled Security Metadata
+### 1053. Compiled Security Metadata
 
 Ejemplo:
 
@@ -13790,7 +13750,7 @@ Ejemplo:
 
 ---
 
-# 1054. Runtime Security Enforcement
+### 1054. Runtime Security Enforcement
 
 En producción:
 
@@ -13808,7 +13768,7 @@ Execution
 
 ---
 
-# 1055. Security Fast Path
+### 1055. Security Fast Path
 
 Casos simples:
 
@@ -13822,7 +13782,7 @@ Allow
 
 ---
 
-# 1056. Security Slow Path
+### 1056. Security Slow Path
 
 Casos complejos:
 
@@ -13833,7 +13793,7 @@ Casos complejos:
 
 ---
 
-# 1057. Controller Security Cache
+### 1057. Controller Security Cache
 
 Cachear:
 
@@ -13844,7 +13804,7 @@ Cachear:
 
 ---
 
-# 1058. Security Cache Isolation
+### 1058. Security Cache Isolation
 
 Nunca compartir:
 
@@ -13854,7 +13814,7 @@ Nunca compartir:
 
 ---
 
-# 1059. Controller Security Testing
+### 1059. Controller Security Testing
 
 Probar:
 
@@ -13866,7 +13826,7 @@ Probar:
 
 ---
 
-# 1060. Security Integration Tests
+### 1060. Security Integration Tests
 
 Escenarios:
 
@@ -13892,7 +13852,7 @@ Audit
 
 ---
 
-# 1061. Controller Security Result
+### 1061. Controller Security Result
 
 Esta entrega establece:
 
@@ -13920,7 +13880,7 @@ Runtime Enforcement
 
 ---
 
-# 1062. Próxima entrega
+### 1062. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 12`
 
@@ -13938,9 +13898,8 @@ Continuará con:
 - Injection protection
 - Security hardening
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 12
 
 **Documento:** Parte 06
 **Entrega:** 12 de varias
@@ -13948,7 +13907,7 @@ Continuará con:
 
 ---
 
-# 1101. Controller Threat Model Architecture
+### 1101. Controller Threat Model Architecture
 
 VoltStack deberá implementar un modelo formal de amenazas para los controladores.
 
@@ -13964,7 +13923,7 @@ El objetivo será identificar:
 
 ---
 
-# 1102. Threat Modeling Principles
+### 1102. Threat Modeling Principles
 
 El análisis deberá basarse en:
 
@@ -13994,7 +13953,7 @@ Threat Model
 
 ---
 
-# 1103. Controller Security Assets
+### 1103. Controller Security Assets
 
 Los activos protegidos incluyen:
 
@@ -14022,7 +13981,7 @@ Audit Evidence
 
 ---
 
-# 1104. Controller Attack Surface
+### 1104. Controller Attack Surface
 
 Un controlador expone:
 
@@ -14048,7 +14007,7 @@ Response Data
 
 ---
 
-# 1105. Controller Entry Points
+### 1105. Controller Entry Points
 
 Cada entrada deberá clasificarse:
 
@@ -14062,7 +14021,7 @@ Cada entrada deberá clasificarse:
 
 ---
 
-# 1106. Threat Actor Model
+### 1106. Threat Actor Model
 
 VoltStack deberá considerar:
 
@@ -14084,7 +14043,7 @@ Compromised Service
 
 ---
 
-# 1107. Threat Classification
+### 1107. Threat Classification
 
 Las amenazas podrán clasificarse:
 
@@ -14104,7 +14063,7 @@ Infrastructure Threats
 
 ---
 
-# 1108. STRIDE Inspired Model
+### 1108. STRIDE Inspired Model
 
 VoltStack podrá utilizar una clasificación similar a STRIDE:
 
@@ -14124,7 +14083,7 @@ Elevation of Privilege
 
 ---
 
-# 1109. Spoofing Protection
+### 1109. Spoofing Protection
 
 Proteger contra:
 
@@ -14135,7 +14094,7 @@ Proteger contra:
 
 ---
 
-# 1110. Tampering Protection
+### 1110. Tampering Protection
 
 Proteger:
 
@@ -14147,7 +14106,7 @@ Proteger:
 
 ---
 
-# 1111. Repudiation Protection
+### 1111. Repudiation Protection
 
 Implementar:
 
@@ -14158,7 +14117,7 @@ Implementar:
 
 ---
 
-# 1112. Information Disclosure Protection
+### 1112. Information Disclosure Protection
 
 Evitar:
 
@@ -14169,7 +14128,7 @@ Evitar:
 
 ---
 
-# 1113. Denial of Service Protection
+### 1113. Denial of Service Protection
 
 Controlar:
 
@@ -14180,7 +14139,7 @@ Controlar:
 
 ---
 
-# 1114. Elevation of Privilege Protection
+### 1114. Elevation of Privilege Protection
 
 Prevenir:
 
@@ -14190,13 +14149,13 @@ Prevenir:
 
 ---
 
-# 1115. Secure Controller Defaults
+### 1115. Secure Controller Defaults
 
 VoltStack deberá aplicar seguridad por defecto.
 
 ---
 
-# 1116. Default Security Policy
+### 1116. Default Security Policy
 
 Regla:
 
@@ -14210,7 +14169,7 @@ Denied
 
 ---
 
-# 1117. Secure Controller Configuration
+### 1117. Secure Controller Configuration
 
 Ejemplo:
 
@@ -14232,7 +14191,7 @@ return [
 
 ---
 
-# 1118. Public Controller Declaration
+### 1118. Public Controller Declaration
 
 Los controladores públicos deberán declararse explícitamente.
 
@@ -14248,13 +14207,13 @@ class HealthController
 
 ---
 
-# 1119. Secure Method Exposure
+### 1119. Secure Method Exposure
 
 Un método público no deberá quedar automáticamente expuesto.
 
 ---
 
-# 1120. Controller Method Discovery
+### 1120. Controller Method Discovery
 
 El framework deberá diferenciar:
 
@@ -14268,7 +14227,7 @@ HTTP Action
 
 ---
 
-# 1121. Explicit Action Mapping
+### 1121. Explicit Action Mapping
 
 Preferido:
 
@@ -14282,7 +14241,7 @@ public function index()
 
 ---
 
-# 1122. Hidden Method Protection
+### 1122. Hidden Method Protection
 
 Métodos internos:
 
@@ -14297,13 +14256,13 @@ no deben ser invocables.
 
 ---
 
-# 1123. Controller Input Security
+### 1123. Controller Input Security
 
 Toda entrada debe considerarse no confiable.
 
 ---
 
-# 1124. Input Validation Pipeline
+### 1124. Input Validation Pipeline
 
 ```text id="x8m4q2"
 Raw Input
@@ -14327,7 +14286,7 @@ Business Logic
 
 ---
 
-# 1125. Input Normalization
+### 1125. Input Normalization
 
 Normalizar:
 
@@ -14339,7 +14298,7 @@ Normalizar:
 
 ---
 
-# 1126. Type Safety Enforcement
+### 1126. Type Safety Enforcement
 
 Ejemplo:
 
@@ -14357,7 +14316,7 @@ deberá rechazar:
 
 ---
 
-# 1127. Parameter Pollution Protection
+### 1127. Parameter Pollution Protection
 
 Prevenir:
 
@@ -14367,7 +14326,7 @@ Prevenir:
 
 ---
 
-# 1128. Mass Assignment Protection
+### 1128. Mass Assignment Protection
 
 Los modelos no deberán aceptar:
 
@@ -14381,7 +14340,7 @@ sin autorización.
 
 ---
 
-# 1129. Secure DTO Mapping
+### 1129. Secure DTO Mapping
 
 Usar:
 
@@ -14403,7 +14362,7 @@ Domain
 
 ---
 
-# 1130. Payload Size Protection
+### 1130. Payload Size Protection
 
 Limitar:
 
@@ -14414,7 +14373,7 @@ Limitar:
 
 ---
 
-# 1131. Deep Object Protection
+### 1131. Deep Object Protection
 
 Evitar payloads:
 
@@ -14432,7 +14391,7 @@ sin control.
 
 ---
 
-# 1132. JSON Structure Validation
+### 1132. JSON Structure Validation
 
 Validar:
 
@@ -14443,7 +14402,7 @@ Validar:
 
 ---
 
-# 1133. Injection Attack Protection
+### 1133. Injection Attack Protection
 
 VoltStack deberá proteger:
 
@@ -14454,7 +14413,7 @@ VoltStack deberá proteger:
 
 ---
 
-# 1134. SQL Injection Prevention
+### 1134. SQL Injection Prevention
 
 Usar:
 
@@ -14465,7 +14424,7 @@ Usar:
 
 ---
 
-# 1135. Raw Query Security
+### 1135. Raw Query Security
 
 Las consultas manuales deberán:
 
@@ -14475,7 +14434,7 @@ Las consultas manuales deberán:
 
 ---
 
-# 1136. Command Injection Protection
+### 1136. Command Injection Protection
 
 Nunca ejecutar:
 
@@ -14487,7 +14446,7 @@ sin sanitización estricta.
 
 ---
 
-# 1137. Template Injection Protection
+### 1137. Template Injection Protection
 
 El compilador Volt deberá:
 
@@ -14497,7 +14456,7 @@ El compilador Volt deberá:
 
 ---
 
-# 1138. Expression Injection
+### 1138. Expression Injection
 
 El motor de expresiones deberá:
 
@@ -14507,13 +14466,13 @@ El motor de expresiones deberá:
 
 ---
 
-# 1139. Cross Site Request Forgery Protection
+### 1139. Cross Site Request Forgery Protection
 
 VoltStack deberá integrar protección CSRF.
 
 ---
 
-# 1140. CSRF Model
+### 1140. CSRF Model
 
 Ataque:
 
@@ -14531,7 +14490,7 @@ Unauthorized Request
 
 ---
 
-# 1141. CSRF Token Architecture
+### 1141. CSRF Token Architecture
 
 ```php id="7m2x8q"
 final readonly class CsrfToken
@@ -14546,7 +14505,7 @@ final readonly class CsrfToken
 
 ---
 
-# 1142. CSRF Validation
+### 1142. CSRF Validation
 
 Validar:
 
@@ -14557,7 +14516,7 @@ Validar:
 
 ---
 
-# 1143. CSRF Exceptions
+### 1143. CSRF Exceptions
 
 No aplicar automáticamente a:
 
@@ -14567,7 +14526,7 @@ No aplicar automáticamente a:
 
 ---
 
-# 1144. SameSite Cookie Security
+### 1144. SameSite Cookie Security
 
 Configurar:
 
@@ -14583,13 +14542,13 @@ según necesidad.
 
 ---
 
-# 1145. Server Side Request Forgery Protection
+### 1145. Server Side Request Forgery Protection
 
 VoltStack deberá proteger SSRF.
 
 ---
 
-# 1146. SSRF Threat
+### 1146. SSRF Threat
 
 Ejemplo:
 
@@ -14607,7 +14566,7 @@ Internal Service
 
 ---
 
-# 1147. SSRF Prevention
+### 1147. SSRF Prevention
 
 Validar:
 
@@ -14619,7 +14578,7 @@ Validar:
 
 ---
 
-# 1148. Network Allowlist
+### 1148. Network Allowlist
 
 Permitir únicamente:
 
@@ -14631,7 +14590,7 @@ Approved Services
 
 ---
 
-# 1149. File Upload Security
+### 1149. File Upload Security
 
 Los controladores de archivos deberán proteger:
 
@@ -14642,7 +14601,7 @@ Los controladores de archivos deberán proteger:
 
 ---
 
-# 1150. File Validation Pipeline
+### 1150. File Validation Pipeline
 
 ```text id="q8m2x5"
 Upload
@@ -14667,7 +14626,7 @@ Storage
 
 ---
 
-# 1151. File Name Security
+### 1151. File Name Security
 
 Nunca confiar:
 
@@ -14677,7 +14636,7 @@ Nunca confiar:
 
 ---
 
-# 1152. Path Traversal Protection
+### 1152. Path Traversal Protection
 
 Bloquear:
 
@@ -14691,13 +14650,13 @@ absolute paths
 
 ---
 
-# 1153. Response Security
+### 1153. Response Security
 
 Las respuestas deberán proteger información.
 
 ---
 
-# 1154. Error Disclosure Prevention
+### 1154. Error Disclosure Prevention
 
 Producción:
 
@@ -14711,7 +14670,7 @@ Internal Logging
 
 ---
 
-# 1155. Exception Security
+### 1155. Exception Security
 
 Las excepciones deberán clasificarse:
 
@@ -14721,7 +14680,7 @@ Las excepciones deberán clasificarse:
 
 ---
 
-# 1156. Stack Trace Protection
+### 1156. Stack Trace Protection
 
 Nunca exponer:
 
@@ -14732,7 +14691,7 @@ Nunca exponer:
 
 ---
 
-# 1157. Header Security
+### 1157. Header Security
 
 Agregar:
 
@@ -14743,7 +14702,7 @@ Agregar:
 
 ---
 
-# 1158. Content Security Policy
+### 1158. Content Security Policy
 
 Controlar:
 
@@ -14753,7 +14712,7 @@ Controlar:
 
 ---
 
-# 1159. Sensitive Response Filtering
+### 1159. Sensitive Response Filtering
 
 Antes de responder:
 
@@ -14771,7 +14730,7 @@ Serialize
 
 ---
 
-# 1160. Controller Security Hardening
+### 1160. Controller Security Hardening
 
 Modo estricto:
 
@@ -14787,13 +14746,13 @@ Strict Serialization
 
 ---
 
-# 1161. Security Headers Middleware
+### 1161. Security Headers Middleware
 
 Debe aplicarse globalmente.
 
 ---
 
-# 1162. Runtime Security Enforcement
+### 1162. Runtime Security Enforcement
 
 El runtime deberá verificar:
 
@@ -14804,7 +14763,7 @@ El runtime deberá verificar:
 
 ---
 
-# 1163. Security Fail Safe
+### 1163. Security Fail Safe
 
 Ante incertidumbre:
 
@@ -14814,7 +14773,7 @@ Deny
 
 ---
 
-# 1164. Security Fail Closed
+### 1164. Security Fail Closed
 
 Ejemplos:
 
@@ -14832,7 +14791,7 @@ Deny
 
 ---
 
-# 1165. Controller Security Monitoring
+### 1165. Controller Security Monitoring
 
 Medir:
 
@@ -14843,7 +14802,7 @@ Medir:
 
 ---
 
-# 1166. Controller Security Events
+### 1166. Controller Security Events
 
 Eventos:
 
@@ -14863,7 +14822,7 @@ SensitiveOutputFiltered
 
 ---
 
-# 1167. Security Testing
+### 1167. Security Testing
 
 Pruebas:
 
@@ -14874,7 +14833,7 @@ Pruebas:
 
 ---
 
-# 1168. Controller Security Checklist
+### 1168. Controller Security Checklist
 
 Cada controlador debe validar:
 
@@ -14896,7 +14855,7 @@ Error Handling
 
 ---
 
-# 1169. Secure Development Guidelines
+### 1169. Secure Development Guidelines
 
 Los desarrolladores deberán:
 
@@ -14907,7 +14866,7 @@ Los desarrolladores deberán:
 
 ---
 
-# 1170. Unsafe Patterns Detection
+### 1170. Unsafe Patterns Detection
 
 El framework podrá detectar:
 
@@ -14918,7 +14877,7 @@ El framework podrá detectar:
 
 ---
 
-# 1171. Static Security Analysis
+### 1171. Static Security Analysis
 
 VoltStack podrá integrar:
 
@@ -14929,7 +14888,7 @@ VoltStack podrá integrar:
 
 ---
 
-# 1172. Controller Security Result
+### 1172. Controller Security Result
 
 Esta entrega establece:
 
@@ -14957,7 +14916,7 @@ Runtime Hardening
 
 ---
 
-# 1173. Próxima entrega
+### 1173. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 13`
 
@@ -14975,9 +14934,7 @@ Continuará con:
 - FrankenPHP security integration
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 13
 
 **Documento:** Parte 06
 **Entrega:** 13 de varias
@@ -14985,7 +14942,7 @@ Continuará con:
 
 ---
 
-# 1201. Advanced Controller Runtime Security Architecture
+### 1201. Advanced Controller Runtime Security Architecture
 
 VoltStack deberá incorporar seguridad dentro del runtime donde se ejecutan los controladores.
 
@@ -15006,7 +14963,7 @@ También deberá controlar:
 
 ---
 
-# 1202. Runtime Security Model
+### 1202. Runtime Security Model
 
 Modelo:
 
@@ -15036,7 +14993,7 @@ Response
 
 ---
 
-# 1203. Runtime Security Objectives
+### 1203. Runtime Security Objectives
 
 El runtime deberá garantizar:
 
@@ -15048,7 +15005,7 @@ El runtime deberá garantizar:
 
 ---
 
-# 1204. Controller Runtime Context
+### 1204. Controller Runtime Context
 
 Cada ejecución deberá tener un contexto aislado.
 
@@ -15067,7 +15024,7 @@ final readonly class ControllerRuntimeContext
 
 ---
 
-# 1205. Execution Identity
+### 1205. Execution Identity
 
 Cada ejecución deberá poseer:
 
@@ -15080,7 +15037,7 @@ Cada ejecución deberá poseer:
 
 ---
 
-# 1206. Runtime Isolation Principles
+### 1206. Runtime Isolation Principles
 
 VoltStack deberá evitar:
 
@@ -15098,7 +15055,7 @@ Request B
 
 ---
 
-# 1207. Persistent Runtime Security
+### 1207. Persistent Runtime Security
 
 Debido al soporte de runtimes persistentes como FrankenPHP:
 
@@ -15112,7 +15069,7 @@ El framework deberá controlar:
 
 ---
 
-# 1208. Long Running Process Threats
+### 1208. Long Running Process Threats
 
 Un proceso persistente puede generar:
 
@@ -15123,7 +15080,7 @@ Un proceso persistente puede generar:
 
 ---
 
-# 1209. Request State Isolation
+### 1209. Request State Isolation
 
 Cada request deberá limpiar:
 
@@ -15135,7 +15092,7 @@ Cada request deberá limpiar:
 
 ---
 
-# 1210. Runtime Reset Manager
+### 1210. Runtime Reset Manager
 
 ```php id="2m8x5q"
 interface RuntimeResetManagerInterface
@@ -15146,7 +15103,7 @@ interface RuntimeResetManagerInterface
 
 ---
 
-# 1211. Reset Responsibilities
+### 1211. Reset Responsibilities
 
 Debe limpiar:
 
@@ -15157,7 +15114,7 @@ Debe limpiar:
 
 ---
 
-# 1212. Scoped Dependency Container
+### 1212. Scoped Dependency Container
 
 VoltStack deberá diferenciar:
 
@@ -15175,7 +15132,7 @@ Transient Object
 
 ---
 
-# 1213. Security Scoped Services
+### 1213. Security Scoped Services
 
 Servicios sensibles deberán ser scoped:
 
@@ -15193,7 +15150,7 @@ RequestIdentity
 
 ---
 
-# 1214. Runtime Container Security
+### 1214. Runtime Container Security
 
 El contenedor deberá evitar:
 
@@ -15203,7 +15160,7 @@ El contenedor deberá evitar:
 
 ---
 
-# 1215. Secure Service Resolution
+### 1215. Secure Service Resolution
 
 ```php id="9x4m7q"
 interface SecureResolverInterface
@@ -15217,13 +15174,13 @@ interface SecureResolverInterface
 
 ---
 
-# 1216. Controller Sandbox Concept
+### 1216. Controller Sandbox Concept
 
 VoltStack podrá implementar aislamiento lógico.
 
 ---
 
-# 1217. Sandbox Objectives
+### 1217. Sandbox Objectives
 
 Controlar:
 
@@ -15235,7 +15192,7 @@ Controlar:
 
 ---
 
-# 1218. Controller Capability Sandbox
+### 1218. Controller Capability Sandbox
 
 Un controlador podrá recibir únicamente capacidades necesarias.
 
@@ -15255,13 +15212,13 @@ system.execute
 
 ---
 
-# 1219. Capability Injection
+### 1219. Capability Injection
 
 El framework deberá inyectar recursos autorizados.
 
 ---
 
-# 1220. Restricted Service Access
+### 1220. Restricted Service Access
 
 Ejemplo:
 
@@ -15281,13 +15238,13 @@ Kernel.shutdown()
 
 ---
 
-# 1221. Runtime Resource Limits
+### 1221. Runtime Resource Limits
 
 Cada ejecución podrá tener límites.
 
 ---
 
-# 1222. ResourceLimits
+### 1222. ResourceLimits
 
 ```php id="4x9m7q"
 final readonly class ResourceLimits
@@ -15304,7 +15261,7 @@ final readonly class ResourceLimits
 
 ---
 
-# 1223. Memory Limits
+### 1223. Memory Limits
 
 Controlar:
 
@@ -15315,7 +15272,7 @@ Controlar:
 
 ---
 
-# 1224. Memory Monitoring
+### 1224. Memory Monitoring
 
 Registrar:
 
@@ -15326,7 +15283,7 @@ Registrar:
 
 ---
 
-# 1225. Memory Leak Detection
+### 1225. Memory Leak Detection
 
 Especialmente importante en:
 
@@ -15336,7 +15293,7 @@ Especialmente importante en:
 
 ---
 
-# 1226. Automatic Runtime Recycling
+### 1226. Automatic Runtime Recycling
 
 Cuando un worker alcance:
 
@@ -15348,7 +15305,7 @@ deberá reciclarse.
 
 ---
 
-# 1227. CPU Execution Limits
+### 1227. CPU Execution Limits
 
 Controlar:
 
@@ -15358,7 +15315,7 @@ Controlar:
 
 ---
 
-# 1228. Timeout Management
+### 1228. Timeout Management
 
 Cada controlador deberá tener:
 
@@ -15368,7 +15325,7 @@ Cada controlador deberá tener:
 
 ---
 
-# 1229. Timeout Policy
+### 1229. Timeout Policy
 
 Ejemplo:
 
@@ -15377,7 +15334,6 @@ Normal Request
 
 30 seconds
 
-
 Critical Operation
 
 120 seconds
@@ -15385,7 +15341,7 @@ Critical Operation
 
 ---
 
-# 1230. Timeout Enforcement
+### 1230. Timeout Enforcement
 
 Cuando exceda:
 
@@ -15403,7 +15359,7 @@ Return Safe Error
 
 ---
 
-# 1231. Database Resource Security
+### 1231. Database Resource Security
 
 Controlar:
 
@@ -15414,7 +15370,7 @@ Controlar:
 
 ---
 
-# 1232. Query Limit Policy
+### 1232. Query Limit Policy
 
 Ejemplo:
 
@@ -15426,13 +15382,13 @@ Maximum:
 
 ---
 
-# 1233. N+1 Detection Security
+### 1233. N+1 Detection Security
 
 El exceso de consultas puede ser un ataque DoS.
 
 ---
 
-# 1234. External Call Limits
+### 1234. External Call Limits
 
 Controlar:
 
@@ -15443,7 +15399,7 @@ Controlar:
 
 ---
 
-# 1235. External Resource Budget
+### 1235. External Resource Budget
 
 Ejemplo:
 
@@ -15457,13 +15413,13 @@ Maximum:
 
 ---
 
-# 1236. Concurrency Security Architecture
+### 1236. Concurrency Security Architecture
 
 VoltStack deberá controlar ejecución concurrente.
 
 ---
 
-# 1237. Concurrency Threats
+### 1237. Concurrency Threats
 
 Riesgos:
 
@@ -15474,7 +15430,7 @@ Riesgos:
 
 ---
 
-# 1238. Request Concurrency Control
+### 1238. Request Concurrency Control
 
 Permitir:
 
@@ -15485,7 +15441,7 @@ Permitir:
 
 ---
 
-# 1239. Idempotency Security
+### 1239. Idempotency Security
 
 Operaciones críticas deberán soportar:
 
@@ -15499,7 +15455,7 @@ Same Result
 
 ---
 
-# 1240. Idempotency Key
+### 1240. Idempotency Key
 
 ```php id="2x9m6q"
 final readonly class IdempotencyKey
@@ -15514,7 +15470,7 @@ final readonly class IdempotencyKey
 
 ---
 
-# 1241. Race Condition Protection
+### 1241. Race Condition Protection
 
 Usar:
 
@@ -15524,7 +15480,7 @@ Usar:
 
 ---
 
-# 1242. Security Lock Manager
+### 1242. Security Lock Manager
 
 ```php id="8m5q3x"
 interface SecurityLockManagerInterface
@@ -15537,13 +15493,13 @@ interface SecurityLockManagerInterface
 
 ---
 
-# 1243. Worker Security Architecture
+### 1243. Worker Security Architecture
 
 Los workers deberán tener identidad propia.
 
 ---
 
-# 1244. Worker Identity
+### 1244. Worker Identity
 
 ```php id="6q8m4x"
 final readonly class WorkerIdentity
@@ -15559,7 +15515,7 @@ final readonly class WorkerIdentity
 
 ---
 
-# 1245. Worker Permission Scope
+### 1245. Worker Permission Scope
 
 Un worker deberá tener solamente:
 
@@ -15569,7 +15525,7 @@ Un worker deberá tener solamente:
 
 ---
 
-# 1246. Queue Job Security
+### 1246. Queue Job Security
 
 Antes de ejecutar:
 
@@ -15595,7 +15551,7 @@ Execute
 
 ---
 
-# 1247. Job Payload Security
+### 1247. Job Payload Security
 
 Proteger:
 
@@ -15605,7 +15561,7 @@ Proteger:
 
 ---
 
-# 1248. Secure Job Serialization
+### 1248. Secure Job Serialization
 
 Evitar:
 
@@ -15615,7 +15571,7 @@ Evitar:
 
 ---
 
-# 1249. Worker Isolation
+### 1249. Worker Isolation
 
 Separar:
 
@@ -15625,13 +15581,13 @@ Separar:
 
 ---
 
-# 1250. FrankenPHP Security Integration
+### 1250. FrankenPHP Security Integration
 
 VoltStack deberá diseñarse considerando FrankenPHP desde inicio.
 
 ---
 
-# 1251. FrankenPHP Runtime Model
+### 1251. FrankenPHP Runtime Model
 
 El modelo permite:
 
@@ -15641,7 +15597,7 @@ El modelo permite:
 
 ---
 
-# 1252. Security Implications
+### 1252. Security Implications
 
 Requiere controlar:
 
@@ -15652,7 +15608,7 @@ Requiere controlar:
 
 ---
 
-# 1253. Worker Lifecycle Security
+### 1253. Worker Lifecycle Security
 
 Ciclo:
 
@@ -15686,7 +15642,7 @@ Next Request
 
 ---
 
-# 1254. FrankenPHP Worker Isolation
+### 1254. FrankenPHP Worker Isolation
 
 Cada request deberá reiniciar:
 
@@ -15697,7 +15653,7 @@ Cada request deberá reiniciar:
 
 ---
 
-# 1255. Persistent Service Security
+### 1255. Persistent Service Security
 
 Servicios singleton deberán clasificarse:
 
@@ -15711,7 +15667,7 @@ Request Scoped
 
 ---
 
-# 1256. Safe Persistent Examples
+### 1256. Safe Persistent Examples
 
 Permitidos:
 
@@ -15722,7 +15678,7 @@ Permitidos:
 
 ---
 
-# 1257. Unsafe Persistent Examples
+### 1257. Unsafe Persistent Examples
 
 No mantener:
 
@@ -15733,7 +15689,7 @@ No mantener:
 
 ---
 
-# 1258. Runtime Security Health
+### 1258. Runtime Security Health
 
 Monitorear:
 
@@ -15745,7 +15701,7 @@ Monitorear:
 
 ---
 
-# 1259. Runtime Security Events
+### 1259. Runtime Security Events
 
 Eventos:
 
@@ -15765,7 +15721,7 @@ ConcurrentExecutionBlocked
 
 ---
 
-# 1260. Runtime Security Result
+### 1260. Runtime Security Result
 
 Esta entrega establece:
 
@@ -15793,7 +15749,7 @@ FrankenPHP Integration
 
 ---
 
-# 1261. Próxima entrega
+### 1261. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 14`
 
@@ -15809,9 +15765,7 @@ Continuará con:
 - Reactive state security
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 14
 
 **Documento:** Parte 06
 **Entrega:** 14 de varias
@@ -15819,7 +15773,7 @@ Continuará con:
 
 ---
 
-# 1301. SPA Runtime Security Architecture
+### 1301. SPA Runtime Security Architecture
 
 VoltStack deberá integrar seguridad dentro del modelo SPA Runtime.
 
@@ -15838,7 +15792,7 @@ Authorized
 
 ---
 
-# 1302. SPA Security Principles
+### 1302. SPA Security Principles
 
 El sistema deberá aplicar:
 
@@ -15851,7 +15805,7 @@ El sistema deberá aplicar:
 
 ---
 
-# 1303. Client Trust Boundary
+### 1303. Client Trust Boundary
 
 Arquitectura:
 
@@ -15883,7 +15837,7 @@ Application Core
 
 ---
 
-# 1304. Backend Security Authority
+### 1304. Backend Security Authority
 
 VoltStack deberá mantener:
 
@@ -15901,7 +15855,7 @@ El frontend únicamente deberá recibir:
 
 ---
 
-# 1305. SPA Authorization Model
+### 1305. SPA Authorization Model
 
 Modelo:
 
@@ -15933,7 +15887,7 @@ Authorization Decision
 
 ---
 
-# 1306. Volt Protocol Security Layer
+### 1306. Volt Protocol Security Layer
 
 El protocolo de comunicación deberá incluir seguridad.
 
@@ -15953,7 +15907,7 @@ Ejemplo:
 
 ---
 
-# 1307. Protocol Security Metadata
+### 1307. Protocol Security Metadata
 
 Cada payload podrá incluir:
 
@@ -15966,7 +15920,7 @@ Cada payload podrá incluir:
 
 ---
 
-# 1308. Protocol Integrity Validation
+### 1308. Protocol Integrity Validation
 
 El servidor deberá validar:
 
@@ -15978,13 +15932,13 @@ El servidor deberá validar:
 
 ---
 
-# 1309. Hydration Security Architecture
+### 1309. Hydration Security Architecture
 
 La hidratación deberá considerarse una operación privilegiada.
 
 ---
 
-# 1310. Hydration Threat Model
+### 1310. Hydration Threat Model
 
 Amenazas:
 
@@ -15996,7 +15950,7 @@ Amenazas:
 
 ---
 
-# 1311. Secure Hydration Flow
+### 1311. Secure Hydration Flow
 
 ```text
 id="m3q8x1"
@@ -16030,7 +15984,7 @@ Restore State
 
 ---
 
-# 1312. Hydration Payload Security
+### 1312. Hydration Payload Security
 
 El payload deberá incluir:
 
@@ -16050,7 +16004,7 @@ Expiration
 
 ---
 
-# 1313. State Integrity Validation
+### 1313. State Integrity Validation
 
 Evitar:
 
@@ -16068,7 +16022,7 @@ Server accepts
 
 ---
 
-# 1314. Signed Component State
+### 1314. Signed Component State
 
 VoltStack podrá firmar estados sensibles.
 
@@ -16088,7 +16042,7 @@ final readonly class SignedComponentState
 
 ---
 
-# 1315. State Validation Pipeline
+### 1315. State Validation Pipeline
 
 ```text
 id="4x7m9p"
@@ -16118,13 +16072,13 @@ Execution
 
 ---
 
-# 1316. Reactive State Security
+### 1316. Reactive State Security
 
 Los estados reactivos deberán clasificarse.
 
 ---
 
-# 1317. State Classification
+### 1317. State Classification
 
 Tipos:
 
@@ -16144,7 +16098,7 @@ Restricted State
 
 ---
 
-# 1318. Public State
+### 1318. Public State
 
 Ejemplo:
 
@@ -16160,7 +16114,7 @@ Sin restricciones especiales.
 
 ---
 
-# 1319. Sensitive State
+### 1319. Sensitive State
 
 Ejemplos:
 
@@ -16178,7 +16132,7 @@ Debe validarse siempre.
 
 ---
 
-# 1320. Restricted State
+### 1320. Restricted State
 
 Nunca deberá viajar al cliente:
 
@@ -16194,13 +16148,13 @@ internal secrets
 
 ---
 
-# 1321. Component Authorization Model
+### 1321. Component Authorization Model
 
 Los componentes deberán tener seguridad propia.
 
 ---
 
-# 1322. Component Security Definition
+### 1322. Component Security Definition
 
 ```php
 final readonly class ComponentSecurityDefinition
@@ -16217,13 +16171,12 @@ final readonly class ComponentSecurityDefinition
 
 ---
 
-# 1323. Component Permission Example
+### 1323. Component Permission Example
 
 ```text
 Component:
 
 InvoiceApproval
-
 
 Requires:
 
@@ -16234,7 +16187,7 @@ invoice.approve
 
 ---
 
-# 1324. Component Action Authorization
+### 1324. Component Action Authorization
 
 Cada acción del componente deberá autorizarse.
 
@@ -16256,13 +16209,13 @@ Execute
 
 ---
 
-# 1325. Event Authorization
+### 1325. Event Authorization
 
 Los eventos frontend deberán validarse.
 
 ---
 
-# 1326. Client Event Security
+### 1326. Client Event Security
 
 Un evento recibido:
 
@@ -16277,7 +16230,7 @@ no deberá ejecutarse directamente.
 
 ---
 
-# 1327. Secure Event Pipeline
+### 1327. Secure Event Pipeline
 
 ```text
 id="6q3m8x"
@@ -16303,7 +16256,7 @@ Action Execution
 
 ---
 
-# 1328. Event Replay Protection
+### 1328. Event Replay Protection
 
 Eventos críticos deberán incluir:
 
@@ -16314,7 +16267,7 @@ Eventos críticos deberán incluir:
 
 ---
 
-# 1329. Reactive Action Security
+### 1329. Reactive Action Security
 
 Acciones reactivas deberán respetar:
 
@@ -16325,7 +16278,7 @@ Acciones reactivas deberán respetar:
 
 ---
 
-# 1330. Live Interaction Security Model
+### 1330. Live Interaction Security Model
 
 Ejemplo:
 
@@ -16351,7 +16304,7 @@ State updates
 
 ---
 
-# 1331. Client Capability Model
+### 1331. Client Capability Model
 
 El backend podrá entregar capacidades.
 
@@ -16368,7 +16321,7 @@ Ejemplo:
 
 ---
 
-# 1332. Capability Limitations
+### 1332. Capability Limitations
 
 Las capacidades:
 
@@ -16380,7 +16333,7 @@ NO sustituyen:
 
 ---
 
-# 1333. Frontend Permission Hints
+### 1333. Frontend Permission Hints
 
 El frontend podrá usar permisos para:
 
@@ -16390,7 +16343,7 @@ El frontend podrá usar permisos para:
 
 ---
 
-# 1334. Security Rule
+### 1334. Security Rule
 
 Regla:
 
@@ -16404,19 +16357,19 @@ Security Control
 
 ---
 
-# 1335. Server Enforcement Required
+### 1335. Server Enforcement Required
 
 Toda acción debe validar nuevamente.
 
 ---
 
-# 1336. SPA Route Security
+### 1336. SPA Route Security
 
 Las rutas SPA deberán protegerse.
 
 ---
 
-# 1337. Frontend Route Metadata
+### 1337. Frontend Route Metadata
 
 El manifest podrá contener:
 
@@ -16429,7 +16382,7 @@ El manifest podrá contener:
 
 ---
 
-# 1338. Frontend Route Limitation
+### 1338. Frontend Route Limitation
 
 El manifest no es autoridad.
 
@@ -16441,7 +16394,7 @@ Solo sirve para:
 
 ---
 
-# 1339. Server Route Verification
+### 1339. Server Route Verification
 
 Siempre:
 
@@ -16459,7 +16412,7 @@ Response
 
 ---
 
-# 1340. Component Visibility Security
+### 1340. Component Visibility Security
 
 Un componente puede estar:
 
@@ -16470,7 +16423,7 @@ Un componente puede estar:
 
 ---
 
-# 1341. Visibility vs Authorization
+### 1341. Visibility vs Authorization
 
 Diferenciar:
 
@@ -16481,7 +16434,6 @@ Hidden
 
 UX Decision
 
-
 Denied
 
 =
@@ -16491,7 +16443,7 @@ Security Decision
 
 ---
 
-# 1342. Secure Component Rendering
+### 1342. Secure Component Rendering
 
 El renderer deberá evaluar:
 
@@ -16513,7 +16465,7 @@ Render
 
 ---
 
-# 1343. Unauthorized Component Handling
+### 1343. Unauthorized Component Handling
 
 Opciones:
 
@@ -16524,7 +16476,7 @@ Opciones:
 
 ---
 
-# 1344. Sensitive Component Protection
+### 1344. Sensitive Component Protection
 
 Ejemplos:
 
@@ -16535,7 +16487,7 @@ Ejemplos:
 
 ---
 
-# 1345. SPA Session Security
+### 1345. SPA Session Security
 
 Controlar:
 
@@ -16546,7 +16498,7 @@ Controlar:
 
 ---
 
-# 1346. Session Synchronization
+### 1346. Session Synchronization
 
 Backend y frontend deberán compartir:
 
@@ -16556,7 +16508,7 @@ Backend y frontend deberán compartir:
 
 ---
 
-# 1347. Session Revocation
+### 1347. Session Revocation
 
 Cuando ocurre:
 
@@ -16580,7 +16532,7 @@ Clear State
 
 ---
 
-# 1348. Client Storage Security
+### 1348. Client Storage Security
 
 Evitar almacenar:
 
@@ -16590,7 +16542,7 @@ Evitar almacenar:
 
 ---
 
-# 1349. Browser Security Model
+### 1349. Browser Security Model
 
 Aplicar:
 
@@ -16601,7 +16553,7 @@ Aplicar:
 
 ---
 
-# 1350. SPA Data Exposure Prevention
+### 1350. SPA Data Exposure Prevention
 
 No enviar:
 
@@ -16611,7 +16563,7 @@ No enviar:
 
 ---
 
-# 1351. Minimal State Principle
+### 1351. Minimal State Principle
 
 Enviar:
 
@@ -16625,13 +16577,13 @@ Autorizado
 
 ---
 
-# 1352. Protocol Version Security
+### 1352. Protocol Version Security
 
 El Volt Protocol deberá versionarse.
 
 ---
 
-# 1353. Protocol Compatibility Validation
+### 1353. Protocol Compatibility Validation
 
 Validar:
 
@@ -16641,7 +16593,7 @@ Validar:
 
 ---
 
-# 1354. Protocol Downgrade Protection
+### 1354. Protocol Downgrade Protection
 
 Evitar:
 
@@ -16655,7 +16607,7 @@ Old Insecure Protocol
 
 ---
 
-# 1355. Runtime Security Middleware
+### 1355. Runtime Security Middleware
 
 El runtime frontend podrá incluir:
 
@@ -16666,7 +16618,7 @@ El runtime frontend podrá incluir:
 
 ---
 
-# 1356. Security Bridge Architecture
+### 1356. Security Bridge Architecture
 
 ```text
 id="5m8q2x"
@@ -16684,7 +16636,7 @@ Backend Authorization Engine
 
 ---
 
-# 1357. React Integration Security
+### 1357. React Integration Security
 
 Para `voltstack/react`:
 
@@ -16696,7 +16648,7 @@ React podrá consumir componentes, pero:
 
 ---
 
-# 1358. React Component Boundary
+### 1358. React Component Boundary
 
 Modelo:
 
@@ -16718,7 +16670,7 @@ Policy Engine
 
 ---
 
-# 1359. Hydration Attack Prevention
+### 1359. Hydration Attack Prevention
 
 Prevenir:
 
@@ -16729,7 +16681,7 @@ Prevenir:
 
 ---
 
-# 1360. Component Identity Protection
+### 1360. Component Identity Protection
 
 Cada componente deberá tener:
 
@@ -16740,7 +16692,7 @@ Cada componente deberá tener:
 
 ---
 
-# 1361. Security Events SPA
+### 1361. Security Events SPA
 
 Eventos:
 
@@ -16760,7 +16712,7 @@ SessionRevoked
 
 ---
 
-# 1362. SPA Security Testing
+### 1362. SPA Security Testing
 
 Pruebas:
 
@@ -16772,7 +16724,7 @@ Pruebas:
 
 ---
 
-# 1363. SPA Security Result
+### 1363. SPA Security Result
 
 Esta entrega establece:
 
@@ -16796,7 +16748,7 @@ Frontend/Backend Security Separation
 
 ---
 
-# 1364. Próxima entrega
+### 1364. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 15`
 
@@ -16813,9 +16765,7 @@ Continuará con:
 - Adaptive security controls
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 15
 
 **Documento:** Parte 06
 **Entrega:** 15 de varias
@@ -16823,7 +16773,7 @@ Continuará con:
 
 ---
 
-# 1401. Advanced Edge Security Architecture
+### 1401. Advanced Edge Security Architecture
 
 VoltStack deberá contemplar seguridad en la capa perimetral antes de que una solicitud llegue al controlador.
 
@@ -16837,7 +16787,7 @@ La arquitectura deberá proteger:
 
 ---
 
-# 1402. Edge Security Model
+### 1402. Edge Security Model
 
 Modelo:
 
@@ -16867,7 +16817,7 @@ Application
 
 ---
 
-# 1403. Edge Security Objectives
+### 1403. Edge Security Objectives
 
 El sistema deberá:
 
@@ -16879,7 +16829,7 @@ El sistema deberá:
 
 ---
 
-# 1404. Edge Security Components
+### 1404. Edge Security Components
 
 VoltStack deberá permitir:
 
@@ -16903,13 +16853,13 @@ Security Cache
 
 ---
 
-# 1405. API Gateway Security Architecture
+### 1405. API Gateway Security Architecture
 
 El gateway será un punto inicial de control.
 
 ---
 
-# 1406. Gateway Responsibilities
+### 1406. Gateway Responsibilities
 
 Debe manejar:
 
@@ -16922,7 +16872,7 @@ Debe manejar:
 
 ---
 
-# 1407. Gateway Security Pipeline
+### 1407. Gateway Security Pipeline
 
 ```text id="4m8x2q"
 Request
@@ -16950,7 +16900,7 @@ Forward
 
 ---
 
-# 1408. Gateway vs Controller Authorization
+### 1408. Gateway vs Controller Authorization
 
 Diferencia:
 
@@ -16968,7 +16918,7 @@ Can this user perform this action?
 
 ---
 
-# 1409. Layered Authorization
+### 1409. Layered Authorization
 
 Modelo:
 
@@ -16994,13 +16944,13 @@ Data
 
 ---
 
-# 1410. Request Firewall Architecture
+### 1410. Request Firewall Architecture
 
 VoltStack podrá incluir reglas preventivas.
 
 ---
 
-# 1411. Request Firewall Purpose
+### 1411. Request Firewall Purpose
 
 Detectar:
 
@@ -17011,7 +16961,7 @@ Detectar:
 
 ---
 
-# 1412. Firewall Rule Model
+### 1412. Firewall Rule Model
 
 ```php id="3x8m7q"
 final readonly class FirewallRule
@@ -17028,7 +16978,7 @@ final readonly class FirewallRule
 
 ---
 
-# 1413. Firewall Actions
+### 1413. Firewall Actions
 
 ```php id="9m5x2q"
 enum FirewallAction: string
@@ -17042,7 +16992,7 @@ enum FirewallAction: string
 
 ---
 
-# 1414. Firewall Detection Types
+### 1414. Firewall Detection Types
 
 Detectar:
 
@@ -17054,7 +17004,7 @@ Detectar:
 
 ---
 
-# 1415. Positive Security Model
+### 1415. Positive Security Model
 
 Preferido:
 
@@ -17066,7 +17016,7 @@ Reject Unknown
 
 ---
 
-# 1416. Negative Security Model
+### 1416. Negative Security Model
 
 Basado en:
 
@@ -17076,19 +17026,19 @@ Block Known Bad
 
 ---
 
-# 1417. Hybrid Firewall Model
+### 1417. Hybrid Firewall Model
 
 VoltStack deberá soportar ambos.
 
 ---
 
-# 1418. Rate Limiting Security Architecture
+### 1418. Rate Limiting Security Architecture
 
 El control de frecuencia será parte de autorización.
 
 ---
 
-# 1419. Rate Limit Objectives
+### 1419. Rate Limit Objectives
 
 Proteger contra:
 
@@ -17099,7 +17049,7 @@ Proteger contra:
 
 ---
 
-# 1420. Rate Limit Dimensions
+### 1420. Rate Limit Dimensions
 
 Puede aplicarse por:
 
@@ -17121,7 +17071,7 @@ Action
 
 ---
 
-# 1421. RateLimitPolicy
+### 1421. RateLimitPolicy
 
 ```php id="5m8q3x"
 final readonly class RateLimitPolicy
@@ -17138,7 +17088,7 @@ final readonly class RateLimitPolicy
 
 ---
 
-# 1422. Rate Limit Algorithms
+### 1422. Rate Limit Algorithms
 
 Soportar:
 
@@ -17149,7 +17099,7 @@ Soportar:
 
 ---
 
-# 1423. Token Bucket Model
+### 1423. Token Bucket Model
 
 Ejemplo:
 
@@ -17169,7 +17119,7 @@ Refill
 
 ---
 
-# 1424. Adaptive Rate Limiting
+### 1424. Adaptive Rate Limiting
 
 Los límites podrán cambiar según:
 
@@ -17180,7 +17130,7 @@ Los límites podrán cambiar según:
 
 ---
 
-# 1425. Risk-Based Rate Limiting
+### 1425. Risk-Based Rate Limiting
 
 Ejemplo:
 
@@ -17198,7 +17148,7 @@ Usuario sospechoso:
 
 ---
 
-# 1426. Rate Limit Headers
+### 1426. Rate Limit Headers
 
 Responder:
 
@@ -17212,7 +17162,7 @@ Reset
 
 ---
 
-# 1427. Rate Limit Events
+### 1427. Rate Limit Events
 
 Eventos:
 
@@ -17226,13 +17176,13 @@ SuspiciousTrafficDetected
 
 ---
 
-# 1428. Bot Protection Architecture
+### 1428. Bot Protection Architecture
 
 VoltStack deberá diferenciar usuarios humanos y automatizados.
 
 ---
 
-# 1429. Bot Threats
+### 1429. Bot Threats
 
 Incluye:
 
@@ -17243,7 +17193,7 @@ Incluye:
 
 ---
 
-# 1430. Bot Detection Signals
+### 1430. Bot Detection Signals
 
 Usar:
 
@@ -17255,7 +17205,7 @@ Usar:
 
 ---
 
-# 1431. BotClassification
+### 1431. BotClassification
 
 ```php id="7m2x5q"
 enum BotClassification: string
@@ -17269,7 +17219,7 @@ enum BotClassification: string
 
 ---
 
-# 1432. Bot Challenge System
+### 1432. Bot Challenge System
 
 Acciones:
 
@@ -17281,7 +17231,7 @@ Acciones:
 
 ---
 
-# 1433. Behavioral Analysis
+### 1433. Behavioral Analysis
 
 Analizar:
 
@@ -17292,7 +17242,7 @@ Analizar:
 
 ---
 
-# 1434. Credential Stuffing Protection
+### 1434. Credential Stuffing Protection
 
 Proteger:
 
@@ -17302,7 +17252,7 @@ Proteger:
 
 ---
 
-# 1435. Login Abuse Prevention
+### 1435. Login Abuse Prevention
 
 Aplicar:
 
@@ -17312,13 +17262,13 @@ Aplicar:
 
 ---
 
-# 1436. Request Fingerprinting Architecture
+### 1436. Request Fingerprinting Architecture
 
 VoltStack podrá crear una huella de solicitud.
 
 ---
 
-# 1437. Fingerprint Components
+### 1437. Fingerprint Components
 
 Puede incluir:
 
@@ -17338,7 +17288,7 @@ Network
 
 ---
 
-# 1438. RequestFingerprint
+### 1438. RequestFingerprint
 
 ```php id="2m8x5q"
 final readonly class RequestFingerprint
@@ -17354,7 +17304,7 @@ final readonly class RequestFingerprint
 
 ---
 
-# 1439. Fingerprint Usage
+### 1439. Fingerprint Usage
 
 Usos:
 
@@ -17364,7 +17314,7 @@ Usos:
 
 ---
 
-# 1440. Fingerprint Privacy
+### 1440. Fingerprint Privacy
 
 No deberá utilizarse para:
 
@@ -17374,7 +17324,7 @@ No deberá utilizarse para:
 
 ---
 
-# 1441. IP Reputation Security
+### 1441. IP Reputation Security
 
 Evaluar:
 
@@ -17384,7 +17334,7 @@ Evaluar:
 
 ---
 
-# 1442. IP Reputation Levels
+### 1442. IP Reputation Levels
 
 ```php id="8m3q7x"
 enum ReputationLevel: string
@@ -17398,7 +17348,7 @@ enum ReputationLevel: string
 
 ---
 
-# 1443. Reputation Sources
+### 1443. Reputation Sources
 
 Integración con:
 
@@ -17408,7 +17358,7 @@ Integración con:
 
 ---
 
-# 1444. Geo Security Controls
+### 1444. Geo Security Controls
 
 Permitir:
 
@@ -17418,7 +17368,7 @@ Permitir:
 
 ---
 
-# 1445. Geo Policy Example
+### 1445. Geo Policy Example
 
 ```text id="5x9m2q"
 Allow Admin Access
@@ -17430,7 +17380,7 @@ Corporate Regions
 
 ---
 
-# 1446. Geo Security Limitations
+### 1446. Geo Security Limitations
 
 No confiar únicamente en:
 
@@ -17440,13 +17390,13 @@ No confiar únicamente en:
 
 ---
 
-# 1447. Threat Intelligence Integration
+### 1447. Threat Intelligence Integration
 
 VoltStack podrá consumir señales externas.
 
 ---
 
-# 1448. Threat Intelligence Data
+### 1448. Threat Intelligence Data
 
 Ejemplos:
 
@@ -17457,7 +17407,7 @@ Ejemplos:
 
 ---
 
-# 1449. Threat Intelligence Provider
+### 1449. Threat Intelligence Provider
 
 ```php id="3m7x8q"
 interface ThreatIntelligenceProviderInterface
@@ -17470,7 +17420,7 @@ interface ThreatIntelligenceProviderInterface
 
 ---
 
-# 1450. Threat Assessment
+### 1450. Threat Assessment
 
 ```php id="9q5m2x"
 final readonly class ThreatAssessment
@@ -17486,13 +17436,13 @@ final readonly class ThreatAssessment
 
 ---
 
-# 1451. Adaptive Security Architecture
+### 1451. Adaptive Security Architecture
 
 VoltStack deberá ajustar controles dinámicamente.
 
 ---
 
-# 1452. Adaptive Security Model
+### 1452. Adaptive Security Model
 
 ```text id="6m8x3q"
 Observe
@@ -17516,7 +17466,7 @@ Learn
 
 ---
 
-# 1453. Adaptive Controls
+### 1453. Adaptive Controls
 
 Puede modificar:
 
@@ -17528,7 +17478,7 @@ Puede modificar:
 
 ---
 
-# 1454. Security Response Actions
+### 1454. Security Response Actions
 
 Acciones:
 
@@ -17548,7 +17498,7 @@ Revoke
 
 ---
 
-# 1455. Risk-Based Enforcement
+### 1455. Risk-Based Enforcement
 
 Ejemplo:
 
@@ -17566,7 +17516,7 @@ Step-Up Authentication
 
 ---
 
-# 1456. Request Anomaly Detection
+### 1456. Request Anomaly Detection
 
 Detectar:
 
@@ -17576,7 +17526,7 @@ Detectar:
 
 ---
 
-# 1457. Behavioral Baseline
+### 1457. Behavioral Baseline
 
 Crear patrones:
 
@@ -17586,7 +17536,7 @@ Crear patrones:
 
 ---
 
-# 1458. Anomaly Score
+### 1458. Anomaly Score
 
 ```php id="7x3m9q"
 final readonly class AnomalyScore
@@ -17601,7 +17551,7 @@ final readonly class AnomalyScore
 
 ---
 
-# 1459. Security Automation
+### 1459. Security Automation
 
 Automatizar:
 
@@ -17612,7 +17562,7 @@ Automatizar:
 
 ---
 
-# 1460. Edge Security Events
+### 1460. Edge Security Events
 
 Eventos:
 
@@ -17634,7 +17584,7 @@ AdaptiveControlApplied
 
 ---
 
-# 1461. Edge Security Monitoring
+### 1461. Edge Security Monitoring
 
 Métricas:
 
@@ -17645,7 +17595,7 @@ Métricas:
 
 ---
 
-# 1462. False Positive Management
+### 1462. False Positive Management
 
 Debe permitir:
 
@@ -17655,7 +17605,7 @@ Debe permitir:
 
 ---
 
-# 1463. Security Rule Lifecycle
+### 1463. Security Rule Lifecycle
 
 ```text id="5m8x2q"
 Draft
@@ -17679,7 +17629,7 @@ Retired
 
 ---
 
-# 1464. Edge Security Testing
+### 1464. Edge Security Testing
 
 Probar:
 
@@ -17690,7 +17640,7 @@ Probar:
 
 ---
 
-# 1465. Edge Security Result
+### 1465. Edge Security Result
 
 Esta entrega establece:
 
@@ -17714,7 +17664,7 @@ Adaptive Security
 
 ---
 
-# 1466. Próxima entrega
+### 1466. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 16`
 
@@ -17731,9 +17681,7 @@ Continuará con:
 - Cryptographic lifecycle
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 16
 
 **Documento:** Parte 06
 **Entrega:** 16 de varias
@@ -17741,7 +17689,7 @@ Continuará con:
 
 ---
 
-# 1501. Cryptographic Security Architecture
+### 1501. Cryptographic Security Architecture
 
 VoltStack deberá incorporar una arquitectura criptográfica transversal.
 
@@ -17758,7 +17706,7 @@ La criptografía deberá proteger:
 
 ---
 
-# 1502. Cryptographic Security Principles
+### 1502. Cryptographic Security Principles
 
 La arquitectura deberá cumplir:
 
@@ -17784,7 +17732,7 @@ Key Management
 
 ---
 
-# 1503. Cryptographic Security Layers
+### 1503. Cryptographic Security Layers
 
 Modelo:
 
@@ -17810,7 +17758,7 @@ Infrastructure Encryption
 
 ---
 
-# 1504. Cryptographic Service Abstraction
+### 1504. Cryptographic Service Abstraction
 
 VoltStack no deberá depender directamente de librerías criptográficas.
 
@@ -17818,7 +17766,7 @@ Debe existir una abstracción.
 
 ---
 
-# 1505. Crypto Service Interface
+### 1505. Crypto Service Interface
 
 ```php id="8q3m7x"
 interface CryptoServiceInterface
@@ -17828,7 +17776,6 @@ interface CryptoServiceInterface
         EncryptionContext $context
     ): EncryptedValue;
 
-
     public function decrypt(
         EncryptedValue $value
     ): string;
@@ -17837,7 +17784,7 @@ interface CryptoServiceInterface
 
 ---
 
-# 1506. Crypto Providers
+### 1506. Crypto Providers
 
 Soportar:
 
@@ -17855,7 +17802,7 @@ Custom Provider
 
 ---
 
-# 1507. Encryption Context
+### 1507. Encryption Context
 
 Debe definir:
 
@@ -17868,7 +17815,7 @@ Debe definir:
 
 ---
 
-# 1508. EncryptionContext
+### 1508. EncryptionContext
 
 ```php id="6m8q4x"
 final readonly class EncryptionContext
@@ -17885,13 +17832,13 @@ final readonly class EncryptionContext
 
 ---
 
-# 1509. Cryptographic Algorithm Policy
+### 1509. Cryptographic Algorithm Policy
 
 VoltStack deberá controlar algoritmos permitidos.
 
 ---
 
-# 1510. Approved Algorithms
+### 1510. Approved Algorithms
 
 Ejemplos:
 
@@ -17919,7 +17866,7 @@ Argon2id
 
 ---
 
-# 1511. Weak Algorithm Blocking
+### 1511. Weak Algorithm Blocking
 
 Bloquear:
 
@@ -17930,13 +17877,13 @@ Bloquear:
 
 ---
 
-# 1512. Encryption at Rest Architecture
+### 1512. Encryption at Rest Architecture
 
 Los datos almacenados deberán poder cifrarse.
 
 ---
 
-# 1513. Data Encryption Layers
+### 1513. Data Encryption Layers
 
 ```text id="8m2x5q"
 Database Encryption
@@ -17956,7 +17903,7 @@ Storage Encryption
 
 ---
 
-# 1514. Database Encryption
+### 1514. Database Encryption
 
 Puede incluir:
 
@@ -17966,7 +17913,7 @@ Puede incluir:
 
 ---
 
-# 1515. Field-Level Encryption
+### 1515. Field-Level Encryption
 
 Campos sensibles:
 
@@ -17982,7 +17929,7 @@ Private Information
 
 ---
 
-# 1516. Encrypted Field Definition
+### 1516. Encrypted Field Definition
 
 ```php id="6x9m3q"
 #[Encrypted(
@@ -17993,7 +17940,7 @@ private string $bankAccount;
 
 ---
 
-# 1517. Transparent Encryption
+### 1517. Transparent Encryption
 
 El framework podrá manejar:
 
@@ -18011,7 +17958,7 @@ Storage
 
 ---
 
-# 1518. Encryption Metadata
+### 1518. Encryption Metadata
 
 Debe almacenar:
 
@@ -18022,7 +17969,7 @@ Debe almacenar:
 
 ---
 
-# 1519. Encryption Versioning
+### 1519. Encryption Versioning
 
 Permitir:
 
@@ -18040,13 +17987,13 @@ Re-encryption
 
 ---
 
-# 1520. Data-in-Transit Security
+### 1520. Data-in-Transit Security
 
 Toda comunicación sensible deberá protegerse.
 
 ---
 
-# 1521. Transport Security
+### 1521. Transport Security
 
 Requerir:
 
@@ -18056,7 +18003,7 @@ Requerir:
 
 ---
 
-# 1522. TLS Policy
+### 1522. TLS Policy
 
 Configurar:
 
@@ -18066,7 +18013,7 @@ Configurar:
 
 ---
 
-# 1523. Certificate Management
+### 1523. Certificate Management
 
 Debe soportar:
 
@@ -18077,7 +18024,7 @@ Debe soportar:
 
 ---
 
-# 1524. Certificate Validation
+### 1524. Certificate Validation
 
 Validar:
 
@@ -18088,7 +18035,7 @@ Validar:
 
 ---
 
-# 1525. Internal Service Encryption
+### 1525. Internal Service Encryption
 
 Las comunicaciones internas deberán protegerse.
 
@@ -18108,7 +18055,7 @@ Database
 
 ---
 
-# 1526. Mutual TLS Support
+### 1526. Mutual TLS Support
 
 Para servicios críticos:
 
@@ -18126,13 +18073,13 @@ Service B
 
 ---
 
-# 1527. Secret Management Architecture
+### 1527. Secret Management Architecture
 
 VoltStack deberá manejar secretos correctamente.
 
 ---
 
-# 1528. Secret Types
+### 1528. Secret Types
 
 Ejemplos:
 
@@ -18152,7 +18099,7 @@ Private Keys
 
 ---
 
-# 1529. Secret Storage Rules
+### 1529. Secret Storage Rules
 
 Nunca almacenar:
 
@@ -18166,7 +18113,7 @@ Database Plain Text
 
 ---
 
-# 1530. Secret Provider Interface
+### 1530. Secret Provider Interface
 
 ```php id="9m5x3q"
 interface SecretProviderInterface
@@ -18179,7 +18126,7 @@ interface SecretProviderInterface
 
 ---
 
-# 1531. Secret Providers
+### 1531. Secret Providers
 
 Soportar:
 
@@ -18197,13 +18144,13 @@ Custom Provider
 
 ---
 
-# 1532. Secret Rotation
+### 1532. Secret Rotation
 
 Los secretos deberán rotarse.
 
 ---
 
-# 1533. Rotation Policies
+### 1533. Rotation Policies
 
 Definir:
 
@@ -18214,7 +18161,7 @@ Definir:
 
 ---
 
-# 1534. Secret Lifecycle
+### 1534. Secret Lifecycle
 
 ```text id="8m3q5x"
 Created
@@ -18242,7 +18189,7 @@ Destroyed
 
 ---
 
-# 1535. Secret Access Control
+### 1535. Secret Access Control
 
 Un secreto deberá tener:
 
@@ -18253,7 +18200,7 @@ Un secreto deberá tener:
 
 ---
 
-# 1536. Secret Access Event
+### 1536. Secret Access Event
 
 Registrar:
 
@@ -18264,13 +18211,13 @@ Registrar:
 
 ---
 
-# 1537. Key Management Architecture
+### 1537. Key Management Architecture
 
 Las claves requieren ciclo propio.
 
 ---
 
-# 1538. Key Management Components
+### 1538. Key Management Components
 
 ```text id="5m7x9q"
 Key Generation
@@ -18288,7 +18235,7 @@ Key Destruction
 
 ---
 
-# 1539. Key Management Service
+### 1539. Key Management Service
 
 ```php id="7q3m8x"
 interface KeyManagementServiceInterface
@@ -18307,7 +18254,7 @@ interface KeyManagementServiceInterface
 
 ---
 
-# 1540. Key Types
+### 1540. Key Types
 
 Separar:
 
@@ -18325,7 +18272,7 @@ Token Keys
 
 ---
 
-# 1541. Key Hierarchy
+### 1541. Key Hierarchy
 
 Modelo:
 
@@ -18343,7 +18290,7 @@ Encrypted Data
 
 ---
 
-# 1542. Key Separation Principle
+### 1542. Key Separation Principle
 
 No reutilizar:
 
@@ -18353,7 +18300,7 @@ No reutilizar:
 
 ---
 
-# 1543. Environment Key Isolation
+### 1543. Environment Key Isolation
 
 Separar:
 
@@ -18367,13 +18314,13 @@ Production
 
 ---
 
-# 1544. Token Cryptographic Security
+### 1544. Token Cryptographic Security
 
 Los tokens deberán protegerse.
 
 ---
 
-# 1545. Token Signing
+### 1545. Token Signing
 
 Usar:
 
@@ -18383,7 +18330,7 @@ Usar:
 
 ---
 
-# 1546. Token Encryption
+### 1546. Token Encryption
 
 Para información sensible:
 
@@ -18397,7 +18344,7 @@ Encrypted Claims
 
 ---
 
-# 1547. Token Key Rotation
+### 1547. Token Key Rotation
 
 Debe soportar:
 
@@ -18407,7 +18354,7 @@ Debe soportar:
 
 ---
 
-# 1548. Session Cryptography
+### 1548. Session Cryptography
 
 Las sesiones deberán proteger:
 
@@ -18417,7 +18364,7 @@ Las sesiones deberán proteger:
 
 ---
 
-# 1549. Session Identifier Security
+### 1549. Session Identifier Security
 
 Debe ser:
 
@@ -18428,7 +18375,7 @@ Debe ser:
 
 ---
 
-# 1550. Password Security
+### 1550. Password Security
 
 VoltStack deberá usar:
 
@@ -18440,7 +18387,7 @@ como algoritmo recomendado.
 
 ---
 
-# 1551. Password Hashing Rules
+### 1551. Password Hashing Rules
 
 Nunca:
 
@@ -18450,7 +18397,7 @@ Nunca:
 
 ---
 
-# 1552. Password Upgrade Strategy
+### 1552. Password Upgrade Strategy
 
 Permitir:
 
@@ -18468,7 +18415,7 @@ New Hash
 
 ---
 
-# 1553. Cryptographic Audit
+### 1553. Cryptographic Audit
 
 Registrar:
 
@@ -18479,7 +18426,7 @@ Registrar:
 
 ---
 
-# 1554. Crypto Events
+### 1554. Crypto Events
 
 Eventos:
 
@@ -18499,7 +18446,7 @@ CertificateExpired
 
 ---
 
-# 1555. Cryptographic Failure Handling
+### 1555. Cryptographic Failure Handling
 
 Ante fallo:
 
@@ -18517,19 +18464,19 @@ Audit
 
 ---
 
-# 1556. Backup Encryption
+### 1556. Backup Encryption
 
 Los respaldos deberán cifrarse.
 
 ---
 
-# 1557. Backup Key Management
+### 1557. Backup Key Management
 
 Las claves de backup deberán estar separadas.
 
 ---
 
-# 1558. Data Recovery Security
+### 1558. Data Recovery Security
 
 La recuperación deberá requerir:
 
@@ -18539,7 +18486,7 @@ La recuperación deberá requerir:
 
 ---
 
-# 1559. Cryptographic Performance
+### 1559. Cryptographic Performance
 
 Optimizar:
 
@@ -18549,7 +18496,7 @@ Optimizar:
 
 ---
 
-# 1560. Cryptographic Result
+### 1560. Cryptographic Result
 
 Esta entrega establece:
 
@@ -18575,7 +18522,7 @@ Cryptographic Auditing
 
 ---
 
-# 1561. Próxima entrega
+### 1561. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 17`
 
@@ -18590,9 +18537,8 @@ Continuará con:
 - Worker isolation
 - Long-running task protection
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 17
 
 **Documento:** Parte 06
 **Entrega:** 17 de varias
@@ -18600,7 +18546,7 @@ Continuará con:
 
 ---
 
-# 1601. Background Execution Security Architecture
+### 1601. Background Execution Security Architecture
 
 VoltStack deberá extender el modelo de seguridad de controladores hacia procesos en segundo plano.
 
@@ -18615,7 +18561,7 @@ Los procesos asíncronos también deberán estar sujetos a:
 
 ---
 
-# 1602. Background Execution Threat Model
+### 1602. Background Execution Threat Model
 
 Los procesos en segundo plano presentan riesgos:
 
@@ -18641,7 +18587,7 @@ Resource Abuse
 
 ---
 
-# 1603. Secure Async Execution Model
+### 1603. Secure Async Execution Model
 
 Modelo:
 
@@ -18675,7 +18621,7 @@ Audit
 
 ---
 
-# 1604. Job Security Principles
+### 1604. Job Security Principles
 
 Todo Job deberá tener:
 
@@ -18688,7 +18634,7 @@ Todo Job deberá tener:
 
 ---
 
-# 1605. Secure Job Identity
+### 1605. Secure Job Identity
 
 Cada job deberá identificarse.
 
@@ -18707,7 +18653,7 @@ final readonly class JobIdentity
 
 ---
 
-# 1606. Job Execution Context
+### 1606. Job Execution Context
 
 Un job deberá transportar contexto seguro:
 
@@ -18727,7 +18673,7 @@ Purpose
 
 ---
 
-# 1607. Job Context Validation
+### 1607. Job Context Validation
 
 Antes de ejecutar:
 
@@ -18753,13 +18699,13 @@ Execute
 
 ---
 
-# 1608. Queue Security Architecture
+### 1608. Queue Security Architecture
 
 Las colas deberán ser consideradas infraestructura crítica.
 
 ---
 
-# 1609. Queue Threats
+### 1609. Queue Threats
 
 Proteger contra:
 
@@ -18771,7 +18717,7 @@ Proteger contra:
 
 ---
 
-# 1610. Queue Message Integrity
+### 1610. Queue Message Integrity
 
 Los mensajes podrán incluir:
 
@@ -18782,7 +18728,7 @@ Los mensajes podrán incluir:
 
 ---
 
-# 1611. Secure Job Payload
+### 1611. Secure Job Payload
 
 Ejemplo:
 
@@ -18800,7 +18746,7 @@ final readonly class SecureJobPayload
 
 ---
 
-# 1612. Job Serialization Security
+### 1612. Job Serialization Security
 
 No permitir:
 
@@ -18810,7 +18756,7 @@ No permitir:
 
 ---
 
-# 1613. Safe Job Deserialization
+### 1613. Safe Job Deserialization
 
 Proceso:
 
@@ -18832,7 +18778,7 @@ Object Creation
 
 ---
 
-# 1614. Queue Authorization Model
+### 1614. Queue Authorization Model
 
 Cada job deberá responder:
 
@@ -18846,7 +18792,7 @@ What can I access?
 
 ---
 
-# 1615. Job Permission Model
+### 1615. Job Permission Model
 
 Ejemplo:
 
@@ -18860,13 +18806,13 @@ report.export
 
 ---
 
-# 1616. Worker Authorization
+### 1616. Worker Authorization
 
 Los workers deberán tener permisos limitados.
 
 ---
 
-# 1617. Worker Capability Model
+### 1617. Worker Capability Model
 
 ```text id="5m8x2q"
 Worker
@@ -18877,7 +18823,6 @@ email.send
 
 report.generate
 
-
 DOES NOT HAVE
 
 user.delete
@@ -18885,7 +18830,7 @@ user.delete
 
 ---
 
-# 1618. Worker Identity Validation
+### 1618. Worker Identity Validation
 
 Antes de ejecutar:
 
@@ -18903,7 +18848,7 @@ Job Authorization
 
 ---
 
-# 1619. Worker Isolation
+### 1619. Worker Isolation
 
 Separar:
 
@@ -18913,7 +18858,7 @@ Separar:
 
 ---
 
-# 1620. Queue Tenant Isolation
+### 1620. Queue Tenant Isolation
 
 Un worker deberá respetar:
 
@@ -18927,7 +18872,7 @@ Tenant B Data
 
 ---
 
-# 1621. Multi Tenant Queue Security
+### 1621. Multi Tenant Queue Security
 
 Opciones:
 
@@ -18938,7 +18883,7 @@ Opciones:
 
 ---
 
-# 1622. Job Ownership
+### 1622. Job Ownership
 
 Cada job deberá tener:
 
@@ -18949,7 +18894,7 @@ Cada job deberá tener:
 
 ---
 
-# 1623. Job Expiration
+### 1623. Job Expiration
 
 Jobs sensibles deberán expirar.
 
@@ -18965,7 +18910,7 @@ Valid:
 
 ---
 
-# 1624. Replay Protection
+### 1624. Replay Protection
 
 Evitar:
 
@@ -18979,7 +18924,7 @@ Executed Twice
 
 ---
 
-# 1625. Job Idempotency
+### 1625. Job Idempotency
 
 Los jobs críticos deberán soportar:
 
@@ -18989,7 +18934,7 @@ Los jobs críticos deberán soportar:
 
 ---
 
-# 1626. Job State Machine
+### 1626. Job State Machine
 
 ```text id="4x8m3q"
 Created
@@ -19013,7 +18958,7 @@ Failed
 
 ---
 
-# 1627. Job Failure Security
+### 1627. Job Failure Security
 
 Cuando falla:
 
@@ -19023,7 +18968,7 @@ Cuando falla:
 
 ---
 
-# 1628. Retry Security
+### 1628. Retry Security
 
 Evitar:
 
@@ -19033,7 +18978,7 @@ Evitar:
 
 ---
 
-# 1629. Retry Policy
+### 1629. Retry Policy
 
 ```php id="7m2x9q"
 final readonly class RetryPolicy
@@ -19049,13 +18994,13 @@ final readonly class RetryPolicy
 
 ---
 
-# 1630. Dead Letter Queue Security
+### 1630. Dead Letter Queue Security
 
 Los jobs fallidos deberán aislarse.
 
 ---
 
-# 1631. Dead Letter Protection
+### 1631. Dead Letter Protection
 
 Debe incluir:
 
@@ -19065,13 +19010,13 @@ Debe incluir:
 
 ---
 
-# 1632. Scheduler Security Architecture
+### 1632. Scheduler Security Architecture
 
 El scheduler ejecuta tareas privilegiadas.
 
 ---
 
-# 1633. Scheduler Threats
+### 1633. Scheduler Threats
 
 Riesgos:
 
@@ -19081,13 +19026,13 @@ Riesgos:
 
 ---
 
-# 1634. Scheduled Task Identity
+### 1634. Scheduled Task Identity
 
 Cada tarea deberá tener identidad.
 
 ---
 
-# 1635. ScheduledTask Definition
+### 1635. ScheduledTask Definition
 
 ```php id="5x7m9q"
 final readonly class ScheduledTask
@@ -19104,7 +19049,7 @@ final readonly class ScheduledTask
 
 ---
 
-# 1636. Scheduler Authorization
+### 1636. Scheduler Authorization
 
 Antes de ejecutar:
 
@@ -19122,7 +19067,7 @@ Execution
 
 ---
 
-# 1637. Scheduler Change Control
+### 1637. Scheduler Change Control
 
 Modificar tareas requiere:
 
@@ -19132,13 +19077,13 @@ Modificar tareas requiere:
 
 ---
 
-# 1638. Command Security Architecture
+### 1638. Command Security Architecture
 
 Los comandos CLI también requieren protección.
 
 ---
 
-# 1639. Command Threat Model
+### 1639. Command Threat Model
 
 Riesgos:
 
@@ -19148,7 +19093,7 @@ Riesgos:
 
 ---
 
-# 1640. Command Authorization
+### 1640. Command Authorization
 
 Ejemplo:
 
@@ -19164,7 +19109,7 @@ class CacheClearCommand
 
 ---
 
-# 1641. Console User Context
+### 1641. Console User Context
 
 Los comandos deberán conocer:
 
@@ -19175,7 +19120,7 @@ Los comandos deberán conocer:
 
 ---
 
-# 1642. Production Command Protection
+### 1642. Production Command Protection
 
 Comandos críticos requieren:
 
@@ -19185,7 +19130,7 @@ Comandos críticos requieren:
 
 ---
 
-# 1643. Dangerous Command Controls
+### 1643. Dangerous Command Controls
 
 Ejemplos:
 
@@ -19199,7 +19144,7 @@ key.rotate
 
 ---
 
-# 1644. Command Execution Audit
+### 1644. Command Execution Audit
 
 Registrar:
 
@@ -19210,13 +19155,13 @@ Registrar:
 
 ---
 
-# 1645. Background Resource Security
+### 1645. Background Resource Security
 
 Los procesos deben tener límites.
 
 ---
 
-# 1646. Worker Resource Limits
+### 1646. Worker Resource Limits
 
 Controlar:
 
@@ -19227,7 +19172,7 @@ Controlar:
 
 ---
 
-# 1647. Long Running Task Security
+### 1647. Long Running Task Security
 
 Tareas largas deberán:
 
@@ -19237,7 +19182,7 @@ Tareas largas deberán:
 
 ---
 
-# 1648. Context Expiration
+### 1648. Context Expiration
 
 Un job largo deberá revisar:
 
@@ -19247,7 +19192,7 @@ Permission Still Valid?
 
 ---
 
-# 1649. Privilege Revocation During Execution
+### 1649. Privilege Revocation During Execution
 
 Si cambia autorización:
 
@@ -19261,7 +19206,7 @@ Reduce Capability
 
 ---
 
-# 1650. Distributed Worker Security
+### 1650. Distributed Worker Security
 
 Para múltiples nodos:
 
@@ -19277,7 +19222,7 @@ todos deberán validar identidad.
 
 ---
 
-# 1651. Worker Communication Security
+### 1651. Worker Communication Security
 
 Usar:
 
@@ -19287,7 +19232,7 @@ Usar:
 
 ---
 
-# 1652. Queue Broker Security
+### 1652. Queue Broker Security
 
 Proteger:
 
@@ -19298,7 +19243,7 @@ Proteger:
 
 ---
 
-# 1653. Broker Access Control
+### 1653. Broker Access Control
 
 Separar:
 
@@ -19308,7 +19253,7 @@ Separar:
 
 ---
 
-# 1654. Background Audit Model
+### 1654. Background Audit Model
 
 Registrar:
 
@@ -19319,7 +19264,7 @@ Registrar:
 
 ---
 
-# 1655. Background Security Events
+### 1655. Background Security Events
 
 Eventos:
 
@@ -19345,7 +19290,7 @@ CommandExecuted
 
 ---
 
-# 1656. Background Security Monitoring
+### 1656. Background Security Monitoring
 
 Medir:
 
@@ -19356,7 +19301,7 @@ Medir:
 
 ---
 
-# 1657. Queue Abuse Detection
+### 1657. Queue Abuse Detection
 
 Detectar:
 
@@ -19366,7 +19311,7 @@ Detectar:
 
 ---
 
-# 1658. Automatic Protection
+### 1658. Automatic Protection
 
 Acciones:
 
@@ -19376,7 +19321,7 @@ Acciones:
 
 ---
 
-# 1659. FrankenPHP Worker Security Integration
+### 1659. FrankenPHP Worker Security Integration
 
 Los workers persistentes deberán aplicar:
 
@@ -19386,7 +19331,7 @@ Los workers persistentes deberán aplicar:
 
 ---
 
-# 1660. Persistent Job Worker Safety
+### 1660. Persistent Job Worker Safety
 
 Después de cada job:
 
@@ -19408,7 +19353,7 @@ Continue
 
 ---
 
-# 1661. Background Security Result
+### 1661. Background Security Result
 
 Esta entrega establece:
 
@@ -19432,7 +19377,7 @@ Background Auditing
 
 ---
 
-# 1662. Próxima entrega
+### 1662. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 18`
 
@@ -19448,9 +19393,7 @@ Continuará con:
 - Transaction security
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 18
 
 **Documento:** Parte 06
 **Entrega:** 18 de varias
@@ -19458,7 +19401,7 @@ Continuará con:
 
 ---
 
-# 1701. Database Security Integration Architecture
+### 1701. Database Security Integration Architecture
 
 VoltStack deberá integrar seguridad desde el controlador hasta la capa de persistencia.
 
@@ -19468,7 +19411,7 @@ Debe continuar hasta los datos.
 
 ---
 
-# 1702. Defense in Depth Data Security
+### 1702. Defense in Depth Data Security
 
 Modelo:
 
@@ -19498,7 +19441,7 @@ Database Security
 
 ---
 
-# 1703. Database Security Principles
+### 1703. Database Security Principles
 
 La capa de datos deberá garantizar:
 
@@ -19510,7 +19453,7 @@ La capa de datos deberá garantizar:
 
 ---
 
-# 1704. Data Access Threat Model
+### 1704. Data Access Threat Model
 
 Amenazas:
 
@@ -19536,7 +19479,7 @@ Injection
 
 ---
 
-# 1705. Secure Data Access Model
+### 1705. Secure Data Access Model
 
 Regla:
 
@@ -19550,7 +19493,7 @@ Authorized Data
 
 ---
 
-# 1706. Data Authorization Layers
+### 1706. Data Authorization Layers
 
 VoltStack deberá soportar:
 
@@ -19572,7 +19515,7 @@ Field Authorization
 
 ---
 
-# 1707. Resource Authorization
+### 1707. Resource Authorization
 
 Ejemplo:
 
@@ -19590,7 +19533,7 @@ Payroll
 
 ---
 
-# 1708. Query Authorization
+### 1708. Query Authorization
 
 La consulta debe considerar:
 
@@ -19601,7 +19544,7 @@ La consulta debe considerar:
 
 ---
 
-# 1709. Secure Query Context
+### 1709. Secure Query Context
 
 ```php id="6m8x3q"
 final readonly class QuerySecurityContext
@@ -19618,13 +19561,13 @@ final readonly class QuerySecurityContext
 
 ---
 
-# 1710. Secure Query Builder
+### 1710. Secure Query Builder
 
 VoltStack deberá extender el generador de consultas.
 
 ---
 
-# 1711. Query Security Pipeline
+### 1711. Query Security Pipeline
 
 ```text id="3x7m9q"
 Query Request
@@ -19652,7 +19595,7 @@ Audit
 
 ---
 
-# 1712. Automatic Security Constraints
+### 1712. Automatic Security Constraints
 
 Ejemplo:
 
@@ -19673,7 +19616,7 @@ WHERE tenant_id = ?
 
 ---
 
-# 1713. Global Security Scopes
+### 1713. Global Security Scopes
 
 Inspirado en Laravel:
 
@@ -19689,7 +19632,7 @@ class TenantScope
 
 ---
 
-# 1714. Security Scope Types
+### 1714. Security Scope Types
 
 VoltStack deberá soportar:
 
@@ -19707,7 +19650,7 @@ Compliance Scope
 
 ---
 
-# 1715. Scope Composition
+### 1715. Scope Composition
 
 Ejemplo:
 
@@ -19729,13 +19672,13 @@ Accessible Data
 
 ---
 
-# 1716. Row Level Security Architecture
+### 1716. Row Level Security Architecture
 
 VoltStack deberá soportar RLS.
 
 ---
 
-# 1717. Row Level Security Concept
+### 1717. Row Level Security Concept
 
 La base de datos puede limitar filas directamente.
 
@@ -19751,7 +19694,7 @@ Only Own Records
 
 ---
 
-# 1718. Database RLS Integration
+### 1718. Database RLS Integration
 
 Motores compatibles:
 
@@ -19761,7 +19704,7 @@ Motores compatibles:
 
 ---
 
-# 1719. RLS Policy Model
+### 1719. RLS Policy Model
 
 ```php id="5x8m2q"
 final readonly class RowPolicy
@@ -19776,7 +19719,7 @@ final readonly class RowPolicy
 
 ---
 
-# 1720. RLS Enforcement Levels
+### 1720. RLS Enforcement Levels
 
 Niveles:
 
@@ -19790,7 +19733,7 @@ Database Enforced
 
 ---
 
-# 1721. Hybrid Authorization Model
+### 1721. Hybrid Authorization Model
 
 Modelo recomendado:
 
@@ -19804,19 +19747,19 @@ Database Protection
 
 ---
 
-# 1722. Repository Security Architecture
+### 1722. Repository Security Architecture
 
 Los repositorios deberán incorporar seguridad.
 
 ---
 
-# 1723. Secure Repository Principle
+### 1723. Secure Repository Principle
 
 Un repositorio no debe asumir que el controlador ya validó.
 
 ---
 
-# 1724. Repository Security Interface
+### 1724. Repository Security Interface
 
 ```php id="7q4m8x"
 interface SecureRepositoryInterface
@@ -19830,7 +19773,7 @@ interface SecureRepositoryInterface
 
 ---
 
-# 1725. Repository Access Rules
+### 1725. Repository Access Rules
 
 Debe validar:
 
@@ -19841,7 +19784,7 @@ Debe validar:
 
 ---
 
-# 1726. Secure Find Operation
+### 1726. Secure Find Operation
 
 Incorrecto:
 
@@ -19860,13 +19803,13 @@ UserRepository::findAuthorized(
 
 ---
 
-# 1727. ORM Security Architecture
+### 1727. ORM Security Architecture
 
 VoltStack ORM deberá incluir seguridad nativa.
 
 ---
 
-# 1728. Secure Entity Model
+### 1728. Secure Entity Model
 
 Las entidades podrán declarar:
 
@@ -19882,7 +19825,7 @@ class Invoice
 
 ---
 
-# 1729. Entity Authorization Metadata
+### 1729. Entity Authorization Metadata
 
 Incluye:
 
@@ -19893,7 +19836,7 @@ Incluye:
 
 ---
 
-# 1730. Relationship Security
+### 1730. Relationship Security
 
 Las relaciones deberán protegerse.
 
@@ -19907,7 +19850,7 @@ debe filtrar según autorización.
 
 ---
 
-# 1731. Secure Relationship Loading
+### 1731. Secure Relationship Loading
 
 Evitar:
 
@@ -19921,7 +19864,7 @@ Filter Later
 
 ---
 
-# 1732. Authorization-Aware ORM
+### 1732. Authorization-Aware ORM
 
 Modelo:
 
@@ -19943,13 +19886,13 @@ Database
 
 ---
 
-# 1733. Field Level Security
+### 1733. Field Level Security
 
 Algunos campos requieren protección.
 
 ---
 
-# 1734. Sensitive Field Definition
+### 1734. Sensitive Field Definition
 
 Ejemplo:
 
@@ -19960,7 +19903,7 @@ private string $salary;
 
 ---
 
-# 1735. Field Access Policy
+### 1735. Field Access Policy
 
 Ejemplo:
 
@@ -19971,7 +19914,6 @@ CAN READ
 
 salary
 
-
 Employee
 
 CANNOT READ
@@ -19979,7 +19921,7 @@ CANNOT READ
 
 ---
 
-# 1736. Secure Serialization
+### 1736. Secure Serialization
 
 Antes de enviar:
 
@@ -20001,7 +19943,7 @@ Response
 
 ---
 
-# 1737. Data Masking
+### 1737. Data Masking
 
 Ejemplo:
 
@@ -20019,13 +19961,13 @@ Salida:
 
 ---
 
-# 1738. Database Transaction Security
+### 1738. Database Transaction Security
 
 Las transacciones deberán considerar seguridad.
 
 ---
 
-# 1739. Secure Transaction Context
+### 1739. Secure Transaction Context
 
 ```php id="6x8m3q"
 Transaction::run(
@@ -20038,7 +19980,7 @@ Transaction::run(
 
 ---
 
-# 1740. Transaction Authorization
+### 1740. Transaction Authorization
 
 Antes de confirmar:
 
@@ -20050,7 +19992,7 @@ Validar:
 
 ---
 
-# 1741. Transaction Race Protection
+### 1741. Transaction Race Protection
 
 Proteger:
 
@@ -20060,7 +20002,7 @@ Proteger:
 
 ---
 
-# 1742. Optimistic Lock Security
+### 1742. Optimistic Lock Security
 
 Usar:
 
@@ -20070,7 +20012,7 @@ Version Field
 
 ---
 
-# 1743. Pessimistic Lock Security
+### 1743. Pessimistic Lock Security
 
 Para operaciones críticas:
 
@@ -20080,7 +20022,7 @@ SELECT FOR UPDATE
 
 ---
 
-# 1744. Database Audit Integration
+### 1744. Database Audit Integration
 
 Registrar:
 
@@ -20090,7 +20032,7 @@ Registrar:
 
 ---
 
-# 1745. Query Audit Events
+### 1745. Query Audit Events
 
 Eventos:
 
@@ -20106,7 +20048,7 @@ MassExportDetected
 
 ---
 
-# 1746. Bulk Operation Security
+### 1746. Bulk Operation Security
 
 Operaciones masivas requieren:
 
@@ -20116,7 +20058,7 @@ Operaciones masivas requieren:
 
 ---
 
-# 1747. Bulk Query Protection
+### 1747. Bulk Query Protection
 
 Evitar:
 
@@ -20128,7 +20070,7 @@ sin autorización.
 
 ---
 
-# 1748. Data Export Security
+### 1748. Data Export Security
 
 Exportaciones deberán incluir:
 
@@ -20138,7 +20080,7 @@ Exportaciones deberán incluir:
 
 ---
 
-# 1749. Database Backup Security
+### 1749. Database Backup Security
 
 Los respaldos deberán:
 
@@ -20148,7 +20090,7 @@ Los respaldos deberán:
 
 ---
 
-# 1750. Migration Security
+### 1750. Migration Security
 
 Las migraciones deberán proteger:
 
@@ -20158,7 +20100,7 @@ Las migraciones deberán proteger:
 
 ---
 
-# 1751. Migration Authorization
+### 1751. Migration Authorization
 
 Ejemplo:
 
@@ -20172,7 +20114,7 @@ Database Administrator
 
 ---
 
-# 1752. Schema Security
+### 1752. Schema Security
 
 Controlar:
 
@@ -20182,7 +20124,7 @@ Controlar:
 
 ---
 
-# 1753. Database Credential Security
+### 1753. Database Credential Security
 
 Nunca:
 
@@ -20192,7 +20134,7 @@ Nunca:
 
 ---
 
-# 1754. Connection Security
+### 1754. Connection Security
 
 Usar:
 
@@ -20202,7 +20144,7 @@ Usar:
 
 ---
 
-# 1755. Database Least Privilege
+### 1755. Database Least Privilege
 
 La aplicación no debería usar:
 
@@ -20212,7 +20154,7 @@ root
 
 ---
 
-# 1756. Database Role Separation
+### 1756. Database Role Separation
 
 Separar:
 
@@ -20228,7 +20170,7 @@ Audit User
 
 ---
 
-# 1757. ORM Query Monitoring
+### 1757. ORM Query Monitoring
 
 Detectar:
 
@@ -20238,7 +20180,7 @@ Detectar:
 
 ---
 
-# 1758. Data Access Anomaly Detection
+### 1758. Data Access Anomaly Detection
 
 Ejemplo:
 
@@ -20256,7 +20198,7 @@ Ahora:
 
 ---
 
-# 1759. Security Result
+### 1759. Security Result
 
 Esta arquitectura establece:
 
@@ -20280,7 +20222,7 @@ Data Isolation
 
 ---
 
-# 1760. Database Security Outcome
+### 1760. Database Security Outcome
 
 El controlador VoltStack quedará conectado a una cadena completa:
 
@@ -20310,7 +20252,7 @@ Audit
 
 ---
 
-# 1761. Próxima entrega
+### 1761. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 19`
 
@@ -20325,9 +20267,7 @@ Continuará con:
 - Encryption storage model
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 19
 
 **Documento:** Parte 06
 **Entrega:** 19 de varias
@@ -20335,7 +20275,7 @@ Continuará con:
 
 ---
 
-# 1801. File System Security Architecture
+### 1801. File System Security Architecture
 
 VoltStack deberá incorporar seguridad dentro del manejo de archivos.
 
@@ -20349,7 +20289,7 @@ Los archivos representan un activo crítico porque pueden contener:
 
 ---
 
-# 1802. File Security Principles
+### 1802. File Security Principles
 
 El sistema deberá garantizar:
 
@@ -20375,7 +20315,7 @@ Traceability
 
 ---
 
-# 1803. File Security Threat Model
+### 1803. File Security Threat Model
 
 Amenazas:
 
@@ -20401,7 +20341,7 @@ Storage Abuse
 
 ---
 
-# 1804. File Security Layers
+### 1804. File Security Layers
 
 Arquitectura:
 
@@ -20427,13 +20367,13 @@ Physical Storage
 
 ---
 
-# 1805. File Authorization Model
+### 1805. File Authorization Model
 
 Un archivo deberá tener autorización propia.
 
 ---
 
-# 1806. File Access Decision
+### 1806. File Access Decision
 
 Modelo:
 
@@ -20459,7 +20399,7 @@ Access Decision
 
 ---
 
-# 1807. File Identity Model
+### 1807. File Identity Model
 
 Cada archivo deberá tener identidad.
 
@@ -20478,7 +20418,7 @@ final readonly class FileIdentity
 
 ---
 
-# 1808. File Metadata Security
+### 1808. File Metadata Security
 
 Metadata:
 
@@ -20490,7 +20430,7 @@ Metadata:
 
 ---
 
-# 1809. File Classification Model
+### 1809. File Classification Model
 
 Tipos:
 
@@ -20508,7 +20448,7 @@ Restricted
 
 ---
 
-# 1810. File Ownership Security
+### 1810. File Ownership Security
 
 Todo archivo deberá tener:
 
@@ -20519,7 +20459,7 @@ Todo archivo deberá tener:
 
 ---
 
-# 1811. File Permission Model
+### 1811. File Permission Model
 
 Permisos:
 
@@ -20537,7 +20477,7 @@ file.download
 
 ---
 
-# 1812. File Policy Engine Integration
+### 1812. File Policy Engine Integration
 
 Ejemplo:
 
@@ -20561,13 +20501,13 @@ Purpose
 
 ---
 
-# 1813. Secure Storage Abstraction
+### 1813. Secure Storage Abstraction
 
 VoltStack deberá abstraer almacenamiento.
 
 ---
 
-# 1814. Storage Interface
+### 1814. Storage Interface
 
 ```php id="5m7x2q"
 interface SecureStorageInterface
@@ -20576,7 +20516,6 @@ interface SecureStorageInterface
         FileUpload $file,
         StorageContext $context
     ): StoredFile;
-
 
     public function get(
         string $id,
@@ -20587,7 +20526,7 @@ interface SecureStorageInterface
 
 ---
 
-# 1815. Storage Drivers
+### 1815. Storage Drivers
 
 Soportar:
 
@@ -20607,7 +20546,7 @@ Azure Blob
 
 ---
 
-# 1816. Storage Security Context
+### 1816. Storage Security Context
 
 Debe contener:
 
@@ -20618,7 +20557,7 @@ Debe contener:
 
 ---
 
-# 1817. Multi-Tenant Storage Isolation
+### 1817. Multi-Tenant Storage Isolation
 
 Modelo:
 
@@ -20629,7 +20568,6 @@ Tenant A
 
 files
 
-
 Tenant B
 
 /
@@ -20639,7 +20577,7 @@ files
 
 ---
 
-# 1818. Storage Isolation Strategies
+### 1818. Storage Isolation Strategies
 
 Soportar:
 
@@ -20655,7 +20593,7 @@ Encryption Isolation
 
 ---
 
-# 1819. Tenant Storage Resolver
+### 1819. Tenant Storage Resolver
 
 ```php id="6x9m3q"
 interface TenantStorageResolverInterface
@@ -20668,7 +20606,7 @@ interface TenantStorageResolverInterface
 
 ---
 
-# 1820. Path Traversal Protection
+### 1820. Path Traversal Protection
 
 Nunca permitir:
 
@@ -20678,7 +20616,7 @@ Nunca permitir:
 
 ---
 
-# 1821. Secure Path Generator
+### 1821. Secure Path Generator
 
 El sistema deberá generar:
 
@@ -20694,7 +20632,7 @@ file
 
 ---
 
-# 1822. File Name Sanitization
+### 1822. File Name Sanitization
 
 Eliminar:
 
@@ -20704,13 +20642,13 @@ Eliminar:
 
 ---
 
-# 1823. Upload Security Architecture
+### 1823. Upload Security Architecture
 
 Los uploads deberán pasar por validación completa.
 
 ---
 
-# 1824. Upload Pipeline
+### 1824. Upload Pipeline
 
 ```text id="5m8x3q"
 Incoming File
@@ -20742,7 +20680,7 @@ Audit
 
 ---
 
-# 1825. File Size Limits
+### 1825. File Size Limits
 
 Controlar:
 
@@ -20753,7 +20691,7 @@ Controlar:
 
 ---
 
-# 1826. MIME Validation
+### 1826. MIME Validation
 
 No confiar únicamente en:
 
@@ -20763,7 +20701,7 @@ extension
 
 ---
 
-# 1827. Content Inspection
+### 1827. Content Inspection
 
 Validar:
 
@@ -20773,7 +20711,7 @@ Validar:
 
 ---
 
-# 1828. Dangerous File Blocking
+### 1828. Dangerous File Blocking
 
 Bloquear:
 
@@ -20783,7 +20721,7 @@ Bloquear:
 
 ---
 
-# 1829. Malware Scanning Integration
+### 1829. Malware Scanning Integration
 
 Permitir integración:
 
@@ -20793,7 +20731,7 @@ Permitir integración:
 
 ---
 
-# 1830. Upload Authorization
+### 1830. Upload Authorization
 
 Antes de almacenar:
 
@@ -20811,7 +20749,7 @@ Allowed Location?
 
 ---
 
-# 1831. Temporary Upload Storage
+### 1831. Temporary Upload Storage
 
 Los archivos temporales deberán:
 
@@ -20821,7 +20759,7 @@ Los archivos temporales deberán:
 
 ---
 
-# 1832. Upload Token Security
+### 1832. Upload Token Security
 
 Los tokens temporales deberán tener:
 
@@ -20831,13 +20769,13 @@ Los tokens temporales deberán tener:
 
 ---
 
-# 1833. Download Security Architecture
+### 1833. Download Security Architecture
 
 Descargar archivos requiere autorización.
 
 ---
 
-# 1834. Secure Download Flow
+### 1834. Secure Download Flow
 
 ```text id="8m4x2q"
 Request File
@@ -20861,7 +20799,7 @@ Stream File
 
 ---
 
-# 1835. Temporary Download URLs
+### 1835. Temporary Download URLs
 
 Soportar:
 
@@ -20871,7 +20809,7 @@ Soportar:
 
 ---
 
-# 1836. Signed URL Security
+### 1836. Signed URL Security
 
 Debe incluir:
 
@@ -20882,7 +20820,7 @@ Debe incluir:
 
 ---
 
-# 1837. File Sharing Security
+### 1837. File Sharing Security
 
 Compartir archivos requiere:
 
@@ -20893,7 +20831,7 @@ Compartir archivos requiere:
 
 ---
 
-# 1838. External File Access
+### 1838. External File Access
 
 Debe controlar:
 
@@ -20903,7 +20841,7 @@ Debe controlar:
 
 ---
 
-# 1839. File Access Revocation
+### 1839. File Access Revocation
 
 Debe permitir:
 
@@ -20921,13 +20859,13 @@ Audit
 
 ---
 
-# 1840. Storage Encryption Architecture
+### 1840. Storage Encryption Architecture
 
 Los archivos sensibles deberán cifrarse.
 
 ---
 
-# 1841. Encryption Strategies
+### 1841. Encryption Strategies
 
 Soportar:
 
@@ -20945,7 +20883,7 @@ Client Side Encryption
 
 ---
 
-# 1842. Object Encryption
+### 1842. Object Encryption
 
 Cada archivo podrá tener:
 
@@ -20955,7 +20893,7 @@ Cada archivo podrá tener:
 
 ---
 
-# 1843. Encryption Metadata
+### 1843. Encryption Metadata
 
 ```php id="3x8m5q"
 final readonly class FileEncryptionMetadata
@@ -20971,13 +20909,13 @@ final readonly class FileEncryptionMetadata
 
 ---
 
-# 1844. Cloud Storage Security
+### 1844. Cloud Storage Security
 
 Integración segura con proveedores externos.
 
 ---
 
-# 1845. AWS S3 Security
+### 1845. AWS S3 Security
 
 Considerar:
 
@@ -20988,7 +20926,7 @@ Considerar:
 
 ---
 
-# 1846. Google Cloud Storage Security
+### 1846. Google Cloud Storage Security
 
 Considerar:
 
@@ -20999,7 +20937,7 @@ Considerar:
 
 ---
 
-# 1847. Cloudflare R2 Security
+### 1847. Cloudflare R2 Security
 
 Considerar:
 
@@ -21009,7 +20947,7 @@ Considerar:
 
 ---
 
-# 1848. MinIO Security
+### 1848. MinIO Security
 
 Considerar:
 
@@ -21020,7 +20958,7 @@ Considerar:
 
 ---
 
-# 1849. Storage Credentials Security
+### 1849. Storage Credentials Security
 
 Nunca almacenar:
 
@@ -21030,7 +20968,7 @@ Nunca almacenar:
 
 ---
 
-# 1850. Storage Access Policies
+### 1850. Storage Access Policies
 
 Ejemplo:
 
@@ -21044,7 +20982,7 @@ Billing Department
 
 ---
 
-# 1851. File Audit Architecture
+### 1851. File Audit Architecture
 
 Registrar:
 
@@ -21056,7 +20994,7 @@ Registrar:
 
 ---
 
-# 1852. File Audit Event
+### 1852. File Audit Event
 
 ```php id="5x8m3q"
 final readonly class FileAuditEvent
@@ -21072,7 +21010,7 @@ final readonly class FileAuditEvent
 
 ---
 
-# 1853. Storage Abuse Protection
+### 1853. Storage Abuse Protection
 
 Controlar:
 
@@ -21082,7 +21020,7 @@ Controlar:
 
 ---
 
-# 1854. Storage Quotas
+### 1854. Storage Quotas
 
 Por:
 
@@ -21092,7 +21030,7 @@ Por:
 
 ---
 
-# 1855. File Lifecycle Security
+### 1855. File Lifecycle Security
 
 Estados:
 
@@ -21118,7 +21056,7 @@ Deleted
 
 ---
 
-# 1856. Secure Deletion
+### 1856. Secure Deletion
 
 Eliminar:
 
@@ -21128,7 +21066,7 @@ Eliminar:
 
 ---
 
-# 1857. Retention Policies
+### 1857. Retention Policies
 
 Aplicar:
 
@@ -21138,7 +21076,7 @@ Aplicar:
 
 ---
 
-# 1858. Legal Hold Support
+### 1858. Legal Hold Support
 
 Para entornos empresariales:
 
@@ -21146,7 +21084,7 @@ Bloquear eliminación durante investigación.
 
 ---
 
-# 1859. File Recovery Security
+### 1859. File Recovery Security
 
 Recuperar archivos requiere:
 
@@ -21155,7 +21093,7 @@ Recuperar archivos requiere:
 
 ---
 
-# 1860. File Security Monitoring
+### 1860. File Security Monitoring
 
 Métricas:
 
@@ -21166,7 +21104,7 @@ Métricas:
 
 ---
 
-# 1861. File Threat Detection
+### 1861. File Threat Detection
 
 Detectar:
 
@@ -21176,7 +21114,7 @@ Detectar:
 
 ---
 
-# 1862. File Security Events
+### 1862. File Security Events
 
 Eventos:
 
@@ -21198,7 +21136,7 @@ StorageViolationDetected
 
 ---
 
-# 1863. Controller Integration
+### 1863. Controller Integration
 
 Los controladores deberán usar:
 
@@ -21220,7 +21158,7 @@ Audit
 
 ---
 
-# 1864. File Security Testing
+### 1864. File Security Testing
 
 Pruebas:
 
@@ -21231,7 +21169,7 @@ Pruebas:
 
 ---
 
-# 1865. File Security Result
+### 1865. File Security Result
 
 Esta entrega establece:
 
@@ -21255,7 +21193,7 @@ File Auditing
 
 ---
 
-# 1866. Próxima entrega
+### 1866. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 20`
 
@@ -21270,9 +21208,8 @@ Continuará con:
 - Message integrity
 - Distributed trust model
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 20
 
 **Documento:** Parte 06
 **Entrega:** 20 de varias
@@ -21280,7 +21217,7 @@ Continuará con:
 
 ---
 
-# 1901. Distributed Communication Security Architecture
+### 1901. Distributed Communication Security Architecture
 
 VoltStack deberá considerar que una aplicación moderna puede estar compuesta por:
 
@@ -21295,7 +21232,7 @@ Cada comunicación deberá considerarse un punto potencial de ataque.
 
 ---
 
-# 1902. Distributed Security Principles
+### 1902. Distributed Security Principles
 
 La comunicación deberá garantizar:
 
@@ -21321,7 +21258,7 @@ Traceability
 
 ---
 
-# 1903. Communication Trust Model
+### 1903. Communication Trust Model
 
 Regla fundamental:
 
@@ -21335,7 +21272,7 @@ Trusted Network
 
 ---
 
-# 1904. Service Communication Model
+### 1904. Service Communication Model
 
 Arquitectura:
 
@@ -21361,7 +21298,7 @@ Service B
 
 ---
 
-# 1905. Service Identity Architecture
+### 1905. Service Identity Architecture
 
 Cada servicio deberá tener identidad propia.
 
@@ -21379,7 +21316,7 @@ analytics-worker
 
 ---
 
-# 1906. Service Identity Definition
+### 1906. Service Identity Definition
 
 ```php id="3x8m5q"
 final readonly class ServiceIdentity
@@ -21396,7 +21333,7 @@ final readonly class ServiceIdentity
 
 ---
 
-# 1907. Service Authentication
+### 1907. Service Authentication
 
 Soportar:
 
@@ -21407,7 +21344,7 @@ Soportar:
 
 ---
 
-# 1908. Service Token Model
+### 1908. Service Token Model
 
 Ejemplo:
 
@@ -21423,7 +21360,7 @@ Ejemplo:
 
 ---
 
-# 1909. Service Authorization
+### 1909. Service Authorization
 
 Autenticación:
 
@@ -21439,13 +21376,13 @@ What can you do?
 
 ---
 
-# 1910. Service Permission Model
+### 1910. Service Permission Model
 
 Los servicios deberán tener permisos limitados.
 
 ---
 
-# 1911. Service Capability Security
+### 1911. Service Capability Security
 
 Ejemplo:
 
@@ -21456,7 +21393,6 @@ CAN:
 
 email.send
 
-
 CANNOT:
 
 user.delete
@@ -21464,13 +21400,13 @@ user.delete
 
 ---
 
-# 1912. Service-to-Service Policy Engine
+### 1912. Service-to-Service Policy Engine
 
 Las llamadas internas deberán pasar por políticas.
 
 ---
 
-# 1913. Internal API Security
+### 1913. Internal API Security
 
 Las APIs internas deberán aplicar:
 
@@ -21481,7 +21417,7 @@ Las APIs internas deberán aplicar:
 
 ---
 
-# 1914. Internal API Gateway
+### 1914. Internal API Gateway
 
 Arquitectura:
 
@@ -21503,7 +21439,7 @@ Service
 
 ---
 
-# 1915. Internal Request Context
+### 1915. Internal Request Context
 
 Debe incluir:
 
@@ -21515,7 +21451,7 @@ Debe incluir:
 
 ---
 
-# 1916. Delegated User Context
+### 1916. Delegated User Context
 
 Ejemplo:
 
@@ -21529,7 +21465,7 @@ Customer User
 
 ---
 
-# 1917. Impersonation Security
+### 1917. Impersonation Security
 
 La suplantación deberá:
 
@@ -21539,7 +21475,7 @@ La suplantación deberá:
 
 ---
 
-# 1918. Service Impersonation Model
+### 1918. Service Impersonation Model
 
 ```php id="4m8x7q"
 final readonly class DelegatedIdentity
@@ -21556,7 +21492,7 @@ final readonly class DelegatedIdentity
 
 ---
 
-# 1919. Mutual TLS Architecture
+### 1919. Mutual TLS Architecture
 
 Para servicios críticos:
 
@@ -21574,7 +21510,7 @@ Service B Certificate
 
 ---
 
-# 1920. Certificate Identity Mapping
+### 1920. Certificate Identity Mapping
 
 Un certificado deberá mapearse:
 
@@ -21592,7 +21528,7 @@ Permissions
 
 ---
 
-# 1921. Internal Encryption
+### 1921. Internal Encryption
 
 Toda comunicación sensible deberá usar:
 
@@ -21602,7 +21538,7 @@ Toda comunicación sensible deberá usar:
 
 ---
 
-# 1922. Distributed Trust Boundaries
+### 1922. Distributed Trust Boundaries
 
 Separar:
 
@@ -21618,13 +21554,13 @@ Organization Boundary
 
 ---
 
-# 1923. Event Security Architecture
+### 1923. Event Security Architecture
 
 Los eventos también deberán protegerse.
 
 ---
 
-# 1924. Event Threat Model
+### 1924. Event Threat Model
 
 Amenazas:
 
@@ -21646,7 +21582,7 @@ Unauthorized Consumer
 
 ---
 
-# 1925. Secure Event Model
+### 1925. Secure Event Model
 
 ```text id="4m7x8q"
 Producer
@@ -21670,7 +21606,7 @@ Processing
 
 ---
 
-# 1926. Event Identity
+### 1926. Event Identity
 
 Cada evento deberá tener:
 
@@ -21681,7 +21617,7 @@ Cada evento deberá tener:
 
 ---
 
-# 1927. Event Envelope
+### 1927. Event Envelope
 
 ```php id="7m2x9q"
 final readonly class EventEnvelope
@@ -21699,7 +21635,7 @@ final readonly class EventEnvelope
 
 ---
 
-# 1928. Event Signature Validation
+### 1928. Event Signature Validation
 
 Validar:
 
@@ -21710,7 +21646,7 @@ Validar:
 
 ---
 
-# 1929. Event Authorization
+### 1929. Event Authorization
 
 Un consumidor deberá estar autorizado.
 
@@ -21723,7 +21659,6 @@ Allowed:
 
 Billing Service
 
-
 Denied:
 
 Analytics Admin
@@ -21731,7 +21666,7 @@ Analytics Admin
 
 ---
 
-# 1930. Event Consumer Permissions
+### 1930. Event Consumer Permissions
 
 Definir:
 
@@ -21741,7 +21676,7 @@ Definir:
 
 ---
 
-# 1931. Event Payload Security
+### 1931. Event Payload Security
 
 Los eventos deberán evitar:
 
@@ -21751,7 +21686,7 @@ Los eventos deberán evitar:
 
 ---
 
-# 1932. Event Data Minimization
+### 1932. Event Data Minimization
 
 Enviar:
 
@@ -21761,13 +21696,13 @@ Required Data Only
 
 ---
 
-# 1933. Event Encryption
+### 1933. Event Encryption
 
 Eventos sensibles podrán cifrarse.
 
 ---
 
-# 1934. Message Broker Security
+### 1934. Message Broker Security
 
 Proteger:
 
@@ -21777,7 +21712,7 @@ Proteger:
 
 ---
 
-# 1935. Broker Authorization
+### 1935. Broker Authorization
 
 Separar:
 
@@ -21791,7 +21726,7 @@ Admin Permissions
 
 ---
 
-# 1936. Message Integrity
+### 1936. Message Integrity
 
 Los mensajes deberán incluir:
 
@@ -21801,7 +21736,7 @@ Los mensajes deberán incluir:
 
 ---
 
-# 1937. Replay Attack Prevention
+### 1937. Replay Attack Prevention
 
 Usar:
 
@@ -21812,7 +21747,7 @@ Usar:
 
 ---
 
-# 1938. Event Ordering Security
+### 1938. Event Ordering Security
 
 Para eventos críticos:
 
@@ -21824,13 +21759,13 @@ Controlar:
 
 ---
 
-# 1939. Distributed Transaction Security
+### 1939. Distributed Transaction Security
 
 Operaciones distribuidas deberán proteger consistencia.
 
 ---
 
-# 1940. Saga Security Model
+### 1940. Saga Security Model
 
 Para procesos largos:
 
@@ -21848,7 +21783,7 @@ Compensation
 
 ---
 
-# 1941. Compensation Security
+### 1941. Compensation Security
 
 Las acciones reversas deberán:
 
@@ -21858,7 +21793,7 @@ Las acciones reversas deberán:
 
 ---
 
-# 1942. Distributed Lock Security
+### 1942. Distributed Lock Security
 
 Evitar:
 
@@ -21867,7 +21802,7 @@ Evitar:
 
 ---
 
-# 1943. Service Mesh Security
+### 1943. Service Mesh Security
 
 VoltStack podrá integrarse con:
 
@@ -21877,7 +21812,7 @@ VoltStack podrá integrarse con:
 
 ---
 
-# 1944. Service Mesh Policies
+### 1944. Service Mesh Policies
 
 Controlar:
 
@@ -21888,7 +21823,7 @@ Controlar:
 
 ---
 
-# 1945. Distributed Rate Limiting
+### 1945. Distributed Rate Limiting
 
 Aplicar límites por:
 
@@ -21899,7 +21834,7 @@ Aplicar límites por:
 
 ---
 
-# 1946. Communication Audit
+### 1946. Communication Audit
 
 Registrar:
 
@@ -21910,7 +21845,7 @@ Registrar:
 
 ---
 
-# 1947. Distributed Trace Security
+### 1947. Distributed Trace Security
 
 El trace deberá propagarse:
 
@@ -21932,7 +21867,7 @@ Database
 
 ---
 
-# 1948. Trace Data Protection
+### 1948. Trace Data Protection
 
 No incluir:
 
@@ -21942,7 +21877,7 @@ No incluir:
 
 ---
 
-# 1949. Communication Security Events
+### 1949. Communication Security Events
 
 Eventos:
 
@@ -21962,7 +21897,7 @@ CertificateFailure
 
 ---
 
-# 1950. Communication Failure Handling
+### 1950. Communication Failure Handling
 
 Ante fallo:
 
@@ -21980,7 +21915,7 @@ Audit
 
 ---
 
-# 1951. External Integration Security
+### 1951. External Integration Security
 
 Integraciones externas deberán usar:
 
@@ -21991,7 +21926,7 @@ Integraciones externas deberán usar:
 
 ---
 
-# 1952. Third Party Trust Model
+### 1952. Third Party Trust Model
 
 Un tercero deberá tener:
 
@@ -22001,7 +21936,7 @@ Un tercero deberá tener:
 
 ---
 
-# 1953. Partner API Security
+### 1953. Partner API Security
 
 Aplicar:
 
@@ -22011,7 +21946,7 @@ Aplicar:
 
 ---
 
-# 1954. Webhook Communication Security
+### 1954. Webhook Communication Security
 
 Validar:
 
@@ -22022,7 +21957,7 @@ Validar:
 
 ---
 
-# 1955. Secure Callback Model
+### 1955. Secure Callback Model
 
 ```text id="5m8x3q"
 External System
@@ -22042,7 +21977,7 @@ Processing
 
 ---
 
-# 1956. Communication Secrets
+### 1956. Communication Secrets
 
 Proteger:
 
@@ -22052,7 +21987,7 @@ Proteger:
 
 ---
 
-# 1957. Communication Key Rotation
+### 1957. Communication Key Rotation
 
 Debe soportar:
 
@@ -22062,7 +21997,7 @@ Debe soportar:
 
 ---
 
-# 1958. Distributed Security Monitoring
+### 1958. Distributed Security Monitoring
 
 Analizar:
 
@@ -22072,7 +22007,7 @@ Analizar:
 
 ---
 
-# 1959. Communication Security Analytics
+### 1959. Communication Security Analytics
 
 Detectar:
 
@@ -22082,7 +22017,7 @@ Detectar:
 
 ---
 
-# 1960. Communication Security Result
+### 1960. Communication Security Result
 
 Esta entrega establece:
 
@@ -22106,7 +22041,7 @@ Service Communication Audit
 
 ---
 
-# 1961. Próxima entrega
+### 1961. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 21`
 
@@ -22121,9 +22056,7 @@ Continuará con:
 - Continuous compliance
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 21
 
 **Documento:** Parte 06
 **Entrega:** 21 de varias
@@ -22131,7 +22064,7 @@ Continuará con:
 
 ---
 
-# 2001. Enterprise Security Governance Architecture
+### 2001. Enterprise Security Governance Architecture
 
 VoltStack deberá incorporar un modelo de gobierno de seguridad de nivel empresarial.
 
@@ -22139,7 +22072,7 @@ La seguridad deberá administrarse como un proceso continuo y no únicamente com
 
 ---
 
-# 2002. Governance Objectives
+### 2002. Governance Objectives
 
 El modelo de gobierno deberá garantizar:
 
@@ -22152,7 +22085,7 @@ El modelo de gobierno deberá garantizar:
 
 ---
 
-# 2003. Governance Domains
+### 2003. Governance Domains
 
 El gobierno abarcará:
 
@@ -22176,7 +22109,7 @@ Continuous Improvement
 
 ---
 
-# 2004. Governance Layers
+### 2004. Governance Layers
 
 ```text
 Corporate Governance
@@ -22200,7 +22133,7 @@ Operational Governance
 
 ---
 
-# 2005. Security Governance Model
+### 2005. Security Governance Model
 
 ```php
 final readonly class SecurityGovernance
@@ -22218,7 +22151,7 @@ final readonly class SecurityGovernance
 
 ---
 
-# 2006. Governance Roles
+### 2006. Governance Roles
 
 Definir responsabilidades para:
 
@@ -22231,7 +22164,7 @@ Definir responsabilidades para:
 
 ---
 
-# 2007. Security Ownership
+### 2007. Security Ownership
 
 Cada componente crítico deberá tener un responsable claramente identificado.
 
@@ -22245,7 +22178,7 @@ Ejemplos:
 
 ---
 
-# 2008. Responsibility Matrix
+### 2008. Responsibility Matrix
 
 Modelo RACI sugerido:
 
@@ -22261,13 +22194,13 @@ Informed
 
 ---
 
-# 2009. Security Policy Lifecycle
+### 2009. Security Policy Lifecycle
 
 Toda política deberá seguir un ciclo de vida controlado.
 
 ---
 
-# 2010. Policy Lifecycle
+### 2010. Policy Lifecycle
 
 ```text
 Draft
@@ -22299,7 +22232,7 @@ Retirement
 
 ---
 
-# 2011. Policy Versioning
+### 2011. Policy Versioning
 
 Cada política deberá almacenar:
 
@@ -22312,7 +22245,7 @@ Cada política deberá almacenar:
 
 ---
 
-# 2012. Policy Metadata
+### 2012. Policy Metadata
 
 ```php
 final readonly class SecurityPolicyMetadata
@@ -22329,7 +22262,7 @@ final readonly class SecurityPolicyMetadata
 
 ---
 
-# 2013. Policy Review
+### 2013. Policy Review
 
 Las políticas críticas deberán revisarse:
 
@@ -22340,7 +22273,7 @@ Las políticas críticas deberán revisarse:
 
 ---
 
-# 2014. Policy Approval Workflow
+### 2014. Policy Approval Workflow
 
 ```text
 Security Team
@@ -22364,13 +22297,13 @@ Production
 
 ---
 
-# 2015. Continuous Compliance Architecture
+### 2015. Continuous Compliance Architecture
 
 VoltStack deberá facilitar el cumplimiento continuo.
 
 ---
 
-# 2016. Compliance Principles
+### 2016. Compliance Principles
 
 El cumplimiento deberá ser:
 
@@ -22381,7 +22314,7 @@ El cumplimiento deberá ser:
 
 ---
 
-# 2017. Compliance Domains
+### 2017. Compliance Domains
 
 Compatibilidad conceptual con:
 
@@ -22394,7 +22327,7 @@ Compatibilidad conceptual con:
 
 ---
 
-# 2018. Compliance Control Mapping
+### 2018. Compliance Control Mapping
 
 Cada control deberá asociarse a:
 
@@ -22416,7 +22349,7 @@ Verification
 
 ---
 
-# 2019. ComplianceControl
+### 2019. ComplianceControl
 
 ```php
 final readonly class ComplianceControl
@@ -22433,7 +22366,7 @@ final readonly class ComplianceControl
 
 ---
 
-# 2020. Compliance Evidence
+### 2020. Compliance Evidence
 
 La evidencia podrá provenir de:
 
@@ -22446,7 +22379,7 @@ La evidencia podrá provenir de:
 
 ---
 
-# 2021. Continuous Compliance Checks
+### 2021. Continuous Compliance Checks
 
 VoltStack podrá ejecutar verificaciones automáticas de:
 
@@ -22458,7 +22391,7 @@ VoltStack podrá ejecutar verificaciones automáticas de:
 
 ---
 
-# 2022. Compliance Engine
+### 2022. Compliance Engine
 
 ```php
 interface ComplianceEngineInterface
@@ -22471,7 +22404,7 @@ interface ComplianceEngineInterface
 
 ---
 
-# 2023. Compliance Result
+### 2023. Compliance Result
 
 ```php
 final readonly class ComplianceResult
@@ -22487,13 +22420,13 @@ final readonly class ComplianceResult
 
 ---
 
-# 2024. Security Posture Architecture
+### 2024. Security Posture Architecture
 
 La postura de seguridad representa el estado global del sistema.
 
 ---
 
-# 2025. Security Posture Dimensions
+### 2025. Security Posture Dimensions
 
 Evaluar:
 
@@ -22515,7 +22448,7 @@ Compliance
 
 ---
 
-# 2026. Security Posture Levels
+### 2026. Security Posture Levels
 
 ```php
 enum SecurityPosture: string
@@ -22530,7 +22463,7 @@ enum SecurityPosture: string
 
 ---
 
-# 2027. Security Score
+### 2027. Security Score
 
 El framework podrá calcular un puntaje basado en:
 
@@ -22542,7 +22475,7 @@ El framework podrá calcular un puntaje basado en:
 
 ---
 
-# 2028. Security Metrics
+### 2028. Security Metrics
 
 Ejemplos:
 
@@ -22554,7 +22487,7 @@ Ejemplos:
 
 ---
 
-# 2029. Governance Dashboard
+### 2029. Governance Dashboard
 
 Debe mostrar:
 
@@ -22566,13 +22499,13 @@ Debe mostrar:
 
 ---
 
-# 2030. Risk Management Architecture
+### 2030. Risk Management Architecture
 
 VoltStack deberá incorporar un modelo formal de gestión del riesgo.
 
 ---
 
-# 2031. Risk Lifecycle
+### 2031. Risk Lifecycle
 
 ```text
 Identify
@@ -22600,7 +22533,7 @@ Review
 
 ---
 
-# 2032. Risk Categories
+### 2032. Risk Categories
 
 Clasificar:
 
@@ -22612,7 +22545,7 @@ Clasificar:
 
 ---
 
-# 2033. SecurityRisk
+### 2033. SecurityRisk
 
 ```php
 final readonly class SecurityRisk
@@ -22630,7 +22563,7 @@ final readonly class SecurityRisk
 
 ---
 
-# 2034. Risk Scoring
+### 2034. Risk Scoring
 
 La puntuación podrá considerar:
 
@@ -22648,7 +22581,7 @@ Exposure
 
 ---
 
-# 2035. Risk Treatment
+### 2035. Risk Treatment
 
 Opciones:
 
@@ -22659,13 +22592,13 @@ Opciones:
 
 ---
 
-# 2036. Residual Risk
+### 2036. Residual Risk
 
 Después de aplicar controles deberá calcularse el riesgo residual.
 
 ---
 
-# 2037. Security Control Effectiveness
+### 2037. Security Control Effectiveness
 
 Cada control deberá medir:
 
@@ -22676,7 +22609,7 @@ Cada control deberá medir:
 
 ---
 
-# 2038. Governance Automation
+### 2038. Governance Automation
 
 Automatizar:
 
@@ -22687,7 +22620,7 @@ Automatizar:
 
 ---
 
-# 2039. Exception Management
+### 2039. Exception Management
 
 Las excepciones deberán:
 
@@ -22698,7 +22631,7 @@ Las excepciones deberán:
 
 ---
 
-# 2040. Security Exception
+### 2040. Security Exception
 
 ```php
 final readonly class SecurityExceptionApproval
@@ -22715,7 +22648,7 @@ final readonly class SecurityExceptionApproval
 
 ---
 
-# 2041. Governance Audit
+### 2041. Governance Audit
 
 Todo cambio deberá registrar:
 
@@ -22726,7 +22659,7 @@ Todo cambio deberá registrar:
 
 ---
 
-# 2042. Governance Events
+### 2042. Governance Events
 
 Eventos:
 
@@ -22748,7 +22681,7 @@ SecurityExceptionGranted
 
 ---
 
-# 2043. Governance Reporting
+### 2043. Governance Reporting
 
 Generar:
 
@@ -22759,7 +22692,7 @@ Generar:
 
 ---
 
-# 2044. Trend Analysis
+### 2044. Trend Analysis
 
 Analizar:
 
@@ -22770,7 +22703,7 @@ Analizar:
 
 ---
 
-# 2045. Security Maturity Model
+### 2045. Security Maturity Model
 
 ```text
 Initial
@@ -22794,7 +22727,7 @@ Optimized
 
 ---
 
-# 2046. Continuous Improvement
+### 2046. Continuous Improvement
 
 Después de cada incidente deberá revisarse:
 
@@ -22805,7 +22738,7 @@ Después de cada incidente deberá revisarse:
 
 ---
 
-# 2047. Governance Reviews
+### 2047. Governance Reviews
 
 Realizar revisiones:
 
@@ -22816,7 +22749,7 @@ Realizar revisiones:
 
 ---
 
-# 2048. Third-Party Governance
+### 2048. Third-Party Governance
 
 Evaluar:
 
@@ -22827,7 +22760,7 @@ Evaluar:
 
 ---
 
-# 2049. Supply Chain Security
+### 2049. Supply Chain Security
 
 Verificar:
 
@@ -22838,7 +22771,7 @@ Verificar:
 
 ---
 
-# 2050. Software Bill of Materials (SBOM)
+### 2050. Software Bill of Materials (SBOM)
 
 VoltStack podrá generar un inventario de:
 
@@ -22849,7 +22782,7 @@ VoltStack podrá generar un inventario de:
 
 ---
 
-# 2051. Security Baselines
+### 2051. Security Baselines
 
 Definir configuraciones mínimas para:
 
@@ -22859,13 +22792,13 @@ Definir configuraciones mínimas para:
 
 ---
 
-# 2052. Baseline Drift Detection
+### 2052. Baseline Drift Detection
 
 Detectar desviaciones respecto a la configuración aprobada.
 
 ---
 
-# 2053. Policy Drift Detection
+### 2053. Policy Drift Detection
 
 Identificar:
 
@@ -22875,7 +22808,7 @@ Identificar:
 
 ---
 
-# 2054. Governance Alerts
+### 2054. Governance Alerts
 
 Alertar cuando:
 
@@ -22886,7 +22819,7 @@ Alertar cuando:
 
 ---
 
-# 2055. Executive Security Reports
+### 2055. Executive Security Reports
 
 Los reportes deberán resumir:
 
@@ -22897,7 +22830,7 @@ Los reportes deberán resumir:
 
 ---
 
-# 2056. Technical Security Reports
+### 2056. Technical Security Reports
 
 Los reportes técnicos incluirán:
 
@@ -22908,7 +22841,7 @@ Los reportes técnicos incluirán:
 
 ---
 
-# 2057. Governance APIs
+### 2057. Governance APIs
 
 Exponer APIs para consultar:
 
@@ -22919,13 +22852,13 @@ Exponer APIs para consultar:
 
 ---
 
-# 2058. Governance Access Control
+### 2058. Governance Access Control
 
 El acceso a funciones de gobierno deberá restringirse mediante RBAC y políticas.
 
 ---
 
-# 2059. Governance Security Events
+### 2059. Governance Security Events
 
 Eventos adicionales:
 
@@ -22943,7 +22876,7 @@ SBOMGenerated
 
 ---
 
-# 2060. Governance Security Result
+### 2060. Governance Security Result
 
 Esta entrega establece:
 
@@ -22969,7 +22902,7 @@ Supply Chain Governance
 
 ---
 
-# 2061. Próxima entrega
+### 2061. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 22`
 
@@ -22985,9 +22918,8 @@ Continuará con:
 - Security Mesh
 - Future Security Roadmap
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 22
 
 **Documento:** Parte 06
 **Entrega:** 22 de varias
@@ -22995,7 +22927,7 @@ Continuará con:
 
 ---
 
-# 2101. Zero Trust Security Architecture
+### 2101. Zero Trust Security Architecture
 
 VoltStack deberá adoptar un modelo Zero Trust basado en el principio:
 
@@ -23011,7 +22943,7 @@ Ningún usuario, servicio, dispositivo o proceso deberá considerarse confiable 
 
 ---
 
-# 2102. Zero Trust Objectives
+### 2102. Zero Trust Objectives
 
 La arquitectura deberá garantizar:
 
@@ -23024,7 +22956,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2103. Zero Trust Trust Model
+### 2103. Zero Trust Trust Model
 
 El modelo tradicional:
 
@@ -23064,7 +22996,7 @@ Access Decision
 
 ---
 
-# 2104. Zero Trust Domains
+### 2104. Zero Trust Domains
 
 VoltStack deberá aplicar Zero Trust sobre:
 
@@ -23080,7 +23012,7 @@ VoltStack deberá aplicar Zero Trust sobre:
 
 ---
 
-# 2105. Zero Trust Control Plane
+### 2105. Zero Trust Control Plane
 
 La arquitectura deberá contar con un plano de control central.
 
@@ -23106,7 +23038,7 @@ Protected Resources
 
 ---
 
-# 2106. Zero Trust Data Plane
+### 2106. Zero Trust Data Plane
 
 El plano de datos comprenderá las operaciones reales:
 
@@ -23120,7 +23052,7 @@ El plano de datos comprenderá las operaciones reales:
 
 ---
 
-# 2107. Zero Trust Component Model
+### 2107. Zero Trust Component Model
 
 ```php
 final readonly class ZeroTrustContext
@@ -23138,7 +23070,7 @@ final readonly class ZeroTrustContext
 
 ---
 
-# 2108. Explicit Verification
+### 2108. Explicit Verification
 
 Cada acceso deberá verificar explícitamente:
 
@@ -23151,7 +23083,7 @@ Cada acceso deberá verificar explícitamente:
 
 ---
 
-# 2109. Continuous Verification
+### 2109. Continuous Verification
 
 La autenticación inicial no deberá ser suficiente para toda la duración de la sesión.
 
@@ -23165,7 +23097,7 @@ VoltStack deberá reevaluar el acceso durante:
 
 ---
 
-# 2110. Continuous Verification Flow
+### 2110. Continuous Verification Flow
 
 ```text
 Authenticated Session
@@ -23193,7 +23125,7 @@ Allow / Challenge / Deny
 
 ---
 
-# 2111. Continuous Verification Triggers
+### 2111. Continuous Verification Triggers
 
 La reevaluación podrá activarse por:
 
@@ -23206,7 +23138,7 @@ La reevaluación podrá activarse por:
 
 ---
 
-# 2112. Verification Frequency
+### 2112. Verification Frequency
 
 La frecuencia deberá adaptarse al riesgo.
 
@@ -23217,7 +23149,6 @@ Low Risk
 
 Longer Verification Window
 
-
 High Risk
 
 ↓
@@ -23227,7 +23158,7 @@ Immediate Reverification
 
 ---
 
-# 2113. VerificationPolicy
+### 2113. VerificationPolicy
 
 ```php
 interface VerificationPolicyInterface
@@ -23241,7 +23172,7 @@ interface VerificationPolicyInterface
 
 ---
 
-# 2114. Adaptive Authorization Architecture
+### 2114. Adaptive Authorization Architecture
 
 VoltStack deberá soportar autorización adaptativa.
 
@@ -23249,7 +23180,7 @@ La decisión no dependerá únicamente de roles y permisos estáticos.
 
 ---
 
-# 2115. Adaptive Authorization Inputs
+### 2115. Adaptive Authorization Inputs
 
 La decisión podrá considerar:
 
@@ -23264,7 +23195,7 @@ La decisión podrá considerar:
 
 ---
 
-# 2116. Adaptive Decision Model
+### 2116. Adaptive Decision Model
 
 ```text
 Base Permissions
@@ -23288,7 +23219,7 @@ Adaptive Decision
 
 ---
 
-# 2117. AdaptiveAuthorizationDecision
+### 2117. AdaptiveAuthorizationDecision
 
 ```php
 enum AdaptiveAuthorizationDecision: string
@@ -23303,7 +23234,7 @@ enum AdaptiveAuthorizationDecision: string
 
 ---
 
-# 2118. Restricted Access Decisions
+### 2118. Restricted Access Decisions
 
 Una autorización limitada podrá:
 
@@ -23315,7 +23246,7 @@ Una autorización limitada podrá:
 
 ---
 
-# 2119. Context-Aware Authorization
+### 2119. Context-Aware Authorization
 
 Ejemplo:
 
@@ -23335,7 +23266,7 @@ Download denied
 
 ---
 
-# 2120. Context Attribute Sources
+### 2120. Context Attribute Sources
 
 Los atributos contextuales podrán provenir de:
 
@@ -23349,7 +23280,7 @@ Los atributos contextuales podrán provenir de:
 
 ---
 
-# 2121. Context Integrity
+### 2121. Context Integrity
 
 Los atributos contextuales deberán:
 
@@ -23360,7 +23291,7 @@ Los atributos contextuales deberán:
 
 ---
 
-# 2122. ContextAttribute
+### 2122. ContextAttribute
 
 ```php
 final readonly class ContextAttribute
@@ -23378,7 +23309,7 @@ final readonly class ContextAttribute
 
 ---
 
-# 2123. Context Confidence
+### 2123. Context Confidence
 
 VoltStack podrá asignar nivel de confianza:
 
@@ -23395,13 +23326,13 @@ enum ContextConfidence: int
 
 ---
 
-# 2124. Device Trust Architecture
+### 2124. Device Trust Architecture
 
 Los dispositivos deberán formar parte del contexto de seguridad.
 
 ---
 
-# 2125. Device Trust Signals
+### 2125. Device Trust Signals
 
 Evaluar:
 
@@ -23415,7 +23346,7 @@ Evaluar:
 
 ---
 
-# 2126. DeviceIdentity
+### 2126. DeviceIdentity
 
 ```php
 final readonly class DeviceIdentity
@@ -23433,7 +23364,7 @@ final readonly class DeviceIdentity
 
 ---
 
-# 2127. Device Trust Levels
+### 2127. Device Trust Levels
 
 ```php
 enum DeviceTrustLevel: string
@@ -23448,7 +23379,7 @@ enum DeviceTrustLevel: string
 
 ---
 
-# 2128. Device Registration Security
+### 2128. Device Registration Security
 
 El registro deberá requerir:
 
@@ -23460,7 +23391,7 @@ El registro deberá requerir:
 
 ---
 
-# 2129. Device Revocation
+### 2129. Device Revocation
 
 VoltStack deberá permitir:
 
@@ -23482,7 +23413,7 @@ Block Future Access
 
 ---
 
-# 2130. Device Compliance Evaluation
+### 2130. Device Compliance Evaluation
 
 La conformidad podrá evaluarse antes de:
 
@@ -23493,7 +23424,7 @@ La conformidad podrá evaluarse antes de:
 
 ---
 
-# 2131. DeviceTrustEvaluator
+### 2131. DeviceTrustEvaluator
 
 ```php
 interface DeviceTrustEvaluatorInterface
@@ -23507,7 +23438,7 @@ interface DeviceTrustEvaluatorInterface
 
 ---
 
-# 2132. Unmanaged Device Restrictions
+### 2132. Unmanaged Device Restrictions
 
 Un dispositivo no administrado podrá tener:
 
@@ -23519,13 +23450,13 @@ Un dispositivo no administrado podrá tener:
 
 ---
 
-# 2133. Network Trust Architecture
+### 2133. Network Trust Architecture
 
 La red será una señal de contexto, pero nunca una garantía absoluta.
 
 ---
 
-# 2134. Network Context Signals
+### 2134. Network Context Signals
 
 Considerar:
 
@@ -23539,7 +23470,7 @@ Considerar:
 
 ---
 
-# 2135. NetworkContext
+### 2135. NetworkContext
 
 ```php
 final readonly class NetworkContext
@@ -23557,7 +23488,7 @@ final readonly class NetworkContext
 
 ---
 
-# 2136. Network Risk Evaluation
+### 2136. Network Risk Evaluation
 
 Ejemplo:
 
@@ -23572,7 +23503,6 @@ Verified Device
 
 Lower Risk
 
-
 Anonymous Proxy
 
 +
@@ -23586,7 +23516,7 @@ Higher Risk
 
 ---
 
-# 2137. Location-Aware Security
+### 2137. Location-Aware Security
 
 La ubicación podrá utilizarse para:
 
@@ -23597,7 +23527,7 @@ La ubicación podrá utilizarse para:
 
 ---
 
-# 2138. Impossible Travel Detection
+### 2138. Impossible Travel Detection
 
 ```text
 Login Mexico
@@ -23617,7 +23547,7 @@ Risk Alert
 
 ---
 
-# 2139. Temporal Context Security
+### 2139. Temporal Context Security
 
 El horario podrá influir en el acceso.
 
@@ -23637,13 +23567,13 @@ Outside Business Hours
 
 ---
 
-# 2140. Behavioral Trust Architecture
+### 2140. Behavioral Trust Architecture
 
 VoltStack podrá analizar patrones de comportamiento.
 
 ---
 
-# 2141. Behavioral Signals
+### 2141. Behavioral Signals
 
 Ejemplos:
 
@@ -23656,7 +23586,7 @@ Ejemplos:
 
 ---
 
-# 2142. BehavioralProfile
+### 2142. BehavioralProfile
 
 ```php
 final readonly class BehavioralProfile
@@ -23673,7 +23603,7 @@ final readonly class BehavioralProfile
 
 ---
 
-# 2143. Behavior Anomaly Detection
+### 2143. Behavior Anomaly Detection
 
 Detectar:
 
@@ -23682,7 +23612,6 @@ Normal:
 
 20 invoices/day
 
-
 Current:
 
 50,000 invoices/hour
@@ -23690,7 +23619,7 @@ Current:
 
 ---
 
-# 2144. Behavioral Privacy
+### 2144. Behavioral Privacy
 
 El análisis de comportamiento deberá:
 
@@ -23701,13 +23630,13 @@ El análisis de comportamiento deberá:
 
 ---
 
-# 2145. Risk-Based Access Control
+### 2145. Risk-Based Access Control
 
 El acceso deberá ajustarse al riesgo calculado.
 
 ---
 
-# 2146. Risk Score Model
+### 2146. Risk Score Model
 
 ```php
 final readonly class AccessRiskScore
@@ -23728,7 +23657,7 @@ final readonly class AccessRiskScore
 
 ---
 
-# 2147. Risk Thresholds
+### 2147. Risk Thresholds
 
 Ejemplo:
 
@@ -23737,16 +23666,13 @@ Ejemplo:
 
 Allow
 
-
 26–50
 
 Allow with Monitoring
 
-
 51–75
 
 Require Step-Up
-
 
 76–100
 
@@ -23755,7 +23681,7 @@ Deny and Investigate
 
 ---
 
-# 2148. Risk Calculation Principles
+### 2148. Risk Calculation Principles
 
 El cálculo deberá ser:
 
@@ -23767,7 +23693,7 @@ El cálculo deberá ser:
 
 ---
 
-# 2149. Risk Signal Weighting
+### 2149. Risk Signal Weighting
 
 ```php
 final readonly class RiskSignalWeight
@@ -23783,7 +23709,7 @@ final readonly class RiskSignalWeight
 
 ---
 
-# 2150. Risk Evaluation Engine
+### 2150. Risk Evaluation Engine
 
 ```php
 interface AccessRiskEngineInterface
@@ -23797,7 +23723,7 @@ interface AccessRiskEngineInterface
 
 ---
 
-# 2151. Resource Sensitivity Model
+### 2151. Resource Sensitivity Model
 
 Cada recurso podrá declarar su sensibilidad.
 
@@ -23814,7 +23740,7 @@ enum ResourceSensitivity: string
 
 ---
 
-# 2152. Sensitivity-Aware Enforcement
+### 2152. Sensitivity-Aware Enforcement
 
 Cuanto mayor sea la sensibilidad:
 
@@ -23826,7 +23752,7 @@ Cuanto mayor sea la sensibilidad:
 
 ---
 
-# 2153. ProtectedOperation
+### 2153. ProtectedOperation
 
 ```php
 final readonly class ProtectedOperation
@@ -23843,13 +23769,13 @@ final readonly class ProtectedOperation
 
 ---
 
-# 2154. Continuous Access Evaluation
+### 2154. Continuous Access Evaluation
 
 VoltStack deberá soportar evaluación continua de acceso durante la sesión.
 
 ---
 
-# 2155. Continuous Access Evaluation Events
+### 2155. Continuous Access Evaluation Events
 
 Reevaluar cuando ocurra:
 
@@ -23862,7 +23788,7 @@ Reevaluar cuando ocurra:
 
 ---
 
-# 2156. CAE Flow
+### 2156. CAE Flow
 
 ```text
 Security Event
@@ -23886,13 +23812,13 @@ Continue / Restrict / Terminate
 
 ---
 
-# 2157. Access Evaluation Event Bus
+### 2157. Access Evaluation Event Bus
 
 Los cambios críticos deberán propagarse mediante eventos internos seguros.
 
 ---
 
-# 2158. AccessRevocationEvent
+### 2158. AccessRevocationEvent
 
 ```php
 final readonly class AccessRevocationEvent
@@ -23909,7 +23835,7 @@ final readonly class AccessRevocationEvent
 
 ---
 
-# 2159. Session Reassessment
+### 2159. Session Reassessment
 
 Una sesión activa deberá poder:
 
@@ -23921,13 +23847,13 @@ Una sesión activa deberá poder:
 
 ---
 
-# 2160. Token Reassessment
+### 2160. Token Reassessment
 
 Los tokens de larga duración no deberán conservar privilegios revocados.
 
 ---
 
-# 2161. Token Introspection
+### 2161. Token Introspection
 
 VoltStack podrá validar en tiempo real:
 
@@ -23939,7 +23865,7 @@ VoltStack podrá validar en tiempo real:
 
 ---
 
-# 2162. Short-Lived Token Strategy
+### 2162. Short-Lived Token Strategy
 
 Los tokens sensibles deberán tener:
 
@@ -23950,7 +23876,7 @@ Los tokens sensibles deberán tener:
 
 ---
 
-# 2163. Proof-of-Possession Tokens
+### 2163. Proof-of-Possession Tokens
 
 Para operaciones críticas podrá requerirse prueba de posesión asociada a:
 
@@ -23961,13 +23887,13 @@ Para operaciones críticas podrá requerirse prueba de posesión asociada a:
 
 ---
 
-# 2164. Step-Up Authentication Architecture
+### 2164. Step-Up Authentication Architecture
 
 Cuando el riesgo aumente, VoltStack podrá solicitar autenticación adicional.
 
 ---
 
-# 2165. Step-Up Factors
+### 2165. Step-Up Factors
 
 Soportar:
 
@@ -23980,7 +23906,7 @@ Soportar:
 
 ---
 
-# 2166. StepUpRequirement
+### 2166. StepUpRequirement
 
 ```php
 final readonly class StepUpRequirement
@@ -23997,7 +23923,7 @@ final readonly class StepUpRequirement
 
 ---
 
-# 2167. Authentication Assurance Levels
+### 2167. Authentication Assurance Levels
 
 ```php
 enum AuthenticationAssuranceLevel: int
@@ -24011,7 +23937,7 @@ enum AuthenticationAssuranceLevel: int
 
 ---
 
-# 2168. Step-Up Scope
+### 2168. Step-Up Scope
 
 La elevación deberá limitarse a:
 
@@ -24022,13 +23948,13 @@ La elevación deberá limitarse a:
 
 ---
 
-# 2169. Step-Up Replay Protection
+### 2169. Step-Up Replay Protection
 
 Una validación elevada no deberá reutilizarse fuera de su alcance autorizado.
 
 ---
 
-# 2170. Policy Enforcement Point Architecture
+### 2170. Policy Enforcement Point Architecture
 
 Los puntos de aplicación de políticas deberán existir en:
 
@@ -24043,7 +23969,7 @@ Los puntos de aplicación de políticas deberán existir en:
 
 ---
 
-# 2171. Policy Decision Point Architecture
+### 2171. Policy Decision Point Architecture
 
 El Policy Decision Point deberá:
 
@@ -24055,7 +23981,7 @@ El Policy Decision Point deberá:
 
 ---
 
-# 2172. Policy Information Point
+### 2172. Policy Information Point
 
 El Policy Information Point deberá proporcionar:
 
@@ -24068,7 +23994,7 @@ El Policy Information Point deberá proporcionar:
 
 ---
 
-# 2173. Policy Administration Point
+### 2173. Policy Administration Point
 
 El Policy Administration Point deberá administrar:
 
@@ -24080,7 +24006,7 @@ El Policy Administration Point deberá administrar:
 
 ---
 
-# 2174. Zero Trust Policy Flow
+### 2174. Zero Trust Policy Flow
 
 ```text
 PEP
@@ -24108,7 +24034,7 @@ PEP Enforcement
 
 ---
 
-# 2175. Authorization Obligations
+### 2175. Authorization Obligations
 
 Una decisión podrá incluir obligaciones.
 
@@ -24122,7 +24048,7 @@ Ejemplos:
 
 ---
 
-# 2176. AuthorizationObligation
+### 2176. AuthorizationObligation
 
 ```php
 final readonly class AuthorizationObligation
@@ -24138,7 +24064,7 @@ final readonly class AuthorizationObligation
 
 ---
 
-# 2177. Obligation Enforcement
+### 2177. Obligation Enforcement
 
 Si una obligación obligatoria no puede aplicarse:
 
@@ -24150,7 +24076,7 @@ La operación deberá rechazarse.
 
 ---
 
-# 2178. Authorization Advice
+### 2178. Authorization Advice
 
 Las políticas también podrán emitir recomendaciones no obligatorias.
 
@@ -24166,13 +24092,13 @@ Increase Monitoring
 
 ---
 
-# 2179. Security Mesh Architecture
+### 2179. Security Mesh Architecture
 
 VoltStack podrá implementar un Security Mesh distribuido.
 
 ---
 
-# 2180. Security Mesh Principles
+### 2180. Security Mesh Principles
 
 El modelo deberá:
 
@@ -24184,7 +24110,7 @@ El modelo deberá:
 
 ---
 
-# 2181. Security Mesh Components
+### 2181. Security Mesh Components
 
 ```text
 Identity Service
@@ -24202,7 +24128,7 @@ Enforcement Adapters
 
 ---
 
-# 2182. Security Mesh Integration
+### 2182. Security Mesh Integration
 
 Cada módulo Quantum podrá integrar un adaptador de seguridad.
 
@@ -24222,7 +24148,7 @@ Quantum\Queue
 
 ---
 
-# 2183. SecurityMeshAdapter
+### 2183. SecurityMeshAdapter
 
 ```php
 interface SecurityMeshAdapterInterface
@@ -24239,7 +24165,7 @@ interface SecurityMeshAdapterInterface
 
 ---
 
-# 2184. Distributed Policy Consistency
+### 2184. Distributed Policy Consistency
 
 Las políticas distribuidas deberán controlar:
 
@@ -24251,7 +24177,7 @@ Las políticas distribuidas deberán controlar:
 
 ---
 
-# 2185. Policy Propagation
+### 2185. Policy Propagation
 
 ```text
 Policy Published
@@ -24275,7 +24201,7 @@ Activation
 
 ---
 
-# 2186. Signed Policy Bundles
+### 2186. Signed Policy Bundles
 
 Cada paquete deberá incluir:
 
@@ -24288,7 +24214,7 @@ Cada paquete deberá incluir:
 
 ---
 
-# 2187. PolicyBundle
+### 2187. PolicyBundle
 
 ```php
 final readonly class PolicyBundle
@@ -24306,13 +24232,13 @@ final readonly class PolicyBundle
 
 ---
 
-# 2188. Offline Enforcement
+### 2188. Offline Enforcement
 
 Los servicios deberán poder aplicar políticas temporalmente cuando el PDP no esté disponible.
 
 ---
 
-# 2189. Offline Decision Rules
+### 2189. Offline Decision Rules
 
 En modo degradado:
 
@@ -24324,7 +24250,7 @@ En modo degradado:
 
 ---
 
-# 2190. Zero Trust Availability Strategy
+### 2190. Zero Trust Availability Strategy
 
 La seguridad no deberá introducir un punto único de falla.
 
@@ -24338,7 +24264,7 @@ Soportar:
 
 ---
 
-# 2191. Fail-Open vs Fail-Closed
+### 2191. Fail-Open vs Fail-Closed
 
 VoltStack deberá clasificar operaciones.
 
@@ -24349,7 +24275,6 @@ Critical Operation
 
 Fail Closed
 
-
 Low-Risk Read Operation
 
 ↓
@@ -24359,7 +24284,7 @@ Configurable Degraded Mode
 
 ---
 
-# 2192. Zero Trust Observability
+### 2192. Zero Trust Observability
 
 Registrar:
 
@@ -24372,7 +24297,7 @@ Registrar:
 
 ---
 
-# 2193. Decision Explainability
+### 2193. Decision Explainability
 
 Cada decisión deberá poder explicar:
 
@@ -24392,7 +24317,7 @@ Restricted Resource
 
 ---
 
-# 2194. Zero Trust Audit Event
+### 2194. Zero Trust Audit Event
 
 ```php
 final readonly class ZeroTrustAuditEvent
@@ -24411,7 +24336,7 @@ final readonly class ZeroTrustAuditEvent
 
 ---
 
-# 2195. Zero Trust Metrics
+### 2195. Zero Trust Metrics
 
 Medir:
 
@@ -24424,7 +24349,7 @@ Medir:
 
 ---
 
-# 2196. Zero Trust Testing Strategy
+### 2196. Zero Trust Testing Strategy
 
 Las pruebas deberán cubrir:
 
@@ -24437,7 +24362,7 @@ Las pruebas deberán cubrir:
 
 ---
 
-# 2197. Zero Trust Simulation
+### 2197. Zero Trust Simulation
 
 VoltStack deberá permitir simulaciones:
 
@@ -24455,7 +24380,7 @@ Policy bundle is unavailable?
 
 ---
 
-# 2198. Zero Trust Security Result
+### 2198. Zero Trust Security Result
 
 Esta entrega establece:
 
@@ -24483,7 +24408,7 @@ Distributed Policy Enforcement
 
 ---
 
-# 2199. Próxima entrega
+### 2199. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 23`
 
@@ -24502,9 +24427,7 @@ Continuará con:
 - Security operations center
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 23
 
 **Documento:** Parte 06
 **Entrega:** 23 de varias
@@ -24512,7 +24435,7 @@ Continuará con:
 
 ---
 
-# 2201. Security Operations Architecture
+### 2201. Security Operations Architecture
 
 VoltStack deberá incorporar una arquitectura de operaciones de seguridad capaz de observar, detectar, investigar, contener y responder ante amenazas.
 
@@ -24530,7 +24453,7 @@ La seguridad operacional deberá cubrir:
 
 ---
 
-# 2202. Security Operations Objectives
+### 2202. Security Operations Objectives
 
 El sistema deberá permitir:
 
@@ -24543,7 +24466,7 @@ El sistema deberá permitir:
 
 ---
 
-# 2203. Security Operations Model
+### 2203. Security Operations Model
 
 ```text
 Telemetry Sources
@@ -24575,7 +24498,7 @@ Containment and Recovery
 
 ---
 
-# 2204. Security Operations Domains
+### 2204. Security Operations Domains
 
 VoltStack deberá organizar las operaciones en:
 
@@ -24599,13 +24522,13 @@ Lessons Learned
 
 ---
 
-# 2205. Security Operations Center Integration
+### 2205. Security Operations Center Integration
 
 VoltStack deberá integrarse con un Security Operations Center interno o externo.
 
 ---
 
-# 2206. SOC Responsibilities
+### 2206. SOC Responsibilities
 
 El SOC podrá encargarse de:
 
@@ -24618,7 +24541,7 @@ El SOC podrá encargarse de:
 
 ---
 
-# 2207. Security Operations Roles
+### 2207. Security Operations Roles
 
 Definir:
 
@@ -24632,23 +24555,20 @@ Definir:
 
 ---
 
-# 2208. Security Operations Responsibility Model
+### 2208. Security Operations Responsibility Model
 
 ```text
 Detection Engineer
 
 Creates Rules
 
-
 SOC Analyst
 
 Investigates Alerts
 
-
 Incident Commander
 
 Coordinates Response
-
 
 Platform Team
 
@@ -24657,13 +24577,13 @@ Applies Containment
 
 ---
 
-# 2209. Security Telemetry Architecture
+### 2209. Security Telemetry Architecture
 
 VoltStack deberá producir telemetría estructurada desde todos los puntos críticos.
 
 ---
 
-# 2210. Security Telemetry Sources
+### 2210. Security Telemetry Sources
 
 Fuentes:
 
@@ -24679,7 +24599,7 @@ Fuentes:
 
 ---
 
-# 2211. SecurityTelemetryRecord
+### 2211. SecurityTelemetryRecord
 
 ```php
 final readonly class SecurityTelemetryRecord
@@ -24698,7 +24618,7 @@ final readonly class SecurityTelemetryRecord
 
 ---
 
-# 2212. Telemetry Collection Pipeline
+### 2212. Telemetry Collection Pipeline
 
 ```text
 Security Event
@@ -24726,7 +24646,7 @@ Detection Platform
 
 ---
 
-# 2213. Telemetry Reliability
+### 2213. Telemetry Reliability
 
 La canalización deberá soportar:
 
@@ -24738,7 +24658,7 @@ La canalización deberá soportar:
 
 ---
 
-# 2214. Telemetry Integrity
+### 2214. Telemetry Integrity
 
 Cada registro podrá incluir:
 
@@ -24749,7 +24669,7 @@ Cada registro podrá incluir:
 
 ---
 
-# 2215. Telemetry Confidentiality
+### 2215. Telemetry Confidentiality
 
 La telemetría deberá evitar exposición de:
 
@@ -24762,7 +24682,7 @@ La telemetría deberá evitar exposición de:
 
 ---
 
-# 2216. Telemetry Minimization
+### 2216. Telemetry Minimization
 
 Registrar únicamente lo necesario para:
 
@@ -24773,13 +24693,13 @@ Registrar únicamente lo necesario para:
 
 ---
 
-# 2217. Security Event Normalization
+### 2217. Security Event Normalization
 
 Los eventos deberán transformarse a un esquema uniforme.
 
 ---
 
-# 2218. Normalized Security Event
+### 2218. Normalized Security Event
 
 ```php
 final readonly class NormalizedSecurityEvent
@@ -24798,7 +24718,7 @@ final readonly class NormalizedSecurityEvent
 
 ---
 
-# 2219. Event Taxonomy
+### 2219. Event Taxonomy
 
 Categorías sugeridas:
 
@@ -24824,7 +24744,7 @@ Threat
 
 ---
 
-# 2220. Event Severity
+### 2220. Event Severity
 
 ```php
 enum SecurityEventSeverity: string
@@ -24839,13 +24759,13 @@ enum SecurityEventSeverity: string
 
 ---
 
-# 2221. SIEM Integration Architecture
+### 2221. SIEM Integration Architecture
 
 VoltStack deberá permitir integración con plataformas SIEM.
 
 ---
 
-# 2222. SIEM Export Formats
+### 2222. SIEM Export Formats
 
 Soportar:
 
@@ -24858,7 +24778,7 @@ Soportar:
 
 ---
 
-# 2223. SiemExporterInterface
+### 2223. SiemExporterInterface
 
 ```php
 interface SiemExporterInterface
@@ -24871,7 +24791,7 @@ interface SiemExporterInterface
 
 ---
 
-# 2224. SIEM Delivery Modes
+### 2224. SIEM Delivery Modes
 
 VoltStack podrá soportar:
 
@@ -24883,7 +24803,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 2225. SIEM Transport Security
+### 2225. SIEM Transport Security
 
 El transporte deberá usar:
 
@@ -24895,7 +24815,7 @@ El transporte deberá usar:
 
 ---
 
-# 2226. SIEM Backpressure Protection
+### 2226. SIEM Backpressure Protection
 
 Cuando el SIEM no responda:
 
@@ -24921,13 +24841,13 @@ Raise Operational Alert
 
 ---
 
-# 2227. Detection Engineering Architecture
+### 2227. Detection Engineering Architecture
 
 VoltStack deberá soportar reglas de detección mantenibles, versionadas y verificables.
 
 ---
 
-# 2228. Detection Rule Lifecycle
+### 2228. Detection Rule Lifecycle
 
 ```text
 Draft
@@ -24959,7 +24879,7 @@ Retire
 
 ---
 
-# 2229. DetectionRule
+### 2229. DetectionRule
 
 ```php
 final readonly class DetectionRule
@@ -24978,7 +24898,7 @@ final readonly class DetectionRule
 
 ---
 
-# 2230. Detection Rule Sources
+### 2230. Detection Rule Sources
 
 Las reglas podrán basarse en:
 
@@ -24991,7 +24911,7 @@ Las reglas podrán basarse en:
 
 ---
 
-# 2231. Threshold Detection
+### 2231. Threshold Detection
 
 Ejemplo:
 
@@ -25009,7 +24929,7 @@ Credential Attack Alert
 
 ---
 
-# 2232. Sequence Detection
+### 2232. Sequence Detection
 
 Ejemplo:
 
@@ -25031,13 +24951,13 @@ Potential Privilege Escalation
 
 ---
 
-# 2233. Behavioral Detection
+### 2233. Behavioral Detection
 
 El motor podrá comparar la actividad actual con patrones históricos.
 
 ---
 
-# 2234. Detection Context
+### 2234. Detection Context
 
 Una regla deberá considerar:
 
@@ -25051,7 +24971,7 @@ Una regla deberá considerar:
 
 ---
 
-# 2235. Detection Correlation Engine
+### 2235. Detection Correlation Engine
 
 ```php
 interface SecurityCorrelationEngineInterface
@@ -25065,7 +24985,7 @@ interface SecurityCorrelationEngineInterface
 
 ---
 
-# 2236. Correlation Window
+### 2236. Correlation Window
 
 ```php
 final readonly class CorrelationWindow
@@ -25080,7 +25000,7 @@ final readonly class CorrelationWindow
 
 ---
 
-# 2237. Cross-Domain Correlation
+### 2237. Cross-Domain Correlation
 
 Ejemplo:
 
@@ -25102,7 +25022,7 @@ High-Risk Incident
 
 ---
 
-# 2238. Detection Confidence
+### 2238. Detection Confidence
 
 Cada detección deberá incluir:
 
@@ -25113,7 +25033,7 @@ Cada detección deberá incluir:
 
 ---
 
-# 2239. DetectionResult
+### 2239. DetectionResult
 
 ```php
 final readonly class DetectionResult
@@ -25131,7 +25051,7 @@ final readonly class DetectionResult
 
 ---
 
-# 2240. False Positive Management
+### 2240. False Positive Management
 
 El sistema deberá permitir:
 
@@ -25143,7 +25063,7 @@ El sistema deberá permitir:
 
 ---
 
-# 2241. False Negative Review
+### 2241. False Negative Review
 
 Después de un incidente no detectado deberá revisarse:
 
@@ -25155,7 +25075,7 @@ Después de un incidente no detectado deberá revisarse:
 
 ---
 
-# 2242. Detection Rule Testing
+### 2242. Detection Rule Testing
 
 Cada regla deberá probarse con:
 
@@ -25167,13 +25087,13 @@ Cada regla deberá probarse con:
 
 ---
 
-# 2243. Detection Simulation
+### 2243. Detection Simulation
 
 VoltStack deberá permitir inyectar eventos simulados sin afectar producción.
 
 ---
 
-# 2244. Detection as Code
+### 2244. Detection as Code
 
 Las reglas deberán poder almacenarse como código versionado.
 
@@ -25187,13 +25107,13 @@ Beneficios:
 
 ---
 
-# 2245. Threat Intelligence Integration
+### 2245. Threat Intelligence Integration
 
 VoltStack podrá consumir inteligencia de amenazas.
 
 ---
 
-# 2246. Threat Intelligence Sources
+### 2246. Threat Intelligence Sources
 
 Ejemplos:
 
@@ -25206,7 +25126,7 @@ Ejemplos:
 
 ---
 
-# 2247. ThreatIndicator
+### 2247. ThreatIndicator
 
 ```php
 final readonly class ThreatIndicator
@@ -25224,7 +25144,7 @@ final readonly class ThreatIndicator
 
 ---
 
-# 2248. Threat Intelligence Validation
+### 2248. Threat Intelligence Validation
 
 No deberá confiarse ciegamente en un feed externo.
 
@@ -25238,7 +25158,7 @@ Validar:
 
 ---
 
-# 2249. Threat Intelligence Matching
+### 2249. Threat Intelligence Matching
 
 ```text
 Incoming Request IP
@@ -25258,19 +25178,19 @@ Challenge or Deny
 
 ---
 
-# 2250. Threat Intelligence Privacy
+### 2250. Threat Intelligence Privacy
 
 El intercambio de inteligencia deberá evitar exposición indebida de datos internos.
 
 ---
 
-# 2251. Threat Hunting Architecture
+### 2251. Threat Hunting Architecture
 
 VoltStack deberá facilitar búsquedas proactivas de amenazas.
 
 ---
 
-# 2252. Threat Hunting Hypothesis
+### 2252. Threat Hunting Hypothesis
 
 Ejemplo:
 
@@ -25284,7 +25204,7 @@ Outside Normal Hours
 
 ---
 
-# 2253. Threat Hunting Data Sources
+### 2253. Threat Hunting Data Sources
 
 Usar:
 
@@ -25297,7 +25217,7 @@ Usar:
 
 ---
 
-# 2254. HuntingQuery
+### 2254. HuntingQuery
 
 ```php
 final readonly class HuntingQuery
@@ -25315,13 +25235,13 @@ final readonly class HuntingQuery
 
 ---
 
-# 2255. Alert Management Architecture
+### 2255. Alert Management Architecture
 
 Una detección deberá convertirse en alerta cuando requiera revisión.
 
 ---
 
-# 2256. SecurityAlert
+### 2256. SecurityAlert
 
 ```php
 final readonly class SecurityAlert
@@ -25340,7 +25260,7 @@ final readonly class SecurityAlert
 
 ---
 
-# 2257. Alert States
+### 2257. Alert States
 
 ```text
 New
@@ -25368,13 +25288,13 @@ Closed
 
 ---
 
-# 2258. Alert Deduplication
+### 2258. Alert Deduplication
 
 El sistema deberá agrupar alertas equivalentes para evitar fatiga operacional.
 
 ---
 
-# 2259. Alert Suppression
+### 2259. Alert Suppression
 
 La supresión deberá:
 
@@ -25385,7 +25305,7 @@ La supresión deberá:
 
 ---
 
-# 2260. Alert Prioritization
+### 2260. Alert Prioritization
 
 La prioridad deberá considerar:
 
@@ -25411,7 +25331,7 @@ Current Threat Context
 
 ---
 
-# 2261. Alert Enrichment
+### 2261. Alert Enrichment
 
 Antes de mostrar una alerta, VoltStack podrá agregar:
 
@@ -25424,7 +25344,7 @@ Antes de mostrar una alerta, VoltStack podrá agregar:
 
 ---
 
-# 2262. Alert Routing
+### 2262. Alert Routing
 
 Las alertas podrán dirigirse según:
 
@@ -25436,7 +25356,7 @@ Las alertas podrán dirigirse según:
 
 ---
 
-# 2263. Alert Escalation
+### 2263. Alert Escalation
 
 Ejemplo:
 
@@ -25456,13 +25376,13 @@ Notify Incident Commander
 
 ---
 
-# 2264. Incident Management Architecture
+### 2264. Incident Management Architecture
 
 Una alerta confirmada podrá convertirse en incidente.
 
 ---
 
-# 2265. SecurityIncident
+### 2265. SecurityIncident
 
 ```php
 final readonly class SecurityIncident
@@ -25482,7 +25402,7 @@ final readonly class SecurityIncident
 
 ---
 
-# 2266. Incident Lifecycle
+### 2266. Incident Lifecycle
 
 ```text
 Declared
@@ -25510,7 +25430,7 @@ Post-Incident Review
 
 ---
 
-# 2267. Incident Classification
+### 2267. Incident Classification
 
 Clasificar por:
 
@@ -25524,7 +25444,7 @@ Clasificar por:
 
 ---
 
-# 2268. Incident Severity Model
+### 2268. Incident Severity Model
 
 La severidad deberá considerar:
 
@@ -25537,7 +25457,7 @@ La severidad deberá considerar:
 
 ---
 
-# 2269. Incident Command Structure
+### 2269. Incident Command Structure
 
 ```text
 Incident Commander
@@ -25551,7 +25471,7 @@ Incident Commander
 
 ---
 
-# 2270. Incident Timeline
+### 2270. Incident Timeline
 
 VoltStack deberá construir una cronología ordenada de:
 
@@ -25563,7 +25483,7 @@ VoltStack deberá construir una cronología ordenada de:
 
 ---
 
-# 2271. IncidentTimelineEntry
+### 2271. IncidentTimelineEntry
 
 ```php
 final readonly class IncidentTimelineEntry
@@ -25580,7 +25500,7 @@ final readonly class IncidentTimelineEntry
 
 ---
 
-# 2272. Evidence Preservation
+### 2272. Evidence Preservation
 
 Durante un incidente deberán preservarse:
 
@@ -25593,7 +25513,7 @@ Durante un incidente deberán preservarse:
 
 ---
 
-# 2273. Chain of Custody
+### 2273. Chain of Custody
 
 La evidencia deberá registrar:
 
@@ -25613,7 +25533,7 @@ Current Custodian
 
 ---
 
-# 2274. EvidenceIntegrityRecord
+### 2274. EvidenceIntegrityRecord
 
 ```php
 final readonly class EvidenceIntegrityRecord
@@ -25631,13 +25551,13 @@ final readonly class EvidenceIntegrityRecord
 
 ---
 
-# 2275. Incident Response Playbooks
+### 2275. Incident Response Playbooks
 
 VoltStack deberá soportar playbooks estructurados y versionados.
 
 ---
 
-# 2276. Playbook Structure
+### 2276. Playbook Structure
 
 Un playbook deberá contener:
 
@@ -25651,7 +25571,7 @@ Un playbook deberá contener:
 
 ---
 
-# 2277. SecurityPlaybook
+### 2277. SecurityPlaybook
 
 ```php
 final readonly class SecurityPlaybook
@@ -25669,7 +25589,7 @@ final readonly class SecurityPlaybook
 
 ---
 
-# 2278. Playbook Example: Compromised Account
+### 2278. Playbook Example: Compromised Account
 
 ```text
 Disable Session
@@ -25697,7 +25617,7 @@ Notify Security Team
 
 ---
 
-# 2279. Playbook Example: Malicious Upload
+### 2279. Playbook Example: Malicious Upload
 
 ```text
 Quarantine File
@@ -25721,19 +25641,19 @@ Preserve Evidence
 
 ---
 
-# 2280. Playbook Approval
+### 2280. Playbook Approval
 
 Los playbooks críticos deberán aprobarse antes de producción.
 
 ---
 
-# 2281. Automated Response Architecture
+### 2281. Automated Response Architecture
 
 VoltStack podrá ejecutar acciones automáticas ante amenazas de alta confianza.
 
 ---
 
-# 2282. Automated Response Principles
+### 2282. Automated Response Principles
 
 Toda automatización deberá ser:
 
@@ -25745,7 +25665,7 @@ Toda automatización deberá ser:
 
 ---
 
-# 2283. Automated Response Actions
+### 2283. Automated Response Actions
 
 Ejemplos:
 
@@ -25759,7 +25679,7 @@ Ejemplos:
 
 ---
 
-# 2284. ResponseAction
+### 2284. ResponseAction
 
 ```php
 final readonly class ResponseAction
@@ -25776,7 +25696,7 @@ final readonly class ResponseAction
 
 ---
 
-# 2285. Response Authorization
+### 2285. Response Authorization
 
 El motor de respuesta también deberá estar autorizado.
 
@@ -25784,7 +25704,7 @@ No deberá poder ejecutar acciones fuera de sus capacidades declaradas.
 
 ---
 
-# 2286. Response Policy
+### 2286. Response Policy
 
 Ejemplo:
 
@@ -25802,7 +25722,7 @@ Immediate Session Revocation
 
 ---
 
-# 2287. Human-in-the-Loop Response
+### 2287. Human-in-the-Loop Response
 
 Acciones destructivas deberán poder requerir aprobación humana.
 
@@ -25815,7 +25735,7 @@ Ejemplos:
 
 ---
 
-# 2288. Automated Response Guardrails
+### 2288. Automated Response Guardrails
 
 Aplicar:
 
@@ -25827,7 +25747,7 @@ Aplicar:
 
 ---
 
-# 2289. Response Circuit Breaker
+### 2289. Response Circuit Breaker
 
 Si una automatización produce efectos anómalos:
 
@@ -25849,13 +25769,13 @@ Require Manual Review
 
 ---
 
-# 2290. Runtime Containment Architecture
+### 2290. Runtime Containment Architecture
 
 VoltStack deberá permitir contener procesos comprometidos.
 
 ---
 
-# 2291. Runtime Containment Actions
+### 2291. Runtime Containment Actions
 
 Soportar:
 
@@ -25868,7 +25788,7 @@ Soportar:
 
 ---
 
-# 2292. Controller Containment
+### 2292. Controller Containment
 
 Un controlador comprometido podrá:
 
@@ -25879,7 +25799,7 @@ Un controlador comprometido podrá:
 
 ---
 
-# 2293. Worker Containment
+### 2293. Worker Containment
 
 ```text
 Suspicious Worker
@@ -25907,7 +25827,7 @@ Investigate
 
 ---
 
-# 2294. Tenant Containment
+### 2294. Tenant Containment
 
 VoltStack deberá permitir contener un tenant sin afectar a los demás.
 
@@ -25921,7 +25841,7 @@ Acciones:
 
 ---
 
-# 2295. Service Containment
+### 2295. Service Containment
 
 Un servicio comprometido deberá perder:
 
@@ -25933,13 +25853,13 @@ Un servicio comprometido deberá perder:
 
 ---
 
-# 2296. Recovery Architecture
+### 2296. Recovery Architecture
 
 Después de contener y erradicar la amenaza deberá restaurarse el servicio de forma controlada.
 
 ---
 
-# 2297. Recovery Validation
+### 2297. Recovery Validation
 
 Antes de reactivar:
 
@@ -25951,7 +25871,7 @@ Antes de reactivar:
 
 ---
 
-# 2298. Security Operations Result
+### 2298. Security Operations Result
 
 Esta entrega establece:
 
@@ -25983,7 +25903,7 @@ Secure Recovery
 
 ---
 
-# 2299. Próxima entrega
+### 2299. Próxima entrega
 
 `CONTROLLER_SECURITY_MODEL_PART_06 Entrega 24`
 
@@ -26002,9 +25922,7 @@ Continuará con:
 - Production deployment security
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 24
 
 **Documento:** Parte 06
 **Entrega:** 24 de varias
@@ -26012,7 +25930,7 @@ Continuará con:
 
 ---
 
-# 2301. Secure Software Development Lifecycle Architecture
+### 2301. Secure Software Development Lifecycle Architecture
 
 VoltStack deberá incorporar seguridad durante todo el ciclo de vida del software.
 
@@ -26031,7 +25949,7 @@ Deberá formar parte de:
 
 ---
 
-# 2302. SSDLC Objectives
+### 2302. SSDLC Objectives
 
 El Secure Software Development Lifecycle deberá:
 
@@ -26044,7 +25962,7 @@ El Secure Software Development Lifecycle deberá:
 
 ---
 
-# 2303. SSDLC Security Model
+### 2303. SSDLC Security Model
 
 ```text
 Requirements
@@ -26080,7 +25998,7 @@ Runtime Monitoring
 
 ---
 
-# 2304. Shift-Left Security
+### 2304. Shift-Left Security
 
 VoltStack deberá aplicar seguridad desde las primeras fases.
 
@@ -26098,7 +26016,7 @@ Lower Production Risk
 
 ---
 
-# 2305. Shift-Right Security
+### 2305. Shift-Right Security
 
 La seguridad deberá continuar después del despliegue mediante:
 
@@ -26110,7 +26028,7 @@ La seguridad deberá continuar después del despliegue mediante:
 
 ---
 
-# 2306. Security Development Roles
+### 2306. Security Development Roles
 
 Definir:
 
@@ -26124,7 +26042,7 @@ Definir:
 
 ---
 
-# 2307. Security Champion Model
+### 2307. Security Champion Model
 
 Cada equipo podrá designar un Security Champion responsable de:
 
@@ -26136,7 +26054,7 @@ Cada equipo podrá designar un Security Champion responsable de:
 
 ---
 
-# 2308. Security Responsibility Principle
+### 2308. Security Responsibility Principle
 
 La seguridad será responsabilidad compartida.
 
@@ -26158,13 +26076,13 @@ Application Developers
 
 ---
 
-# 2309. Security Requirements Architecture
+### 2309. Security Requirements Architecture
 
 Cada funcionalidad deberá identificar sus requisitos de seguridad.
 
 ---
 
-# 2310. Security Requirement Categories
+### 2310. Security Requirement Categories
 
 Clasificar:
 
@@ -26179,7 +26097,7 @@ Clasificar:
 
 ---
 
-# 2311. SecurityRequirement
+### 2311. SecurityRequirement
 
 ```php
 final readonly class SecurityRequirement
@@ -26197,7 +26115,7 @@ final readonly class SecurityRequirement
 
 ---
 
-# 2312. Security Acceptance Criteria
+### 2312. Security Acceptance Criteria
 
 Ejemplo:
 
@@ -26205,7 +26123,6 @@ Ejemplo:
 Feature:
 
 Invoice Export
-
 
 Security Criteria:
 
@@ -26218,7 +26135,7 @@ Security Criteria:
 
 ---
 
-# 2313. Security Requirements Traceability
+### 2313. Security Requirements Traceability
 
 Cada requisito deberá relacionarse con:
 
@@ -26244,13 +26161,13 @@ Evidence
 
 ---
 
-# 2314. Security Architecture Review
+### 2314. Security Architecture Review
 
 Los cambios de alto impacto deberán pasar por revisión de arquitectura de seguridad.
 
 ---
 
-# 2315. Architecture Review Triggers
+### 2315. Architecture Review Triggers
 
 Requerir revisión cuando se agregue:
 
@@ -26265,7 +26182,7 @@ Requerir revisión cuando se agregue:
 
 ---
 
-# 2316. Security Architecture Review Process
+### 2316. Security Architecture Review Process
 
 ```text
 Architecture Proposal
@@ -26289,7 +26206,7 @@ Approval or Rework
 
 ---
 
-# 2317. ArchitectureSecurityReview
+### 2317. ArchitectureSecurityReview
 
 ```php
 final readonly class ArchitectureSecurityReview
@@ -26308,7 +26225,7 @@ final readonly class ArchitectureSecurityReview
 
 ---
 
-# 2318. Security Design Principles
+### 2318. Security Design Principles
 
 VoltStack deberá promover:
 
@@ -26321,13 +26238,13 @@ VoltStack deberá promover:
 
 ---
 
-# 2319. Threat Modeling Architecture
+### 2319. Threat Modeling Architecture
 
 El threat modeling deberá integrarse al diseño de módulos y funcionalidades.
 
 ---
 
-# 2320. Threat Modeling Objectives
+### 2320. Threat Modeling Objectives
 
 Identificar:
 
@@ -26340,7 +26257,7 @@ Identificar:
 
 ---
 
-# 2321. Threat Modeling Workflow
+### 2321. Threat Modeling Workflow
 
 ```text
 Define Scope
@@ -26372,7 +26289,7 @@ Validate Residual Risk
 
 ---
 
-# 2322. Threat Model Scope
+### 2322. Threat Model Scope
 
 Un modelo podrá cubrir:
 
@@ -26385,7 +26302,7 @@ Un modelo podrá cubrir:
 
 ---
 
-# 2323. ThreatModel
+### 2323. ThreatModel
 
 ```php
 final readonly class ThreatModel
@@ -26404,7 +26321,7 @@ final readonly class ThreatModel
 
 ---
 
-# 2324. Asset Identification
+### 2324. Asset Identification
 
 Activos típicos:
 
@@ -26419,7 +26336,7 @@ Activos típicos:
 
 ---
 
-# 2325. Data Flow Diagram Security
+### 2325. Data Flow Diagram Security
 
 Ejemplo:
 
@@ -26455,7 +26372,7 @@ Cada transición deberá declarar su límite de confianza.
 
 ---
 
-# 2326. Trust Boundary Identification
+### 2326. Trust Boundary Identification
 
 Límites comunes:
 
@@ -26468,13 +26385,13 @@ Límites comunes:
 
 ---
 
-# 2327. Threat Catalog
+### 2327. Threat Catalog
 
 VoltStack podrá mantener un catálogo reutilizable de amenazas.
 
 ---
 
-# 2328. Threat Categories
+### 2328. Threat Categories
 
 Incluir:
 
@@ -26488,7 +26405,7 @@ Incluir:
 
 ---
 
-# 2329. ThreatRecord
+### 2329. ThreatRecord
 
 ```php
 final readonly class ThreatRecord
@@ -26507,7 +26424,7 @@ final readonly class ThreatRecord
 
 ---
 
-# 2330. Threat Modeling Automation
+### 2330. Threat Modeling Automation
 
 VoltStack podrá generar modelos iniciales desde:
 
@@ -26521,7 +26438,7 @@ VoltStack podrá generar modelos iniciales desde:
 
 ---
 
-# 2331. Controller Threat Metadata
+### 2331. Controller Threat Metadata
 
 Ejemplo:
 
@@ -26538,7 +26455,7 @@ final class CustomerController
 
 ---
 
-# 2332. Threat Model Review Frequency
+### 2332. Threat Model Review Frequency
 
 Revisar cuando:
 
@@ -26550,13 +26467,13 @@ Revisar cuando:
 
 ---
 
-# 2333. Secure Coding Standards Architecture
+### 2333. Secure Coding Standards Architecture
 
 VoltStack deberá publicar estándares de codificación segura.
 
 ---
 
-# 2334. Secure Coding Domains
+### 2334. Secure Coding Domains
 
 Cubrir:
 
@@ -26572,13 +26489,13 @@ Cubrir:
 
 ---
 
-# 2335. Secure Input Handling
+### 2335. Secure Input Handling
 
 Toda entrada deberá tratarse como no confiable.
 
 ---
 
-# 2336. Input Validation Principle
+### 2336. Input Validation Principle
 
 Validar:
 
@@ -26591,7 +26508,7 @@ Validar:
 
 ---
 
-# 2337. Validation at Boundaries
+### 2337. Validation at Boundaries
 
 ```text
 External Input
@@ -26607,7 +26524,7 @@ Convert to Trusted Domain Type
 
 ---
 
-# 2338. Domain Value Objects
+### 2338. Domain Value Objects
 
 Ejemplo:
 
@@ -26628,7 +26545,7 @@ final readonly class EmailAddress
 
 ---
 
-# 2339. Output Encoding Standard
+### 2339. Output Encoding Standard
 
 La salida deberá codificarse según el contexto:
 
@@ -26641,7 +26558,7 @@ La salida deberá codificarse según el contexto:
 
 ---
 
-# 2340. Query Safety Standard
+### 2340. Query Safety Standard
 
 Usar:
 
@@ -26654,7 +26571,7 @@ Nunca concatenar entrada no confiable en SQL.
 
 ---
 
-# 2341. Command Execution Safety
+### 2341. Command Execution Safety
 
 Las llamadas al sistema deberán:
 
@@ -26666,7 +26583,7 @@ Las llamadas al sistema deberán:
 
 ---
 
-# 2342. Safe Process Interface
+### 2342. Safe Process Interface
 
 ```php
 interface SecureProcessRunnerInterface
@@ -26681,7 +26598,7 @@ interface SecureProcessRunnerInterface
 
 ---
 
-# 2343. Filesystem Coding Standard
+### 2343. Filesystem Coding Standard
 
 Toda operación deberá:
 
@@ -26693,13 +26610,13 @@ Toda operación deberá:
 
 ---
 
-# 2344. Serialization Safety Standard
+### 2344. Serialization Safety Standard
 
 No permitir deserialización arbitraria de clases desde entrada externa.
 
 ---
 
-# 2345. Error Handling Standard
+### 2345. Error Handling Standard
 
 Los errores deberán:
 
@@ -26710,7 +26627,7 @@ Los errores deberán:
 
 ---
 
-# 2346. Secret Handling Standard
+### 2346. Secret Handling Standard
 
 Los secretos no deberán:
 
@@ -26722,7 +26639,7 @@ Los secretos no deberán:
 
 ---
 
-# 2347. SensitiveValue
+### 2347. SensitiveValue
 
 ```php
 final readonly class SensitiveValue
@@ -26747,7 +26664,7 @@ final readonly class SensitiveValue
 
 ---
 
-# 2348. Secure Logging Standard
+### 2348. Secure Logging Standard
 
 Los logs deberán usar:
 
@@ -26759,13 +26676,13 @@ Los logs deberán usar:
 
 ---
 
-# 2349. Authorization Coding Standard
+### 2349. Authorization Coding Standard
 
 Los desarrolladores no deberán depender únicamente de validaciones visuales o frontend.
 
 ---
 
-# 2350. Authorization Placement
+### 2350. Authorization Placement
 
 Aplicar autorización en:
 
@@ -26789,7 +26706,7 @@ según sensibilidad y profundidad requerida.
 
 ---
 
-# 2351. Insecure Direct Object Reference Prevention
+### 2351. Insecure Direct Object Reference Prevention
 
 La resolución de recursos deberá verificar:
 
@@ -26801,13 +26718,13 @@ La resolución de recursos deberá verificar:
 
 ---
 
-# 2352. Mass Assignment Protection
+### 2352. Mass Assignment Protection
 
 Los modelos deberán declarar campos permitidos explícitamente.
 
 ---
 
-# 2353. Safe Data Mapping
+### 2353. Safe Data Mapping
 
 ```php
 final readonly class UpdateUserData
@@ -26824,7 +26741,7 @@ La entrada no deberá asignarse directamente a entidades persistentes.
 
 ---
 
-# 2354. Concurrency Coding Standard
+### 2354. Concurrency Coding Standard
 
 Las operaciones críticas deberán considerar:
 
@@ -26836,13 +26753,13 @@ Las operaciones críticas deberán considerar:
 
 ---
 
-# 2355. Secure Code Review Architecture
+### 2355. Secure Code Review Architecture
 
 Los cambios deberán revisarse según su riesgo.
 
 ---
 
-# 2356. Security Review Checklist
+### 2356. Security Review Checklist
 
 Revisar:
 
@@ -26857,7 +26774,7 @@ Revisar:
 
 ---
 
-# 2357. Risk-Based Code Review
+### 2357. Risk-Based Code Review
 
 Cambios críticos podrán requerir:
 
@@ -26869,7 +26786,7 @@ Cambios críticos podrán requerir:
 
 ---
 
-# 2358. Protected Code Ownership
+### 2358. Protected Code Ownership
 
 Archivos críticos deberán usar reglas de ownership.
 
@@ -26889,7 +26806,7 @@ Deployment Configuration
 
 ---
 
-# 2359. ReviewEvidence
+### 2359. ReviewEvidence
 
 ```php
 final readonly class ReviewEvidence
@@ -26906,13 +26823,13 @@ final readonly class ReviewEvidence
 
 ---
 
-# 2360. Static Application Security Testing
+### 2360. Static Application Security Testing
 
 VoltStack deberá integrar análisis estático en el pipeline.
 
 ---
 
-# 2361. SAST Objectives
+### 2361. SAST Objectives
 
 Detectar:
 
@@ -26925,7 +26842,7 @@ Detectar:
 
 ---
 
-# 2362. SAST Execution Modes
+### 2362. SAST Execution Modes
 
 Ejecutar:
 
@@ -26936,7 +26853,7 @@ Ejecutar:
 
 ---
 
-# 2363. SAST Quality Gate
+### 2363. SAST Quality Gate
 
 Un release podrá bloquearse ante:
 
@@ -26947,7 +26864,7 @@ Un release podrá bloquearse ante:
 
 ---
 
-# 2364. StaticAnalysisFinding
+### 2364. StaticAnalysisFinding
 
 ```php
 final readonly class StaticAnalysisFinding
@@ -26966,7 +26883,7 @@ final readonly class StaticAnalysisFinding
 
 ---
 
-# 2365. SAST Baseline Management
+### 2365. SAST Baseline Management
 
 VoltStack deberá distinguir:
 
@@ -26977,7 +26894,7 @@ VoltStack deberá distinguir:
 
 ---
 
-# 2366. No New Critical Findings Policy
+### 2366. No New Critical Findings Policy
 
 Regla recomendada:
 
@@ -26986,7 +26903,6 @@ Existing Technical Debt
 
 May Be Tracked
 
-
 New Critical Vulnerability
 
 Must Block Merge
@@ -26994,13 +26910,13 @@ Must Block Merge
 
 ---
 
-# 2367. Dynamic Application Security Testing
+### 2367. Dynamic Application Security Testing
 
 VoltStack deberá soportar análisis dinámico contra entornos controlados.
 
 ---
 
-# 2368. DAST Coverage
+### 2368. DAST Coverage
 
 Probar:
 
@@ -27015,7 +26931,7 @@ Probar:
 
 ---
 
-# 2369. DAST Environment Isolation
+### 2369. DAST Environment Isolation
 
 Las pruebas dinámicas deberán ejecutarse en entornos:
 
@@ -27026,7 +26942,7 @@ Las pruebas dinámicas deberán ejecutarse en entornos:
 
 ---
 
-# 2370. DynamicScanResult
+### 2370. DynamicScanResult
 
 ```php
 final readonly class DynamicScanResult
@@ -27044,13 +26960,13 @@ final readonly class DynamicScanResult
 
 ---
 
-# 2371. Interactive Application Security Testing
+### 2371. Interactive Application Security Testing
 
 VoltStack podrá integrar instrumentación durante pruebas funcionales.
 
 ---
 
-# 2372. IAST Benefits
+### 2372. IAST Benefits
 
 Permitirá observar:
 
@@ -27062,7 +26978,7 @@ Permitirá observar:
 
 ---
 
-# 2373. Runtime Application Self-Protection Testing
+### 2373. Runtime Application Self-Protection Testing
 
 Los controles runtime deberán probarse contra:
 
@@ -27074,7 +26990,7 @@ Los controles runtime deberán probarse contra:
 
 ---
 
-# 2374. Fuzz Testing Architecture
+### 2374. Fuzz Testing Architecture
 
 VoltStack deberá permitir fuzzing de:
 
@@ -27087,7 +27003,7 @@ VoltStack deberá permitir fuzzing de:
 
 ---
 
-# 2375. FuzzTarget
+### 2375. FuzzTarget
 
 ```php
 interface FuzzTargetInterface
@@ -27100,7 +27016,7 @@ interface FuzzTargetInterface
 
 ---
 
-# 2376. Property-Based Security Testing
+### 2376. Property-Based Security Testing
 
 Ejemplos de propiedades:
 
@@ -27109,11 +27025,9 @@ Unauthorized Identity
 
 Never Accesses Restricted Resource
 
-
 Invalid Signature
 
 Never Produces Valid Session
-
 
 Tenant A Context
 
@@ -27122,13 +27036,13 @@ Never Resolves Tenant B Record
 
 ---
 
-# 2377. Penetration Testing
+### 2377. Penetration Testing
 
 Los releases mayores deberán poder someterse a pruebas de penetración.
 
 ---
 
-# 2378. Penetration Test Scope
+### 2378. Penetration Test Scope
 
 Cubrir:
 
@@ -27142,19 +27056,19 @@ Cubrir:
 
 ---
 
-# 2379. Security Regression Testing
+### 2379. Security Regression Testing
 
 Cada vulnerabilidad corregida deberá generar una prueba de regresión.
 
 ---
 
-# 2380. Dependency Security Architecture
+### 2380. Dependency Security Architecture
 
 VoltStack deberá controlar la seguridad de dependencias PHP, JavaScript y herramientas de build.
 
 ---
 
-# 2381. Dependency Inventory
+### 2381. Dependency Inventory
 
 Mantener:
 
@@ -27168,7 +27082,7 @@ Mantener:
 
 ---
 
-# 2382. DependencyPolicy
+### 2382. DependencyPolicy
 
 ```php
 final readonly class DependencyPolicy
@@ -27185,7 +27099,7 @@ final readonly class DependencyPolicy
 
 ---
 
-# 2383. Dependency Vulnerability Scanning
+### 2383. Dependency Vulnerability Scanning
 
 Analizar:
 
@@ -27198,7 +27112,7 @@ Analizar:
 
 ---
 
-# 2384. Lockfile Integrity
+### 2384. Lockfile Integrity
 
 Los lockfiles deberán:
 
@@ -27209,7 +27123,7 @@ Los lockfiles deberán:
 
 ---
 
-# 2385. Package Provenance
+### 2385. Package Provenance
 
 VoltStack deberá verificar cuando sea posible:
 
@@ -27221,7 +27135,7 @@ VoltStack deberá verificar cuando sea posible:
 
 ---
 
-# 2386. Typosquatting Protection
+### 2386. Typosquatting Protection
 
 Los nuevos paquetes deberán revisarse contra:
 
@@ -27233,7 +27147,7 @@ Los nuevos paquetes deberán revisarse contra:
 
 ---
 
-# 2387. Dependency Update Policy
+### 2387. Dependency Update Policy
 
 Clasificar actualizaciones:
 
@@ -27245,7 +27159,7 @@ Clasificar actualizaciones:
 
 ---
 
-# 2388. Vulnerability Exception Process
+### 2388. Vulnerability Exception Process
 
 Una vulnerabilidad no corregida deberá requerir:
 
@@ -27257,19 +27171,19 @@ Una vulnerabilidad no corregida deberá requerir:
 
 ---
 
-# 2389. Software Bill of Materials Generation
+### 2389. Software Bill of Materials Generation
 
 Cada release deberá poder producir un SBOM firmado.
 
 ---
 
-# 2390. CI/CD Security Architecture
+### 2390. CI/CD Security Architecture
 
 El pipeline deberá considerarse infraestructura privilegiada.
 
 ---
 
-# 2391. Pipeline Security Principles
+### 2391. Pipeline Security Principles
 
 Aplicar:
 
@@ -27282,7 +27196,7 @@ Aplicar:
 
 ---
 
-# 2392. CI Identity Model
+### 2392. CI Identity Model
 
 Cada pipeline deberá ejecutar bajo identidad propia.
 
@@ -27301,7 +27215,7 @@ final readonly class PipelineIdentity
 
 ---
 
-# 2393. CI Secret Security
+### 2393. CI Secret Security
 
 Los secretos deberán:
 
@@ -27313,7 +27227,7 @@ Los secretos deberán:
 
 ---
 
-# 2394. CI Security Gates
+### 2394. CI Security Gates
 
 Gates sugeridos:
 
@@ -27347,7 +27261,7 @@ Release Approval
 
 ---
 
-# 2395. Build Integrity
+### 2395. Build Integrity
 
 El build deberá relacionarse con:
 
@@ -27360,13 +27274,13 @@ El build deberá relacionarse con:
 
 ---
 
-# 2396. Reproducible Builds
+### 2396. Reproducible Builds
 
 VoltStack deberá favorecer builds reproducibles para detectar alteraciones y reducir incertidumbre.
 
 ---
 
-# 2397. Artifact Security
+### 2397. Artifact Security
 
 Los artifacts deberán incluir:
 
@@ -27379,7 +27293,7 @@ Los artifacts deberán incluir:
 
 ---
 
-# 2398. Release and Deployment Security
+### 2398. Release and Deployment Security
 
 Todo release deberá pasar por:
 
@@ -27391,7 +27305,7 @@ Todo release deberá pasar por:
 
 ---
 
-# 2399. Production Deployment Security
+### 2399. Production Deployment Security
 
 El despliegue a producción deberá aplicar:
 
@@ -27419,7 +27333,7 @@ Deberá evitarse construir directamente en producción o desplegar artifacts no 
 
 ---
 
-# 2400. Estado
+### 2400. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -27437,9 +27351,7 @@ Next:
 Sections 2401-2500
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 25
 
 **Documento:** Parte 06
 **Entrega:** 25 de varias
@@ -27447,7 +27359,7 @@ Sections 2401-2500
 
 ---
 
-# 2401. Environment Security Architecture
+### 2401. Environment Security Architecture
 
 VoltStack deberá definir una arquitectura de seguridad específica para cada ambiente de ejecución.
 
@@ -27463,7 +27375,7 @@ Los ambientes principales serán:
 
 ---
 
-# 2402. Environment Isolation Principle
+### 2402. Environment Isolation Principle
 
 Cada ambiente deberá permanecer aislado en:
 
@@ -27493,7 +27405,7 @@ Observability
 
 ---
 
-# 2403. Environment Trust Model
+### 2403. Environment Trust Model
 
 Regla fundamental:
 
@@ -27509,7 +27421,7 @@ Ningún ambiente inferior deberá considerarse confiable para acceder a recursos
 
 ---
 
-# 2404. Environment Classification
+### 2404. Environment Classification
 
 ```php
 enum EnvironmentType: string
@@ -27526,7 +27438,7 @@ enum EnvironmentType: string
 
 ---
 
-# 2405. EnvironmentSecurityProfile
+### 2405. EnvironmentSecurityProfile
 
 ```php
 final readonly class EnvironmentSecurityProfile
@@ -27544,7 +27456,7 @@ final readonly class EnvironmentSecurityProfile
 
 ---
 
-# 2406. Environment Security Baselines
+### 2406. Environment Security Baselines
 
 Cada ambiente deberá tener una línea base que defina:
 
@@ -27557,7 +27469,7 @@ Cada ambiente deberá tener una línea base que defina:
 
 ---
 
-# 2407. Development Environment Security
+### 2407. Development Environment Security
 
 El ambiente de desarrollo deberá facilitar productividad sin eliminar controles esenciales.
 
@@ -27571,7 +27483,7 @@ Deberá mantener:
 
 ---
 
-# 2408. Local Development Security
+### 2408. Local Development Security
 
 La ejecución local deberá proteger:
 
@@ -27584,7 +27496,7 @@ La ejecución local deberá proteger:
 
 ---
 
-# 2409. Local Secret Protection
+### 2409. Local Secret Protection
 
 Los secretos locales deberán:
 
@@ -27595,7 +27507,7 @@ Los secretos locales deberán:
 
 ---
 
-# 2410. Local Environment Validation
+### 2410. Local Environment Validation
 
 VoltStack podrá validar al iniciar:
 
@@ -27611,7 +27523,7 @@ Exposed Development Server?
 
 ---
 
-# 2411. Secure Development Server
+### 2411. Secure Development Server
 
 El servidor de desarrollo deberá:
 
@@ -27622,7 +27534,7 @@ El servidor de desarrollo deberá:
 
 ---
 
-# 2412. Development Data Security
+### 2412. Development Data Security
 
 Los desarrolladores no deberán usar copias productivas sin:
 
@@ -27633,7 +27545,7 @@ Los desarrolladores no deberán usar copias productivas sin:
 
 ---
 
-# 2413. Synthetic Data Strategy
+### 2413. Synthetic Data Strategy
 
 VoltStack deberá favorecer datos sintéticos para:
 
@@ -27644,7 +27556,7 @@ VoltStack deberá favorecer datos sintéticos para:
 
 ---
 
-# 2414. Data Anonymization Controls
+### 2414. Data Anonymization Controls
 
 La anonimización deberá proteger:
 
@@ -27657,7 +27569,7 @@ La anonimización deberá proteger:
 
 ---
 
-# 2415. Testing Environment Security
+### 2415. Testing Environment Security
 
 Los entornos de prueba deberán:
 
@@ -27668,7 +27580,7 @@ Los entornos de prueba deberán:
 
 ---
 
-# 2416. Ephemeral Test Environments
+### 2416. Ephemeral Test Environments
 
 Modelo:
 
@@ -27694,13 +27606,13 @@ Destroy Environment
 
 ---
 
-# 2417. Test Credential Isolation
+### 2417. Test Credential Isolation
 
 Cada suite o entorno deberá usar credenciales propias y temporales.
 
 ---
 
-# 2418. Test Environment Cleanup
+### 2418. Test Environment Cleanup
 
 La eliminación deberá abarcar:
 
@@ -27713,7 +27625,7 @@ La eliminación deberá abarcar:
 
 ---
 
-# 2419. Staging Security Architecture
+### 2419. Staging Security Architecture
 
 Staging deberá parecerse a producción en:
 
@@ -27727,7 +27639,7 @@ Pero no deberá compartir recursos productivos.
 
 ---
 
-# 2420. Staging Data Policy
+### 2420. Staging Data Policy
 
 Staging deberá utilizar:
 
@@ -27737,7 +27649,7 @@ Staging deberá utilizar:
 
 ---
 
-# 2421. Staging Access Control
+### 2421. Staging Access Control
 
 El acceso deberá limitarse a:
 
@@ -27748,7 +27660,7 @@ El acceso deberá limitarse a:
 
 ---
 
-# 2422. Pre-Production Environment
+### 2422. Pre-Production Environment
 
 Pre-production podrá utilizarse para:
 
@@ -27760,13 +27672,13 @@ Pre-production podrá utilizarse para:
 
 ---
 
-# 2423. Production Security Architecture
+### 2423. Production Security Architecture
 
 Producción deberá aplicar la configuración más restrictiva.
 
 ---
 
-# 2424. Production Security Requirements
+### 2424. Production Security Requirements
 
 Producción deberá exigir:
 
@@ -27780,7 +27692,7 @@ Producción deberá exigir:
 
 ---
 
-# 2425. Production Runtime Principle
+### 2425. Production Runtime Principle
 
 ```text
 Immutable Artifact
@@ -27800,7 +27712,7 @@ Production Runtime
 
 ---
 
-# 2426. Production Change Restrictions
+### 2426. Production Change Restrictions
 
 Quedará prohibido modificar manualmente:
 
@@ -27812,7 +27724,7 @@ Quedará prohibido modificar manualmente:
 
 ---
 
-# 2427. Production Shell Access
+### 2427. Production Shell Access
 
 El acceso shell deberá:
 
@@ -27824,7 +27736,7 @@ El acceso shell deberá:
 
 ---
 
-# 2428. Break-Glass Production Access
+### 2428. Break-Glass Production Access
 
 El acceso de emergencia deberá seguir:
 
@@ -27854,7 +27766,7 @@ Post-Access Review
 
 ---
 
-# 2429. Production Debugging Security
+### 2429. Production Debugging Security
 
 Las herramientas de debugging deberán estar:
 
@@ -27865,7 +27777,7 @@ Las herramientas de debugging deberán estar:
 
 ---
 
-# 2430. Environment Promotion Architecture
+### 2430. Environment Promotion Architecture
 
 Los cambios deberán promoverse en orden controlado.
 
@@ -27891,7 +27803,7 @@ Production
 
 ---
 
-# 2431. Promotion Integrity
+### 2431. Promotion Integrity
 
 El mismo artifact deberá promocionarse entre ambientes.
 
@@ -27899,7 +27811,7 @@ No deberá recompilarse de forma distinta en cada etapa.
 
 ---
 
-# 2432. PromotionManifest
+### 2432. PromotionManifest
 
 ```php
 final readonly class PromotionManifest
@@ -27918,7 +27830,7 @@ final readonly class PromotionManifest
 
 ---
 
-# 2433. Environment Promotion Policy
+### 2433. Environment Promotion Policy
 
 La promoción deberá validar:
 
@@ -27932,13 +27844,13 @@ La promoción deberá validar:
 
 ---
 
-# 2434. Separation of Duties in Deployment
+### 2434. Separation of Duties in Deployment
 
 La persona que desarrolla un cambio no deberá necesariamente tener autoridad para desplegarlo directamente en producción.
 
 ---
 
-# 2435. Promotion Approval Levels
+### 2435. Promotion Approval Levels
 
 Ejemplo:
 
@@ -27947,11 +27859,9 @@ Low Risk
 
 Automated Approval
 
-
 Medium Risk
 
 Release Manager Approval
-
 
 High Risk
 
@@ -27960,7 +27870,7 @@ Security + Operations Approval
 
 ---
 
-# 2436. Configuration Security Architecture
+### 2436. Configuration Security Architecture
 
 VoltStack deberá separar claramente:
 
@@ -27978,7 +27888,7 @@ Secrets
 
 ---
 
-# 2437. Configuration Classification
+### 2437. Configuration Classification
 
 Clasificar configuración como:
 
@@ -27990,7 +27900,7 @@ Clasificar configuración como:
 
 ---
 
-# 2438. ConfigurationValue
+### 2438. ConfigurationValue
 
 ```php
 final readonly class ConfigurationValue
@@ -28008,7 +27918,7 @@ final readonly class ConfigurationValue
 
 ---
 
-# 2439. Configuration Sources
+### 2439. Configuration Sources
 
 VoltStack podrá resolver configuración desde:
 
@@ -28020,7 +27930,7 @@ VoltStack podrá resolver configuración desde:
 
 ---
 
-# 2440. Configuration Precedence Security
+### 2440. Configuration Precedence Security
 
 La precedencia deberá ser determinista y auditable.
 
@@ -28042,13 +27952,13 @@ Framework Defaults
 
 ---
 
-# 2441. Configuration Validation
+### 2441. Configuration Validation
 
 Toda configuración deberá validarse antes de iniciar el runtime.
 
 ---
 
-# 2442. ConfigurationSchema
+### 2442. ConfigurationSchema
 
 ```php
 interface ConfigurationSchemaInterface
@@ -28062,7 +27972,7 @@ interface ConfigurationSchemaInterface
 
 ---
 
-# 2443. Secure Configuration Defaults
+### 2443. Secure Configuration Defaults
 
 Los valores por defecto deberán favorecer:
 
@@ -28075,7 +27985,7 @@ Los valores por defecto deberán favorecer:
 
 ---
 
-# 2444. Dangerous Configuration Detection
+### 2444. Dangerous Configuration Detection
 
 VoltStack deberá detectar:
 
@@ -28093,13 +28003,13 @@ Disabled Authorization
 
 ---
 
-# 2445. Configuration Drift
+### 2445. Configuration Drift
 
 El sistema deberá comparar configuración activa contra la línea base aprobada.
 
 ---
 
-# 2446. Configuration Drift Record
+### 2446. Configuration Drift Record
 
 ```php
 final readonly class ConfigurationDrift
@@ -28117,13 +28027,13 @@ final readonly class ConfigurationDrift
 
 ---
 
-# 2447. Runtime Configuration Mutability
+### 2447. Runtime Configuration Mutability
 
 Solo configuraciones explícitamente permitidas podrán cambiar en runtime.
 
 ---
 
-# 2448. Immutable Security Configuration
+### 2448. Immutable Security Configuration
 
 Deberán ser inmutables durante la ejecución:
 
@@ -28135,7 +28045,7 @@ Deberán ser inmutables durante la ejecución:
 
 ---
 
-# 2449. Configuration Reload Security
+### 2449. Configuration Reload Security
 
 La recarga deberá:
 
@@ -28147,13 +28057,13 @@ La recarga deberá:
 
 ---
 
-# 2450. Infrastructure as Code Security Architecture
+### 2450. Infrastructure as Code Security Architecture
 
 Toda infraestructura deberá definirse mediante código cuando sea posible.
 
 ---
 
-# 2451. IaC Security Objectives
+### 2451. IaC Security Objectives
 
 Infrastructure as Code deberá proporcionar:
 
@@ -28166,7 +28076,7 @@ Infrastructure as Code deberá proporcionar:
 
 ---
 
-# 2452. IaC Security Domains
+### 2452. IaC Security Domains
 
 Cubrir:
 
@@ -28181,7 +28091,7 @@ Cubrir:
 
 ---
 
-# 2453. IaC Repository Security
+### 2453. IaC Repository Security
 
 Los repositorios de infraestructura deberán aplicar:
 
@@ -28193,7 +28103,7 @@ Los repositorios de infraestructura deberán aplicar:
 
 ---
 
-# 2454. IaC Static Analysis
+### 2454. IaC Static Analysis
 
 Detectar:
 
@@ -28206,7 +28116,7 @@ Detectar:
 
 ---
 
-# 2455. InfrastructurePolicy
+### 2455. InfrastructurePolicy
 
 ```php
 final readonly class InfrastructurePolicy
@@ -28223,7 +28133,7 @@ final readonly class InfrastructurePolicy
 
 ---
 
-# 2456. Policy as Code
+### 2456. Policy as Code
 
 Las políticas de infraestructura deberán poder ejecutarse automáticamente durante:
 
@@ -28234,7 +28144,7 @@ Las políticas de infraestructura deberán poder ejecutarse automáticamente dur
 
 ---
 
-# 2457. IaC Plan Review
+### 2457. IaC Plan Review
 
 Antes de aplicar cambios deberá revisarse:
 
@@ -28252,7 +28162,7 @@ Network Changes
 
 ---
 
-# 2458. Destructive Infrastructure Changes
+### 2458. Destructive Infrastructure Changes
 
 Cambios destructivos deberán requerir:
 
@@ -28263,13 +28173,13 @@ Cambios destructivos deberán requerir:
 
 ---
 
-# 2459. Infrastructure Drift Detection
+### 2459. Infrastructure Drift Detection
 
 VoltStack deberá detectar recursos modificados fuera del flujo aprobado.
 
 ---
 
-# 2460. Drift Response
+### 2460. Drift Response
 
 Ante drift:
 
@@ -28295,13 +28205,13 @@ Preserve Evidence
 
 ---
 
-# 2461. Container Security Architecture
+### 2461. Container Security Architecture
 
 Los despliegues en contenedores deberán aplicar una postura endurecida.
 
 ---
 
-# 2462. Container Image Principles
+### 2462. Container Image Principles
 
 Las imágenes deberán ser:
 
@@ -28314,7 +28224,7 @@ Las imágenes deberán ser:
 
 ---
 
-# 2463. Base Image Security
+### 2463. Base Image Security
 
 Las imágenes base deberán:
 
@@ -28325,7 +28235,7 @@ Las imágenes base deberán:
 
 ---
 
-# 2464. ContainerImageMetadata
+### 2464. ContainerImageMetadata
 
 ```php
 final readonly class ContainerImageMetadata
@@ -28344,13 +28254,13 @@ final readonly class ContainerImageMetadata
 
 ---
 
-# 2465. Image Digest Enforcement
+### 2465. Image Digest Enforcement
 
 Producción deberá desplegar imágenes mediante digest y no únicamente mediante etiquetas mutables.
 
 ---
 
-# 2466. Container Image Scanning
+### 2466. Container Image Scanning
 
 Analizar:
 
@@ -28364,13 +28274,13 @@ Analizar:
 
 ---
 
-# 2467. Container Signing
+### 2467. Container Signing
 
 Las imágenes deberán firmarse antes de entrar al registro de producción.
 
 ---
 
-# 2468. Container Registry Security
+### 2468. Container Registry Security
 
 El registro deberá aplicar:
 
@@ -28383,19 +28293,19 @@ El registro deberá aplicar:
 
 ---
 
-# 2469. Runtime Container Identity
+### 2469. Runtime Container Identity
 
 Los contenedores no deberán ejecutarse como root salvo necesidad excepcional documentada.
 
 ---
 
-# 2470. Read-Only Filesystem
+### 2470. Read-Only Filesystem
 
 Cuando sea posible, el filesystem raíz deberá ser de solo lectura.
 
 ---
 
-# 2471. Writable Paths
+### 2471. Writable Paths
 
 Las rutas escribibles deberán limitarse a:
 
@@ -28407,7 +28317,7 @@ Las rutas escribibles deberán limitarse a:
 
 ---
 
-# 2472. Linux Capability Reduction
+### 2472. Linux Capability Reduction
 
 Eliminar capabilities innecesarias.
 
@@ -28425,7 +28335,7 @@ Add Only Required
 
 ---
 
-# 2473. Container Privilege Restrictions
+### 2473. Container Privilege Restrictions
 
 Evitar:
 
@@ -28437,7 +28347,7 @@ Evitar:
 
 ---
 
-# 2474. Container Resource Limits
+### 2474. Container Resource Limits
 
 Definir:
 
@@ -28449,7 +28359,7 @@ Definir:
 
 ---
 
-# 2475. Container Secret Injection
+### 2475. Container Secret Injection
 
 Los secretos deberán inyectarse:
 
@@ -28460,7 +28370,7 @@ Los secretos deberán inyectarse:
 
 ---
 
-# 2476. Container Health Security
+### 2476. Container Health Security
 
 Health checks no deberán exponer:
 
@@ -28472,13 +28382,13 @@ Health checks no deberán exponer:
 
 ---
 
-# 2477. Kubernetes Security Architecture
+### 2477. Kubernetes Security Architecture
 
 VoltStack deberá soportar despliegues endurecidos en Kubernetes.
 
 ---
 
-# 2478. Kubernetes Namespace Isolation
+### 2478. Kubernetes Namespace Isolation
 
 Separar por:
 
@@ -28489,13 +28399,13 @@ Separar por:
 
 ---
 
-# 2479. Kubernetes Service Accounts
+### 2479. Kubernetes Service Accounts
 
 Cada workload deberá usar una service account específica.
 
 ---
 
-# 2480. Kubernetes RBAC
+### 2480. Kubernetes RBAC
 
 RBAC deberá aplicar mínimo privilegio para:
 
@@ -28508,7 +28418,7 @@ RBAC deberá aplicar mínimo privilegio para:
 
 ---
 
-# 2481. Kubernetes Network Policies
+### 2481. Kubernetes Network Policies
 
 Definir comunicación explícita:
 
@@ -28519,13 +28429,11 @@ CAN CALL
 
 Application Pod
 
-
 Application Pod
 
 CAN CALL
 
 Database Proxy
-
 
 Unknown Pod
 
@@ -28534,7 +28442,7 @@ DENIED
 
 ---
 
-# 2482. Kubernetes Admission Control
+### 2482. Kubernetes Admission Control
 
 Los admission controllers deberán bloquear:
 
@@ -28547,7 +28455,7 @@ Los admission controllers deberán bloquear:
 
 ---
 
-# 2483. Kubernetes Pod Security
+### 2483. Kubernetes Pod Security
 
 Aplicar estándares equivalentes a:
 
@@ -28559,7 +28467,7 @@ Aplicar estándares equivalentes a:
 
 ---
 
-# 2484. Kubernetes Secret Security
+### 2484. Kubernetes Secret Security
 
 Los secrets deberán:
 
@@ -28571,13 +28479,13 @@ Los secrets deberán:
 
 ---
 
-# 2485. Kubernetes Workload Identity
+### 2485. Kubernetes Workload Identity
 
 Deberá preferirse identidad del workload sobre credenciales cloud estáticas.
 
 ---
 
-# 2486. Kubernetes Audit Integration
+### 2486. Kubernetes Audit Integration
 
 Registrar:
 
@@ -28590,13 +28498,13 @@ Registrar:
 
 ---
 
-# 2487. FrankenPHP Deployment Security
+### 2487. FrankenPHP Deployment Security
 
 VoltStack deberá endurecer despliegues basados en FrankenPHP.
 
 ---
 
-# 2488. FrankenPHP Runtime Identity
+### 2488. FrankenPHP Runtime Identity
 
 El proceso FrankenPHP deberá ejecutarse con:
 
@@ -28607,7 +28515,7 @@ El proceso FrankenPHP deberá ejecutarse con:
 
 ---
 
-# 2489. FrankenPHP Worker Mode Security
+### 2489. FrankenPHP Worker Mode Security
 
 Los workers persistentes deberán aplicar después de cada request:
 
@@ -28633,7 +28541,7 @@ Verify Runtime Health
 
 ---
 
-# 2490. FrankenPHP Configuration Security
+### 2490. FrankenPHP Configuration Security
 
 La configuración deberá proteger:
 
@@ -28646,7 +28554,7 @@ La configuración deberá proteger:
 
 ---
 
-# 2491. FrankenPHP Admin Endpoint Security
+### 2491. FrankenPHP Admin Endpoint Security
 
 Cualquier endpoint administrativo deberá:
 
@@ -28657,7 +28565,7 @@ Cualquier endpoint administrativo deberá:
 
 ---
 
-# 2492. FrankenPHP TLS Security
+### 2492. FrankenPHP TLS Security
 
 VoltStack deberá favorecer:
 
@@ -28669,7 +28577,7 @@ VoltStack deberá favorecer:
 
 ---
 
-# 2493. FrankenPHP Static File Security
+### 2493. FrankenPHP Static File Security
 
 Los archivos estáticos deberán servirse mediante:
 
@@ -28681,13 +28589,13 @@ Los archivos estáticos deberán servirse mediante:
 
 ---
 
-# 2494. Deployment Rollback Architecture
+### 2494. Deployment Rollback Architecture
 
 Todo despliegue deberá tener una estrategia de rollback previamente validada.
 
 ---
 
-# 2495. Rollback Integrity
+### 2495. Rollback Integrity
 
 El rollback deberá utilizar artifacts previamente:
 
@@ -28698,7 +28606,7 @@ El rollback deberá utilizar artifacts previamente:
 
 ---
 
-# 2496. Database Rollback Security
+### 2496. Database Rollback Security
 
 Las migrations deberán clasificarse como:
 
@@ -28710,7 +28618,7 @@ Las irreversibles requerirán backup y plan de recuperación.
 
 ---
 
-# 2497. RollbackAuthorization
+### 2497. RollbackAuthorization
 
 ```php
 final readonly class RollbackAuthorization
@@ -28728,7 +28636,7 @@ final readonly class RollbackAuthorization
 
 ---
 
-# 2498. Post-Deployment Security Validation
+### 2498. Post-Deployment Security Validation
 
 Después del despliegue deberán ejecutarse:
 
@@ -28741,7 +28649,7 @@ Después del despliegue deberán ejecutarse:
 
 ---
 
-# 2499. Environment and Deployment Security Result
+### 2499. Environment and Deployment Security Result
 
 Esta entrega establece:
 
@@ -28769,7 +28677,7 @@ Post-Deployment Validation
 
 ---
 
-# 2500. Estado
+### 2500. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -28786,9 +28694,8 @@ Sections 2401-2500
 Next:
 Sections 2501-2600
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 25
 
 **Documento:** Parte 06
 **Entrega:** 25 de varias
@@ -28796,7 +28703,7 @@ Sections 2501-2600
 
 ---
 
-# 2401. Environment Security Architecture
+### 2401. Environment Security Architecture
 
 VoltStack deberá definir una arquitectura de seguridad específica para cada ambiente de ejecución.
 
@@ -28812,7 +28719,7 @@ Los ambientes principales serán:
 
 ---
 
-# 2402. Environment Isolation Principle
+### 2402. Environment Isolation Principle
 
 Cada ambiente deberá permanecer aislado en:
 
@@ -28842,7 +28749,7 @@ Observability
 
 ---
 
-# 2403. Environment Trust Model
+### 2403. Environment Trust Model
 
 Regla fundamental:
 
@@ -28858,7 +28765,7 @@ Ningún ambiente inferior deberá considerarse confiable para acceder a recursos
 
 ---
 
-# 2404. Environment Classification
+### 2404. Environment Classification
 
 ```php
 enum EnvironmentType: string
@@ -28875,7 +28782,7 @@ enum EnvironmentType: string
 
 ---
 
-# 2405. EnvironmentSecurityProfile
+### 2405. EnvironmentSecurityProfile
 
 ```php
 final readonly class EnvironmentSecurityProfile
@@ -28893,7 +28800,7 @@ final readonly class EnvironmentSecurityProfile
 
 ---
 
-# 2406. Environment Security Baselines
+### 2406. Environment Security Baselines
 
 Cada ambiente deberá tener una línea base que defina:
 
@@ -28906,7 +28813,7 @@ Cada ambiente deberá tener una línea base que defina:
 
 ---
 
-# 2407. Development Environment Security
+### 2407. Development Environment Security
 
 El ambiente de desarrollo deberá facilitar productividad sin eliminar controles esenciales.
 
@@ -28920,7 +28827,7 @@ Deberá mantener:
 
 ---
 
-# 2408. Local Development Security
+### 2408. Local Development Security
 
 La ejecución local deberá proteger:
 
@@ -28933,7 +28840,7 @@ La ejecución local deberá proteger:
 
 ---
 
-# 2409. Local Secret Protection
+### 2409. Local Secret Protection
 
 Los secretos locales deberán:
 
@@ -28944,7 +28851,7 @@ Los secretos locales deberán:
 
 ---
 
-# 2410. Local Environment Validation
+### 2410. Local Environment Validation
 
 VoltStack podrá validar al iniciar:
 
@@ -28960,7 +28867,7 @@ Exposed Development Server?
 
 ---
 
-# 2411. Secure Development Server
+### 2411. Secure Development Server
 
 El servidor de desarrollo deberá:
 
@@ -28971,7 +28878,7 @@ El servidor de desarrollo deberá:
 
 ---
 
-# 2412. Development Data Security
+### 2412. Development Data Security
 
 Los desarrolladores no deberán usar copias productivas sin:
 
@@ -28982,7 +28889,7 @@ Los desarrolladores no deberán usar copias productivas sin:
 
 ---
 
-# 2413. Synthetic Data Strategy
+### 2413. Synthetic Data Strategy
 
 VoltStack deberá favorecer datos sintéticos para:
 
@@ -28993,7 +28900,7 @@ VoltStack deberá favorecer datos sintéticos para:
 
 ---
 
-# 2414. Data Anonymization Controls
+### 2414. Data Anonymization Controls
 
 La anonimización deberá proteger:
 
@@ -29006,7 +28913,7 @@ La anonimización deberá proteger:
 
 ---
 
-# 2415. Testing Environment Security
+### 2415. Testing Environment Security
 
 Los entornos de prueba deberán:
 
@@ -29017,7 +28924,7 @@ Los entornos de prueba deberán:
 
 ---
 
-# 2416. Ephemeral Test Environments
+### 2416. Ephemeral Test Environments
 
 Modelo:
 
@@ -29043,13 +28950,13 @@ Destroy Environment
 
 ---
 
-# 2417. Test Credential Isolation
+### 2417. Test Credential Isolation
 
 Cada suite o entorno deberá usar credenciales propias y temporales.
 
 ---
 
-# 2418. Test Environment Cleanup
+### 2418. Test Environment Cleanup
 
 La eliminación deberá abarcar:
 
@@ -29062,7 +28969,7 @@ La eliminación deberá abarcar:
 
 ---
 
-# 2419. Staging Security Architecture
+### 2419. Staging Security Architecture
 
 Staging deberá parecerse a producción en:
 
@@ -29076,7 +28983,7 @@ Pero no deberá compartir recursos productivos.
 
 ---
 
-# 2420. Staging Data Policy
+### 2420. Staging Data Policy
 
 Staging deberá utilizar:
 
@@ -29086,7 +28993,7 @@ Staging deberá utilizar:
 
 ---
 
-# 2421. Staging Access Control
+### 2421. Staging Access Control
 
 El acceso deberá limitarse a:
 
@@ -29097,7 +29004,7 @@ El acceso deberá limitarse a:
 
 ---
 
-# 2422. Pre-Production Environment
+### 2422. Pre-Production Environment
 
 Pre-production podrá utilizarse para:
 
@@ -29109,13 +29016,13 @@ Pre-production podrá utilizarse para:
 
 ---
 
-# 2423. Production Security Architecture
+### 2423. Production Security Architecture
 
 Producción deberá aplicar la configuración más restrictiva.
 
 ---
 
-# 2424. Production Security Requirements
+### 2424. Production Security Requirements
 
 Producción deberá exigir:
 
@@ -29129,7 +29036,7 @@ Producción deberá exigir:
 
 ---
 
-# 2425. Production Runtime Principle
+### 2425. Production Runtime Principle
 
 ```text
 Immutable Artifact
@@ -29149,7 +29056,7 @@ Production Runtime
 
 ---
 
-# 2426. Production Change Restrictions
+### 2426. Production Change Restrictions
 
 Quedará prohibido modificar manualmente:
 
@@ -29161,7 +29068,7 @@ Quedará prohibido modificar manualmente:
 
 ---
 
-# 2427. Production Shell Access
+### 2427. Production Shell Access
 
 El acceso shell deberá:
 
@@ -29173,7 +29080,7 @@ El acceso shell deberá:
 
 ---
 
-# 2428. Break-Glass Production Access
+### 2428. Break-Glass Production Access
 
 El acceso de emergencia deberá seguir:
 
@@ -29203,7 +29110,7 @@ Post-Access Review
 
 ---
 
-# 2429. Production Debugging Security
+### 2429. Production Debugging Security
 
 Las herramientas de debugging deberán estar:
 
@@ -29214,7 +29121,7 @@ Las herramientas de debugging deberán estar:
 
 ---
 
-# 2430. Environment Promotion Architecture
+### 2430. Environment Promotion Architecture
 
 Los cambios deberán promoverse en orden controlado.
 
@@ -29240,7 +29147,7 @@ Production
 
 ---
 
-# 2431. Promotion Integrity
+### 2431. Promotion Integrity
 
 El mismo artifact deberá promocionarse entre ambientes.
 
@@ -29248,7 +29155,7 @@ No deberá recompilarse de forma distinta en cada etapa.
 
 ---
 
-# 2432. PromotionManifest
+### 2432. PromotionManifest
 
 ```php
 final readonly class PromotionManifest
@@ -29267,7 +29174,7 @@ final readonly class PromotionManifest
 
 ---
 
-# 2433. Environment Promotion Policy
+### 2433. Environment Promotion Policy
 
 La promoción deberá validar:
 
@@ -29281,13 +29188,13 @@ La promoción deberá validar:
 
 ---
 
-# 2434. Separation of Duties in Deployment
+### 2434. Separation of Duties in Deployment
 
 La persona que desarrolla un cambio no deberá necesariamente tener autoridad para desplegarlo directamente en producción.
 
 ---
 
-# 2435. Promotion Approval Levels
+### 2435. Promotion Approval Levels
 
 Ejemplo:
 
@@ -29296,11 +29203,9 @@ Low Risk
 
 Automated Approval
 
-
 Medium Risk
 
 Release Manager Approval
-
 
 High Risk
 
@@ -29309,7 +29214,7 @@ Security + Operations Approval
 
 ---
 
-# 2436. Configuration Security Architecture
+### 2436. Configuration Security Architecture
 
 VoltStack deberá separar claramente:
 
@@ -29327,7 +29232,7 @@ Secrets
 
 ---
 
-# 2437. Configuration Classification
+### 2437. Configuration Classification
 
 Clasificar configuración como:
 
@@ -29339,7 +29244,7 @@ Clasificar configuración como:
 
 ---
 
-# 2438. ConfigurationValue
+### 2438. ConfigurationValue
 
 ```php
 final readonly class ConfigurationValue
@@ -29357,7 +29262,7 @@ final readonly class ConfigurationValue
 
 ---
 
-# 2439. Configuration Sources
+### 2439. Configuration Sources
 
 VoltStack podrá resolver configuración desde:
 
@@ -29369,7 +29274,7 @@ VoltStack podrá resolver configuración desde:
 
 ---
 
-# 2440. Configuration Precedence Security
+### 2440. Configuration Precedence Security
 
 La precedencia deberá ser determinista y auditable.
 
@@ -29391,13 +29296,13 @@ Framework Defaults
 
 ---
 
-# 2441. Configuration Validation
+### 2441. Configuration Validation
 
 Toda configuración deberá validarse antes de iniciar el runtime.
 
 ---
 
-# 2442. ConfigurationSchema
+### 2442. ConfigurationSchema
 
 ```php
 interface ConfigurationSchemaInterface
@@ -29411,7 +29316,7 @@ interface ConfigurationSchemaInterface
 
 ---
 
-# 2443. Secure Configuration Defaults
+### 2443. Secure Configuration Defaults
 
 Los valores por defecto deberán favorecer:
 
@@ -29424,7 +29329,7 @@ Los valores por defecto deberán favorecer:
 
 ---
 
-# 2444. Dangerous Configuration Detection
+### 2444. Dangerous Configuration Detection
 
 VoltStack deberá detectar:
 
@@ -29442,13 +29347,13 @@ Disabled Authorization
 
 ---
 
-# 2445. Configuration Drift
+### 2445. Configuration Drift
 
 El sistema deberá comparar configuración activa contra la línea base aprobada.
 
 ---
 
-# 2446. Configuration Drift Record
+### 2446. Configuration Drift Record
 
 ```php
 final readonly class ConfigurationDrift
@@ -29466,13 +29371,13 @@ final readonly class ConfigurationDrift
 
 ---
 
-# 2447. Runtime Configuration Mutability
+### 2447. Runtime Configuration Mutability
 
 Solo configuraciones explícitamente permitidas podrán cambiar en runtime.
 
 ---
 
-# 2448. Immutable Security Configuration
+### 2448. Immutable Security Configuration
 
 Deberán ser inmutables durante la ejecución:
 
@@ -29484,7 +29389,7 @@ Deberán ser inmutables durante la ejecución:
 
 ---
 
-# 2449. Configuration Reload Security
+### 2449. Configuration Reload Security
 
 La recarga deberá:
 
@@ -29496,13 +29401,13 @@ La recarga deberá:
 
 ---
 
-# 2450. Infrastructure as Code Security Architecture
+### 2450. Infrastructure as Code Security Architecture
 
 Toda infraestructura deberá definirse mediante código cuando sea posible.
 
 ---
 
-# 2451. IaC Security Objectives
+### 2451. IaC Security Objectives
 
 Infrastructure as Code deberá proporcionar:
 
@@ -29515,7 +29420,7 @@ Infrastructure as Code deberá proporcionar:
 
 ---
 
-# 2452. IaC Security Domains
+### 2452. IaC Security Domains
 
 Cubrir:
 
@@ -29530,7 +29435,7 @@ Cubrir:
 
 ---
 
-# 2453. IaC Repository Security
+### 2453. IaC Repository Security
 
 Los repositorios de infraestructura deberán aplicar:
 
@@ -29542,7 +29447,7 @@ Los repositorios de infraestructura deberán aplicar:
 
 ---
 
-# 2454. IaC Static Analysis
+### 2454. IaC Static Analysis
 
 Detectar:
 
@@ -29555,7 +29460,7 @@ Detectar:
 
 ---
 
-# 2455. InfrastructurePolicy
+### 2455. InfrastructurePolicy
 
 ```php
 final readonly class InfrastructurePolicy
@@ -29572,7 +29477,7 @@ final readonly class InfrastructurePolicy
 
 ---
 
-# 2456. Policy as Code
+### 2456. Policy as Code
 
 Las políticas de infraestructura deberán poder ejecutarse automáticamente durante:
 
@@ -29583,7 +29488,7 @@ Las políticas de infraestructura deberán poder ejecutarse automáticamente dur
 
 ---
 
-# 2457. IaC Plan Review
+### 2457. IaC Plan Review
 
 Antes de aplicar cambios deberá revisarse:
 
@@ -29601,7 +29506,7 @@ Network Changes
 
 ---
 
-# 2458. Destructive Infrastructure Changes
+### 2458. Destructive Infrastructure Changes
 
 Cambios destructivos deberán requerir:
 
@@ -29612,13 +29517,13 @@ Cambios destructivos deberán requerir:
 
 ---
 
-# 2459. Infrastructure Drift Detection
+### 2459. Infrastructure Drift Detection
 
 VoltStack deberá detectar recursos modificados fuera del flujo aprobado.
 
 ---
 
-# 2460. Drift Response
+### 2460. Drift Response
 
 Ante drift:
 
@@ -29644,13 +29549,13 @@ Preserve Evidence
 
 ---
 
-# 2461. Container Security Architecture
+### 2461. Container Security Architecture
 
 Los despliegues en contenedores deberán aplicar una postura endurecida.
 
 ---
 
-# 2462. Container Image Principles
+### 2462. Container Image Principles
 
 Las imágenes deberán ser:
 
@@ -29663,7 +29568,7 @@ Las imágenes deberán ser:
 
 ---
 
-# 2463. Base Image Security
+### 2463. Base Image Security
 
 Las imágenes base deberán:
 
@@ -29674,7 +29579,7 @@ Las imágenes base deberán:
 
 ---
 
-# 2464. ContainerImageMetadata
+### 2464. ContainerImageMetadata
 
 ```php
 final readonly class ContainerImageMetadata
@@ -29693,13 +29598,13 @@ final readonly class ContainerImageMetadata
 
 ---
 
-# 2465. Image Digest Enforcement
+### 2465. Image Digest Enforcement
 
 Producción deberá desplegar imágenes mediante digest y no únicamente mediante etiquetas mutables.
 
 ---
 
-# 2466. Container Image Scanning
+### 2466. Container Image Scanning
 
 Analizar:
 
@@ -29713,13 +29618,13 @@ Analizar:
 
 ---
 
-# 2467. Container Signing
+### 2467. Container Signing
 
 Las imágenes deberán firmarse antes de entrar al registro de producción.
 
 ---
 
-# 2468. Container Registry Security
+### 2468. Container Registry Security
 
 El registro deberá aplicar:
 
@@ -29732,19 +29637,19 @@ El registro deberá aplicar:
 
 ---
 
-# 2469. Runtime Container Identity
+### 2469. Runtime Container Identity
 
 Los contenedores no deberán ejecutarse como root salvo necesidad excepcional documentada.
 
 ---
 
-# 2470. Read-Only Filesystem
+### 2470. Read-Only Filesystem
 
 Cuando sea posible, el filesystem raíz deberá ser de solo lectura.
 
 ---
 
-# 2471. Writable Paths
+### 2471. Writable Paths
 
 Las rutas escribibles deberán limitarse a:
 
@@ -29756,7 +29661,7 @@ Las rutas escribibles deberán limitarse a:
 
 ---
 
-# 2472. Linux Capability Reduction
+### 2472. Linux Capability Reduction
 
 Eliminar capabilities innecesarias.
 
@@ -29774,7 +29679,7 @@ Add Only Required
 
 ---
 
-# 2473. Container Privilege Restrictions
+### 2473. Container Privilege Restrictions
 
 Evitar:
 
@@ -29786,7 +29691,7 @@ Evitar:
 
 ---
 
-# 2474. Container Resource Limits
+### 2474. Container Resource Limits
 
 Definir:
 
@@ -29798,7 +29703,7 @@ Definir:
 
 ---
 
-# 2475. Container Secret Injection
+### 2475. Container Secret Injection
 
 Los secretos deberán inyectarse:
 
@@ -29809,7 +29714,7 @@ Los secretos deberán inyectarse:
 
 ---
 
-# 2476. Container Health Security
+### 2476. Container Health Security
 
 Health checks no deberán exponer:
 
@@ -29821,13 +29726,13 @@ Health checks no deberán exponer:
 
 ---
 
-# 2477. Kubernetes Security Architecture
+### 2477. Kubernetes Security Architecture
 
 VoltStack deberá soportar despliegues endurecidos en Kubernetes.
 
 ---
 
-# 2478. Kubernetes Namespace Isolation
+### 2478. Kubernetes Namespace Isolation
 
 Separar por:
 
@@ -29838,13 +29743,13 @@ Separar por:
 
 ---
 
-# 2479. Kubernetes Service Accounts
+### 2479. Kubernetes Service Accounts
 
 Cada workload deberá usar una service account específica.
 
 ---
 
-# 2480. Kubernetes RBAC
+### 2480. Kubernetes RBAC
 
 RBAC deberá aplicar mínimo privilegio para:
 
@@ -29857,7 +29762,7 @@ RBAC deberá aplicar mínimo privilegio para:
 
 ---
 
-# 2481. Kubernetes Network Policies
+### 2481. Kubernetes Network Policies
 
 Definir comunicación explícita:
 
@@ -29868,13 +29773,11 @@ CAN CALL
 
 Application Pod
 
-
 Application Pod
 
 CAN CALL
 
 Database Proxy
-
 
 Unknown Pod
 
@@ -29883,7 +29786,7 @@ DENIED
 
 ---
 
-# 2482. Kubernetes Admission Control
+### 2482. Kubernetes Admission Control
 
 Los admission controllers deberán bloquear:
 
@@ -29896,7 +29799,7 @@ Los admission controllers deberán bloquear:
 
 ---
 
-# 2483. Kubernetes Pod Security
+### 2483. Kubernetes Pod Security
 
 Aplicar estándares equivalentes a:
 
@@ -29908,7 +29811,7 @@ Aplicar estándares equivalentes a:
 
 ---
 
-# 2484. Kubernetes Secret Security
+### 2484. Kubernetes Secret Security
 
 Los secrets deberán:
 
@@ -29920,13 +29823,13 @@ Los secrets deberán:
 
 ---
 
-# 2485. Kubernetes Workload Identity
+### 2485. Kubernetes Workload Identity
 
 Deberá preferirse identidad del workload sobre credenciales cloud estáticas.
 
 ---
 
-# 2486. Kubernetes Audit Integration
+### 2486. Kubernetes Audit Integration
 
 Registrar:
 
@@ -29939,13 +29842,13 @@ Registrar:
 
 ---
 
-# 2487. FrankenPHP Deployment Security
+### 2487. FrankenPHP Deployment Security
 
 VoltStack deberá endurecer despliegues basados en FrankenPHP.
 
 ---
 
-# 2488. FrankenPHP Runtime Identity
+### 2488. FrankenPHP Runtime Identity
 
 El proceso FrankenPHP deberá ejecutarse con:
 
@@ -29956,7 +29859,7 @@ El proceso FrankenPHP deberá ejecutarse con:
 
 ---
 
-# 2489. FrankenPHP Worker Mode Security
+### 2489. FrankenPHP Worker Mode Security
 
 Los workers persistentes deberán aplicar después de cada request:
 
@@ -29982,7 +29885,7 @@ Verify Runtime Health
 
 ---
 
-# 2490. FrankenPHP Configuration Security
+### 2490. FrankenPHP Configuration Security
 
 La configuración deberá proteger:
 
@@ -29995,7 +29898,7 @@ La configuración deberá proteger:
 
 ---
 
-# 2491. FrankenPHP Admin Endpoint Security
+### 2491. FrankenPHP Admin Endpoint Security
 
 Cualquier endpoint administrativo deberá:
 
@@ -30006,7 +29909,7 @@ Cualquier endpoint administrativo deberá:
 
 ---
 
-# 2492. FrankenPHP TLS Security
+### 2492. FrankenPHP TLS Security
 
 VoltStack deberá favorecer:
 
@@ -30018,7 +29921,7 @@ VoltStack deberá favorecer:
 
 ---
 
-# 2493. FrankenPHP Static File Security
+### 2493. FrankenPHP Static File Security
 
 Los archivos estáticos deberán servirse mediante:
 
@@ -30030,13 +29933,13 @@ Los archivos estáticos deberán servirse mediante:
 
 ---
 
-# 2494. Deployment Rollback Architecture
+### 2494. Deployment Rollback Architecture
 
 Todo despliegue deberá tener una estrategia de rollback previamente validada.
 
 ---
 
-# 2495. Rollback Integrity
+### 2495. Rollback Integrity
 
 El rollback deberá utilizar artifacts previamente:
 
@@ -30047,7 +29950,7 @@ El rollback deberá utilizar artifacts previamente:
 
 ---
 
-# 2496. Database Rollback Security
+### 2496. Database Rollback Security
 
 Las migrations deberán clasificarse como:
 
@@ -30059,7 +29962,7 @@ Las irreversibles requerirán backup y plan de recuperación.
 
 ---
 
-# 2497. RollbackAuthorization
+### 2497. RollbackAuthorization
 
 ```php
 final readonly class RollbackAuthorization
@@ -30077,7 +29980,7 @@ final readonly class RollbackAuthorization
 
 ---
 
-# 2498. Post-Deployment Security Validation
+### 2498. Post-Deployment Security Validation
 
 Después del despliegue deberán ejecutarse:
 
@@ -30090,7 +29993,7 @@ Después del despliegue deberán ejecutarse:
 
 ---
 
-# 2499. Environment and Deployment Security Result
+### 2499. Environment and Deployment Security Result
 
 Esta entrega establece:
 
@@ -30118,7 +30021,7 @@ Post-Deployment Validation
 
 ---
 
-# 2500. Estado
+### 2500. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -30150,9 +30053,8 @@ La siguiente entrega continuará con:
 - Managed database security
 - Multi-cloud governance
 ```
-# CONTROLLER_SECURITY_MODEL_PART_06.md
 
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 26
 
 **Documento:** Parte 06
 **Entrega:** 26 de varias
@@ -30160,7 +30062,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2501. Cloud Security Architecture
+### 2501. Cloud Security Architecture
 
 VoltStack deberá incorporar una arquitectura de seguridad independiente del proveedor cloud.
 
@@ -30174,7 +30076,7 @@ El framework deberá poder desplegarse sobre:
 
 ---
 
-# 2502. Cloud Security Objectives
+### 2502. Cloud Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -30188,7 +30090,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2503. Cloud Security Model
+### 2503. Cloud Security Model
 
 ```text
 Cloud Provider Controls
@@ -30212,7 +30114,7 @@ Cloud Security Posture
 
 ---
 
-# 2504. Cloud Security Domains
+### 2504. Cloud Security Domains
 
 La seguridad cloud deberá cubrir:
 
@@ -30238,7 +30140,7 @@ Resilience
 
 ---
 
-# 2505. Cloud Environment Abstraction
+### 2505. Cloud Environment Abstraction
 
 VoltStack no deberá acoplar su modelo de seguridad a un único proveedor.
 
@@ -30257,13 +30159,13 @@ interface CloudSecurityProviderInterface
 
 ---
 
-# 2506. Shared Responsibility Model
+### 2506. Shared Responsibility Model
 
 La seguridad cloud deberá entenderse como una responsabilidad compartida.
 
 ---
 
-# 2507. Provider Responsibilities
+### 2507. Provider Responsibilities
 
 El proveedor podrá ser responsable de:
 
@@ -30276,7 +30178,7 @@ El proveedor podrá ser responsable de:
 
 ---
 
-# 2508. Customer Responsibilities
+### 2508. Customer Responsibilities
 
 VoltStack y la organización serán responsables de:
 
@@ -30291,7 +30193,7 @@ VoltStack y la organización serán responsables de:
 
 ---
 
-# 2509. Shared Responsibility Matrix
+### 2509. Shared Responsibility Matrix
 
 ```text
 Provider
@@ -30301,7 +30203,6 @@ Responsible For:
 Physical Infrastructure
 
 Core Platform Availability
-
 
 Application Owner
 
@@ -30318,7 +30219,7 @@ Application Security
 
 ---
 
-# 2510. Responsibility Boundary Documentation
+### 2510. Responsibility Boundary Documentation
 
 Cada servicio cloud utilizado deberá documentar:
 
@@ -30330,7 +30231,7 @@ Cada servicio cloud utilizado deberá documentar:
 
 ---
 
-# 2511. CloudServiceResponsibility
+### 2511. CloudServiceResponsibility
 
 ```php
 final readonly class CloudServiceResponsibility
@@ -30347,13 +30248,13 @@ final readonly class CloudServiceResponsibility
 
 ---
 
-# 2512. Cloud Account Architecture
+### 2512. Cloud Account Architecture
 
 Los recursos deberán organizarse mediante cuentas, proyectos o suscripciones separadas.
 
 ---
 
-# 2513. Account Separation
+### 2513. Account Separation
 
 Separar:
 
@@ -30367,7 +30268,7 @@ Separar:
 
 ---
 
-# 2514. Cloud Organization Model
+### 2514. Cloud Organization Model
 
 ```text
 Organization Root
@@ -30382,7 +30283,7 @@ Organization Root
 
 ---
 
-# 2515. Management Account Protection
+### 2515. Management Account Protection
 
 La cuenta raíz o administrativa deberá:
 
@@ -30394,7 +30295,7 @@ La cuenta raíz o administrativa deberá:
 
 ---
 
-# 2516. Cloud Account Bootstrap
+### 2516. Cloud Account Bootstrap
 
 Cada nueva cuenta deberá inicializar:
 
@@ -30408,7 +30309,7 @@ Cada nueva cuenta deberá inicializar:
 
 ---
 
-# 2517. Cloud Landing Zone
+### 2517. Cloud Landing Zone
 
 VoltStack podrá operar sobre una landing zone con:
 
@@ -30420,7 +30321,7 @@ VoltStack podrá operar sobre una landing zone con:
 
 ---
 
-# 2518. Cloud Guardrails
+### 2518. Cloud Guardrails
 
 Los guardrails podrán ser:
 
@@ -30436,7 +30337,7 @@ Responsive
 
 ---
 
-# 2519. Preventive Guardrails
+### 2519. Preventive Guardrails
 
 Ejemplos:
 
@@ -30448,7 +30349,7 @@ Ejemplos:
 
 ---
 
-# 2520. Detective Guardrails
+### 2520. Detective Guardrails
 
 Detectar:
 
@@ -30461,7 +30362,7 @@ Detectar:
 
 ---
 
-# 2521. Corrective Guardrails
+### 2521. Corrective Guardrails
 
 Podrán:
 
@@ -30473,13 +30374,13 @@ Podrán:
 
 ---
 
-# 2522. Cloud Identity Architecture
+### 2522. Cloud Identity Architecture
 
 La identidad deberá ser el principal perímetro de seguridad cloud.
 
 ---
 
-# 2523. Cloud Identity Federation
+### 2523. Cloud Identity Federation
 
 VoltStack deberá favorecer identidad federada mediante:
 
@@ -30491,7 +30392,7 @@ VoltStack deberá favorecer identidad federada mediante:
 
 ---
 
-# 2524. Federation Flow
+### 2524. Federation Flow
 
 ```text
 User
@@ -30515,7 +30416,7 @@ Authorized Resource
 
 ---
 
-# 2525. FederatedCloudIdentity
+### 2525. FederatedCloudIdentity
 
 ```php
 final readonly class FederatedCloudIdentity
@@ -30533,7 +30434,7 @@ final readonly class FederatedCloudIdentity
 
 ---
 
-# 2526. Temporary Credentials Principle
+### 2526. Temporary Credentials Principle
 
 Las credenciales cloud deberán ser:
 
@@ -30545,7 +30446,7 @@ Las credenciales cloud deberán ser:
 
 ---
 
-# 2527. Permanent Access Keys
+### 2527. Permanent Access Keys
 
 Las claves permanentes deberán evitarse.
 
@@ -30559,7 +30460,7 @@ Cuando sean inevitables deberán:
 
 ---
 
-# 2528. Human Identity vs Workload Identity
+### 2528. Human Identity vs Workload Identity
 
 VoltStack deberá diferenciar:
 
@@ -30573,7 +30474,6 @@ Developers
 Operators
 
 Auditors
-
 
 Workload Identity
 
@@ -30590,13 +30490,13 @@ Services
 
 ---
 
-# 2529. Cloud Workload Identity
+### 2529. Cloud Workload Identity
 
 Los workloads deberán autenticarse sin secretos estáticos cuando el proveedor lo permita.
 
 ---
 
-# 2530. Workload Identity Flow
+### 2530. Workload Identity Flow
 
 ```text
 Runtime Workload
@@ -30620,7 +30520,7 @@ Cloud Resource
 
 ---
 
-# 2531. WorkloadIdentity
+### 2531. WorkloadIdentity
 
 ```php
 final readonly class WorkloadIdentity
@@ -30637,7 +30537,7 @@ final readonly class WorkloadIdentity
 
 ---
 
-# 2532. Workload Identity Binding
+### 2532. Workload Identity Binding
 
 La identidad deberá vincularse a:
 
@@ -30650,7 +30550,7 @@ La identidad deberá vincularse a:
 
 ---
 
-# 2533. Workload Identity Validation
+### 2533. Workload Identity Validation
 
 Antes de conceder acceso deberá validarse:
 
@@ -30664,13 +30564,13 @@ Antes de conceder acceso deberá validarse:
 
 ---
 
-# 2534. Cloud IAM Architecture
+### 2534. Cloud IAM Architecture
 
 VoltStack deberá aplicar un modelo IAM basado en capacidades mínimas.
 
 ---
 
-# 2535. Cloud IAM Principles
+### 2535. Cloud IAM Principles
 
 Aplicar:
 
@@ -30683,7 +30583,7 @@ Aplicar:
 
 ---
 
-# 2536. Cloud Role Design
+### 2536. Cloud Role Design
 
 Los roles deberán representar funciones concretas.
 
@@ -30701,7 +30601,7 @@ VoltStackSecurityAuditor
 
 ---
 
-# 2537. Wildcard Permission Restrictions
+### 2537. Wildcard Permission Restrictions
 
 Permisos como:
 
@@ -30715,13 +30615,13 @@ deberán bloquearse salvo excepciones explícitas y temporales.
 
 ---
 
-# 2538. Permission Boundary
+### 2538. Permission Boundary
 
 VoltStack podrá utilizar límites de permisos para impedir que una identidad se otorgue privilegios fuera de su alcance.
 
 ---
 
-# 2539. CloudPolicyDefinition
+### 2539. CloudPolicyDefinition
 
 ```php
 final readonly class CloudPolicyDefinition
@@ -30739,7 +30639,7 @@ final readonly class CloudPolicyDefinition
 
 ---
 
-# 2540. Cloud IAM Conditions
+### 2540. Cloud IAM Conditions
 
 Las políticas podrán depender de:
 
@@ -30754,7 +30654,7 @@ Las políticas podrán depender de:
 
 ---
 
-# 2541. Privileged Cloud Access
+### 2541. Privileged Cloud Access
 
 Las operaciones privilegiadas deberán requerir:
 
@@ -30767,7 +30667,7 @@ Las operaciones privilegiadas deberán requerir:
 
 ---
 
-# 2542. Just-in-Time Cloud Access
+### 2542. Just-in-Time Cloud Access
 
 ```text
 Access Request
@@ -30791,7 +30691,7 @@ Automatic Revocation
 
 ---
 
-# 2543. Cloud Access Review
+### 2543. Cloud Access Review
 
 Revisar periódicamente:
 
@@ -30804,7 +30704,7 @@ Revisar periódicamente:
 
 ---
 
-# 2544. Unused Permission Detection
+### 2544. Unused Permission Detection
 
 VoltStack deberá poder comparar:
 
@@ -30820,7 +30720,7 @@ para reducir acceso excesivo.
 
 ---
 
-# 2545. Cross-Account Access Security
+### 2545. Cross-Account Access Security
 
 El acceso entre cuentas deberá usar:
 
@@ -30832,13 +30732,13 @@ El acceso entre cuentas deberá usar:
 
 ---
 
-# 2546. Cloud Network Security Architecture
+### 2546. Cloud Network Security Architecture
 
 La red cloud deberá segmentarse por nivel de confianza.
 
 ---
 
-# 2547. Network Segmentation Layers
+### 2547. Network Segmentation Layers
 
 ```text
 Internet Edge
@@ -30866,25 +30766,25 @@ Management Zone
 
 ---
 
-# 2548. Public Subnet Restrictions
+### 2548. Public Subnet Restrictions
 
 Solo deberán ubicarse en zonas públicas componentes que necesiten exposición directa.
 
 ---
 
-# 2549. Private Runtime Placement
+### 2549. Private Runtime Placement
 
 Los runtimes VoltStack deberán ejecutarse preferentemente en redes privadas.
 
 ---
 
-# 2550. Database Network Isolation
+### 2550. Database Network Isolation
 
 Las bases de datos no deberán exponerse directamente a Internet.
 
 ---
 
-# 2551. Cloud Firewall Model
+### 2551. Cloud Firewall Model
 
 Las reglas deberán:
 
@@ -30896,7 +30796,7 @@ Las reglas deberán:
 
 ---
 
-# 2552. NetworkSecurityRule
+### 2552. NetworkSecurityRule
 
 ```php
 final readonly class NetworkSecurityRule
@@ -30915,7 +30815,7 @@ final readonly class NetworkSecurityRule
 
 ---
 
-# 2553. Default Network Denial
+### 2553. Default Network Denial
 
 ```text
 Unspecified Connection
@@ -30929,13 +30829,13 @@ La conectividad deberá habilitarse explícitamente.
 
 ---
 
-# 2554. East-West Traffic Security
+### 2554. East-West Traffic Security
 
 El tráfico interno entre servicios deberá autenticarse y autorizarse.
 
 ---
 
-# 2555. North-South Traffic Security
+### 2555. North-South Traffic Security
 
 El tráfico externo deberá pasar por controles como:
 
@@ -30948,13 +30848,13 @@ El tráfico externo deberá pasar por controles como:
 
 ---
 
-# 2556. Private Service Endpoints
+### 2556. Private Service Endpoints
 
 Cuando sea posible, los servicios cloud deberán consumirse mediante endpoints privados.
 
 ---
 
-# 2557. Cloud Egress Security
+### 2557. Cloud Egress Security
 
 La salida a Internet deberá controlarse mediante:
 
@@ -30966,7 +30866,7 @@ La salida a Internet deberá controlarse mediante:
 
 ---
 
-# 2558. EgressRestrictionPolicy
+### 2558. EgressRestrictionPolicy
 
 ```php
 final readonly class EgressRestrictionPolicy
@@ -30983,7 +30883,7 @@ final readonly class EgressRestrictionPolicy
 
 ---
 
-# 2559. DNS Security
+### 2559. DNS Security
 
 El DNS cloud deberá protegerse mediante:
 
@@ -30995,7 +30895,7 @@ El DNS cloud deberá protegerse mediante:
 
 ---
 
-# 2560. Cloud Storage Security Architecture
+### 2560. Cloud Storage Security Architecture
 
 Los servicios de objetos y archivos deberán proteger:
 
@@ -31007,7 +30907,7 @@ Los servicios de objetos y archivos deberán proteger:
 
 ---
 
-# 2561. Bucket Security
+### 2561. Bucket Security
 
 Todo bucket deberá:
 
@@ -31019,7 +30919,7 @@ Todo bucket deberá:
 
 ---
 
-# 2562. Object Access Security
+### 2562. Object Access Security
 
 El acceso deberá evaluarse por:
 
@@ -31032,7 +30932,7 @@ El acceso deberá evaluarse por:
 
 ---
 
-# 2563. Signed URL Security
+### 2563. Signed URL Security
 
 Las URLs firmadas deberán:
 
@@ -31044,7 +30944,7 @@ Las URLs firmadas deberán:
 
 ---
 
-# 2564. CloudObjectAccessGrant
+### 2564. CloudObjectAccessGrant
 
 ```php
 final readonly class CloudObjectAccessGrant
@@ -31062,7 +30962,7 @@ final readonly class CloudObjectAccessGrant
 
 ---
 
-# 2565. Object Encryption
+### 2565. Object Encryption
 
 VoltStack deberá soportar:
 
@@ -31073,7 +30973,7 @@ VoltStack deberá soportar:
 
 ---
 
-# 2566. Storage Versioning
+### 2566. Storage Versioning
 
 Los objetos críticos deberán poder conservar versiones para proteger contra:
 
@@ -31084,7 +30984,7 @@ Los objetos críticos deberán poder conservar versiones para proteger contra:
 
 ---
 
-# 2567. Object Lock
+### 2567. Object Lock
 
 Para cumplimiento o evidencia podrán usarse mecanismos WORM:
 
@@ -31096,13 +30996,13 @@ Read Many
 
 ---
 
-# 2568. Managed Database Security Architecture
+### 2568. Managed Database Security Architecture
 
 Las bases de datos administradas deberán desplegarse con controles reforzados.
 
 ---
 
-# 2569. Managed Database Requirements
+### 2569. Managed Database Requirements
 
 Exigir:
 
@@ -31115,7 +31015,7 @@ Exigir:
 
 ---
 
-# 2570. Database Authentication
+### 2570. Database Authentication
 
 Preferir:
 
@@ -31126,7 +31026,7 @@ Preferir:
 
 ---
 
-# 2571. Shared Database Credentials
+### 2571. Shared Database Credentials
 
 No deberán compartirse credenciales entre:
 
@@ -31138,7 +31038,7 @@ No deberán compartirse credenciales entre:
 
 ---
 
-# 2572. ManagedDatabaseIdentity
+### 2572. ManagedDatabaseIdentity
 
 ```php
 final readonly class ManagedDatabaseIdentity
@@ -31155,7 +31055,7 @@ final readonly class ManagedDatabaseIdentity
 
 ---
 
-# 2573. Database Parameter Security
+### 2573. Database Parameter Security
 
 Las configuraciones deberán revisar:
 
@@ -31169,7 +31069,7 @@ Las configuraciones deberán revisar:
 
 ---
 
-# 2574. Database Backup Security
+### 2574. Database Backup Security
 
 Los backups deberán:
 
@@ -31182,19 +31082,19 @@ Los backups deberán:
 
 ---
 
-# 2575. Point-in-Time Recovery
+### 2575. Point-in-Time Recovery
 
 Las bases críticas deberán soportar recuperación a un punto específico.
 
 ---
 
-# 2576. Database Snapshot Access
+### 2576. Database Snapshot Access
 
 El acceso a snapshots deberá ser más restrictivo que el acceso normal a la base activa.
 
 ---
 
-# 2577. Database Clone Security
+### 2577. Database Clone Security
 
 Los clones para pruebas deberán:
 
@@ -31205,13 +31105,13 @@ Los clones para pruebas deberán:
 
 ---
 
-# 2578. Serverless Security Architecture
+### 2578. Serverless Security Architecture
 
 VoltStack podrá ejecutar componentes en funciones o runtimes serverless.
 
 ---
 
-# 2579. Serverless Security Characteristics
+### 2579. Serverless Security Characteristics
 
 Considerar:
 
@@ -31224,7 +31124,7 @@ Considerar:
 
 ---
 
-# 2580. Serverless Function Isolation
+### 2580. Serverless Function Isolation
 
 Cada función deberá tener:
 
@@ -31237,7 +31137,7 @@ Cada función deberá tener:
 
 ---
 
-# 2581. Serverless Event Validation
+### 2581. Serverless Event Validation
 
 Toda invocación deberá validar:
 
@@ -31250,7 +31150,7 @@ Toda invocación deberá validar:
 
 ---
 
-# 2582. ServerlessInvocationContext
+### 2582. ServerlessInvocationContext
 
 ```php
 final readonly class ServerlessInvocationContext
@@ -31268,7 +31168,7 @@ final readonly class ServerlessInvocationContext
 
 ---
 
-# 2583. Serverless Cold Start Security
+### 2583. Serverless Cold Start Security
 
 La inicialización deberá:
 
@@ -31279,7 +31179,7 @@ La inicialización deberá:
 
 ---
 
-# 2584. Serverless Warm Runtime Security
+### 2584. Serverless Warm Runtime Security
 
 En reutilización de instancia deberá limpiarse:
 
@@ -31291,7 +31191,7 @@ En reutilización de instancia deberá limpiarse:
 
 ---
 
-# 2585. Serverless Concurrency Security
+### 2585. Serverless Concurrency Security
 
 La concurrencia deberá evitar mezcla de:
 
@@ -31303,13 +31203,13 @@ La concurrencia deberá evitar mezcla de:
 
 ---
 
-# 2586. Cloud Posture Management Architecture
+### 2586. Cloud Posture Management Architecture
 
 VoltStack deberá permitir evaluar continuamente la postura cloud.
 
 ---
 
-# 2587. Cloud Posture Signals
+### 2587. Cloud Posture Signals
 
 Evaluar:
 
@@ -31324,7 +31224,7 @@ Evaluar:
 
 ---
 
-# 2588. CloudPostureFinding
+### 2588. CloudPostureFinding
 
 ```php
 final readonly class CloudPostureFinding
@@ -31343,7 +31243,7 @@ final readonly class CloudPostureFinding
 
 ---
 
-# 2589. Cloud Security Posture Score
+### 2589. Cloud Security Posture Score
 
 El puntaje podrá considerar:
 
@@ -31369,7 +31269,7 @@ Configuration Compliance
 
 ---
 
-# 2590. Cloud Misconfiguration Detection
+### 2590. Cloud Misconfiguration Detection
 
 Detectar:
 
@@ -31382,7 +31282,7 @@ Detectar:
 
 ---
 
-# 2591. Automated Cloud Remediation
+### 2591. Automated Cloud Remediation
 
 Las correcciones automáticas deberán aplicar guardrails.
 
@@ -31396,13 +31296,13 @@ Ejemplos:
 
 ---
 
-# 2592. Multi-Cloud Governance Architecture
+### 2592. Multi-Cloud Governance Architecture
 
 VoltStack deberá mantener controles equivalentes entre proveedores.
 
 ---
 
-# 2593. Multi-Cloud Control Abstraction
+### 2593. Multi-Cloud Control Abstraction
 
 ```text
 VoltStack Security Control
@@ -31419,7 +31319,7 @@ Provider Adapter
 
 ---
 
-# 2594. Provider-Specific Differences
+### 2594. Provider-Specific Differences
 
 La abstracción no deberá ocultar diferencias críticas como:
 
@@ -31432,7 +31332,7 @@ La abstracción no deberá ocultar diferencias críticas como:
 
 ---
 
-# 2595. CloudCapabilityMatrix
+### 2595. CloudCapabilityMatrix
 
 ```php
 final readonly class CloudCapabilityMatrix
@@ -31449,19 +31349,19 @@ final readonly class CloudCapabilityMatrix
 
 ---
 
-# 2596. Multi-Cloud Identity Governance
+### 2596. Multi-Cloud Identity Governance
 
 Las identidades deberán administrarse desde una fuente de verdad central cuando sea posible.
 
 ---
 
-# 2597. Multi-Cloud Logging
+### 2597. Multi-Cloud Logging
 
 Los eventos deberán normalizarse y enviarse a una plataforma común de observabilidad y seguridad.
 
 ---
 
-# 2598. Cloud Resilience and Security Validation
+### 2598. Cloud Resilience and Security Validation
 
 VoltStack deberá probar:
 
@@ -31474,7 +31374,7 @@ VoltStack deberá probar:
 
 ---
 
-# 2599. Cloud Security Result
+### 2599. Cloud Security Result
 
 Esta entrega establece:
 
@@ -31506,7 +31406,7 @@ Multi-Cloud Governance
 
 ---
 
-# 2600. Estado
+### 2600. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -31539,9 +31439,7 @@ La siguiente entrega continuará con:
 - Secure analytics
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 26
 
 **Documento:** Parte 06
 **Entrega:** 26 de varias
@@ -31549,7 +31447,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2501. Cloud Security Architecture
+### 2501. Cloud Security Architecture
 
 VoltStack deberá incorporar una arquitectura de seguridad independiente del proveedor cloud.
 
@@ -31563,7 +31461,7 @@ El framework deberá poder desplegarse sobre:
 
 ---
 
-# 2502. Cloud Security Objectives
+### 2502. Cloud Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -31577,7 +31475,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2503. Cloud Security Model
+### 2503. Cloud Security Model
 
 ```text
 Cloud Provider Controls
@@ -31601,7 +31499,7 @@ Cloud Security Posture
 
 ---
 
-# 2504. Cloud Security Domains
+### 2504. Cloud Security Domains
 
 La seguridad cloud deberá cubrir:
 
@@ -31627,7 +31525,7 @@ Resilience
 
 ---
 
-# 2505. Cloud Environment Abstraction
+### 2505. Cloud Environment Abstraction
 
 VoltStack no deberá acoplar su modelo de seguridad a un único proveedor.
 
@@ -31646,13 +31544,13 @@ interface CloudSecurityProviderInterface
 
 ---
 
-# 2506. Shared Responsibility Model
+### 2506. Shared Responsibility Model
 
 La seguridad cloud deberá entenderse como una responsabilidad compartida.
 
 ---
 
-# 2507. Provider Responsibilities
+### 2507. Provider Responsibilities
 
 El proveedor podrá ser responsable de:
 
@@ -31665,7 +31563,7 @@ El proveedor podrá ser responsable de:
 
 ---
 
-# 2508. Customer Responsibilities
+### 2508. Customer Responsibilities
 
 VoltStack y la organización serán responsables de:
 
@@ -31680,7 +31578,7 @@ VoltStack y la organización serán responsables de:
 
 ---
 
-# 2509. Shared Responsibility Matrix
+### 2509. Shared Responsibility Matrix
 
 ```text
 Provider
@@ -31690,7 +31588,6 @@ Responsible For:
 Physical Infrastructure
 
 Core Platform Availability
-
 
 Application Owner
 
@@ -31707,7 +31604,7 @@ Application Security
 
 ---
 
-# 2510. Responsibility Boundary Documentation
+### 2510. Responsibility Boundary Documentation
 
 Cada servicio cloud utilizado deberá documentar:
 
@@ -31719,7 +31616,7 @@ Cada servicio cloud utilizado deberá documentar:
 
 ---
 
-# 2511. CloudServiceResponsibility
+### 2511. CloudServiceResponsibility
 
 ```php
 final readonly class CloudServiceResponsibility
@@ -31736,13 +31633,13 @@ final readonly class CloudServiceResponsibility
 
 ---
 
-# 2512. Cloud Account Architecture
+### 2512. Cloud Account Architecture
 
 Los recursos deberán organizarse mediante cuentas, proyectos o suscripciones separadas.
 
 ---
 
-# 2513. Account Separation
+### 2513. Account Separation
 
 Separar:
 
@@ -31756,7 +31653,7 @@ Separar:
 
 ---
 
-# 2514. Cloud Organization Model
+### 2514. Cloud Organization Model
 
 ```text
 Organization Root
@@ -31771,7 +31668,7 @@ Organization Root
 
 ---
 
-# 2515. Management Account Protection
+### 2515. Management Account Protection
 
 La cuenta raíz o administrativa deberá:
 
@@ -31783,7 +31680,7 @@ La cuenta raíz o administrativa deberá:
 
 ---
 
-# 2516. Cloud Account Bootstrap
+### 2516. Cloud Account Bootstrap
 
 Cada nueva cuenta deberá inicializar:
 
@@ -31797,7 +31694,7 @@ Cada nueva cuenta deberá inicializar:
 
 ---
 
-# 2517. Cloud Landing Zone
+### 2517. Cloud Landing Zone
 
 VoltStack podrá operar sobre una landing zone con:
 
@@ -31809,7 +31706,7 @@ VoltStack podrá operar sobre una landing zone con:
 
 ---
 
-# 2518. Cloud Guardrails
+### 2518. Cloud Guardrails
 
 Los guardrails podrán ser:
 
@@ -31825,7 +31722,7 @@ Responsive
 
 ---
 
-# 2519. Preventive Guardrails
+### 2519. Preventive Guardrails
 
 Ejemplos:
 
@@ -31837,7 +31734,7 @@ Ejemplos:
 
 ---
 
-# 2520. Detective Guardrails
+### 2520. Detective Guardrails
 
 Detectar:
 
@@ -31850,7 +31747,7 @@ Detectar:
 
 ---
 
-# 2521. Corrective Guardrails
+### 2521. Corrective Guardrails
 
 Podrán:
 
@@ -31862,13 +31759,13 @@ Podrán:
 
 ---
 
-# 2522. Cloud Identity Architecture
+### 2522. Cloud Identity Architecture
 
 La identidad deberá ser el principal perímetro de seguridad cloud.
 
 ---
 
-# 2523. Cloud Identity Federation
+### 2523. Cloud Identity Federation
 
 VoltStack deberá favorecer identidad federada mediante:
 
@@ -31880,7 +31777,7 @@ VoltStack deberá favorecer identidad federada mediante:
 
 ---
 
-# 2524. Federation Flow
+### 2524. Federation Flow
 
 ```text
 User
@@ -31904,7 +31801,7 @@ Authorized Resource
 
 ---
 
-# 2525. FederatedCloudIdentity
+### 2525. FederatedCloudIdentity
 
 ```php
 final readonly class FederatedCloudIdentity
@@ -31922,7 +31819,7 @@ final readonly class FederatedCloudIdentity
 
 ---
 
-# 2526. Temporary Credentials Principle
+### 2526. Temporary Credentials Principle
 
 Las credenciales cloud deberán ser:
 
@@ -31934,7 +31831,7 @@ Las credenciales cloud deberán ser:
 
 ---
 
-# 2527. Permanent Access Keys
+### 2527. Permanent Access Keys
 
 Las claves permanentes deberán evitarse.
 
@@ -31948,7 +31845,7 @@ Cuando sean inevitables deberán:
 
 ---
 
-# 2528. Human Identity vs Workload Identity
+### 2528. Human Identity vs Workload Identity
 
 VoltStack deberá diferenciar:
 
@@ -31962,7 +31859,6 @@ Developers
 Operators
 
 Auditors
-
 
 Workload Identity
 
@@ -31979,13 +31875,13 @@ Services
 
 ---
 
-# 2529. Cloud Workload Identity
+### 2529. Cloud Workload Identity
 
 Los workloads deberán autenticarse sin secretos estáticos cuando el proveedor lo permita.
 
 ---
 
-# 2530. Workload Identity Flow
+### 2530. Workload Identity Flow
 
 ```text
 Runtime Workload
@@ -32009,7 +31905,7 @@ Cloud Resource
 
 ---
 
-# 2531. WorkloadIdentity
+### 2531. WorkloadIdentity
 
 ```php
 final readonly class WorkloadIdentity
@@ -32026,7 +31922,7 @@ final readonly class WorkloadIdentity
 
 ---
 
-# 2532. Workload Identity Binding
+### 2532. Workload Identity Binding
 
 La identidad deberá vincularse a:
 
@@ -32039,7 +31935,7 @@ La identidad deberá vincularse a:
 
 ---
 
-# 2533. Workload Identity Validation
+### 2533. Workload Identity Validation
 
 Antes de conceder acceso deberá validarse:
 
@@ -32053,13 +31949,13 @@ Antes de conceder acceso deberá validarse:
 
 ---
 
-# 2534. Cloud IAM Architecture
+### 2534. Cloud IAM Architecture
 
 VoltStack deberá aplicar un modelo IAM basado en capacidades mínimas.
 
 ---
 
-# 2535. Cloud IAM Principles
+### 2535. Cloud IAM Principles
 
 Aplicar:
 
@@ -32072,7 +31968,7 @@ Aplicar:
 
 ---
 
-# 2536. Cloud Role Design
+### 2536. Cloud Role Design
 
 Los roles deberán representar funciones concretas.
 
@@ -32090,7 +31986,7 @@ VoltStackSecurityAuditor
 
 ---
 
-# 2537. Wildcard Permission Restrictions
+### 2537. Wildcard Permission Restrictions
 
 Permisos como:
 
@@ -32104,13 +32000,13 @@ deberán bloquearse salvo excepciones explícitas y temporales.
 
 ---
 
-# 2538. Permission Boundary
+### 2538. Permission Boundary
 
 VoltStack podrá utilizar límites de permisos para impedir que una identidad se otorgue privilegios fuera de su alcance.
 
 ---
 
-# 2539. CloudPolicyDefinition
+### 2539. CloudPolicyDefinition
 
 ```php
 final readonly class CloudPolicyDefinition
@@ -32128,7 +32024,7 @@ final readonly class CloudPolicyDefinition
 
 ---
 
-# 2540. Cloud IAM Conditions
+### 2540. Cloud IAM Conditions
 
 Las políticas podrán depender de:
 
@@ -32143,7 +32039,7 @@ Las políticas podrán depender de:
 
 ---
 
-# 2541. Privileged Cloud Access
+### 2541. Privileged Cloud Access
 
 Las operaciones privilegiadas deberán requerir:
 
@@ -32156,7 +32052,7 @@ Las operaciones privilegiadas deberán requerir:
 
 ---
 
-# 2542. Just-in-Time Cloud Access
+### 2542. Just-in-Time Cloud Access
 
 ```text
 Access Request
@@ -32180,7 +32076,7 @@ Automatic Revocation
 
 ---
 
-# 2543. Cloud Access Review
+### 2543. Cloud Access Review
 
 Revisar periódicamente:
 
@@ -32193,7 +32089,7 @@ Revisar periódicamente:
 
 ---
 
-# 2544. Unused Permission Detection
+### 2544. Unused Permission Detection
 
 VoltStack deberá poder comparar:
 
@@ -32209,7 +32105,7 @@ para reducir acceso excesivo.
 
 ---
 
-# 2545. Cross-Account Access Security
+### 2545. Cross-Account Access Security
 
 El acceso entre cuentas deberá usar:
 
@@ -32221,13 +32117,13 @@ El acceso entre cuentas deberá usar:
 
 ---
 
-# 2546. Cloud Network Security Architecture
+### 2546. Cloud Network Security Architecture
 
 La red cloud deberá segmentarse por nivel de confianza.
 
 ---
 
-# 2547. Network Segmentation Layers
+### 2547. Network Segmentation Layers
 
 ```text
 Internet Edge
@@ -32255,25 +32151,25 @@ Management Zone
 
 ---
 
-# 2548. Public Subnet Restrictions
+### 2548. Public Subnet Restrictions
 
 Solo deberán ubicarse en zonas públicas componentes que necesiten exposición directa.
 
 ---
 
-# 2549. Private Runtime Placement
+### 2549. Private Runtime Placement
 
 Los runtimes VoltStack deberán ejecutarse preferentemente en redes privadas.
 
 ---
 
-# 2550. Database Network Isolation
+### 2550. Database Network Isolation
 
 Las bases de datos no deberán exponerse directamente a Internet.
 
 ---
 
-# 2551. Cloud Firewall Model
+### 2551. Cloud Firewall Model
 
 Las reglas deberán:
 
@@ -32285,7 +32181,7 @@ Las reglas deberán:
 
 ---
 
-# 2552. NetworkSecurityRule
+### 2552. NetworkSecurityRule
 
 ```php
 final readonly class NetworkSecurityRule
@@ -32304,7 +32200,7 @@ final readonly class NetworkSecurityRule
 
 ---
 
-# 2553. Default Network Denial
+### 2553. Default Network Denial
 
 ```text
 Unspecified Connection
@@ -32318,13 +32214,13 @@ La conectividad deberá habilitarse explícitamente.
 
 ---
 
-# 2554. East-West Traffic Security
+### 2554. East-West Traffic Security
 
 El tráfico interno entre servicios deberá autenticarse y autorizarse.
 
 ---
 
-# 2555. North-South Traffic Security
+### 2555. North-South Traffic Security
 
 El tráfico externo deberá pasar por controles como:
 
@@ -32337,13 +32233,13 @@ El tráfico externo deberá pasar por controles como:
 
 ---
 
-# 2556. Private Service Endpoints
+### 2556. Private Service Endpoints
 
 Cuando sea posible, los servicios cloud deberán consumirse mediante endpoints privados.
 
 ---
 
-# 2557. Cloud Egress Security
+### 2557. Cloud Egress Security
 
 La salida a Internet deberá controlarse mediante:
 
@@ -32355,7 +32251,7 @@ La salida a Internet deberá controlarse mediante:
 
 ---
 
-# 2558. EgressRestrictionPolicy
+### 2558. EgressRestrictionPolicy
 
 ```php
 final readonly class EgressRestrictionPolicy
@@ -32372,7 +32268,7 @@ final readonly class EgressRestrictionPolicy
 
 ---
 
-# 2559. DNS Security
+### 2559. DNS Security
 
 El DNS cloud deberá protegerse mediante:
 
@@ -32384,7 +32280,7 @@ El DNS cloud deberá protegerse mediante:
 
 ---
 
-# 2560. Cloud Storage Security Architecture
+### 2560. Cloud Storage Security Architecture
 
 Los servicios de objetos y archivos deberán proteger:
 
@@ -32396,7 +32292,7 @@ Los servicios de objetos y archivos deberán proteger:
 
 ---
 
-# 2561. Bucket Security
+### 2561. Bucket Security
 
 Todo bucket deberá:
 
@@ -32408,7 +32304,7 @@ Todo bucket deberá:
 
 ---
 
-# 2562. Object Access Security
+### 2562. Object Access Security
 
 El acceso deberá evaluarse por:
 
@@ -32421,7 +32317,7 @@ El acceso deberá evaluarse por:
 
 ---
 
-# 2563. Signed URL Security
+### 2563. Signed URL Security
 
 Las URLs firmadas deberán:
 
@@ -32433,7 +32329,7 @@ Las URLs firmadas deberán:
 
 ---
 
-# 2564. CloudObjectAccessGrant
+### 2564. CloudObjectAccessGrant
 
 ```php
 final readonly class CloudObjectAccessGrant
@@ -32451,7 +32347,7 @@ final readonly class CloudObjectAccessGrant
 
 ---
 
-# 2565. Object Encryption
+### 2565. Object Encryption
 
 VoltStack deberá soportar:
 
@@ -32462,7 +32358,7 @@ VoltStack deberá soportar:
 
 ---
 
-# 2566. Storage Versioning
+### 2566. Storage Versioning
 
 Los objetos críticos deberán poder conservar versiones para proteger contra:
 
@@ -32473,7 +32369,7 @@ Los objetos críticos deberán poder conservar versiones para proteger contra:
 
 ---
 
-# 2567. Object Lock
+### 2567. Object Lock
 
 Para cumplimiento o evidencia podrán usarse mecanismos WORM:
 
@@ -32485,13 +32381,13 @@ Read Many
 
 ---
 
-# 2568. Managed Database Security Architecture
+### 2568. Managed Database Security Architecture
 
 Las bases de datos administradas deberán desplegarse con controles reforzados.
 
 ---
 
-# 2569. Managed Database Requirements
+### 2569. Managed Database Requirements
 
 Exigir:
 
@@ -32504,7 +32400,7 @@ Exigir:
 
 ---
 
-# 2570. Database Authentication
+### 2570. Database Authentication
 
 Preferir:
 
@@ -32515,7 +32411,7 @@ Preferir:
 
 ---
 
-# 2571. Shared Database Credentials
+### 2571. Shared Database Credentials
 
 No deberán compartirse credenciales entre:
 
@@ -32527,7 +32423,7 @@ No deberán compartirse credenciales entre:
 
 ---
 
-# 2572. ManagedDatabaseIdentity
+### 2572. ManagedDatabaseIdentity
 
 ```php
 final readonly class ManagedDatabaseIdentity
@@ -32544,7 +32440,7 @@ final readonly class ManagedDatabaseIdentity
 
 ---
 
-# 2573. Database Parameter Security
+### 2573. Database Parameter Security
 
 Las configuraciones deberán revisar:
 
@@ -32558,7 +32454,7 @@ Las configuraciones deberán revisar:
 
 ---
 
-# 2574. Database Backup Security
+### 2574. Database Backup Security
 
 Los backups deberán:
 
@@ -32571,19 +32467,19 @@ Los backups deberán:
 
 ---
 
-# 2575. Point-in-Time Recovery
+### 2575. Point-in-Time Recovery
 
 Las bases críticas deberán soportar recuperación a un punto específico.
 
 ---
 
-# 2576. Database Snapshot Access
+### 2576. Database Snapshot Access
 
 El acceso a snapshots deberá ser más restrictivo que el acceso normal a la base activa.
 
 ---
 
-# 2577. Database Clone Security
+### 2577. Database Clone Security
 
 Los clones para pruebas deberán:
 
@@ -32594,13 +32490,13 @@ Los clones para pruebas deberán:
 
 ---
 
-# 2578. Serverless Security Architecture
+### 2578. Serverless Security Architecture
 
 VoltStack podrá ejecutar componentes en funciones o runtimes serverless.
 
 ---
 
-# 2579. Serverless Security Characteristics
+### 2579. Serverless Security Characteristics
 
 Considerar:
 
@@ -32613,7 +32509,7 @@ Considerar:
 
 ---
 
-# 2580. Serverless Function Isolation
+### 2580. Serverless Function Isolation
 
 Cada función deberá tener:
 
@@ -32626,7 +32522,7 @@ Cada función deberá tener:
 
 ---
 
-# 2581. Serverless Event Validation
+### 2581. Serverless Event Validation
 
 Toda invocación deberá validar:
 
@@ -32639,7 +32535,7 @@ Toda invocación deberá validar:
 
 ---
 
-# 2582. ServerlessInvocationContext
+### 2582. ServerlessInvocationContext
 
 ```php
 final readonly class ServerlessInvocationContext
@@ -32657,7 +32553,7 @@ final readonly class ServerlessInvocationContext
 
 ---
 
-# 2583. Serverless Cold Start Security
+### 2583. Serverless Cold Start Security
 
 La inicialización deberá:
 
@@ -32668,7 +32564,7 @@ La inicialización deberá:
 
 ---
 
-# 2584. Serverless Warm Runtime Security
+### 2584. Serverless Warm Runtime Security
 
 En reutilización de instancia deberá limpiarse:
 
@@ -32680,7 +32576,7 @@ En reutilización de instancia deberá limpiarse:
 
 ---
 
-# 2585. Serverless Concurrency Security
+### 2585. Serverless Concurrency Security
 
 La concurrencia deberá evitar mezcla de:
 
@@ -32692,13 +32588,13 @@ La concurrencia deberá evitar mezcla de:
 
 ---
 
-# 2586. Cloud Posture Management Architecture
+### 2586. Cloud Posture Management Architecture
 
 VoltStack deberá permitir evaluar continuamente la postura cloud.
 
 ---
 
-# 2587. Cloud Posture Signals
+### 2587. Cloud Posture Signals
 
 Evaluar:
 
@@ -32713,7 +32609,7 @@ Evaluar:
 
 ---
 
-# 2588. CloudPostureFinding
+### 2588. CloudPostureFinding
 
 ```php
 final readonly class CloudPostureFinding
@@ -32732,7 +32628,7 @@ final readonly class CloudPostureFinding
 
 ---
 
-# 2589. Cloud Security Posture Score
+### 2589. Cloud Security Posture Score
 
 El puntaje podrá considerar:
 
@@ -32758,7 +32654,7 @@ Configuration Compliance
 
 ---
 
-# 2590. Cloud Misconfiguration Detection
+### 2590. Cloud Misconfiguration Detection
 
 Detectar:
 
@@ -32771,7 +32667,7 @@ Detectar:
 
 ---
 
-# 2591. Automated Cloud Remediation
+### 2591. Automated Cloud Remediation
 
 Las correcciones automáticas deberán aplicar guardrails.
 
@@ -32785,13 +32681,13 @@ Ejemplos:
 
 ---
 
-# 2592. Multi-Cloud Governance Architecture
+### 2592. Multi-Cloud Governance Architecture
 
 VoltStack deberá mantener controles equivalentes entre proveedores.
 
 ---
 
-# 2593. Multi-Cloud Control Abstraction
+### 2593. Multi-Cloud Control Abstraction
 
 ```text
 VoltStack Security Control
@@ -32808,7 +32704,7 @@ Provider Adapter
 
 ---
 
-# 2594. Provider-Specific Differences
+### 2594. Provider-Specific Differences
 
 La abstracción no deberá ocultar diferencias críticas como:
 
@@ -32821,7 +32717,7 @@ La abstracción no deberá ocultar diferencias críticas como:
 
 ---
 
-# 2595. CloudCapabilityMatrix
+### 2595. CloudCapabilityMatrix
 
 ```php
 final readonly class CloudCapabilityMatrix
@@ -32838,19 +32734,19 @@ final readonly class CloudCapabilityMatrix
 
 ---
 
-# 2596. Multi-Cloud Identity Governance
+### 2596. Multi-Cloud Identity Governance
 
 Las identidades deberán administrarse desde una fuente de verdad central cuando sea posible.
 
 ---
 
-# 2597. Multi-Cloud Logging
+### 2597. Multi-Cloud Logging
 
 Los eventos deberán normalizarse y enviarse a una plataforma común de observabilidad y seguridad.
 
 ---
 
-# 2598. Cloud Resilience and Security Validation
+### 2598. Cloud Resilience and Security Validation
 
 VoltStack deberá probar:
 
@@ -32863,7 +32759,7 @@ VoltStack deberá probar:
 
 ---
 
-# 2599. Cloud Security Result
+### 2599. Cloud Security Result
 
 Esta entrega establece:
 
@@ -32895,7 +32791,7 @@ Multi-Cloud Governance
 
 ---
 
-# 2600. Estado
+### 2600. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -32928,9 +32824,7 @@ La siguiente entrega continuará con:
 - Secure analytics
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 27
 
 **Documento:** Parte 06
 **Entrega:** 27 de 31
@@ -32938,7 +32832,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2601. Data Security Architecture
+### 2601. Data Security Architecture
 
 VoltStack deberá incorporar una arquitectura integral para proteger los datos durante todo su ciclo de vida.
 
@@ -32954,7 +32848,7 @@ La protección deberá aplicarse a:
 
 ---
 
-# 2602. Data Security Objectives
+### 2602. Data Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -32968,7 +32862,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2603. Data Security Model
+### 2603. Data Security Model
 
 ```text
 Data Classification
@@ -32996,7 +32890,7 @@ Secure Disposal
 
 ---
 
-# 2604. Data Security Domains
+### 2604. Data Security Domains
 
 VoltStack deberá organizar la seguridad de datos en:
 
@@ -33024,7 +32918,7 @@ Analytics
 
 ---
 
-# 2605. Data Governance Architecture
+### 2605. Data Governance Architecture
 
 La seguridad de datos deberá formar parte de un modelo de gobierno formal.
 
@@ -33040,7 +32934,7 @@ El gobierno deberá definir:
 
 ---
 
-# 2606. Data Governance Roles
+### 2606. Data Governance Roles
 
 Definir:
 
@@ -33054,7 +32948,7 @@ Definir:
 
 ---
 
-# 2607. Data Ownership
+### 2607. Data Ownership
 
 Cada conjunto de datos deberá tener un propietario responsable de:
 
@@ -33066,7 +32960,7 @@ Cada conjunto de datos deberá tener un propietario responsable de:
 
 ---
 
-# 2608. Data Custodianship
+### 2608. Data Custodianship
 
 El custodio será responsable de implementar:
 
@@ -33079,7 +32973,7 @@ El custodio será responsable de implementar:
 
 ---
 
-# 2609. DataAsset
+### 2609. DataAsset
 
 ```php
 final readonly class DataAsset
@@ -33098,7 +32992,7 @@ final readonly class DataAsset
 
 ---
 
-# 2610. Data Inventory
+### 2610. Data Inventory
 
 VoltStack deberá poder mantener un inventario de:
 
@@ -33113,7 +33007,7 @@ VoltStack deberá poder mantener un inventario de:
 
 ---
 
-# 2611. Data Inventory Metadata
+### 2611. Data Inventory Metadata
 
 Cada elemento deberá declarar:
 
@@ -33128,7 +33022,7 @@ Cada elemento deberá declarar:
 
 ---
 
-# 2612. Data Discovery
+### 2612. Data Discovery
 
 VoltStack podrá facilitar el descubrimiento de datos mediante:
 
@@ -33142,13 +33036,13 @@ VoltStack podrá facilitar el descubrimiento de datos mediante:
 
 ---
 
-# 2613. Data Classification Architecture
+### 2613. Data Classification Architecture
 
 Todo dato deberá clasificarse de acuerdo con su impacto potencial.
 
 ---
 
-# 2614. DataClassification
+### 2614. DataClassification
 
 ```php
 enum DataClassification: string
@@ -33163,7 +33057,7 @@ enum DataClassification: string
 
 ---
 
-# 2615. Public Data
+### 2615. Public Data
 
 Los datos públicos podrán divulgarse sin daño significativo.
 
@@ -33176,7 +33070,7 @@ Aun así deberán protegerse contra:
 
 ---
 
-# 2616. Internal Data
+### 2616. Internal Data
 
 Los datos internos deberán limitarse a:
 
@@ -33187,7 +33081,7 @@ Los datos internos deberán limitarse a:
 
 ---
 
-# 2617. Confidential Data
+### 2617. Confidential Data
 
 Los datos confidenciales deberán requerir:
 
@@ -33199,7 +33093,7 @@ Los datos confidenciales deberán requerir:
 
 ---
 
-# 2618. Restricted Data
+### 2618. Restricted Data
 
 Los datos restringidos podrán incluir:
 
@@ -33211,7 +33105,7 @@ Los datos restringidos podrán incluir:
 
 ---
 
-# 2619. Highly Restricted Data
+### 2619. Highly Restricted Data
 
 Los datos altamente restringidos deberán usar los controles más fuertes.
 
@@ -33225,7 +33119,7 @@ Ejemplos:
 
 ---
 
-# 2620. Data Classification Criteria
+### 2620. Data Classification Criteria
 
 La clasificación deberá considerar:
 
@@ -33251,7 +33145,7 @@ Operational Criticality
 
 ---
 
-# 2621. DataClassificationMetadata
+### 2621. DataClassificationMetadata
 
 ```php
 #[Attribute(Attribute::TARGET_PROPERTY)]
@@ -33269,7 +33163,7 @@ final readonly class DataClassificationMetadata
 
 ---
 
-# 2622. Field Classification Example
+### 2622. Field Classification Example
 
 ```php
 final readonly class CustomerProfile
@@ -33301,7 +33195,7 @@ final readonly class CustomerProfile
 
 ---
 
-# 2623. Classification Inheritance
+### 2623. Classification Inheritance
 
 Los contenedores podrán heredar la clasificación más alta de sus campos.
 
@@ -33319,7 +33213,7 @@ Restricted Record
 
 ---
 
-# 2624. Classification Propagation
+### 2624. Classification Propagation
 
 La clasificación deberá propagarse durante:
 
@@ -33332,7 +33226,7 @@ La clasificación deberá propagarse durante:
 
 ---
 
-# 2625. Derived Data Classification
+### 2625. Derived Data Classification
 
 Los datos derivados deberán clasificarse según:
 
@@ -33343,7 +33237,7 @@ Los datos derivados deberán clasificarse según:
 
 ---
 
-# 2626. Aggregated Data Classification
+### 2626. Aggregated Data Classification
 
 Un agregado podrá reducir sensibilidad solo si:
 
@@ -33354,7 +33248,7 @@ Un agregado podrá reducir sensibilidad solo si:
 
 ---
 
-# 2627. Data Labeling Architecture
+### 2627. Data Labeling Architecture
 
 VoltStack deberá poder asociar etiquetas de protección a datos y recursos.
 
@@ -33376,7 +33270,7 @@ legal-hold
 
 ---
 
-# 2628. DataLabel
+### 2628. DataLabel
 
 ```php
 final readonly class DataLabel
@@ -33392,13 +33286,13 @@ final readonly class DataLabel
 
 ---
 
-# 2629. Data Lifecycle Architecture
+### 2629. Data Lifecycle Architecture
 
 Todo dato deberá administrarse desde su creación hasta su eliminación.
 
 ---
 
-# 2630. Data Lifecycle Stages
+### 2630. Data Lifecycle Stages
 
 ```text
 Create
@@ -33430,7 +33324,7 @@ Delete
 
 ---
 
-# 2631. Data Creation Security
+### 2631. Data Creation Security
 
 Al crear datos deberá registrarse:
 
@@ -33443,7 +33337,7 @@ Al crear datos deberá registrarse:
 
 ---
 
-# 2632. Data Collection Security
+### 2632. Data Collection Security
 
 La recopilación deberá limitarse a datos:
 
@@ -33455,7 +33349,7 @@ La recopilación deberá limitarse a datos:
 
 ---
 
-# 2633. Data Minimization Principle
+### 2633. Data Minimization Principle
 
 ```text
 Collect Only
@@ -33467,7 +33361,7 @@ For The Declared Purpose
 
 ---
 
-# 2634. Purpose Limitation
+### 2634. Purpose Limitation
 
 Los datos no deberán utilizarse para propósitos incompatibles sin:
 
@@ -33478,7 +33372,7 @@ Los datos no deberán utilizarse para propósitos incompatibles sin:
 
 ---
 
-# 2635. DataPurpose
+### 2635. DataPurpose
 
 ```php
 final readonly class DataPurpose
@@ -33495,13 +33389,13 @@ final readonly class DataPurpose
 
 ---
 
-# 2636. Purpose-Based Access Control
+### 2636. Purpose-Based Access Control
 
 La autorización deberá considerar no solo quién accede, sino para qué propósito.
 
 ---
 
-# 2637. PurposeAccessContext
+### 2637. PurposeAccessContext
 
 ```php
 final readonly class PurposeAccessContext
@@ -33518,7 +33412,7 @@ final readonly class PurposeAccessContext
 
 ---
 
-# 2638. Data Storage Security
+### 2638. Data Storage Security
 
 El almacenamiento deberá aplicar controles según:
 
@@ -33531,7 +33425,7 @@ El almacenamiento deberá aplicar controles según:
 
 ---
 
-# 2639. Data at Rest Protection
+### 2639. Data at Rest Protection
 
 Los datos en reposo deberán protegerse mediante:
 
@@ -33544,7 +33438,7 @@ Los datos en reposo deberán protegerse mediante:
 
 ---
 
-# 2640. Data in Transit Protection
+### 2640. Data in Transit Protection
 
 Toda transmisión sensible deberá usar:
 
@@ -33556,7 +33450,7 @@ Toda transmisión sensible deberá usar:
 
 ---
 
-# 2641. Data in Use Protection
+### 2641. Data in Use Protection
 
 Durante el procesamiento deberán limitarse:
 
@@ -33568,7 +33462,7 @@ Durante el procesamiento deberán limitarse:
 
 ---
 
-# 2642. Temporary Data Security
+### 2642. Temporary Data Security
 
 Los datos temporales deberán:
 
@@ -33579,7 +33473,7 @@ Los datos temporales deberán:
 
 ---
 
-# 2643. Cache Data Security
+### 2643. Cache Data Security
 
 Los caches deberán respetar:
 
@@ -33591,7 +33485,7 @@ Los caches deberán respetar:
 
 ---
 
-# 2644. CacheKeySecurity
+### 2644. CacheKeySecurity
 
 ```php
 final readonly class SecureCacheKey
@@ -33608,7 +33502,7 @@ final readonly class SecureCacheKey
 
 ---
 
-# 2645. Data Isolation Architecture
+### 2645. Data Isolation Architecture
 
 VoltStack deberá evitar mezcla de datos entre:
 
@@ -33620,7 +33514,7 @@ VoltStack deberá evitar mezcla de datos entre:
 
 ---
 
-# 2646. Tenant Data Isolation
+### 2646. Tenant Data Isolation
 
 El aislamiento podrá aplicarse mediante:
 
@@ -33633,7 +33527,7 @@ El aislamiento podrá aplicarse mediante:
 
 ---
 
-# 2647. Row-Level Data Security
+### 2647. Row-Level Data Security
 
 Las consultas deberán incluir restricciones derivadas del contexto de seguridad.
 
@@ -33655,7 +33549,7 @@ Policy Scope
 
 ---
 
-# 2648. Secure Repository Pattern
+### 2648. Secure Repository Pattern
 
 ```php
 interface SecureRepositoryInterface
@@ -33674,7 +33568,7 @@ interface SecureRepositoryInterface
 
 ---
 
-# 2649. DataAccessContext
+### 2649. DataAccessContext
 
 ```php
 final readonly class DataAccessContext
@@ -33692,13 +33586,13 @@ final readonly class DataAccessContext
 
 ---
 
-# 2650. Field-Level Security Architecture
+### 2650. Field-Level Security Architecture
 
 VoltStack deberá permitir controles a nivel de campo.
 
 ---
 
-# 2651. Field-Level Access Decisions
+### 2651. Field-Level Access Decisions
 
 Una propiedad podrá ser:
 
@@ -33711,7 +33605,7 @@ Una propiedad podrá ser:
 
 ---
 
-# 2652. FieldAccessDecision
+### 2652. FieldAccessDecision
 
 ```php
 enum FieldAccessDecision: string
@@ -33726,7 +33620,7 @@ enum FieldAccessDecision: string
 
 ---
 
-# 2653. FieldPolicyInterface
+### 2653. FieldPolicyInterface
 
 ```php
 interface FieldPolicyInterface
@@ -33741,13 +33635,13 @@ interface FieldPolicyInterface
 
 ---
 
-# 2654. Secure Serialization
+### 2654. Secure Serialization
 
 Los serializadores deberán consultar políticas de campo antes de producir una salida.
 
 ---
 
-# 2655. SecureSerializerInterface
+### 2655. SecureSerializerInterface
 
 ```php
 interface SecureSerializerInterface
@@ -33761,7 +33655,7 @@ interface SecureSerializerInterface
 
 ---
 
-# 2656. Serialization Security Flow
+### 2656. Serialization Security Flow
 
 ```text
 Domain Object
@@ -33785,7 +33679,7 @@ Generate Secure Output
 
 ---
 
-# 2657. Sensitive Field Revelation
+### 2657. Sensitive Field Revelation
 
 La revelación de campos sensibles podrá requerir:
 
@@ -33797,7 +33691,7 @@ La revelación de campos sensibles podrá requerir:
 
 ---
 
-# 2658. RevealSensitiveFieldCommand
+### 2658. RevealSensitiveFieldCommand
 
 ```php
 final readonly class RevealSensitiveFieldCommand
@@ -33814,13 +33708,13 @@ final readonly class RevealSensitiveFieldCommand
 
 ---
 
-# 2659. Data Masking Architecture
+### 2659. Data Masking Architecture
 
 VoltStack deberá permitir enmascarar valores según contexto.
 
 ---
 
-# 2660. Masking Strategies
+### 2660. Masking Strategies
 
 Soportar:
 
@@ -33833,18 +33727,16 @@ Soportar:
 
 ---
 
-# 2661. Partial Masking Example
+### 2661. Partial Masking Example
 
 ```text
 Email:
 
 j***@example.com
 
-
 Card:
 
 **** **** **** 4242
-
 
 Phone:
 
@@ -33853,7 +33745,7 @@ Phone:
 
 ---
 
-# 2662. DataMaskerInterface
+### 2662. DataMaskerInterface
 
 ```php
 interface DataMaskerInterface
@@ -33868,7 +33760,7 @@ interface DataMaskerInterface
 
 ---
 
-# 2663. MaskingStrategy
+### 2663. MaskingStrategy
 
 ```php
 enum MaskingStrategy: string
@@ -33883,19 +33775,19 @@ enum MaskingStrategy: string
 
 ---
 
-# 2664. Dynamic Data Masking
+### 2664. Dynamic Data Masking
 
 El valor almacenado podrá permanecer intacto mientras la salida se transforma según permisos.
 
 ---
 
-# 2665. Static Data Masking
+### 2665. Static Data Masking
 
 Las copias para desarrollo o pruebas deberán transformarse antes de abandonar producción.
 
 ---
 
-# 2666. Masking Consistency
+### 2666. Masking Consistency
 
 Los valores sustituidos deberán mantener cuando sea necesario:
 
@@ -33907,13 +33799,13 @@ Los valores sustituidos deberán mantener cuando sea necesario:
 
 ---
 
-# 2667. Tokenization Architecture
+### 2667. Tokenization Architecture
 
 VoltStack deberá permitir reemplazar datos sensibles por tokens no significativos.
 
 ---
 
-# 2668. Tokenization Use Cases
+### 2668. Tokenization Use Cases
 
 Ejemplos:
 
@@ -33925,7 +33817,7 @@ Ejemplos:
 
 ---
 
-# 2669. Tokenization Flow
+### 2669. Tokenization Flow
 
 ```text
 Sensitive Value
@@ -33949,7 +33841,7 @@ Vault Stores Mapping
 
 ---
 
-# 2670. TokenizationServiceInterface
+### 2670. TokenizationServiceInterface
 
 ```php
 interface TokenizationServiceInterface
@@ -33968,7 +33860,7 @@ interface TokenizationServiceInterface
 
 ---
 
-# 2671. DataToken
+### 2671. DataToken
 
 ```php
 final readonly class DataToken
@@ -33984,7 +33876,7 @@ final readonly class DataToken
 
 ---
 
-# 2672. Token Vault Security
+### 2672. Token Vault Security
 
 El vault deberá aplicar:
 
@@ -33997,13 +33889,13 @@ El vault deberá aplicar:
 
 ---
 
-# 2673. Detokenization Authorization
+### 2673. Detokenization Authorization
 
 La recuperación del valor original deberá requerir autorización específica.
 
 ---
 
-# 2674. Format-Preserving Tokenization
+### 2674. Format-Preserving Tokenization
 
 Cuando sistemas heredados lo requieran, el token podrá conservar:
 
@@ -34014,7 +33906,7 @@ Cuando sistemas heredados lo requieran, el token podrá conservar:
 
 ---
 
-# 2675. Token Scope
+### 2675. Token Scope
 
 Los tokens podrán limitarse por:
 
@@ -34026,13 +33918,13 @@ Los tokens podrán limitarse por:
 
 ---
 
-# 2676. Pseudonymization Architecture
+### 2676. Pseudonymization Architecture
 
 VoltStack deberá soportar sustitución de identificadores directos por pseudónimos.
 
 ---
 
-# 2677. Pseudonymization vs Anonymization
+### 2677. Pseudonymization vs Anonymization
 
 ```text
 Pseudonymized Data
@@ -34041,7 +33933,6 @@ Can Be Re-Associated
 
 With Protected Additional Information
 
-
 Anonymized Data
 
 Cannot Reasonably Be Re-Identified
@@ -34049,19 +33940,19 @@ Cannot Reasonably Be Re-Identified
 
 ---
 
-# 2678. Pseudonymization Key Separation
+### 2678. Pseudonymization Key Separation
 
 La información necesaria para reidentificar deberá almacenarse separadamente.
 
 ---
 
-# 2679. Anonymization Architecture
+### 2679. Anonymization Architecture
 
 La anonimización deberá reducir razonablemente el riesgo de reidentificación.
 
 ---
 
-# 2680. Anonymization Techniques
+### 2680. Anonymization Techniques
 
 Podrán utilizarse:
 
@@ -34074,7 +33965,7 @@ Podrán utilizarse:
 
 ---
 
-# 2681. Reidentification Risk
+### 2681. Reidentification Risk
 
 La anonimización deberá evaluar:
 
@@ -34086,7 +33977,7 @@ La anonimización deberá evaluar:
 
 ---
 
-# 2682. AnonymizationAssessment
+### 2682. AnonymizationAssessment
 
 ```php
 final readonly class AnonymizationAssessment
@@ -34103,13 +33994,13 @@ final readonly class AnonymizationAssessment
 
 ---
 
-# 2683. Privacy Engineering Architecture
+### 2683. Privacy Engineering Architecture
 
 VoltStack deberá incorporar privacidad desde el diseño.
 
 ---
 
-# 2684. Privacy by Design
+### 2684. Privacy by Design
 
 Aplicar:
 
@@ -34123,7 +34014,7 @@ Aplicar:
 
 ---
 
-# 2685. Privacy by Default
+### 2685. Privacy by Default
 
 La configuración inicial deberá:
 
@@ -34135,7 +34026,7 @@ La configuración inicial deberá:
 
 ---
 
-# 2686. Privacy Impact Assessment
+### 2686. Privacy Impact Assessment
 
 Los cambios de alto impacto deberán evaluar:
 
@@ -34148,7 +34039,7 @@ Los cambios de alto impacto deberán evaluar:
 
 ---
 
-# 2687. PrivacyImpactAssessment
+### 2687. PrivacyImpactAssessment
 
 ```php
 final readonly class PrivacyImpactAssessment
@@ -34167,7 +34058,7 @@ final readonly class PrivacyImpactAssessment
 
 ---
 
-# 2688. Consent Management
+### 2688. Consent Management
 
 Cuando el consentimiento sea necesario deberá ser:
 
@@ -34179,7 +34070,7 @@ Cuando el consentimiento sea necesario deberá ser:
 
 ---
 
-# 2689. ConsentRecord
+### 2689. ConsentRecord
 
 ```php
 final readonly class ConsentRecord
@@ -34197,13 +34088,13 @@ final readonly class ConsentRecord
 
 ---
 
-# 2690. Data Residency Architecture
+### 2690. Data Residency Architecture
 
 VoltStack deberá permitir controlar dónde se almacenan y procesan los datos.
 
 ---
 
-# 2691. Residency Policy
+### 2691. Residency Policy
 
 Una política podrá especificar:
 
@@ -34216,7 +34107,7 @@ Una política podrá especificar:
 
 ---
 
-# 2692. DataResidencyPolicy
+### 2692. DataResidencyPolicy
 
 ```php
 final readonly class DataResidencyPolicy
@@ -34234,7 +34125,7 @@ final readonly class DataResidencyPolicy
 
 ---
 
-# 2693. Residency Enforcement
+### 2693. Residency Enforcement
 
 ```text
 Data Classification
@@ -34254,7 +34145,7 @@ Placement Decision
 
 ---
 
-# 2694. Cross-Border Data Transfer
+### 2694. Cross-Border Data Transfer
 
 Toda transferencia deberá evaluar:
 
@@ -34268,13 +34159,13 @@ Toda transferencia deberá evaluar:
 
 ---
 
-# 2695. Retention Architecture
+### 2695. Retention Architecture
 
 Cada categoría de datos deberá tener un periodo de retención definido.
 
 ---
 
-# 2696. RetentionPolicy
+### 2696. RetentionPolicy
 
 ```php
 final readonly class RetentionPolicy
@@ -34292,7 +34183,7 @@ final readonly class RetentionPolicy
 
 ---
 
-# 2697. Retention Enforcement
+### 2697. Retention Enforcement
 
 El sistema deberá:
 
@@ -34304,7 +34195,7 @@ El sistema deberá:
 
 ---
 
-# 2698. Secure Deletion Architecture
+### 2698. Secure Deletion Architecture
 
 La eliminación deberá abarcar:
 
@@ -34318,7 +34209,7 @@ La eliminación deberá abarcar:
 
 ---
 
-# 2699. Data Security Result
+### 2699. Data Security Result
 
 Esta entrega establece:
 
@@ -34354,7 +34245,7 @@ Secure Deletion
 
 ---
 
-# 2700. Estado
+### 2700. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -34390,9 +34281,7 @@ La siguiente entrega continuará con:
 - Cryptographic agility
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 28
 
 **Documento:** Parte 06
 **Entrega:** 28 de 31
@@ -34400,7 +34289,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2701. Cryptographic Security Architecture
+### 2701. Cryptographic Security Architecture
 
 VoltStack deberá incorporar una arquitectura criptográfica centralizada, auditable y desacoplada de algoritmos específicos.
 
@@ -34417,7 +34306,7 @@ La criptografía deberá proteger:
 
 ---
 
-# 2702. Cryptographic Security Objectives
+### 2702. Cryptographic Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -34432,7 +34321,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2703. Cryptographic Trust Model
+### 2703. Cryptographic Trust Model
 
 ```text
 Trusted Key Source
@@ -34456,7 +34345,7 @@ Auditable Result
 
 ---
 
-# 2704. Cryptographic Domains
+### 2704. Cryptographic Domains
 
 VoltStack deberá dividir la arquitectura en:
 
@@ -34484,7 +34373,7 @@ Crypto Agility
 
 ---
 
-# 2705. Central Cryptographic Service
+### 2705. Central Cryptographic Service
 
 Las aplicaciones no deberán instanciar primitivas criptográficas directamente.
 
@@ -34518,7 +34407,7 @@ interface CryptographicServiceInterface
 
 ---
 
-# 2706. Cryptographic Provider Abstraction
+### 2706. Cryptographic Provider Abstraction
 
 VoltStack deberá poder trabajar con:
 
@@ -34532,7 +34421,7 @@ VoltStack deberá poder trabajar con:
 
 ---
 
-# 2707. CryptographicProviderInterface
+### 2707. CryptographicProviderInterface
 
 ```php
 interface CryptographicProviderInterface
@@ -34549,7 +34438,7 @@ interface CryptographicProviderInterface
 
 ---
 
-# 2708. Cryptographic Operation Model
+### 2708. Cryptographic Operation Model
 
 ```php
 final readonly class CryptographicOperation
@@ -34567,13 +34456,13 @@ final readonly class CryptographicOperation
 
 ---
 
-# 2709. Cryptographic Algorithm Registry
+### 2709. Cryptographic Algorithm Registry
 
 VoltStack deberá mantener un registro explícito de algoritmos permitidos.
 
 ---
 
-# 2710. Algorithm Approval States
+### 2710. Algorithm Approval States
 
 ```php
 enum CryptographicAlgorithmStatus: string
@@ -34587,7 +34476,7 @@ enum CryptographicAlgorithmStatus: string
 
 ---
 
-# 2711. Cryptographic Algorithm Policy
+### 2711. Cryptographic Algorithm Policy
 
 La política deberá definir:
 
@@ -34600,7 +34489,7 @@ La política deberá definir:
 
 ---
 
-# 2712. CryptographicAlgorithmPolicy
+### 2712. CryptographicAlgorithmPolicy
 
 ```php
 final readonly class CryptographicAlgorithmPolicy
@@ -34618,7 +34507,7 @@ final readonly class CryptographicAlgorithmPolicy
 
 ---
 
-# 2713. Forbidden Cryptographic Practices
+### 2713. Forbidden Cryptographic Practices
 
 VoltStack deberá prohibir:
 
@@ -34632,7 +34521,7 @@ VoltStack deberá prohibir:
 
 ---
 
-# 2714. Authenticated Encryption
+### 2714. Authenticated Encryption
 
 Los datos sensibles deberán cifrarse mediante mecanismos autenticados.
 
@@ -34658,7 +34547,7 @@ Ciphertext + Authentication Tag
 
 ---
 
-# 2715. EncryptionContext
+### 2715. EncryptionContext
 
 ```php
 final readonly class EncryptionContext
@@ -34676,7 +34565,7 @@ final readonly class EncryptionContext
 
 ---
 
-# 2716. Associated Authenticated Data
+### 2716. Associated Authenticated Data
 
 VoltStack deberá usar datos asociados para vincular el ciphertext con:
 
@@ -34689,7 +34578,7 @@ VoltStack deberá usar datos asociados para vincular el ciphertext con:
 
 ---
 
-# 2717. Ciphertext Binding
+### 2717. Ciphertext Binding
 
 Ejemplo:
 
@@ -34711,7 +34600,7 @@ Mover el ciphertext a otro contexto deberá causar fallo de autenticación.
 
 ---
 
-# 2718. EncryptedPayload
+### 2718. EncryptedPayload
 
 ```php
 final readonly class EncryptedPayload
@@ -34731,7 +34620,7 @@ final readonly class EncryptedPayload
 
 ---
 
-# 2719. Encryption Versioning
+### 2719. Encryption Versioning
 
 Todo payload cifrado deberá declarar una versión para permitir:
 
@@ -34743,7 +34632,7 @@ Todo payload cifrado deberá declarar una versión para permitir:
 
 ---
 
-# 2720. Data Encryption Scope
+### 2720. Data Encryption Scope
 
 VoltStack deberá soportar cifrado:
 
@@ -34757,13 +34646,13 @@ VoltStack deberá soportar cifrado:
 
 ---
 
-# 2721. Field-Level Encryption
+### 2721. Field-Level Encryption
 
 Los campos altamente sensibles deberán poder cifrarse antes de persistirse.
 
 ---
 
-# 2722. Encrypted Field Example
+### 2722. Encrypted Field Example
 
 ```php
 final readonly class PaymentProfile
@@ -34783,7 +34672,7 @@ final readonly class PaymentProfile
 
 ---
 
-# 2723. Transparent Encryption Boundary
+### 2723. Transparent Encryption Boundary
 
 VoltStack podrá cifrar y descifrar en:
 
@@ -34807,13 +34696,13 @@ El repositorio no deberá recibir plaintext cuando no sea necesario.
 
 ---
 
-# 2724. Data Encryption at Rest
+### 2724. Data Encryption at Rest
 
 El cifrado de infraestructura no reemplazará el cifrado a nivel de aplicación para datos altamente sensibles.
 
 ---
 
-# 2725. Layered Encryption Model
+### 2725. Layered Encryption Model
 
 ```text
 Application-Level Encryption
@@ -34833,7 +34722,7 @@ Backup Encryption
 
 ---
 
-# 2726. Key Management Architecture
+### 2726. Key Management Architecture
 
 VoltStack deberá separar completamente:
 
@@ -34851,7 +34740,7 @@ Key Management Metadata
 
 ---
 
-# 2727. Key Management Objectives
+### 2727. Key Management Objectives
 
 El sistema deberá controlar:
 
@@ -34866,7 +34755,7 @@ El sistema deberá controlar:
 
 ---
 
-# 2728. CryptographicKey
+### 2728. CryptographicKey
 
 ```php
 final readonly class CryptographicKey
@@ -34886,7 +34775,7 @@ final readonly class CryptographicKey
 
 ---
 
-# 2729. Key Material Isolation
+### 2729. Key Material Isolation
 
 El material criptográfico no deberá formar parte de objetos de dominio ordinarios.
 
@@ -34900,7 +34789,7 @@ Deberá permanecer dentro de:
 
 ---
 
-# 2730. KeyReference
+### 2730. KeyReference
 
 ```php
 final readonly class KeyReference
@@ -34917,7 +34806,7 @@ final readonly class KeyReference
 
 ---
 
-# 2731. Key Manager Interface
+### 2731. Key Manager Interface
 
 ```php
 interface KeyManagerInterface
@@ -34943,7 +34832,7 @@ interface KeyManagerInterface
 
 ---
 
-# 2732. Key Lifecycle
+### 2732. Key Lifecycle
 
 ```text
 Requested
@@ -34979,7 +34868,7 @@ Destroyed
 
 ---
 
-# 2733. Key Status Model
+### 2733. Key Status Model
 
 ```php
 enum CryptographicKeyStatus: string
@@ -34995,7 +34884,7 @@ enum CryptographicKeyStatus: string
 
 ---
 
-# 2734. Key Generation Security
+### 2734. Key Generation Security
 
 Las claves deberán generarse mediante:
 
@@ -35014,7 +34903,7 @@ Nunca mediante valores derivados de:
 
 ---
 
-# 2735. Key Usage Policy
+### 2735. Key Usage Policy
 
 Cada clave deberá limitarse por:
 
@@ -35028,7 +34917,7 @@ Cada clave deberá limitarse por:
 
 ---
 
-# 2736. KeyUsagePolicy
+### 2736. KeyUsagePolicy
 
 ```php
 final readonly class KeyUsagePolicy
@@ -35046,7 +34935,7 @@ final readonly class KeyUsagePolicy
 
 ---
 
-# 2737. Separation of Cryptographic Purposes
+### 2737. Separation of Cryptographic Purposes
 
 Una misma clave no deberá usarse simultáneamente para:
 
@@ -35058,7 +34947,7 @@ Una misma clave no deberá usarse simultáneamente para:
 
 ---
 
-# 2738. Environment Key Separation
+### 2738. Environment Key Separation
 
 Cada ambiente deberá utilizar claves independientes.
 
@@ -35076,19 +34965,19 @@ Production Key
 
 ---
 
-# 2739. Service Key Separation
+### 2739. Service Key Separation
 
 Cada servicio deberá tener acceso únicamente a sus claves necesarias.
 
 ---
 
-# 2740. Tenant-Specific Cryptographic Keys
+### 2740. Tenant-Specific Cryptographic Keys
 
 VoltStack deberá permitir claves específicas por tenant.
 
 ---
 
-# 2741. Tenant Key Benefits
+### 2741. Tenant Key Benefits
 
 Las claves por tenant permiten:
 
@@ -35101,7 +34990,7 @@ Las claves por tenant permiten:
 
 ---
 
-# 2742. TenantKeyResolverInterface
+### 2742. TenantKeyResolverInterface
 
 ```php
 interface TenantKeyResolverInterface
@@ -35115,7 +35004,7 @@ interface TenantKeyResolverInterface
 
 ---
 
-# 2743. Tenant Key Hierarchy
+### 2743. Tenant Key Hierarchy
 
 ```text
 Platform Root Key
@@ -35135,19 +35024,19 @@ Data Encryption Key
 
 ---
 
-# 2744. Key Hierarchy Isolation
+### 2744. Key Hierarchy Isolation
 
 La jerarquía deberá impedir que una clave de menor nivel pueda derivar o recuperar claves superiores.
 
 ---
 
-# 2745. Envelope Encryption Architecture
+### 2745. Envelope Encryption Architecture
 
 VoltStack deberá soportar cifrado por envoltura.
 
 ---
 
-# 2746. Envelope Encryption Flow
+### 2746. Envelope Encryption Flow
 
 ```text
 Generate Data Encryption Key
@@ -35167,7 +35056,7 @@ Store Ciphertext + Wrapped Data Key
 
 ---
 
-# 2747. EnvelopeEncryptedPayload
+### 2747. EnvelopeEncryptedPayload
 
 ```php
 final readonly class EnvelopeEncryptedPayload
@@ -35187,7 +35076,7 @@ final readonly class EnvelopeEncryptedPayload
 
 ---
 
-# 2748. Data Encryption Key Scope
+### 2748. Data Encryption Key Scope
 
 Las Data Encryption Keys podrán generarse por:
 
@@ -35200,13 +35089,13 @@ Las Data Encryption Keys podrán generarse por:
 
 ---
 
-# 2749. Plaintext Data Key Lifetime
+### 2749. Plaintext Data Key Lifetime
 
 Una data key en plaintext deberá existir solamente durante la operación criptográfica.
 
 ---
 
-# 2750. Data Key Memory Handling
+### 2750. Data Key Memory Handling
 
 Después del uso deberá:
 
@@ -35217,13 +35106,13 @@ Después del uso deberá:
 
 ---
 
-# 2751. Key Rotation Architecture
+### 2751. Key Rotation Architecture
 
 VoltStack deberá permitir rotación sin pérdida de disponibilidad.
 
 ---
 
-# 2752. Rotation Types
+### 2752. Rotation Types
 
 Soportar:
 
@@ -35236,7 +35125,7 @@ Soportar:
 
 ---
 
-# 2753. Key Rotation Flow
+### 2753. Key Rotation Flow
 
 ```text
 Create New Key Version
@@ -35260,7 +35149,7 @@ Retire Old Version
 
 ---
 
-# 2754. Read-Old Write-New Strategy
+### 2754. Read-Old Write-New Strategy
 
 Durante rotación:
 
@@ -35269,7 +35158,6 @@ Read:
 
 Support Current + Previous Keys
 
-
 Write:
 
 Use Current Key Only
@@ -35277,7 +35165,7 @@ Use Current Key Only
 
 ---
 
-# 2755. KeyRotationPlan
+### 2755. KeyRotationPlan
 
 ```php
 final readonly class KeyRotationPlan
@@ -35295,13 +35183,13 @@ final readonly class KeyRotationPlan
 
 ---
 
-# 2756. Lazy Re-Encryption
+### 2756. Lazy Re-Encryption
 
 VoltStack podrá re-cifrar un registro cuando sea leído y aún use una versión antigua.
 
 ---
 
-# 2757. Batch Re-Encryption
+### 2757. Batch Re-Encryption
 
 Para grandes volúmenes deberá soportarse:
 
@@ -35314,7 +35202,7 @@ Para grandes volúmenes deberá soportarse:
 
 ---
 
-# 2758. ReEncryptionJob
+### 2758. ReEncryptionJob
 
 ```php
 final readonly class ReEncryptionJob
@@ -35332,7 +35220,7 @@ final readonly class ReEncryptionJob
 
 ---
 
-# 2759. Key Revocation Architecture
+### 2759. Key Revocation Architecture
 
 Una clave deberá revocarse cuando:
 
@@ -35344,7 +35232,7 @@ Una clave deberá revocarse cuando:
 
 ---
 
-# 2760. Revocation Effects
+### 2760. Revocation Effects
 
 La revocación podrá:
 
@@ -35356,7 +35244,7 @@ La revocación podrá:
 
 ---
 
-# 2761. Emergency Key Revocation
+### 2761. Emergency Key Revocation
 
 ```text
 Compromise Detected
@@ -35384,13 +35272,13 @@ Investigate
 
 ---
 
-# 2762. Crypto-Shredding
+### 2762. Crypto-Shredding
 
 La eliminación criptográfica podrá lograrse destruyendo la clave que protege datos irrecuperables.
 
 ---
 
-# 2763. Crypto-Shredding Conditions
+### 2763. Crypto-Shredding Conditions
 
 Solo deberá considerarse eliminación efectiva cuando:
 
@@ -35401,7 +35289,7 @@ Solo deberá considerarse eliminación efectiva cuando:
 
 ---
 
-# 2764. Key Backup Security
+### 2764. Key Backup Security
 
 Las copias de claves deberán:
 
@@ -35414,7 +35302,7 @@ Las copias de claves deberán:
 
 ---
 
-# 2765. Key Recovery Governance
+### 2765. Key Recovery Governance
 
 La recuperación deberá requerir:
 
@@ -35426,13 +35314,13 @@ La recuperación deberá requerir:
 
 ---
 
-# 2766. Split Knowledge
+### 2766. Split Knowledge
 
 Ninguna persona deberá tener por sí sola toda la información necesaria para reconstruir una clave crítica.
 
 ---
 
-# 2767. Dual Control
+### 2767. Dual Control
 
 Operaciones críticas podrán requerir dos identidades independientes.
 
@@ -35445,13 +35333,13 @@ Ejemplos:
 
 ---
 
-# 2768. Hardware Security Module Integration
+### 2768. Hardware Security Module Integration
 
 VoltStack deberá poder delegar operaciones a un HSM.
 
 ---
 
-# 2769. HSM Benefits
+### 2769. HSM Benefits
 
 Un HSM podrá proporcionar:
 
@@ -35463,7 +35351,7 @@ Un HSM podrá proporcionar:
 
 ---
 
-# 2770. HsmProviderInterface
+### 2770. HsmProviderInterface
 
 ```php
 interface HsmProviderInterface
@@ -35482,13 +35370,13 @@ interface HsmProviderInterface
 
 ---
 
-# 2771. KMS Integration Architecture
+### 2771. KMS Integration Architecture
 
 VoltStack deberá integrar KMS administrados mediante adaptadores.
 
 ---
 
-# 2772. KMS Operations
+### 2772. KMS Operations
 
 Soportar:
 
@@ -35504,7 +35392,7 @@ Soportar:
 
 ---
 
-# 2773. KMS Authorization
+### 2773. KMS Authorization
 
 El acceso a KMS deberá utilizar:
 
@@ -35516,19 +35404,19 @@ El acceso a KMS deberá utilizar:
 
 ---
 
-# 2774. KMS Context Binding
+### 2774. KMS Context Binding
 
 El contexto de cifrado deberá incluir atributos que el KMS pueda validar.
 
 ---
 
-# 2775. Digital Signature Architecture
+### 2775. Digital Signature Architecture
 
 VoltStack deberá utilizar firmas digitales para proteger autenticidad e integridad.
 
 ---
 
-# 2776. Signature Use Cases
+### 2776. Signature Use Cases
 
 Ejemplos:
 
@@ -35543,7 +35431,7 @@ Ejemplos:
 
 ---
 
-# 2777. SignablePayload
+### 2777. SignablePayload
 
 ```php
 final readonly class SignablePayload
@@ -35560,7 +35448,7 @@ final readonly class SignablePayload
 
 ---
 
-# 2778. DigitalSignature
+### 2778. DigitalSignature
 
 ```php
 final readonly class DigitalSignature
@@ -35578,13 +35466,13 @@ final readonly class DigitalSignature
 
 ---
 
-# 2779. Canonicalization Before Signing
+### 2779. Canonicalization Before Signing
 
 Los datos estructurados deberán canonicalizarse antes de firmarse.
 
 ---
 
-# 2780. Canonicalization Requirements
+### 2780. Canonicalization Requirements
 
 La canonicalización deberá definir:
 
@@ -35597,7 +35485,7 @@ La canonicalización deberá definir:
 
 ---
 
-# 2781. Signature Verification Flow
+### 2781. Signature Verification Flow
 
 ```text
 Receive Payload
@@ -35625,7 +35513,7 @@ Accept or Reject
 
 ---
 
-# 2782. Signature Trust Policy
+### 2782. Signature Trust Policy
 
 La verificación deberá validar:
 
@@ -35639,7 +35527,7 @@ La verificación deberá validar:
 
 ---
 
-# 2783. Replay Protection for Signed Messages
+### 2783. Replay Protection for Signed Messages
 
 Las firmas deberán complementarse con:
 
@@ -35651,7 +35539,7 @@ Las firmas deberán complementarse con:
 
 ---
 
-# 2784. Webhook Signature Security
+### 2784. Webhook Signature Security
 
 Cada webhook deberá firmarse sobre:
 
@@ -35673,13 +35561,13 @@ Body Hash
 
 ---
 
-# 2785. Asymmetric Key Separation
+### 2785. Asymmetric Key Separation
 
 Las claves privadas deberán permanecer exclusivamente en el emisor autorizado.
 
 ---
 
-# 2786. Signature Key Rotation
+### 2786. Signature Key Rotation
 
 Los verificadores deberán soportar temporalmente:
 
@@ -35690,13 +35578,13 @@ Los verificadores deberán soportar temporalmente:
 
 ---
 
-# 2787. Artifact Signing
+### 2787. Artifact Signing
 
 Todo artifact crítico deberá firmarse después de construirse.
 
 ---
 
-# 2788. SignedArtifactManifest
+### 2788. SignedArtifactManifest
 
 ```php
 final readonly class SignedArtifactManifest
@@ -35714,7 +35602,7 @@ final readonly class SignedArtifactManifest
 
 ---
 
-# 2789. Hashing Architecture
+### 2789. Hashing Architecture
 
 VoltStack deberá distinguir claramente entre:
 
@@ -35726,7 +35614,7 @@ VoltStack deberá distinguir claramente entre:
 
 ---
 
-# 2790. General Hashing Use Cases
+### 2790. General Hashing Use Cases
 
 El hashing podrá usarse para:
 
@@ -35739,7 +35627,7 @@ El hashing podrá usarse para:
 
 ---
 
-# 2791. HashingServiceInterface
+### 2791. HashingServiceInterface
 
 ```php
 interface HashingServiceInterface
@@ -35758,7 +35646,7 @@ interface HashingServiceInterface
 
 ---
 
-# 2792. HashDigest
+### 2792. HashDigest
 
 ```php
 final readonly class HashDigest
@@ -35774,13 +35662,13 @@ final readonly class HashDigest
 
 ---
 
-# 2793. Keyed Message Authentication
+### 2793. Keyed Message Authentication
 
 Cuando se requiera autenticidad con secreto compartido deberá utilizarse un MAC aprobado.
 
 ---
 
-# 2794. Constant-Time Comparison
+### 2794. Constant-Time Comparison
 
 Las verificaciones de:
 
@@ -35794,7 +35682,7 @@ deberán usar comparación en tiempo constante.
 
 ---
 
-# 2795. Password Protection Architecture
+### 2795. Password Protection Architecture
 
 Las contraseñas no deberán cifrarse de forma reversible.
 
@@ -35802,7 +35690,7 @@ Deberán protegerse mediante algoritmos de password hashing adaptativos.
 
 ---
 
-# 2796. PasswordHash
+### 2796. PasswordHash
 
 ```php
 final readonly class PasswordHash
@@ -35819,7 +35707,7 @@ final readonly class PasswordHash
 
 ---
 
-# 2797. Password Hashing Policy
+### 2797. Password Hashing Policy
 
 La política deberá definir:
 
@@ -35832,7 +35720,7 @@ La política deberá definir:
 
 ---
 
-# 2798. Password Rehashing
+### 2798. Password Rehashing
 
 Después de una autenticación exitosa VoltStack deberá verificar si el hash requiere actualización.
 
@@ -35854,7 +35742,7 @@ Persist Securely
 
 ---
 
-# 2799. Cryptographic Architecture Result
+### 2799. Cryptographic Architecture Result
 
 Esta entrega establece:
 
@@ -35892,7 +35780,7 @@ Password Protection
 
 ---
 
-# 2800. Estado
+### 2800. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -35929,9 +35817,7 @@ La siguiente entrega continuará con:
 - API security architecture
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 29
 
 **Documento:** Parte 06
 **Entrega:** 29 de 31
@@ -35939,7 +35825,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2801. Public Key Infrastructure Architecture
+### 2801. Public Key Infrastructure Architecture
 
 VoltStack deberá incorporar una arquitectura PKI para administrar relaciones de confianza basadas en certificados.
 
@@ -35955,7 +35841,7 @@ La PKI deberá soportar:
 
 ---
 
-# 2802. PKI Security Objectives
+### 2802. PKI Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -35969,7 +35855,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 2803. PKI Trust Hierarchy
+### 2803. PKI Trust Hierarchy
 
 ```text
 Root Certificate Authority
@@ -35989,7 +35875,7 @@ Service or User Certificate
 
 ---
 
-# 2804. Root Certificate Authority Security
+### 2804. Root Certificate Authority Security
 
 La autoridad raíz deberá:
 
@@ -36002,7 +35888,7 @@ La autoridad raíz deberá:
 
 ---
 
-# 2805. Intermediate Certificate Authority
+### 2805. Intermediate Certificate Authority
 
 Las autoridades intermedias deberán separar:
 
@@ -36014,7 +35900,7 @@ Las autoridades intermedias deberán separar:
 
 ---
 
-# 2806. Certificate Authority Interface
+### 2806. Certificate Authority Interface
 
 ```php
 interface CertificateAuthorityInterface
@@ -36033,7 +35919,7 @@ interface CertificateAuthorityInterface
 
 ---
 
-# 2807. CertificateSigningRequest
+### 2807. CertificateSigningRequest
 
 ```php
 final readonly class CertificateSigningRequest
@@ -36051,13 +35937,13 @@ final readonly class CertificateSigningRequest
 
 ---
 
-# 2808. Certificate Policy Architecture
+### 2808. Certificate Policy Architecture
 
 Cada certificado deberá emitirse bajo una política explícita.
 
 ---
 
-# 2809. CertificatePolicy
+### 2809. CertificatePolicy
 
 ```php
 final readonly class CertificatePolicy
@@ -36075,7 +35961,7 @@ final readonly class CertificatePolicy
 
 ---
 
-# 2810. Certificate Purpose Separation
+### 2810. Certificate Purpose Separation
 
 No deberá reutilizarse el mismo certificado para propósitos incompatibles.
 
@@ -36089,7 +35975,7 @@ Ejemplos:
 
 ---
 
-# 2811. Certificate Identity Binding
+### 2811. Certificate Identity Binding
 
 Un certificado deberá vincularse con:
 
@@ -36103,13 +35989,13 @@ Un certificado deberá vincularse con:
 
 ---
 
-# 2812. Subject Alternative Name Validation
+### 2812. Subject Alternative Name Validation
 
 VoltStack deberá validar SANs en lugar de depender únicamente del Common Name.
 
 ---
 
-# 2813. Certificate Lifetime Policy
+### 2813. Certificate Lifetime Policy
 
 Los certificados deberán tener vigencia corta cuando la automatización lo permita.
 
@@ -36127,7 +36013,7 @@ Reduced Exposure Window
 
 ---
 
-# 2814. IssuedCertificate
+### 2814. IssuedCertificate
 
 ```php
 final readonly class IssuedCertificate
@@ -36146,7 +36032,7 @@ final readonly class IssuedCertificate
 
 ---
 
-# 2815. Certificate Inventory
+### 2815. Certificate Inventory
 
 VoltStack deberá mantener inventario de:
 
@@ -36161,7 +36047,7 @@ VoltStack deberá mantener inventario de:
 
 ---
 
-# 2816. Certificate Discovery
+### 2816. Certificate Discovery
 
 El sistema deberá poder descubrir certificados en:
 
@@ -36175,13 +36061,13 @@ El sistema deberá poder descubrir certificados en:
 
 ---
 
-# 2817. Certificate Rotation Architecture
+### 2817. Certificate Rotation Architecture
 
 La renovación deberá ser automática y sin interrupciones cuando sea posible.
 
 ---
 
-# 2818. Certificate Rotation Flow
+### 2818. Certificate Rotation Flow
 
 ```text
 Issue New Certificate
@@ -36205,13 +36091,13 @@ Retire Previous Certificate
 
 ---
 
-# 2819. Overlapping Certificate Validity
+### 2819. Overlapping Certificate Validity
 
 Durante la rotación podrá existir una ventana donde ambos certificados sean válidos.
 
 ---
 
-# 2820. CertificateRotationPlan
+### 2820. CertificateRotationPlan
 
 ```php
 final readonly class CertificateRotationPlan
@@ -36229,7 +36115,7 @@ final readonly class CertificateRotationPlan
 
 ---
 
-# 2821. Certificate Expiration Monitoring
+### 2821. Certificate Expiration Monitoring
 
 VoltStack deberá generar alertas progresivas antes de la expiración.
 
@@ -36257,7 +36143,7 @@ Critical
 
 ---
 
-# 2822. Certificate Revocation Architecture
+### 2822. Certificate Revocation Architecture
 
 La revocación deberá aplicarse cuando:
 
@@ -36269,7 +36155,7 @@ La revocación deberá aplicarse cuando:
 
 ---
 
-# 2823. CertificateRevocationReason
+### 2823. CertificateRevocationReason
 
 ```php
 enum CertificateRevocationReason: string
@@ -36284,7 +36170,7 @@ enum CertificateRevocationReason: string
 
 ---
 
-# 2824. Revocation Validation
+### 2824. Revocation Validation
 
 Los verificadores deberán consultar:
 
@@ -36296,7 +36182,7 @@ Los verificadores deberán consultar:
 
 ---
 
-# 2825. Revocation Failure Policy
+### 2825. Revocation Failure Policy
 
 En operaciones sensibles deberá definirse si un fallo de validación produce:
 
@@ -36308,13 +36194,13 @@ En operaciones sensibles deberá definirse si un fallo de validación produce:
 
 ---
 
-# 2826. Trust Store Architecture
+### 2826. Trust Store Architecture
 
 VoltStack deberá administrar trust stores de forma explícita.
 
 ---
 
-# 2827. Trust Store Segmentation
+### 2827. Trust Store Segmentation
 
 Separar:
 
@@ -36327,7 +36213,7 @@ Separar:
 
 ---
 
-# 2828. TrustStore
+### 2828. TrustStore
 
 ```php
 final readonly class TrustStore
@@ -36345,7 +36231,7 @@ final readonly class TrustStore
 
 ---
 
-# 2829. Trust Anchor Governance
+### 2829. Trust Anchor Governance
 
 Agregar o eliminar una raíz de confianza deberá requerir:
 
@@ -36357,7 +36243,7 @@ Agregar o eliminar una raíz de confianza deberá requerir:
 
 ---
 
-# 2830. Certificate Pinning
+### 2830. Certificate Pinning
 
 VoltStack podrá usar pinning en integraciones altamente sensibles.
 
@@ -36365,7 +36251,7 @@ Deberá evitarse cuando impida rotación operativa segura.
 
 ---
 
-# 2831. Public Key Pinning Strategy
+### 2831. Public Key Pinning Strategy
 
 El pinning deberá basarse preferentemente en:
 
@@ -36376,13 +36262,13 @@ El pinning deberá basarse preferentemente en:
 
 ---
 
-# 2832. Mutual TLS Architecture
+### 2832. Mutual TLS Architecture
 
 VoltStack deberá soportar autenticación mutua TLS entre servicios.
 
 ---
 
-# 2833. mTLS Flow
+### 2833. mTLS Flow
 
 ```text
 Client Presents Certificate
@@ -36406,7 +36292,7 @@ Encrypted Authorized Channel
 
 ---
 
-# 2834. mTLS Identity Context
+### 2834. mTLS Identity Context
 
 ```php
 final readonly class MutualTlsIdentity
@@ -36424,7 +36310,7 @@ final readonly class MutualTlsIdentity
 
 ---
 
-# 2835. mTLS Authorization
+### 2835. mTLS Authorization
 
 La validación criptográfica no reemplaza la autorización.
 
@@ -36439,7 +36325,7 @@ Después de validar el certificado deberá evaluarse:
 
 ---
 
-# 2836. Service-to-Service Trust Model
+### 2836. Service-to-Service Trust Model
 
 ```text
 mTLS Authentication
@@ -36459,7 +36345,7 @@ Authorized Service Call
 
 ---
 
-# 2837. Service Mesh Integration
+### 2837. Service Mesh Integration
 
 VoltStack podrá integrarse con service meshes para:
 
@@ -36471,7 +36357,7 @@ VoltStack podrá integrarse con service meshes para:
 
 ---
 
-# 2838. Sidecar Trust Boundary
+### 2838. Sidecar Trust Boundary
 
 Cuando exista sidecar, deberá definirse claramente la frontera entre:
 
@@ -36483,7 +36369,7 @@ Cuando exista sidecar, deberá definirse claramente la frontera entre:
 
 ---
 
-# 2839. Certificate Private Key Protection
+### 2839. Certificate Private Key Protection
 
 Las claves privadas deberán:
 
@@ -36495,13 +36381,13 @@ Las claves privadas deberán:
 
 ---
 
-# 2840. TLS Configuration Architecture
+### 2840. TLS Configuration Architecture
 
 VoltStack deberá aplicar una configuración TLS moderna y centralizada.
 
 ---
 
-# 2841. TLS Security Requirements
+### 2841. TLS Security Requirements
 
 La configuración deberá definir:
 
@@ -36515,13 +36401,13 @@ La configuración deberá definir:
 
 ---
 
-# 2842. TLS Version Policy
+### 2842. TLS Version Policy
 
 Las versiones obsoletas deberán bloquearse.
 
 ---
 
-# 2843. TLS Cipher Policy
+### 2843. TLS Cipher Policy
 
 Solo deberán habilitarse suites:
 
@@ -36532,13 +36418,13 @@ Solo deberán habilitarse suites:
 
 ---
 
-# 2844. Perfect Forward Secrecy
+### 2844. Perfect Forward Secrecy
 
 La arquitectura deberá favorecer intercambio efímero de claves para limitar el impacto de compromisos futuros.
 
 ---
 
-# 2845. TLS Termination Boundaries
+### 2845. TLS Termination Boundaries
 
 La terminación TLS podrá ocurrir en:
 
@@ -36552,19 +36438,19 @@ Cada salto posterior deberá permanecer protegido.
 
 ---
 
-# 2846. Re-Encryption After Termination
+### 2846. Re-Encryption After Termination
 
 Cuando TLS termine en un proxy, el tráfico interno sensible deberá volver a cifrarse.
 
 ---
 
-# 2847. Trusted Proxy Validation
+### 2847. Trusted Proxy Validation
 
 VoltStack deberá aceptar headers de proxy únicamente desde fuentes confiables.
 
 ---
 
-# 2848. TrustedProxyPolicy
+### 2848. TrustedProxyPolicy
 
 ```php
 final readonly class TrustedProxyPolicy
@@ -36581,13 +36467,13 @@ final readonly class TrustedProxyPolicy
 
 ---
 
-# 2849. Secure Randomness Architecture
+### 2849. Secure Randomness Architecture
 
 VoltStack deberá utilizar fuentes criptográficamente seguras de aleatoriedad.
 
 ---
 
-# 2850. Secure Random Use Cases
+### 2850. Secure Random Use Cases
 
 La aleatoriedad segura deberá emplearse para:
 
@@ -36601,7 +36487,7 @@ La aleatoriedad segura deberá emplearse para:
 
 ---
 
-# 2851. SecureRandomGeneratorInterface
+### 2851. SecureRandomGeneratorInterface
 
 ```php
 interface SecureRandomGeneratorInterface
@@ -36616,7 +36502,7 @@ interface SecureRandomGeneratorInterface
 
 ---
 
-# 2852. Forbidden Random Sources
+### 2852. Forbidden Random Sources
 
 No deberán usarse para seguridad:
 
@@ -36629,7 +36515,7 @@ No deberán usarse para seguridad:
 
 ---
 
-# 2853. Randomness Health Validation
+### 2853. Randomness Health Validation
 
 Los proveedores críticos podrán ejecutar pruebas de salud para detectar:
 
@@ -36640,7 +36526,7 @@ Los proveedores críticos podrán ejecutar pruebas de salud para detectar:
 
 ---
 
-# 2854. Salt Management
+### 2854. Salt Management
 
 Los salts deberán:
 
@@ -36651,13 +36537,13 @@ Los salts deberán:
 
 ---
 
-# 2855. Nonce Management Architecture
+### 2855. Nonce Management Architecture
 
 Los nonces deberán garantizar unicidad dentro del alcance del algoritmo y la clave.
 
 ---
 
-# 2856. Nonce Scope
+### 2856. Nonce Scope
 
 La unicidad deberá evaluarse por:
 
@@ -36675,7 +36561,7 @@ Message Domain
 
 ---
 
-# 2857. NonceGenerationStrategy
+### 2857. NonceGenerationStrategy
 
 ```php
 enum NonceGenerationStrategy: string
@@ -36689,7 +36575,7 @@ enum NonceGenerationStrategy: string
 
 ---
 
-# 2858. Nonce Reuse Prevention
+### 2858. Nonce Reuse Prevention
 
 El sistema deberá impedir reutilización mediante:
 
@@ -36700,7 +36586,7 @@ El sistema deberá impedir reutilización mediante:
 
 ---
 
-# 2859. NonceRegistryInterface
+### 2859. NonceRegistryInterface
 
 ```php
 interface NonceRegistryInterface
@@ -36719,7 +36605,7 @@ interface NonceRegistryInterface
 
 ---
 
-# 2860. Replay Protection Architecture
+### 2860. Replay Protection Architecture
 
 VoltStack deberá combinar:
 
@@ -36732,7 +36618,7 @@ VoltStack deberá combinar:
 
 ---
 
-# 2861. ReplayProtectionContext
+### 2861. ReplayProtectionContext
 
 ```php
 final readonly class ReplayProtectionContext
@@ -36750,13 +36636,13 @@ final readonly class ReplayProtectionContext
 
 ---
 
-# 2862. Clock Skew Handling
+### 2862. Clock Skew Handling
 
 Las validaciones temporales deberán aceptar una tolerancia limitada y configurable.
 
 ---
 
-# 2863. Replay Cache
+### 2863. Replay Cache
 
 El cache deberá:
 
@@ -36768,13 +36654,13 @@ El cache deberá:
 
 ---
 
-# 2864. Cryptographic Policy Enforcement
+### 2864. Cryptographic Policy Enforcement
 
 Toda operación criptográfica deberá pasar por un motor de políticas.
 
 ---
 
-# 2865. CryptographicPolicyEngineInterface
+### 2865. CryptographicPolicyEngineInterface
 
 ```php
 interface CryptographicPolicyEngineInterface
@@ -36788,7 +36674,7 @@ interface CryptographicPolicyEngineInterface
 
 ---
 
-# 2866. Cryptographic Security Context
+### 2866. Cryptographic Security Context
 
 ```php
 final readonly class CryptographicSecurityContext
@@ -36807,7 +36693,7 @@ final readonly class CryptographicSecurityContext
 
 ---
 
-# 2867. Cryptographic Policy Decision
+### 2867. Cryptographic Policy Decision
 
 ```php
 final readonly class CryptographicPolicyDecision
@@ -36825,7 +36711,7 @@ final readonly class CryptographicPolicyDecision
 
 ---
 
-# 2868. Policy Enforcement Examples
+### 2868. Policy Enforcement Examples
 
 ```text
 Highly Restricted Data
@@ -36843,7 +36729,7 @@ Audit Event
 
 ---
 
-# 2869. Cryptographic Observability
+### 2869. Cryptographic Observability
 
 VoltStack deberá registrar metadatos de operaciones criptográficas sin exponer:
 
@@ -36855,7 +36741,7 @@ VoltStack deberá registrar metadatos de operaciones criptográficas sin exponer
 
 ---
 
-# 2870. Cryptographic Audit Event
+### 2870. Cryptographic Audit Event
 
 ```php
 final readonly class CryptographicAuditEvent
@@ -36875,7 +36761,7 @@ final readonly class CryptographicAuditEvent
 
 ---
 
-# 2871. Cryptographic Metrics
+### 2871. Cryptographic Metrics
 
 Medir:
 
@@ -36889,7 +36775,7 @@ Medir:
 
 ---
 
-# 2872. Cryptographic Failure Handling
+### 2872. Cryptographic Failure Handling
 
 Los fallos deberán:
 
@@ -36901,19 +36787,19 @@ Los fallos deberán:
 
 ---
 
-# 2873. No Silent Crypto Downgrade
+### 2873. No Silent Crypto Downgrade
 
 VoltStack no deberá degradar silenciosamente a algoritmos más débiles.
 
 ---
 
-# 2874. Cryptographic Agility Architecture
+### 2874. Cryptographic Agility Architecture
 
 La arquitectura deberá permitir reemplazar algoritmos, proveedores y longitudes sin rediseñar el dominio.
 
 ---
 
-# 2875. Crypto Agility Dimensions
+### 2875. Crypto Agility Dimensions
 
 Incluir:
 
@@ -36927,7 +36813,7 @@ Incluir:
 
 ---
 
-# 2876. Versioned Cryptographic Envelope
+### 2876. Versioned Cryptographic Envelope
 
 ```php
 final readonly class VersionedCryptographicEnvelope
@@ -36946,7 +36832,7 @@ final readonly class VersionedCryptographicEnvelope
 
 ---
 
-# 2877. Algorithm Migration Strategy
+### 2877. Algorithm Migration Strategy
 
 ```text
 Support Old Read
@@ -36970,13 +36856,13 @@ Retire Old Read
 
 ---
 
-# 2878. Crypto Migration Registry
+### 2878. Crypto Migration Registry
 
 VoltStack deberá mantener migradores entre versiones criptográficas.
 
 ---
 
-# 2879. CryptographicMigrationInterface
+### 2879. CryptographicMigrationInterface
 
 ```php
 interface CryptographicMigrationInterface
@@ -36994,13 +36880,13 @@ interface CryptographicMigrationInterface
 
 ---
 
-# 2880. Post-Quantum Readiness
+### 2880. Post-Quantum Readiness
 
 VoltStack deberá prepararse para futuras transiciones criptográficas post-cuánticas.
 
 ---
 
-# 2881. Post-Quantum Objectives
+### 2881. Post-Quantum Objectives
 
 La preparación deberá incluir:
 
@@ -37013,7 +36899,7 @@ La preparación deberá incluir:
 
 ---
 
-# 2882. Cryptographic Inventory
+### 2882. Cryptographic Inventory
 
 El framework deberá poder identificar dónde se utiliza:
 
@@ -37026,13 +36912,13 @@ El framework deberá poder identificar dónde se utiliza:
 
 ---
 
-# 2883. Harvest Now, Decrypt Later Risk
+### 2883. Harvest Now, Decrypt Later Risk
 
 Los datos con vida útil larga deberán evaluarse frente a adversarios que almacenen ciphertext para descifrarlo en el futuro.
 
 ---
 
-# 2884. Post-Quantum Data Priority
+### 2884. Post-Quantum Data Priority
 
 Priorizar:
 
@@ -37044,7 +36930,7 @@ Priorizar:
 
 ---
 
-# 2885. Hybrid Cryptographic Mode
+### 2885. Hybrid Cryptographic Mode
 
 VoltStack podrá soportar esquemas híbridos:
 
@@ -37062,7 +36948,7 @@ Hybrid Protection
 
 ---
 
-# 2886. PostQuantumPolicy
+### 2886. PostQuantumPolicy
 
 ```php
 final readonly class PostQuantumPolicy
@@ -37079,7 +36965,7 @@ final readonly class PostQuantumPolicy
 
 ---
 
-# 2887. API Security Architecture
+### 2887. API Security Architecture
 
 VoltStack deberá incorporar un modelo de seguridad completo para APIs.
 
@@ -37096,7 +36982,7 @@ Las APIs deberán proteger:
 
 ---
 
-# 2888. API Security Model
+### 2888. API Security Model
 
 ```text
 Request
@@ -37132,7 +37018,7 @@ Response Protection
 
 ---
 
-# 2889. API Classification
+### 2889. API Classification
 
 Las APIs podrán clasificarse como:
 
@@ -37145,7 +37031,7 @@ Las APIs podrán clasificarse como:
 
 ---
 
-# 2890. ApiSecurityProfile
+### 2890. ApiSecurityProfile
 
 ```php
 final readonly class ApiSecurityProfile
@@ -37164,7 +37050,7 @@ final readonly class ApiSecurityProfile
 
 ---
 
-# 2891. API Authentication Architecture
+### 2891. API Authentication Architecture
 
 VoltStack deberá soportar:
 
@@ -37179,7 +37065,7 @@ VoltStack deberá soportar:
 
 ---
 
-# 2892. Authentication Method Selection
+### 2892. Authentication Method Selection
 
 La selección deberá considerar:
 
@@ -37192,7 +37078,7 @@ La selección deberá considerar:
 
 ---
 
-# 2893. API Key Security
+### 2893. API Key Security
 
 Las API keys deberán:
 
@@ -37205,7 +37091,7 @@ Las API keys deberán:
 
 ---
 
-# 2894. ApiKeyCredential
+### 2894. ApiKeyCredential
 
 ```php
 final readonly class ApiKeyCredential
@@ -37223,13 +37109,13 @@ final readonly class ApiKeyCredential
 
 ---
 
-# 2895. API Key Presentation
+### 2895. API Key Presentation
 
 La clave completa deberá mostrarse únicamente al momento de creación.
 
 ---
 
-# 2896. OAuth Scope Architecture
+### 2896. OAuth Scope Architecture
 
 Los scopes deberán representar capacidades concretas y no roles ambiguos.
 
@@ -37247,7 +37133,7 @@ customer.profile.update
 
 ---
 
-# 2897. JWT Validation Architecture
+### 2897. JWT Validation Architecture
 
 Todo JWT deberá validar:
 
@@ -37262,7 +37148,7 @@ Todo JWT deberá validar:
 
 ---
 
-# 2898. JwtValidationPolicy
+### 2898. JwtValidationPolicy
 
 ```php
 final readonly class JwtValidationPolicy
@@ -37280,7 +37166,7 @@ final readonly class JwtValidationPolicy
 
 ---
 
-# 2899. API Security Result
+### 2899. API Security Result
 
 Esta entrega establece:
 
@@ -37318,7 +37204,7 @@ API Authentication Foundations
 
 ---
 
-# 2900. Estado
+### 2900. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -37356,9 +37242,7 @@ La siguiente entrega continuará con:
 - API gateway integration
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 30
 
 **Documento:** Parte 06
 **Entrega:** 30 de 31
@@ -37366,7 +37250,7 @@ La siguiente entrega continuará con:
 
 ---
 
-# 2901. OAuth Security Architecture
+### 2901. OAuth Security Architecture
 
 VoltStack deberá incorporar una arquitectura OAuth desacoplada del proveedor de identidad y del mecanismo de almacenamiento de tokens.
 
@@ -37382,7 +37266,7 @@ La arquitectura deberá separar:
 
 ---
 
-# 2902. OAuth Security Objectives
+### 2902. OAuth Security Objectives
 
 La implementación deberá garantizar:
 
@@ -37396,7 +37280,7 @@ La implementación deberá garantizar:
 
 ---
 
-# 2903. OAuth Roles
+### 2903. OAuth Roles
 
 VoltStack deberá distinguir:
 
@@ -37414,7 +37298,7 @@ Una misma aplicación podrá desempeñar más de un rol, pero sus responsabilida
 
 ---
 
-# 2904. OAuthFlow
+### 2904. OAuthFlow
 
 ```php
 enum OAuthFlow: string
@@ -37429,7 +37313,7 @@ enum OAuthFlow: string
 
 ---
 
-# 2905. Authorization Code Flow
+### 2905. Authorization Code Flow
 
 El flujo Authorization Code deberá usarse para aplicaciones interactivas con usuario.
 
@@ -37459,7 +37343,7 @@ Access Token Issued
 
 ---
 
-# 2906. PKCE Enforcement
+### 2906. PKCE Enforcement
 
 Los clientes públicos deberán utilizar Proof Key for Code Exchange.
 
@@ -37474,7 +37358,7 @@ VoltStack deberá validar:
 
 ---
 
-# 2907. PkceChallenge
+### 2907. PkceChallenge
 
 ```php
 final readonly class PkceChallenge
@@ -37490,7 +37374,7 @@ final readonly class PkceChallenge
 
 ---
 
-# 2908. Authorization Code Security
+### 2908. Authorization Code Security
 
 Los authorization codes deberán:
 
@@ -37503,7 +37387,7 @@ Los authorization codes deberán:
 
 ---
 
-# 2909. Client Credentials Flow
+### 2909. Client Credentials Flow
 
 El flujo Client Credentials deberá reservarse para comunicación machine-to-machine.
 
@@ -37511,7 +37395,7 @@ No deberá representar a un usuario humano.
 
 ---
 
-# 2910. Machine Client Identity
+### 2910. Machine Client Identity
 
 ```php
 final readonly class MachineClientIdentity
@@ -37529,7 +37413,7 @@ final readonly class MachineClientIdentity
 
 ---
 
-# 2911. Device Authorization Flow
+### 2911. Device Authorization Flow
 
 VoltStack podrá soportar Device Authorization para clientes sin navegador adecuado.
 
@@ -37544,7 +37428,7 @@ Deberá controlar:
 
 ---
 
-# 2912. OAuth Redirect URI Security
+### 2912. OAuth Redirect URI Security
 
 Los redirect URIs deberán:
 
@@ -37556,7 +37440,7 @@ Los redirect URIs deberán:
 
 ---
 
-# 2913. RedirectUriPolicy
+### 2913. RedirectUriPolicy
 
 ```php
 final readonly class RedirectUriPolicy
@@ -37573,7 +37457,7 @@ final readonly class RedirectUriPolicy
 
 ---
 
-# 2914. OAuth Client Registration
+### 2914. OAuth Client Registration
 
 Todo cliente deberá declarar:
 
@@ -37588,7 +37472,7 @@ Todo cliente deberá declarar:
 
 ---
 
-# 2915. OAuthClient
+### 2915. OAuthClient
 
 ```php
 final readonly class OAuthClient
@@ -37608,7 +37492,7 @@ final readonly class OAuthClient
 
 ---
 
-# 2916. Confidential and Public Clients
+### 2916. Confidential and Public Clients
 
 VoltStack deberá distinguir:
 
@@ -37616,7 +37500,6 @@ VoltStack deberá distinguir:
 Confidential Client
 
 Can Protect Credentials
-
 
 Public Client
 
@@ -37627,7 +37510,7 @@ La política de autenticación deberá adaptarse a esta diferencia.
 
 ---
 
-# 2917. Client Authentication Methods
+### 2917. Client Authentication Methods
 
 Podrán soportarse:
 
@@ -37639,7 +37522,7 @@ Podrán soportarse:
 
 ---
 
-# 2918. Client Secret Security
+### 2918. Client Secret Security
 
 Los secretos de cliente deberán:
 
@@ -37652,7 +37535,7 @@ Los secretos de cliente deberán:
 
 ---
 
-# 2919. Private Key JWT Authentication
+### 2919. Private Key JWT Authentication
 
 Los clientes de alta confianza podrán autenticarse mediante assertions firmadas.
 
@@ -37668,13 +37551,13 @@ Deberán validarse:
 
 ---
 
-# 2920. OAuth Consent Architecture
+### 2920. OAuth Consent Architecture
 
 VoltStack deberá permitir consentimiento explícito cuando el contexto lo requiera.
 
 ---
 
-# 2921. Consent Screen Requirements
+### 2921. Consent Screen Requirements
 
 La pantalla deberá mostrar:
 
@@ -37687,7 +37570,7 @@ La pantalla deberá mostrar:
 
 ---
 
-# 2922. OAuthConsentGrant
+### 2922. OAuthConsentGrant
 
 ```php
 final readonly class OAuthConsentGrant
@@ -37706,7 +37589,7 @@ final readonly class OAuthConsentGrant
 
 ---
 
-# 2923. Consent Reuse
+### 2923. Consent Reuse
 
 El consentimiento podrá reutilizarse únicamente si:
 
@@ -37718,13 +37601,13 @@ El consentimiento podrá reutilizarse únicamente si:
 
 ---
 
-# 2924. Incremental Authorization
+### 2924. Incremental Authorization
 
 VoltStack deberá permitir solicitar scopes adicionales sin volver a pedir permisos ya aprobados.
 
 ---
 
-# 2925. Token Lifecycle Architecture
+### 2925. Token Lifecycle Architecture
 
 Todo token deberá pasar por un ciclo de vida controlado.
 
@@ -37754,7 +37637,7 @@ Revoked or Expired
 
 ---
 
-# 2926. Token Types
+### 2926. Token Types
 
 VoltStack deberá distinguir:
 
@@ -37767,7 +37650,7 @@ VoltStack deberá distinguir:
 
 ---
 
-# 2927. AccessToken
+### 2927. AccessToken
 
 ```php
 final readonly class AccessToken
@@ -37787,7 +37670,7 @@ final readonly class AccessToken
 
 ---
 
-# 2928. Access Token Lifetime
+### 2928. Access Token Lifetime
 
 La duración deberá depender de:
 
@@ -37801,7 +37684,7 @@ La duración deberá depender de:
 
 ---
 
-# 2929. Short-Lived Access Tokens
+### 2929. Short-Lived Access Tokens
 
 Los access tokens deberán ser cortos para reducir:
 
@@ -37812,13 +37695,13 @@ Los access tokens deberán ser cortos para reducir:
 
 ---
 
-# 2930. Refresh Token Architecture
+### 2930. Refresh Token Architecture
 
 Los refresh tokens deberán recibir una protección superior a los access tokens.
 
 ---
 
-# 2931. RefreshToken
+### 2931. RefreshToken
 
 ```php
 final readonly class RefreshToken
@@ -37838,7 +37721,7 @@ final readonly class RefreshToken
 
 ---
 
-# 2932. Refresh Token Rotation
+### 2932. Refresh Token Rotation
 
 Cada uso deberá emitir un nuevo refresh token e invalidar el anterior.
 
@@ -37860,13 +37743,13 @@ Refresh Token A Revoked
 
 ---
 
-# 2933. Refresh Token Family
+### 2933. Refresh Token Family
 
 Los tokens rotados deberán pertenecer a una misma familia para detectar reutilización.
 
 ---
 
-# 2934. Refresh Token Reuse Detection
+### 2934. Refresh Token Reuse Detection
 
 Si un token previamente consumido vuelve a usarse, VoltStack deberá:
 
@@ -37878,7 +37761,7 @@ Si un token previamente consumido vuelve a usarse, VoltStack deberá:
 
 ---
 
-# 2935. TokenFamilyCompromiseEvent
+### 2935. TokenFamilyCompromiseEvent
 
 ```php
 final readonly class TokenFamilyCompromiseEvent
@@ -37896,7 +37779,7 @@ final readonly class TokenFamilyCompromiseEvent
 
 ---
 
-# 2936. Token Revocation Architecture
+### 2936. Token Revocation Architecture
 
 VoltStack deberá permitir revocar por:
 
@@ -37911,7 +37794,7 @@ VoltStack deberá permitir revocar por:
 
 ---
 
-# 2937. TokenRevocationServiceInterface
+### 2937. TokenRevocationServiceInterface
 
 ```php
 interface TokenRevocationServiceInterface
@@ -37935,7 +37818,7 @@ interface TokenRevocationServiceInterface
 
 ---
 
-# 2938. Token Introspection
+### 2938. Token Introspection
 
 Los resource servers podrán consultar el estado de tokens opacos.
 
@@ -37943,7 +37826,7 @@ La respuesta deberá incluir únicamente información necesaria.
 
 ---
 
-# 2939. TokenIntrospectionResult
+### 2939. TokenIntrospectionResult
 
 ```php
 final readonly class TokenIntrospectionResult
@@ -37962,7 +37845,7 @@ final readonly class TokenIntrospectionResult
 
 ---
 
-# 2940. Token Binding
+### 2940. Token Binding
 
 VoltStack podrá vincular tokens a:
 
@@ -37975,13 +37858,13 @@ VoltStack podrá vincular tokens a:
 
 ---
 
-# 2941. Proof-of-Possession Tokens
+### 2941. Proof-of-Possession Tokens
 
 Los tokens de prueba de posesión deberán exigir evidencia criptográfica adicional en cada solicitud.
 
 ---
 
-# 2942. DPoP Security
+### 2942. DPoP Security
 
 La prueba deberá cubrir:
 
@@ -37994,7 +37877,7 @@ La prueba deberá cubrir:
 
 ---
 
-# 2943. Token Exchange Architecture
+### 2943. Token Exchange Architecture
 
 VoltStack podrá intercambiar un token por otro de menor alcance.
 
@@ -38012,7 +37895,7 @@ Restricted Downstream Token
 
 ---
 
-# 2944. Delegation and Impersonation
+### 2944. Delegation and Impersonation
 
 VoltStack deberá diferenciar:
 
@@ -38021,7 +37904,6 @@ Delegation
 
 Service Acts With Limited Authority
 On Behalf of Subject
-
 
 Impersonation
 
@@ -38032,13 +37914,13 @@ La impersonación deberá recibir controles más estrictos.
 
 ---
 
-# 2945. ApiAuthorizationArchitecture
+### 2945. ApiAuthorizationArchitecture
 
 La autenticación de la API deberá preceder a una autorización contextual.
 
 ---
 
-# 2946. API Authorization Context
+### 2946. API Authorization Context
 
 ```php
 final readonly class ApiAuthorizationContext
@@ -38059,7 +37941,7 @@ final readonly class ApiAuthorizationContext
 
 ---
 
-# 2947. API Authorization Layers
+### 2947. API Authorization Layers
 
 VoltStack deberá evaluar:
 
@@ -38085,7 +37967,7 @@ Business Rule Authorization
 
 ---
 
-# 2948. Route-Level Authorization
+### 2948. Route-Level Authorization
 
 Cada endpoint deberá declarar una política explícita.
 
@@ -38102,7 +37984,7 @@ final readonly class ShowInvoiceController
 
 ---
 
-# 2949. Function-Level Authorization
+### 2949. Function-Level Authorization
 
 Las operaciones sensibles deberán diferenciarse incluso cuando compartan recurso.
 
@@ -38122,19 +38004,19 @@ invoice.export
 
 ---
 
-# 2950. Broken Function-Level Authorization Prevention
+### 2950. Broken Function-Level Authorization Prevention
 
 VoltStack deberá impedir que un usuario acceda a funciones administrativas únicamente conociendo la ruta.
 
 ---
 
-# 2951. Object-Level Authorization
+### 2951. Object-Level Authorization
 
 Todo recurso solicitado por identificador deberá pasar por una política de acceso.
 
 ---
 
-# 2952. ObjectAuthorizationPolicyInterface
+### 2952. ObjectAuthorizationPolicyInterface
 
 ```php
 interface ObjectAuthorizationPolicyInterface
@@ -38150,7 +38032,7 @@ interface ObjectAuthorizationPolicyInterface
 
 ---
 
-# 2953. BOLA Prevention
+### 2953. BOLA Prevention
 
 VoltStack deberá prevenir Broken Object Level Authorization mediante:
 
@@ -38162,7 +38044,7 @@ VoltStack deberá prevenir Broken Object Level Authorization mediante:
 
 ---
 
-# 2954. Secure Resource Resolution
+### 2954. Secure Resource Resolution
 
 ```text
 Route Identifier
@@ -38186,7 +38068,7 @@ Controller Invoked
 
 ---
 
-# 2955. Resource Identifier Security
+### 2955. Resource Identifier Security
 
 Los identificadores no deberán considerarse secretos.
 
@@ -38194,13 +38076,13 @@ La autorización no podrá depender de que sean difíciles de adivinar.
 
 ---
 
-# 2956. Mass Assignment Security
+### 2956. Mass Assignment Security
 
 Los DTOs de entrada deberán permitir únicamente campos explícitos.
 
 ---
 
-# 2957. Secure Input DTO
+### 2957. Secure Input DTO
 
 ```php
 final readonly class UpdateCustomerInput
@@ -38217,13 +38099,13 @@ Campos como `role`, `tenantId` o `isAdmin` no deberán aceptarse sin una operaci
 
 ---
 
-# 2958. Property-Level Authorization
+### 2958. Property-Level Authorization
 
 Cambiar una propiedad sensible deberá requerir una política distinta.
 
 ---
 
-# 2959. PropertyMutationPolicy
+### 2959. PropertyMutationPolicy
 
 ```php
 interface PropertyMutationPolicyInterface
@@ -38240,13 +38122,13 @@ interface PropertyMutationPolicyInterface
 
 ---
 
-# 2960. API Request Signing Architecture
+### 2960. API Request Signing Architecture
 
 VoltStack deberá permitir firmar solicitudes de integraciones críticas.
 
 ---
 
-# 2961. Signed Request Components
+### 2961. Signed Request Components
 
 La firma deberá cubrir:
 
@@ -38280,7 +38162,7 @@ Nonce
 
 ---
 
-# 2962. SignedApiRequest
+### 2962. SignedApiRequest
 
 ```php
 final readonly class SignedApiRequest
@@ -38300,13 +38182,13 @@ final readonly class SignedApiRequest
 
 ---
 
-# 2963. Request Canonicalization
+### 2963. Request Canonicalization
 
 VoltStack deberá definir una representación canónica para evitar discrepancias entre firmante y verificador.
 
 ---
 
-# 2964. Canonical Request Format
+### 2964. Canonical Request Format
 
 ```text
 METHOD
@@ -38323,7 +38205,7 @@ nonce
 
 ---
 
-# 2965. Signed Request Verification
+### 2965. Signed Request Verification
 
 El verificador deberá comprobar:
 
@@ -38339,7 +38221,7 @@ El verificador deberá comprobar:
 
 ---
 
-# 2966. ApiRequestSignatureVerifierInterface
+### 2966. ApiRequestSignatureVerifierInterface
 
 ```php
 interface ApiRequestSignatureVerifierInterface
@@ -38353,7 +38235,7 @@ interface ApiRequestSignatureVerifierInterface
 
 ---
 
-# 2967. SignatureVerificationResult
+### 2967. SignatureVerificationResult
 
 ```php
 final readonly class SignatureVerificationResult
@@ -38370,13 +38252,13 @@ final readonly class SignatureVerificationResult
 
 ---
 
-# 2968. API Schema Validation Architecture
+### 2968. API Schema Validation Architecture
 
 Toda entrada deberá validarse contra un contrato conocido.
 
 ---
 
-# 2969. API Input Validation Layers
+### 2969. API Input Validation Layers
 
 Aplicar:
 
@@ -38406,7 +38288,7 @@ Authorization Validation
 
 ---
 
-# 2970. Schema Validation Requirements
+### 2970. Schema Validation Requirements
 
 Validar:
 
@@ -38421,7 +38303,7 @@ Validar:
 
 ---
 
-# 2971. Reject Unknown Fields
+### 2971. Reject Unknown Fields
 
 Los endpoints sensibles deberán rechazar propiedades desconocidas para reducir:
 
@@ -38432,7 +38314,7 @@ Los endpoints sensibles deberán rechazar propiedades desconocidas para reducir:
 
 ---
 
-# 2972. ApiSchemaValidatorInterface
+### 2972. ApiSchemaValidatorInterface
 
 ```php
 interface ApiSchemaValidatorInterface
@@ -38446,7 +38328,7 @@ interface ApiSchemaValidatorInterface
 
 ---
 
-# 2973. SchemaValidationResult
+### 2973. SchemaValidationResult
 
 ```php
 final readonly class SchemaValidationResult
@@ -38462,7 +38344,7 @@ final readonly class SchemaValidationResult
 
 ---
 
-# 2974. Payload Size Limits
+### 2974. Payload Size Limits
 
 VoltStack deberá limitar:
 
@@ -38475,7 +38357,7 @@ VoltStack deberá limitar:
 
 ---
 
-# 2975. Content-Type Enforcement
+### 2975. Content-Type Enforcement
 
 Un endpoint deberá aceptar únicamente tipos declarados.
 
@@ -38493,7 +38375,7 @@ No deberá inferirse silenciosamente el formato.
 
 ---
 
-# 2976. Duplicate Parameter Security
+### 2976. Duplicate Parameter Security
 
 VoltStack deberá definir cómo manejar parámetros duplicados en:
 
@@ -38506,7 +38388,7 @@ La opción segura por defecto será rechazarlos cuando generen ambigüedad.
 
 ---
 
-# 2977. HTTP Parameter Pollution Prevention
+### 2977. HTTP Parameter Pollution Prevention
 
 El framework deberá normalizar parámetros de forma consistente entre:
 
@@ -38518,7 +38400,7 @@ El framework deberá normalizar parámetros de forma consistente entre:
 
 ---
 
-# 2978. Deserialization Security
+### 2978. Deserialization Security
 
 La deserialización deberá:
 
@@ -38530,7 +38412,7 @@ La deserialización deberá:
 
 ---
 
-# 2979. API Response Security
+### 2979. API Response Security
 
 Las respuestas deberán:
 
@@ -38543,7 +38425,7 @@ Las respuestas deberán:
 
 ---
 
-# 2980. Error Response Security
+### 2980. Error Response Security
 
 Los errores públicos no deberán revelar:
 
@@ -38556,7 +38438,7 @@ Los errores públicos no deberán revelar:
 
 ---
 
-# 2981. Problem Details Architecture
+### 2981. Problem Details Architecture
 
 VoltStack podrá normalizar errores mediante un formato seguro.
 
@@ -38577,13 +38459,13 @@ final readonly class ApiProblemDetails
 
 ---
 
-# 2982. API Rate Limiting Architecture
+### 2982. API Rate Limiting Architecture
 
 VoltStack deberá limitar consumo por múltiples dimensiones.
 
 ---
 
-# 2983. Rate Limit Dimensions
+### 2983. Rate Limit Dimensions
 
 Podrán utilizarse:
 
@@ -38599,7 +38481,7 @@ Podrán utilizarse:
 
 ---
 
-# 2984. RateLimitKey
+### 2984. RateLimitKey
 
 ```php
 final readonly class RateLimitKey
@@ -38616,7 +38498,7 @@ final readonly class RateLimitKey
 
 ---
 
-# 2985. Rate Limit Algorithms
+### 2985. Rate Limit Algorithms
 
 VoltStack podrá soportar:
 
@@ -38628,7 +38510,7 @@ VoltStack podrá soportar:
 
 ---
 
-# 2986. RateLimitPolicy
+### 2986. RateLimitPolicy
 
 ```php
 final readonly class RateLimitPolicy
@@ -38646,7 +38528,7 @@ final readonly class RateLimitPolicy
 
 ---
 
-# 2987. Distributed Rate Limiting
+### 2987. Distributed Rate Limiting
 
 En despliegues distribuidos, el contador deberá:
 
@@ -38658,7 +38540,7 @@ En despliegues distribuidos, el contador deberá:
 
 ---
 
-# 2988. Adaptive Rate Limiting
+### 2988. Adaptive Rate Limiting
 
 Los límites podrán endurecerse según:
 
@@ -38671,7 +38553,7 @@ Los límites podrán endurecerse según:
 
 ---
 
-# 2989. Cost-Based Rate Limiting
+### 2989. Cost-Based Rate Limiting
 
 No todas las operaciones deberán consumir el mismo costo.
 
@@ -38680,11 +38562,9 @@ Simple Read
 
 Cost: 1
 
-
 Complex Report
 
 Cost: 20
-
 
 Large Export
 
@@ -38693,7 +38573,7 @@ Cost: 100
 
 ---
 
-# 2990. ApiRequestCostCalculatorInterface
+### 2990. ApiRequestCostCalculatorInterface
 
 ```php
 interface ApiRequestCostCalculatorInterface
@@ -38707,13 +38587,13 @@ interface ApiRequestCostCalculatorInterface
 
 ---
 
-# 2991. Abuse Prevention Architecture
+### 2991. Abuse Prevention Architecture
 
 VoltStack deberá detectar y contener patrones abusivos aunque no excedan un límite simple.
 
 ---
 
-# 2992. Abuse Signals
+### 2992. Abuse Signals
 
 Considerar:
 
@@ -38728,7 +38608,7 @@ Considerar:
 
 ---
 
-# 2993. AbuseDetectionResult
+### 2993. AbuseDetectionResult
 
 ```php
 final readonly class AbuseDetectionResult
@@ -38745,7 +38625,7 @@ final readonly class AbuseDetectionResult
 
 ---
 
-# 2994. Abuse Response Actions
+### 2994. Abuse Response Actions
 
 VoltStack podrá:
 
@@ -38759,13 +38639,13 @@ VoltStack podrá:
 
 ---
 
-# 2995. GraphQL Security Architecture
+### 2995. GraphQL Security Architecture
 
 VoltStack deberá aplicar controles específicos a GraphQL.
 
 ---
 
-# 2996. GraphQL Security Controls
+### 2996. GraphQL Security Controls
 
 Incluir:
 
@@ -38780,7 +38660,7 @@ Incluir:
 
 ---
 
-# 2997. GraphQlQueryPolicy
+### 2997. GraphQlQueryPolicy
 
 ```php
 final readonly class GraphQlQueryPolicy
@@ -38798,7 +38678,7 @@ final readonly class GraphQlQueryPolicy
 
 ---
 
-# 2998. Webhook Security Architecture
+### 2998. Webhook Security Architecture
 
 Los webhooks deberán protegerse mediante:
 
@@ -38812,7 +38692,7 @@ Los webhooks deberán protegerse mediante:
 
 ---
 
-# 2999. API Security Architecture Result
+### 2999. API Security Architecture Result
 
 Esta entrega establece:
 
@@ -38864,7 +38744,7 @@ Webhook Security Foundations
 
 ---
 
-# 3000. Estado
+### 3000. Estado
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md
@@ -38905,9 +38785,7 @@ La entrega final continuará con:
 - Final status
 ```
 
-# CONTROLLER_SECURITY_MODEL_PART_06.md
-
-## Controller Authorization, Policy Enforcement & Resource Access Security
+## Entrega 31
 
 **Documento:** Parte 06
 **Entrega:** 31 de 31
@@ -38916,7 +38794,7 @@ La entrega final continuará con:
 
 ---
 
-# 3001. Webhook Delivery Security Architecture
+### 3001. Webhook Delivery Security Architecture
 
 VoltStack deberá incorporar una arquitectura específica para asegurar la entrega y recepción de webhooks.
 
@@ -38924,7 +38802,7 @@ Los webhooks deberán tratarse como mensajes remotos potencialmente hostiles.
 
 ---
 
-# 3002. Webhook Security Objectives
+### 3002. Webhook Security Objectives
 
 La arquitectura deberá garantizar:
 
@@ -38938,7 +38816,7 @@ La arquitectura deberá garantizar:
 
 ---
 
-# 3003. Webhook Delivery Model
+### 3003. Webhook Delivery Model
 
 ```text
 Domain Event
@@ -38970,7 +38848,7 @@ Delivery Verification
 
 ---
 
-# 3004. WebhookSubscription
+### 3004. WebhookSubscription
 
 ```php
 final readonly class WebhookSubscription
@@ -38990,7 +38868,7 @@ final readonly class WebhookSubscription
 
 ---
 
-# 3005. Webhook Endpoint Registration
+### 3005. Webhook Endpoint Registration
 
 Todo endpoint deberá registrarse mediante un proceso que valide:
 
@@ -39004,7 +38882,7 @@ Todo endpoint deberá registrarse mediante un proceso que valide:
 
 ---
 
-# 3006. Webhook Destination Validation
+### 3006. Webhook Destination Validation
 
 VoltStack deberá impedir entregas hacia:
 
@@ -39017,7 +38895,7 @@ VoltStack deberá impedir entregas hacia:
 
 ---
 
-# 3007. SSRF Protection for Webhooks
+### 3007. SSRF Protection for Webhooks
 
 La entrega deberá protegerse contra Server-Side Request Forgery.
 
@@ -39047,7 +38925,7 @@ Connection
 
 ---
 
-# 3008. WebhookDestinationPolicy
+### 3008. WebhookDestinationPolicy
 
 ```php
 final readonly class WebhookDestinationPolicy
@@ -39065,7 +38943,7 @@ final readonly class WebhookDestinationPolicy
 
 ---
 
-# 3009. DNS Rebinding Protection
+### 3009. DNS Rebinding Protection
 
 VoltStack deberá resolver y validar el destino:
 
@@ -39076,7 +38954,7 @@ VoltStack deberá resolver y validar el destino:
 
 ---
 
-# 3010. Webhook Payload Minimization
+### 3010. Webhook Payload Minimization
 
 El payload deberá contener únicamente:
 
@@ -39089,7 +38967,7 @@ El payload deberá contener únicamente:
 
 ---
 
-# 3011. Webhook Payload Versioning
+### 3011. Webhook Payload Versioning
 
 Todo payload deberá declarar su versión.
 
@@ -39110,13 +38988,13 @@ final readonly class WebhookEnvelope
 
 ---
 
-# 3012. Webhook Signature Architecture
+### 3012. Webhook Signature Architecture
 
 La firma deberá proteger una representación canónica del mensaje.
 
 ---
 
-# 3013. Webhook Signature Input
+### 3013. Webhook Signature Input
 
 ```text
 Delivery ID
@@ -39140,7 +39018,7 @@ Body Digest
 
 ---
 
-# 3014. WebhookSignature
+### 3014. WebhookSignature
 
 ```php
 final readonly class WebhookSignature
@@ -39158,7 +39036,7 @@ final readonly class WebhookSignature
 
 ---
 
-# 3015. Webhook Signing Key Isolation
+### 3015. Webhook Signing Key Isolation
 
 Las claves de webhook deberán separarse por:
 
@@ -39170,7 +39048,7 @@ Las claves de webhook deberán separarse por:
 
 ---
 
-# 3016. Webhook Secret Rotation
+### 3016. Webhook Secret Rotation
 
 La rotación deberá permitir una ventana controlada con:
 
@@ -39182,7 +39060,7 @@ La rotación deberá permitir una ventana controlada con:
 
 ---
 
-# 3017. Webhook Replay Protection
+### 3017. Webhook Replay Protection
 
 El receptor deberá validar:
 
@@ -39195,13 +39073,13 @@ El receptor deberá validar:
 
 ---
 
-# 3018. Webhook Idempotency
+### 3018. Webhook Idempotency
 
 Cada entrega deberá incluir un identificador único reutilizable durante los reintentos.
 
 ---
 
-# 3019. WebhookDelivery
+### 3019. WebhookDelivery
 
 ```php
 final readonly class WebhookDelivery
@@ -39220,7 +39098,7 @@ final readonly class WebhookDelivery
 
 ---
 
-# 3020. Webhook Retry Architecture
+### 3020. Webhook Retry Architecture
 
 Los reintentos deberán usar:
 
@@ -39232,18 +39110,16 @@ Los reintentos deberán usar:
 
 ---
 
-# 3021. Retry Classification
+### 3021. Retry Classification
 
 ```text
 2xx
 
 Delivered
 
-
 408 / 429 / Selected 5xx
 
 Retryable
-
 
 4xx Validation or Authorization Failure
 
@@ -39252,7 +39128,7 @@ Non-Retryable
 
 ---
 
-# 3022. Webhook Dead-Letter Queue
+### 3022. Webhook Dead-Letter Queue
 
 Las entregas agotadas deberán pasar a una cola controlada para:
 
@@ -39264,7 +39140,7 @@ Las entregas agotadas deberán pasar a una cola controlada para:
 
 ---
 
-# 3023. Webhook Delivery Confidentiality
+### 3023. Webhook Delivery Confidentiality
 
 Cuando el payload sea sensible, VoltStack podrá aplicar:
 
@@ -39276,7 +39152,7 @@ Cuando el payload sea sensible, VoltStack podrá aplicar:
 
 ---
 
-# 3024. Webhook Response Handling
+### 3024. Webhook Response Handling
 
 La respuesta remota deberá limitarse en:
 
@@ -39289,7 +39165,7 @@ La respuesta remota deberá limitarse en:
 
 ---
 
-# 3025. Webhook Delivery Observability
+### 3025. Webhook Delivery Observability
 
 Registrar:
 
@@ -39304,7 +39180,7 @@ Registrar:
 
 ---
 
-# 3026. Webhook Security Result
+### 3026. Webhook Security Result
 
 La arquitectura deberá impedir que los webhooks se conviertan en:
 
@@ -39316,13 +39192,13 @@ La arquitectura deberá impedir que los webhooks se conviertan en:
 
 ---
 
-# 3027. API Gateway Integration Architecture
+### 3027. API Gateway Integration Architecture
 
 VoltStack deberá integrarse con gateways sin delegar completamente su seguridad al perímetro.
 
 ---
 
-# 3028. Gateway Security Responsibilities
+### 3028. Gateway Security Responsibilities
 
 El gateway podrá aplicar:
 
@@ -39336,7 +39212,7 @@ El gateway podrá aplicar:
 
 ---
 
-# 3029. Application Security Responsibilities
+### 3029. Application Security Responsibilities
 
 VoltStack deberá seguir aplicando:
 
@@ -39349,7 +39225,7 @@ VoltStack deberá seguir aplicando:
 
 ---
 
-# 3030. Gateway Trust Boundary
+### 3030. Gateway Trust Boundary
 
 ```text
 Untrusted Client
@@ -39375,7 +39251,7 @@ El gateway no deberá considerarse una fuente de autorización absoluta.
 
 ---
 
-# 3031. Gateway Identity Propagation
+### 3031. Gateway Identity Propagation
 
 La identidad propagada deberá protegerse mediante:
 
@@ -39387,7 +39263,7 @@ La identidad propagada deberá protegerse mediante:
 
 ---
 
-# 3032. Trusted Gateway Headers
+### 3032. Trusted Gateway Headers
 
 ```php
 final readonly class TrustedGatewayHeaderPolicy
@@ -39404,13 +39280,13 @@ final readonly class TrustedGatewayHeaderPolicy
 
 ---
 
-# 3033. Header Spoofing Prevention
+### 3033. Header Spoofing Prevention
 
 VoltStack deberá eliminar headers de identidad enviados directamente por clientes no confiables.
 
 ---
 
-# 3034. GatewayAuthenticationContext
+### 3034. GatewayAuthenticationContext
 
 ```php
 final readonly class GatewayAuthenticationContext
@@ -39428,7 +39304,7 @@ final readonly class GatewayAuthenticationContext
 
 ---
 
-# 3035. Gateway Policy Consistency
+### 3035. Gateway Policy Consistency
 
 Las políticas del gateway y del framework deberán revisarse para evitar:
 
@@ -39440,13 +39316,13 @@ Las políticas del gateway y del framework deberán revisarse para evitar:
 
 ---
 
-# 3036. Gateway Failover Security
+### 3036. Gateway Failover Security
 
 El failover no deberá redirigir tráfico hacia rutas menos protegidas.
 
 ---
 
-# 3037. Direct Origin Access Protection
+### 3037. Direct Origin Access Protection
 
 Los orígenes detrás del gateway deberán bloquear acceso directo mediante:
 
@@ -39458,19 +39334,19 @@ Los orígenes detrás del gateway deberán bloquear acceso directo mediante:
 
 ---
 
-# 3038. API Gateway Result
+### 3038. API Gateway Result
 
 El gateway deberá funcionar como una capa adicional, no como sustituto del modelo de seguridad de VoltStack.
 
 ---
 
-# 3039. Controller Security Testing Architecture
+### 3039. Controller Security Testing Architecture
 
 VoltStack deberá incorporar pruebas específicas para autorización, políticas y acceso a recursos.
 
 ---
 
-# 3040. Security Testing Objectives
+### 3040. Security Testing Objectives
 
 Las pruebas deberán verificar:
 
@@ -39484,7 +39360,7 @@ Las pruebas deberán verificar:
 
 ---
 
-# 3041. Security Test Layers
+### 3041. Security Test Layers
 
 ```text
 Unit Tests
@@ -39512,7 +39388,7 @@ Adversarial Tests
 
 ---
 
-# 3042. Authorization Unit Testing
+### 3042. Authorization Unit Testing
 
 Cada policy deberá probar:
 
@@ -39525,7 +39401,7 @@ Cada policy deberá probar:
 
 ---
 
-# 3043. PolicyTestCase
+### 3043. PolicyTestCase
 
 ```php
 abstract class PolicyTestCase extends TestCase
@@ -39548,7 +39424,7 @@ abstract class PolicyTestCase extends TestCase
 
 ---
 
-# 3044. Authorization Decision Matrix Testing
+### 3044. Authorization Decision Matrix Testing
 
 VoltStack deberá permitir definir matrices de prueba.
 
@@ -39574,7 +39450,7 @@ Expected Decision
 
 ---
 
-# 3045. AuthorizationScenario
+### 3045. AuthorizationScenario
 
 ```php
 final readonly class AuthorizationScenario
@@ -39593,13 +39469,13 @@ final readonly class AuthorizationScenario
 
 ---
 
-# 3046. Deny-by-Default Testing
+### 3046. Deny-by-Default Testing
 
 Toda nueva operación deberá probar que un sujeto sin permisos recibe denegación.
 
 ---
 
-# 3047. Cross-Tenant Security Testing
+### 3047. Cross-Tenant Security Testing
 
 Las pruebas deberán intentar acceder a recursos de otro tenant mediante:
 
@@ -39612,19 +39488,19 @@ Las pruebas deberán intentar acceder a recursos de otro tenant mediante:
 
 ---
 
-# 3048. BOLA Security Tests
+### 3048. BOLA Security Tests
 
 Cada endpoint que reciba identificadores deberá incluir pruebas de Broken Object Level Authorization.
 
 ---
 
-# 3049. Function-Level Security Tests
+### 3049. Function-Level Security Tests
 
 Las rutas administrativas deberán probarse con usuarios autenticados pero no autorizados.
 
 ---
 
-# 3050. Field-Level Security Tests
+### 3050. Field-Level Security Tests
 
 Los serializadores deberán verificar que campos sensibles sean:
 
@@ -39635,13 +39511,13 @@ Los serializadores deberán verificar que campos sensibles sean:
 
 ---
 
-# 3051. Mass Assignment Tests
+### 3051. Mass Assignment Tests
 
 Las pruebas deberán enviar propiedades no permitidas y comprobar que no se persistan.
 
 ---
 
-# 3052. Policy Mutation Testing
+### 3052. Policy Mutation Testing
 
 VoltStack podrá aplicar mutation testing para detectar pruebas débiles.
 
@@ -39654,7 +39530,7 @@ Ejemplos:
 
 ---
 
-# 3053. Property-Based Authorization Testing
+### 3053. Property-Based Authorization Testing
 
 Podrán generarse combinaciones de:
 
@@ -39667,7 +39543,7 @@ Podrán generarse combinaciones de:
 
 ---
 
-# 3054. Authorization Invariant
+### 3054. Authorization Invariant
 
 Ejemplo:
 
@@ -39683,13 +39559,13 @@ A Resource Owned By Tenant B
 
 ---
 
-# 3055. Policy Verification Architecture
+### 3055. Policy Verification Architecture
 
 VoltStack deberá permitir análisis estructural de políticas antes del runtime.
 
 ---
 
-# 3056. Policy Verification Checks
+### 3056. Policy Verification Checks
 
 Validar:
 
@@ -39703,7 +39579,7 @@ Validar:
 
 ---
 
-# 3057. PolicyDefinitionValidatorInterface
+### 3057. PolicyDefinitionValidatorInterface
 
 ```php
 interface PolicyDefinitionValidatorInterface
@@ -39716,7 +39592,7 @@ interface PolicyDefinitionValidatorInterface
 
 ---
 
-# 3058. PolicyValidationResult
+### 3058. PolicyValidationResult
 
 ```php
 final readonly class PolicyValidationResult
@@ -39733,13 +39609,13 @@ final readonly class PolicyValidationResult
 
 ---
 
-# 3059. Policy Coverage Analysis
+### 3059. Policy Coverage Analysis
 
 VoltStack deberá detectar controladores, métodos y operaciones sin policy asociada.
 
 ---
 
-# 3060. Policy Coverage Report
+### 3060. Policy Coverage Report
 
 ```php
 final readonly class PolicyCoverageReport
@@ -39756,7 +39632,7 @@ final readonly class PolicyCoverageReport
 
 ---
 
-# 3061. Static Security Analysis
+### 3061. Static Security Analysis
 
 El análisis podrá inspeccionar:
 
@@ -39770,7 +39646,7 @@ El análisis podrá inspeccionar:
 
 ---
 
-# 3062. Authorization Path Analysis
+### 3062. Authorization Path Analysis
 
 ```text
 Route
@@ -39800,19 +39676,19 @@ Toda ruta deberá demostrar que el policy engine no puede omitirse.
 
 ---
 
-# 3063. Security Regression Testing
+### 3063. Security Regression Testing
 
 Cada vulnerabilidad corregida deberá producir una prueba permanente.
 
 ---
 
-# 3064. Threat Simulation Architecture
+### 3064. Threat Simulation Architecture
 
 VoltStack deberá soportar pruebas adversariales controladas.
 
 ---
 
-# 3065. Threat Simulation Scenarios
+### 3065. Threat Simulation Scenarios
 
 Incluir:
 
@@ -39826,7 +39702,7 @@ Incluir:
 
 ---
 
-# 3066. ThreatSimulationScenario
+### 3066. ThreatSimulationScenario
 
 ```php
 final readonly class ThreatSimulationScenario
@@ -39845,7 +39721,7 @@ final readonly class ThreatSimulationScenario
 
 ---
 
-# 3067. Chaos Security Testing
+### 3067. Chaos Security Testing
 
 Podrán simularse fallos de:
 
@@ -39859,7 +39735,7 @@ Podrán simularse fallos de:
 
 ---
 
-# 3068. Security Failure Invariants
+### 3068. Security Failure Invariants
 
 Ante fallos críticos:
 
@@ -39875,7 +39751,7 @@ salvo política explícita y documentada.
 
 ---
 
-# 3069. Penetration Testing Support
+### 3069. Penetration Testing Support
 
 VoltStack deberá facilitar:
 
@@ -39888,19 +39764,19 @@ VoltStack deberá facilitar:
 
 ---
 
-# 3070. Security Testing Result
+### 3070. Security Testing Result
 
 La arquitectura de testing deberá convertir la autorización en una propiedad verificable y no solamente en una expectativa de diseño.
 
 ---
 
-# 3071. Security Observability Integration
+### 3071. Security Observability Integration
 
 El modelo de controladores deberá integrarse con la observabilidad general de VoltStack.
 
 ---
 
-# 3072. Authorization Observability Signals
+### 3072. Authorization Observability Signals
 
 Registrar:
 
@@ -39916,7 +39792,7 @@ Registrar:
 
 ---
 
-# 3073. AuthorizationDecisionEvent
+### 3073. AuthorizationDecisionEvent
 
 ```php
 final readonly class AuthorizationDecisionEvent
@@ -39938,7 +39814,7 @@ final readonly class AuthorizationDecisionEvent
 
 ---
 
-# 3074. Sensitive Audit Data Protection
+### 3074. Sensitive Audit Data Protection
 
 Los eventos no deberán incluir:
 
@@ -39951,7 +39827,7 @@ Los eventos no deberán incluir:
 
 ---
 
-# 3075. Authorization Metrics
+### 3075. Authorization Metrics
 
 Medir:
 
@@ -39965,7 +39841,7 @@ Medir:
 
 ---
 
-# 3076. Security Dashboards
+### 3076. Security Dashboards
 
 Los dashboards podrán mostrar:
 
@@ -39985,7 +39861,7 @@ Security Test Coverage
 
 ---
 
-# 3077. Security Alerting
+### 3077. Security Alerting
 
 Generar alertas por:
 
@@ -39998,7 +39874,7 @@ Generar alertas por:
 
 ---
 
-# 3078. Security Correlation
+### 3078. Security Correlation
 
 Las decisiones deberán correlacionarse con:
 
@@ -40012,7 +39888,7 @@ Las decisiones deberán correlacionarse con:
 
 ---
 
-# 3079. Security Evidence Architecture
+### 3079. Security Evidence Architecture
 
 VoltStack deberá preservar evidencia suficiente para reconstruir:
 
@@ -40032,19 +39908,19 @@ At What Time
 
 ---
 
-# 3080. Observability Integration Result
+### 3080. Observability Integration Result
 
 La observabilidad deberá permitir detectar ataques, investigar incidentes y validar que las políticas operan como fueron diseñadas.
 
 ---
 
-# 3081. Controller Security Configuration Architecture
+### 3081. Controller Security Configuration Architecture
 
 VoltStack deberá centralizar la configuración de seguridad del sistema de controladores.
 
 ---
 
-# 3082. Controller Security Configuration Domains
+### 3082. Controller Security Configuration Domains
 
 ```text
 Authorization
@@ -40066,7 +39942,7 @@ Failure Handling
 
 ---
 
-# 3083. Security Configuration Example
+### 3083. Security Configuration Example
 
 ```php
 return [
@@ -40100,7 +39976,7 @@ return [
 
 ---
 
-# 3084. Secure Configuration Defaults
+### 3084. Secure Configuration Defaults
 
 Los defaults deberán:
 
@@ -40113,13 +39989,13 @@ Los defaults deberán:
 
 ---
 
-# 3085. Configuration Schema Validation
+### 3085. Configuration Schema Validation
 
 La configuración deberá validarse durante bootstrap.
 
 ---
 
-# 3086. ControllerSecurityConfiguration
+### 3086. ControllerSecurityConfiguration
 
 ```php
 final readonly class ControllerSecurityConfiguration
@@ -40138,7 +40014,7 @@ final readonly class ControllerSecurityConfiguration
 
 ---
 
-# 3087. Environment-Specific Security Configuration
+### 3087. Environment-Specific Security Configuration
 
 Los ambientes podrán endurecer controles sin cambiar código.
 
@@ -40147,11 +40023,9 @@ Development
 
 Verbose Diagnostics
 
-
 Staging
 
 Production-Like Enforcement
-
 
 Production
 
@@ -40160,13 +40034,13 @@ Strict Enforcement
 
 ---
 
-# 3088. Security Configuration Immutability
+### 3088. Security Configuration Immutability
 
 La configuración efectiva deberá volverse inmutable después del bootstrap.
 
 ---
 
-# 3089. Security Configuration Fingerprint
+### 3089. Security Configuration Fingerprint
 
 VoltStack podrá calcular un fingerprint para detectar cambios.
 
@@ -40184,13 +40058,13 @@ final readonly class SecurityConfigurationFingerprint
 
 ---
 
-# 3090. Controller Security Service Registration
+### 3090. Controller Security Service Registration
 
 El framework deberá registrar servicios mediante un módulo Quantum dedicado.
 
 ---
 
-# 3091. Quantum Controller Security Module
+### 3091. Quantum Controller Security Module
 
 Estructura propuesta:
 
@@ -40211,7 +40085,7 @@ src/Quantum/ControllerSecurity/
 
 ---
 
-# 3092. ControllerSecurityServiceProvider
+### 3092. ControllerSecurityServiceProvider
 
 ```php
 final class ControllerSecurityServiceProvider
@@ -40247,7 +40121,7 @@ final class ControllerSecurityServiceProvider
 
 ---
 
-# 3093. Controller Security Middleware Pipeline
+### 3093. Controller Security Middleware Pipeline
 
 ```text
 Request
@@ -40291,13 +40165,13 @@ Audit Finalization
 
 ---
 
-# 3094. Controller Security Compiler
+### 3094. Controller Security Compiler
 
 VoltStack deberá compilar metadata de seguridad para evitar reflexión repetida.
 
 ---
 
-# 3095. CompiledControllerSecurityMetadata
+### 3095. CompiledControllerSecurityMetadata
 
 ```php
 final readonly class CompiledControllerSecurityMetadata
@@ -40316,7 +40190,7 @@ final readonly class CompiledControllerSecurityMetadata
 
 ---
 
-# 3096. Final Controller Security Reference Architecture
+### 3096. Final Controller Security Reference Architecture
 
 ```text
                          ┌──────────────────────────┐
@@ -40372,7 +40246,7 @@ final readonly class CompiledControllerSecurityMetadata
 
 ---
 
-# 3097. Controller Security Implementation Roadmap
+### 3097. Controller Security Implementation Roadmap
 
 La implementación deberá avanzar por fases.
 
@@ -40384,14 +40258,12 @@ Deny-by-default
 Policy registry
 Controller metadata
 
-
 Phase 2
 
 Resource resolution
 Tenant isolation
 Object-level authorization
 Audit events
-
 
 Phase 3
 
@@ -40400,14 +40272,12 @@ Obligations
 Step-up authentication
 Policy cache
 
-
 Phase 4
 
 Distributed policy enforcement
 Cloud identity
 API and webhook security
 Security observability
-
 
 Phase 5
 
@@ -40419,7 +40289,7 @@ Advanced governance
 
 ---
 
-# 3098. Final Architectural Principles
+### 3098. Final Architectural Principles
 
 El sistema completo deberá conservar estos principios:
 
@@ -40436,7 +40306,7 @@ El sistema completo deberá conservar estos principios:
 
 ---
 
-# 3099. Final Controller Security Model Result
+### 3099. Final Controller Security Model Result
 
 `CONTROLLER_SECURITY_MODEL_PART_06.md` establece una arquitectura integral que incluye:
 
@@ -40490,7 +40360,7 @@ El resultado es un modelo de seguridad diseñado para operar como parte nativa d
 
 ---
 
-# 3100. Estado Final
+### 3100. Estado Final
 
 ```text
 CONTROLLER_SECURITY_MODEL_PART_06.md

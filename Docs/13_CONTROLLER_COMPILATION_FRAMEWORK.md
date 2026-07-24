@@ -1,6 +1,5 @@
 # Framework de compilación del subsistema Controllers de VoltStack
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Compilation`

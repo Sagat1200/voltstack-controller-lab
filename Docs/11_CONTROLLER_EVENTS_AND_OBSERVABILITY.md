@@ -1,6 +1,5 @@
 # Sistema de eventos y observabilidad de controladores en VoltStack
 
-
 **Versión:** 1.0
 **Estado:** Draft arquitectónico
 **Módulo:** `VoltStack\Quantum\Controllers\Observability`
