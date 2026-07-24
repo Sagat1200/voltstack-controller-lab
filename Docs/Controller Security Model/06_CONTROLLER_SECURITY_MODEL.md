@@ -30150,3 +30150,10382 @@ La siguiente entrega continuará con:
 - Managed database security
 - Multi-cloud governance
 ```
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 26 de varias
+**Cobertura:** Secciones **2501–2600**
+
+---
+
+# 2501. Cloud Security Architecture
+
+VoltStack deberá incorporar una arquitectura de seguridad independiente del proveedor cloud.
+
+El framework deberá poder desplegarse sobre:
+
+* infraestructura dedicada;
+* nubes públicas;
+* nubes privadas;
+* arquitecturas híbridas;
+* entornos multi-cloud.
+
+---
+
+# 2502. Cloud Security Objectives
+
+La arquitectura deberá garantizar:
+
+* aislamiento;
+* identidad verificable;
+* mínima autoridad;
+* cifrado;
+* visibilidad;
+* configuración segura;
+* portabilidad de controles.
+
+---
+
+# 2503. Cloud Security Model
+
+```text
+Cloud Provider Controls
+
++
+
+VoltStack Runtime Controls
+
++
+
+Application Controls
+
++
+
+Operational Controls
+
+=
+
+Cloud Security Posture
+```
+
+---
+
+# 2504. Cloud Security Domains
+
+La seguridad cloud deberá cubrir:
+
+```text
+Identity
+
+Network
+
+Compute
+
+Storage
+
+Database
+
+Secrets
+
+Observability
+
+Governance
+
+Resilience
+```
+
+---
+
+# 2505. Cloud Environment Abstraction
+
+VoltStack no deberá acoplar su modelo de seguridad a un único proveedor.
+
+```php
+interface CloudSecurityProviderInterface
+{
+    public function identity(): CloudIdentityManagerInterface;
+
+    public function network(): CloudNetworkSecurityInterface;
+
+    public function secrets(): CloudSecretManagerInterface;
+
+    public function posture(): CloudPostureProviderInterface;
+}
+```
+
+---
+
+# 2506. Shared Responsibility Model
+
+La seguridad cloud deberá entenderse como una responsabilidad compartida.
+
+---
+
+# 2507. Provider Responsibilities
+
+El proveedor podrá ser responsable de:
+
+* seguridad física;
+* hardware;
+* hipervisor;
+* regiones;
+* servicios administrados;
+* infraestructura base.
+
+---
+
+# 2508. Customer Responsibilities
+
+VoltStack y la organización serán responsables de:
+
+* identidades;
+* permisos;
+* datos;
+* configuración;
+* código;
+* secretos;
+* políticas;
+* monitoreo.
+
+---
+
+# 2509. Shared Responsibility Matrix
+
+```text
+Provider
+
+Responsible For:
+
+Physical Infrastructure
+
+Core Platform Availability
+
+
+Application Owner
+
+Responsible For:
+
+Access Policies
+
+Data Protection
+
+Runtime Configuration
+
+Application Security
+```
+
+---
+
+# 2510. Responsibility Boundary Documentation
+
+Cada servicio cloud utilizado deberá documentar:
+
+* responsabilidades del proveedor;
+* responsabilidades del cliente;
+* controles heredados;
+* controles adicionales;
+* riesgos residuales.
+
+---
+
+# 2511. CloudServiceResponsibility
+
+```php
+final readonly class CloudServiceResponsibility
+{
+    public function __construct(
+        public string $service,
+        public array $providerResponsibilities,
+        public array $customerResponsibilities,
+        public array $sharedResponsibilities,
+    ) {
+    }
+}
+```
+
+---
+
+# 2512. Cloud Account Architecture
+
+Los recursos deberán organizarse mediante cuentas, proyectos o suscripciones separadas.
+
+---
+
+# 2513. Account Separation
+
+Separar:
+
+* desarrollo;
+* pruebas;
+* staging;
+* producción;
+* seguridad;
+* auditoría;
+* disaster recovery.
+
+---
+
+# 2514. Cloud Organization Model
+
+```text
+Organization Root
+
+├── Security
+├── Shared Services
+├── Development
+├── Staging
+├── Production
+└── Disaster Recovery
+```
+
+---
+
+# 2515. Management Account Protection
+
+La cuenta raíz o administrativa deberá:
+
+* evitar uso diario;
+* requerir MFA resistente a phishing;
+* mantener acceso de emergencia;
+* registrar toda actividad;
+* limitar credenciales permanentes.
+
+---
+
+# 2516. Cloud Account Bootstrap
+
+Cada nueva cuenta deberá inicializar:
+
+* logging;
+* IAM;
+* alertas;
+* cifrado;
+* networking;
+* políticas organizacionales;
+* control de costos.
+
+---
+
+# 2517. Cloud Landing Zone
+
+VoltStack podrá operar sobre una landing zone con:
+
+* estructura de cuentas;
+* identidades federadas;
+* redes segmentadas;
+* guardrails;
+* observabilidad central.
+
+---
+
+# 2518. Cloud Guardrails
+
+Los guardrails podrán ser:
+
+```text
+Preventive
+
+Detective
+
+Corrective
+
+Responsive
+```
+
+---
+
+# 2519. Preventive Guardrails
+
+Ejemplos:
+
+* bloquear regiones no autorizadas;
+* impedir buckets públicos;
+* exigir cifrado;
+* prohibir usuarios IAM locales;
+* restringir imágenes no aprobadas.
+
+---
+
+# 2520. Detective Guardrails
+
+Detectar:
+
+* cambios IAM;
+* recursos públicos;
+* secretos expuestos;
+* cifrado desactivado;
+* logging eliminado;
+* puertos abiertos.
+
+---
+
+# 2521. Corrective Guardrails
+
+Podrán:
+
+* cerrar exposición pública;
+* restaurar logging;
+* revocar permisos;
+* aplicar etiquetas;
+* aislar workloads.
+
+---
+
+# 2522. Cloud Identity Architecture
+
+La identidad deberá ser el principal perímetro de seguridad cloud.
+
+---
+
+# 2523. Cloud Identity Federation
+
+VoltStack deberá favorecer identidad federada mediante:
+
+* OIDC;
+* SAML;
+* directorios empresariales;
+* proveedores de identidad;
+* identidades temporales.
+
+---
+
+# 2524. Federation Flow
+
+```text
+User
+
+↓
+
+Enterprise Identity Provider
+
+↓
+
+Federation Trust
+
+↓
+
+Temporary Cloud Session
+
+↓
+
+Authorized Resource
+```
+
+---
+
+# 2525. FederatedCloudIdentity
+
+```php
+final readonly class FederatedCloudIdentity
+{
+    public function __construct(
+        public string $subject,
+        public string $issuer,
+        public array $groups,
+        public array $cloudRoles,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2526. Temporary Credentials Principle
+
+Las credenciales cloud deberán ser:
+
+* temporales;
+* limitadas;
+* rotables;
+* auditables;
+* asociadas a una identidad real.
+
+---
+
+# 2527. Permanent Access Keys
+
+Las claves permanentes deberán evitarse.
+
+Cuando sean inevitables deberán:
+
+* estar inventariadas;
+* rotarse;
+* limitarse;
+* monitorizarse;
+* eliminarse al dejar de usarse.
+
+---
+
+# 2528. Human Identity vs Workload Identity
+
+VoltStack deberá diferenciar:
+
+```text
+Human Identity
+
+Used By:
+
+Developers
+
+Operators
+
+Auditors
+
+
+Workload Identity
+
+Used By:
+
+Applications
+
+Workers
+
+Pipelines
+
+Services
+```
+
+---
+
+# 2529. Cloud Workload Identity
+
+Los workloads deberán autenticarse sin secretos estáticos cuando el proveedor lo permita.
+
+---
+
+# 2530. Workload Identity Flow
+
+```text
+Runtime Workload
+
+↓
+
+Platform Identity Token
+
+↓
+
+Cloud Identity Exchange
+
+↓
+
+Short-Lived Credential
+
+↓
+
+Cloud Resource
+```
+
+---
+
+# 2531. WorkloadIdentity
+
+```php
+final readonly class WorkloadIdentity
+{
+    public function __construct(
+        public string $workloadId,
+        public string $environment,
+        public array $capabilities,
+        public DateTimeImmutable $validUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2532. Workload Identity Binding
+
+La identidad deberá vincularse a:
+
+* servicio;
+* ambiente;
+* namespace;
+* cuenta;
+* deployment;
+* artifact.
+
+---
+
+# 2533. Workload Identity Validation
+
+Antes de conceder acceso deberá validarse:
+
+* issuer;
+* audience;
+* subject;
+* entorno;
+* firma;
+* expiración;
+* claims.
+
+---
+
+# 2534. Cloud IAM Architecture
+
+VoltStack deberá aplicar un modelo IAM basado en capacidades mínimas.
+
+---
+
+# 2535. Cloud IAM Principles
+
+Aplicar:
+
+* deny by default;
+* least privilege;
+* role separation;
+* temporary access;
+* conditional access;
+* periodic review.
+
+---
+
+# 2536. Cloud Role Design
+
+Los roles deberán representar funciones concretas.
+
+Ejemplos:
+
+```text
+VoltStackRuntimeReader
+
+VoltStackStorageWriter
+
+VoltStackDeploymentOperator
+
+VoltStackSecurityAuditor
+```
+
+---
+
+# 2537. Wildcard Permission Restrictions
+
+Permisos como:
+
+```text
+Action: *
+
+Resource: *
+```
+
+deberán bloquearse salvo excepciones explícitas y temporales.
+
+---
+
+# 2538. Permission Boundary
+
+VoltStack podrá utilizar límites de permisos para impedir que una identidad se otorgue privilegios fuera de su alcance.
+
+---
+
+# 2539. CloudPolicyDefinition
+
+```php
+final readonly class CloudPolicyDefinition
+{
+    public function __construct(
+        public string $policyId,
+        public array $allowedActions,
+        public array $resources,
+        public array $conditions,
+        public array $explicitDenies,
+    ) {
+    }
+}
+```
+
+---
+
+# 2540. Cloud IAM Conditions
+
+Las políticas podrán depender de:
+
+* ambiente;
+* región;
+* etiquetas;
+* red;
+* identidad;
+* autenticación fuerte;
+* hora;
+* recurso.
+
+---
+
+# 2541. Privileged Cloud Access
+
+Las operaciones privilegiadas deberán requerir:
+
+* MFA;
+* sesión temporal;
+* aprobación;
+* motivo;
+* auditoría;
+* expiración.
+
+---
+
+# 2542. Just-in-Time Cloud Access
+
+```text
+Access Request
+
+↓
+
+Approval
+
+↓
+
+Temporary Role Assignment
+
+↓
+
+Privileged Operation
+
+↓
+
+Automatic Revocation
+```
+
+---
+
+# 2543. Cloud Access Review
+
+Revisar periódicamente:
+
+* usuarios;
+* roles;
+* service accounts;
+* access keys;
+* trust policies;
+* privilegios sin uso.
+
+---
+
+# 2544. Unused Permission Detection
+
+VoltStack deberá poder comparar:
+
+```text
+Granted Permissions
+
+vs
+
+Actually Used Permissions
+```
+
+para reducir acceso excesivo.
+
+---
+
+# 2545. Cross-Account Access Security
+
+El acceso entre cuentas deberá usar:
+
+* roles específicos;
+* trust policies;
+* external IDs;
+* condiciones;
+* auditoría.
+
+---
+
+# 2546. Cloud Network Security Architecture
+
+La red cloud deberá segmentarse por nivel de confianza.
+
+---
+
+# 2547. Network Segmentation Layers
+
+```text
+Internet Edge
+
+↓
+
+Public Network Zone
+
+↓
+
+Application Zone
+
+↓
+
+Service Zone
+
+↓
+
+Data Zone
+
+↓
+
+Management Zone
+```
+
+---
+
+# 2548. Public Subnet Restrictions
+
+Solo deberán ubicarse en zonas públicas componentes que necesiten exposición directa.
+
+---
+
+# 2549. Private Runtime Placement
+
+Los runtimes VoltStack deberán ejecutarse preferentemente en redes privadas.
+
+---
+
+# 2550. Database Network Isolation
+
+Las bases de datos no deberán exponerse directamente a Internet.
+
+---
+
+# 2551. Cloud Firewall Model
+
+Las reglas deberán:
+
+* permitir solo tráfico necesario;
+* limitar origen y destino;
+* usar puertos específicos;
+* documentar propósito;
+* expirar si son temporales.
+
+---
+
+# 2552. NetworkSecurityRule
+
+```php
+final readonly class NetworkSecurityRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $source,
+        public string $destination,
+        public int $port,
+        public string $protocol,
+        public string $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 2553. Default Network Denial
+
+```text
+Unspecified Connection
+
+=
+
+Denied
+```
+
+La conectividad deberá habilitarse explícitamente.
+
+---
+
+# 2554. East-West Traffic Security
+
+El tráfico interno entre servicios deberá autenticarse y autorizarse.
+
+---
+
+# 2555. North-South Traffic Security
+
+El tráfico externo deberá pasar por controles como:
+
+* gateway;
+* WAF;
+* rate limiter;
+* DDoS protection;
+* TLS termination;
+* threat detection.
+
+---
+
+# 2556. Private Service Endpoints
+
+Cuando sea posible, los servicios cloud deberán consumirse mediante endpoints privados.
+
+---
+
+# 2557. Cloud Egress Security
+
+La salida a Internet deberá controlarse mediante:
+
+* allowlists;
+* proxies;
+* gateways;
+* DNS filtering;
+* logging.
+
+---
+
+# 2558. EgressRestrictionPolicy
+
+```php
+final readonly class EgressRestrictionPolicy
+{
+    public function __construct(
+        public array $allowedDomains,
+        public array $allowedNetworks,
+        public array $allowedPorts,
+        public bool $denyUnknownDestinations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2559. DNS Security
+
+El DNS cloud deberá protegerse mediante:
+
+* resolución privada;
+* logging;
+* filtrado;
+* protección contra rebinding;
+* zonas administradas.
+
+---
+
+# 2560. Cloud Storage Security Architecture
+
+Los servicios de objetos y archivos deberán proteger:
+
+* confidencialidad;
+* integridad;
+* acceso;
+* retención;
+* eliminación.
+
+---
+
+# 2561. Bucket Security
+
+Todo bucket deberá:
+
+* bloquear acceso público por defecto;
+* aplicar cifrado;
+* habilitar logging;
+* usar políticas mínimas;
+* tener ownership definido.
+
+---
+
+# 2562. Object Access Security
+
+El acceso deberá evaluarse por:
+
+* identidad;
+* tenant;
+* prefijo;
+* clasificación;
+* operación;
+* contexto.
+
+---
+
+# 2563. Signed URL Security
+
+Las URLs firmadas deberán:
+
+* expirar rápidamente;
+* limitar método;
+* limitar recurso;
+* evitar reutilización indebida;
+* registrarse.
+
+---
+
+# 2564. CloudObjectAccessGrant
+
+```php
+final readonly class CloudObjectAccessGrant
+{
+    public function __construct(
+        public string $objectKey,
+        public string $operation,
+        public DateTimeImmutable $expiresAt,
+        public string $subjectId,
+        public array $constraints,
+    ) {
+    }
+}
+```
+
+---
+
+# 2565. Object Encryption
+
+VoltStack deberá soportar:
+
+* claves administradas por proveedor;
+* claves administradas por cliente;
+* claves específicas por tenant;
+* rotación.
+
+---
+
+# 2566. Storage Versioning
+
+Los objetos críticos deberán poder conservar versiones para proteger contra:
+
+* eliminación accidental;
+* corrupción;
+* ransomware;
+* sobreescritura.
+
+---
+
+# 2567. Object Lock
+
+Para cumplimiento o evidencia podrán usarse mecanismos WORM:
+
+```text
+Write Once
+
+Read Many
+```
+
+---
+
+# 2568. Managed Database Security Architecture
+
+Las bases de datos administradas deberán desplegarse con controles reforzados.
+
+---
+
+# 2569. Managed Database Requirements
+
+Exigir:
+
+* red privada;
+* cifrado;
+* backups;
+* logging;
+* acceso limitado;
+* mantenimiento controlado.
+
+---
+
+# 2570. Database Authentication
+
+Preferir:
+
+* identidad federada;
+* tokens temporales;
+* certificados;
+* usuarios por servicio.
+
+---
+
+# 2571. Shared Database Credentials
+
+No deberán compartirse credenciales entre:
+
+* aplicaciones;
+* ambientes;
+* tenants críticos;
+* humanos;
+* procesos automatizados.
+
+---
+
+# 2572. ManagedDatabaseIdentity
+
+```php
+final readonly class ManagedDatabaseIdentity
+{
+    public function __construct(
+        public string $principal,
+        public string $database,
+        public array $privileges,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2573. Database Parameter Security
+
+Las configuraciones deberán revisar:
+
+* TLS obligatorio;
+* logging;
+* extensiones;
+* conexiones;
+* timeouts;
+* autenticación;
+* replicación.
+
+---
+
+# 2574. Database Backup Security
+
+Los backups deberán:
+
+* cifrarse;
+* probarse;
+* separarse;
+* retenerse;
+* auditarse;
+* protegerse contra eliminación.
+
+---
+
+# 2575. Point-in-Time Recovery
+
+Las bases críticas deberán soportar recuperación a un punto específico.
+
+---
+
+# 2576. Database Snapshot Access
+
+El acceso a snapshots deberá ser más restrictivo que el acceso normal a la base activa.
+
+---
+
+# 2577. Database Clone Security
+
+Los clones para pruebas deberán:
+
+* anonimizar datos;
+* usar cuentas separadas;
+* expirar;
+* prohibir conectividad productiva.
+
+---
+
+# 2578. Serverless Security Architecture
+
+VoltStack podrá ejecutar componentes en funciones o runtimes serverless.
+
+---
+
+# 2579. Serverless Security Characteristics
+
+Considerar:
+
+* ejecución efímera;
+* identidad por función;
+* eventos externos;
+* límites de runtime;
+* secretos dinámicos;
+* observabilidad distribuida.
+
+---
+
+# 2580. Serverless Function Isolation
+
+Cada función deberá tener:
+
+* identidad propia;
+* permisos mínimos;
+* variables limitadas;
+* red definida;
+* timeout;
+* memoria restringida.
+
+---
+
+# 2581. Serverless Event Validation
+
+Toda invocación deberá validar:
+
+* origen;
+* firma;
+* schema;
+* timestamp;
+* replay;
+* autorización.
+
+---
+
+# 2582. ServerlessInvocationContext
+
+```php
+final readonly class ServerlessInvocationContext
+{
+    public function __construct(
+        public string $functionId,
+        public string $eventSource,
+        public string $invocationId,
+        public DateTimeImmutable $invokedAt,
+        public array $claims,
+    ) {
+    }
+}
+```
+
+---
+
+# 2583. Serverless Cold Start Security
+
+La inicialización deberá:
+
+* cargar configuración validada;
+* obtener secretos temporalmente;
+* verificar integridad;
+* evitar datos residuales.
+
+---
+
+# 2584. Serverless Warm Runtime Security
+
+En reutilización de instancia deberá limpiarse:
+
+* estado de request;
+* datos de usuario;
+* contexto de tenant;
+* conexiones;
+* caches sensibles.
+
+---
+
+# 2585. Serverless Concurrency Security
+
+La concurrencia deberá evitar mezcla de:
+
+* identidades;
+* tenants;
+* transacciones;
+* respuestas;
+* datos temporales.
+
+---
+
+# 2586. Cloud Posture Management Architecture
+
+VoltStack deberá permitir evaluar continuamente la postura cloud.
+
+---
+
+# 2587. Cloud Posture Signals
+
+Evaluar:
+
+* recursos públicos;
+* cifrado;
+* IAM;
+* logging;
+* backups;
+* vulnerabilidades;
+* configuraciones;
+* exposición de red.
+
+---
+
+# 2588. CloudPostureFinding
+
+```php
+final readonly class CloudPostureFinding
+{
+    public function __construct(
+        public string $findingId,
+        public string $resourceId,
+        public string $control,
+        public string $severity,
+        public string $status,
+        public array $remediation,
+    ) {
+    }
+}
+```
+
+---
+
+# 2589. Cloud Security Posture Score
+
+El puntaje podrá considerar:
+
+```text
+Identity Security
+
++
+
+Network Security
+
++
+
+Data Protection
+
++
+
+Logging Coverage
+
++
+
+Configuration Compliance
+```
+
+---
+
+# 2590. Cloud Misconfiguration Detection
+
+Detectar:
+
+* puertos administrativos públicos;
+* snapshots compartidos;
+* buckets públicos;
+* roles excesivos;
+* cifrado desactivado;
+* logs eliminados.
+
+---
+
+# 2591. Automated Cloud Remediation
+
+Las correcciones automáticas deberán aplicar guardrails.
+
+Ejemplos:
+
+* cerrar puerto;
+* desactivar acceso público;
+* restaurar policy;
+* habilitar logging;
+* aislar recurso.
+
+---
+
+# 2592. Multi-Cloud Governance Architecture
+
+VoltStack deberá mantener controles equivalentes entre proveedores.
+
+---
+
+# 2593. Multi-Cloud Control Abstraction
+
+```text
+VoltStack Security Control
+
+↓
+
+Provider Adapter
+
+├── AWS Control
+├── Google Cloud Control
+├── Azure Control
+└── Private Cloud Control
+```
+
+---
+
+# 2594. Provider-Specific Differences
+
+La abstracción no deberá ocultar diferencias críticas como:
+
+* semántica IAM;
+* cifrado;
+* redes;
+* logging;
+* identity federation;
+* límites regionales.
+
+---
+
+# 2595. CloudCapabilityMatrix
+
+```php
+final readonly class CloudCapabilityMatrix
+{
+    public function __construct(
+        public string $provider,
+        public array $supportedControls,
+        public array $limitations,
+        public array $requiredCompensatingControls,
+    ) {
+    }
+}
+```
+
+---
+
+# 2596. Multi-Cloud Identity Governance
+
+Las identidades deberán administrarse desde una fuente de verdad central cuando sea posible.
+
+---
+
+# 2597. Multi-Cloud Logging
+
+Los eventos deberán normalizarse y enviarse a una plataforma común de observabilidad y seguridad.
+
+---
+
+# 2598. Cloud Resilience and Security Validation
+
+VoltStack deberá probar:
+
+* pérdida de región;
+* revocación de identidad;
+* caída de secret manager;
+* corrupción de configuración;
+* bloqueo de cuenta;
+* recuperación de backups.
+
+---
+
+# 2599. Cloud Security Result
+
+Esta entrega establece:
+
+```text
+Cloud Security Architecture
+
+Shared Responsibility Model
+
+Cloud Account Isolation
+
+Federated Identity
+
+Workload Identity
+
+Cloud IAM Governance
+
+Network Segmentation
+
+Secure Cloud Storage
+
+Managed Database Security
+
+Serverless Security
+
+Cloud Posture Management
+
+Multi-Cloud Governance
+```
+
+---
+
+# 2600. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2600
+
+Current Delivery:
+Sections 2501-2600
+
+Next:
+Sections 2601-2700
+```
+
+La siguiente entrega continuará con:
+
+```text
+- Data security architecture
+- Data classification
+- Data lifecycle governance
+- Field-level protection
+- Tokenization
+- Data masking
+- Privacy engineering
+- Data residency
+- Retention and deletion
+- Secure analytics
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 26 de varias
+**Cobertura:** Secciones **2501–2600**
+
+---
+
+# 2501. Cloud Security Architecture
+
+VoltStack deberá incorporar una arquitectura de seguridad independiente del proveedor cloud.
+
+El framework deberá poder desplegarse sobre:
+
+* infraestructura dedicada;
+* nubes públicas;
+* nubes privadas;
+* arquitecturas híbridas;
+* entornos multi-cloud.
+
+---
+
+# 2502. Cloud Security Objectives
+
+La arquitectura deberá garantizar:
+
+* aislamiento;
+* identidad verificable;
+* mínima autoridad;
+* cifrado;
+* visibilidad;
+* configuración segura;
+* portabilidad de controles.
+
+---
+
+# 2503. Cloud Security Model
+
+```text
+Cloud Provider Controls
+
++
+
+VoltStack Runtime Controls
+
++
+
+Application Controls
+
++
+
+Operational Controls
+
+=
+
+Cloud Security Posture
+```
+
+---
+
+# 2504. Cloud Security Domains
+
+La seguridad cloud deberá cubrir:
+
+```text
+Identity
+
+Network
+
+Compute
+
+Storage
+
+Database
+
+Secrets
+
+Observability
+
+Governance
+
+Resilience
+```
+
+---
+
+# 2505. Cloud Environment Abstraction
+
+VoltStack no deberá acoplar su modelo de seguridad a un único proveedor.
+
+```php
+interface CloudSecurityProviderInterface
+{
+    public function identity(): CloudIdentityManagerInterface;
+
+    public function network(): CloudNetworkSecurityInterface;
+
+    public function secrets(): CloudSecretManagerInterface;
+
+    public function posture(): CloudPostureProviderInterface;
+}
+```
+
+---
+
+# 2506. Shared Responsibility Model
+
+La seguridad cloud deberá entenderse como una responsabilidad compartida.
+
+---
+
+# 2507. Provider Responsibilities
+
+El proveedor podrá ser responsable de:
+
+* seguridad física;
+* hardware;
+* hipervisor;
+* regiones;
+* servicios administrados;
+* infraestructura base.
+
+---
+
+# 2508. Customer Responsibilities
+
+VoltStack y la organización serán responsables de:
+
+* identidades;
+* permisos;
+* datos;
+* configuración;
+* código;
+* secretos;
+* políticas;
+* monitoreo.
+
+---
+
+# 2509. Shared Responsibility Matrix
+
+```text
+Provider
+
+Responsible For:
+
+Physical Infrastructure
+
+Core Platform Availability
+
+
+Application Owner
+
+Responsible For:
+
+Access Policies
+
+Data Protection
+
+Runtime Configuration
+
+Application Security
+```
+
+---
+
+# 2510. Responsibility Boundary Documentation
+
+Cada servicio cloud utilizado deberá documentar:
+
+* responsabilidades del proveedor;
+* responsabilidades del cliente;
+* controles heredados;
+* controles adicionales;
+* riesgos residuales.
+
+---
+
+# 2511. CloudServiceResponsibility
+
+```php
+final readonly class CloudServiceResponsibility
+{
+    public function __construct(
+        public string $service,
+        public array $providerResponsibilities,
+        public array $customerResponsibilities,
+        public array $sharedResponsibilities,
+    ) {
+    }
+}
+```
+
+---
+
+# 2512. Cloud Account Architecture
+
+Los recursos deberán organizarse mediante cuentas, proyectos o suscripciones separadas.
+
+---
+
+# 2513. Account Separation
+
+Separar:
+
+* desarrollo;
+* pruebas;
+* staging;
+* producción;
+* seguridad;
+* auditoría;
+* disaster recovery.
+
+---
+
+# 2514. Cloud Organization Model
+
+```text
+Organization Root
+
+├── Security
+├── Shared Services
+├── Development
+├── Staging
+├── Production
+└── Disaster Recovery
+```
+
+---
+
+# 2515. Management Account Protection
+
+La cuenta raíz o administrativa deberá:
+
+* evitar uso diario;
+* requerir MFA resistente a phishing;
+* mantener acceso de emergencia;
+* registrar toda actividad;
+* limitar credenciales permanentes.
+
+---
+
+# 2516. Cloud Account Bootstrap
+
+Cada nueva cuenta deberá inicializar:
+
+* logging;
+* IAM;
+* alertas;
+* cifrado;
+* networking;
+* políticas organizacionales;
+* control de costos.
+
+---
+
+# 2517. Cloud Landing Zone
+
+VoltStack podrá operar sobre una landing zone con:
+
+* estructura de cuentas;
+* identidades federadas;
+* redes segmentadas;
+* guardrails;
+* observabilidad central.
+
+---
+
+# 2518. Cloud Guardrails
+
+Los guardrails podrán ser:
+
+```text
+Preventive
+
+Detective
+
+Corrective
+
+Responsive
+```
+
+---
+
+# 2519. Preventive Guardrails
+
+Ejemplos:
+
+* bloquear regiones no autorizadas;
+* impedir buckets públicos;
+* exigir cifrado;
+* prohibir usuarios IAM locales;
+* restringir imágenes no aprobadas.
+
+---
+
+# 2520. Detective Guardrails
+
+Detectar:
+
+* cambios IAM;
+* recursos públicos;
+* secretos expuestos;
+* cifrado desactivado;
+* logging eliminado;
+* puertos abiertos.
+
+---
+
+# 2521. Corrective Guardrails
+
+Podrán:
+
+* cerrar exposición pública;
+* restaurar logging;
+* revocar permisos;
+* aplicar etiquetas;
+* aislar workloads.
+
+---
+
+# 2522. Cloud Identity Architecture
+
+La identidad deberá ser el principal perímetro de seguridad cloud.
+
+---
+
+# 2523. Cloud Identity Federation
+
+VoltStack deberá favorecer identidad federada mediante:
+
+* OIDC;
+* SAML;
+* directorios empresariales;
+* proveedores de identidad;
+* identidades temporales.
+
+---
+
+# 2524. Federation Flow
+
+```text
+User
+
+↓
+
+Enterprise Identity Provider
+
+↓
+
+Federation Trust
+
+↓
+
+Temporary Cloud Session
+
+↓
+
+Authorized Resource
+```
+
+---
+
+# 2525. FederatedCloudIdentity
+
+```php
+final readonly class FederatedCloudIdentity
+{
+    public function __construct(
+        public string $subject,
+        public string $issuer,
+        public array $groups,
+        public array $cloudRoles,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2526. Temporary Credentials Principle
+
+Las credenciales cloud deberán ser:
+
+* temporales;
+* limitadas;
+* rotables;
+* auditables;
+* asociadas a una identidad real.
+
+---
+
+# 2527. Permanent Access Keys
+
+Las claves permanentes deberán evitarse.
+
+Cuando sean inevitables deberán:
+
+* estar inventariadas;
+* rotarse;
+* limitarse;
+* monitorizarse;
+* eliminarse al dejar de usarse.
+
+---
+
+# 2528. Human Identity vs Workload Identity
+
+VoltStack deberá diferenciar:
+
+```text
+Human Identity
+
+Used By:
+
+Developers
+
+Operators
+
+Auditors
+
+
+Workload Identity
+
+Used By:
+
+Applications
+
+Workers
+
+Pipelines
+
+Services
+```
+
+---
+
+# 2529. Cloud Workload Identity
+
+Los workloads deberán autenticarse sin secretos estáticos cuando el proveedor lo permita.
+
+---
+
+# 2530. Workload Identity Flow
+
+```text
+Runtime Workload
+
+↓
+
+Platform Identity Token
+
+↓
+
+Cloud Identity Exchange
+
+↓
+
+Short-Lived Credential
+
+↓
+
+Cloud Resource
+```
+
+---
+
+# 2531. WorkloadIdentity
+
+```php
+final readonly class WorkloadIdentity
+{
+    public function __construct(
+        public string $workloadId,
+        public string $environment,
+        public array $capabilities,
+        public DateTimeImmutable $validUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2532. Workload Identity Binding
+
+La identidad deberá vincularse a:
+
+* servicio;
+* ambiente;
+* namespace;
+* cuenta;
+* deployment;
+* artifact.
+
+---
+
+# 2533. Workload Identity Validation
+
+Antes de conceder acceso deberá validarse:
+
+* issuer;
+* audience;
+* subject;
+* entorno;
+* firma;
+* expiración;
+* claims.
+
+---
+
+# 2534. Cloud IAM Architecture
+
+VoltStack deberá aplicar un modelo IAM basado en capacidades mínimas.
+
+---
+
+# 2535. Cloud IAM Principles
+
+Aplicar:
+
+* deny by default;
+* least privilege;
+* role separation;
+* temporary access;
+* conditional access;
+* periodic review.
+
+---
+
+# 2536. Cloud Role Design
+
+Los roles deberán representar funciones concretas.
+
+Ejemplos:
+
+```text
+VoltStackRuntimeReader
+
+VoltStackStorageWriter
+
+VoltStackDeploymentOperator
+
+VoltStackSecurityAuditor
+```
+
+---
+
+# 2537. Wildcard Permission Restrictions
+
+Permisos como:
+
+```text
+Action: *
+
+Resource: *
+```
+
+deberán bloquearse salvo excepciones explícitas y temporales.
+
+---
+
+# 2538. Permission Boundary
+
+VoltStack podrá utilizar límites de permisos para impedir que una identidad se otorgue privilegios fuera de su alcance.
+
+---
+
+# 2539. CloudPolicyDefinition
+
+```php
+final readonly class CloudPolicyDefinition
+{
+    public function __construct(
+        public string $policyId,
+        public array $allowedActions,
+        public array $resources,
+        public array $conditions,
+        public array $explicitDenies,
+    ) {
+    }
+}
+```
+
+---
+
+# 2540. Cloud IAM Conditions
+
+Las políticas podrán depender de:
+
+* ambiente;
+* región;
+* etiquetas;
+* red;
+* identidad;
+* autenticación fuerte;
+* hora;
+* recurso.
+
+---
+
+# 2541. Privileged Cloud Access
+
+Las operaciones privilegiadas deberán requerir:
+
+* MFA;
+* sesión temporal;
+* aprobación;
+* motivo;
+* auditoría;
+* expiración.
+
+---
+
+# 2542. Just-in-Time Cloud Access
+
+```text
+Access Request
+
+↓
+
+Approval
+
+↓
+
+Temporary Role Assignment
+
+↓
+
+Privileged Operation
+
+↓
+
+Automatic Revocation
+```
+
+---
+
+# 2543. Cloud Access Review
+
+Revisar periódicamente:
+
+* usuarios;
+* roles;
+* service accounts;
+* access keys;
+* trust policies;
+* privilegios sin uso.
+
+---
+
+# 2544. Unused Permission Detection
+
+VoltStack deberá poder comparar:
+
+```text
+Granted Permissions
+
+vs
+
+Actually Used Permissions
+```
+
+para reducir acceso excesivo.
+
+---
+
+# 2545. Cross-Account Access Security
+
+El acceso entre cuentas deberá usar:
+
+* roles específicos;
+* trust policies;
+* external IDs;
+* condiciones;
+* auditoría.
+
+---
+
+# 2546. Cloud Network Security Architecture
+
+La red cloud deberá segmentarse por nivel de confianza.
+
+---
+
+# 2547. Network Segmentation Layers
+
+```text
+Internet Edge
+
+↓
+
+Public Network Zone
+
+↓
+
+Application Zone
+
+↓
+
+Service Zone
+
+↓
+
+Data Zone
+
+↓
+
+Management Zone
+```
+
+---
+
+# 2548. Public Subnet Restrictions
+
+Solo deberán ubicarse en zonas públicas componentes que necesiten exposición directa.
+
+---
+
+# 2549. Private Runtime Placement
+
+Los runtimes VoltStack deberán ejecutarse preferentemente en redes privadas.
+
+---
+
+# 2550. Database Network Isolation
+
+Las bases de datos no deberán exponerse directamente a Internet.
+
+---
+
+# 2551. Cloud Firewall Model
+
+Las reglas deberán:
+
+* permitir solo tráfico necesario;
+* limitar origen y destino;
+* usar puertos específicos;
+* documentar propósito;
+* expirar si son temporales.
+
+---
+
+# 2552. NetworkSecurityRule
+
+```php
+final readonly class NetworkSecurityRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $source,
+        public string $destination,
+        public int $port,
+        public string $protocol,
+        public string $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 2553. Default Network Denial
+
+```text
+Unspecified Connection
+
+=
+
+Denied
+```
+
+La conectividad deberá habilitarse explícitamente.
+
+---
+
+# 2554. East-West Traffic Security
+
+El tráfico interno entre servicios deberá autenticarse y autorizarse.
+
+---
+
+# 2555. North-South Traffic Security
+
+El tráfico externo deberá pasar por controles como:
+
+* gateway;
+* WAF;
+* rate limiter;
+* DDoS protection;
+* TLS termination;
+* threat detection.
+
+---
+
+# 2556. Private Service Endpoints
+
+Cuando sea posible, los servicios cloud deberán consumirse mediante endpoints privados.
+
+---
+
+# 2557. Cloud Egress Security
+
+La salida a Internet deberá controlarse mediante:
+
+* allowlists;
+* proxies;
+* gateways;
+* DNS filtering;
+* logging.
+
+---
+
+# 2558. EgressRestrictionPolicy
+
+```php
+final readonly class EgressRestrictionPolicy
+{
+    public function __construct(
+        public array $allowedDomains,
+        public array $allowedNetworks,
+        public array $allowedPorts,
+        public bool $denyUnknownDestinations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2559. DNS Security
+
+El DNS cloud deberá protegerse mediante:
+
+* resolución privada;
+* logging;
+* filtrado;
+* protección contra rebinding;
+* zonas administradas.
+
+---
+
+# 2560. Cloud Storage Security Architecture
+
+Los servicios de objetos y archivos deberán proteger:
+
+* confidencialidad;
+* integridad;
+* acceso;
+* retención;
+* eliminación.
+
+---
+
+# 2561. Bucket Security
+
+Todo bucket deberá:
+
+* bloquear acceso público por defecto;
+* aplicar cifrado;
+* habilitar logging;
+* usar políticas mínimas;
+* tener ownership definido.
+
+---
+
+# 2562. Object Access Security
+
+El acceso deberá evaluarse por:
+
+* identidad;
+* tenant;
+* prefijo;
+* clasificación;
+* operación;
+* contexto.
+
+---
+
+# 2563. Signed URL Security
+
+Las URLs firmadas deberán:
+
+* expirar rápidamente;
+* limitar método;
+* limitar recurso;
+* evitar reutilización indebida;
+* registrarse.
+
+---
+
+# 2564. CloudObjectAccessGrant
+
+```php
+final readonly class CloudObjectAccessGrant
+{
+    public function __construct(
+        public string $objectKey,
+        public string $operation,
+        public DateTimeImmutable $expiresAt,
+        public string $subjectId,
+        public array $constraints,
+    ) {
+    }
+}
+```
+
+---
+
+# 2565. Object Encryption
+
+VoltStack deberá soportar:
+
+* claves administradas por proveedor;
+* claves administradas por cliente;
+* claves específicas por tenant;
+* rotación.
+
+---
+
+# 2566. Storage Versioning
+
+Los objetos críticos deberán poder conservar versiones para proteger contra:
+
+* eliminación accidental;
+* corrupción;
+* ransomware;
+* sobreescritura.
+
+---
+
+# 2567. Object Lock
+
+Para cumplimiento o evidencia podrán usarse mecanismos WORM:
+
+```text
+Write Once
+
+Read Many
+```
+
+---
+
+# 2568. Managed Database Security Architecture
+
+Las bases de datos administradas deberán desplegarse con controles reforzados.
+
+---
+
+# 2569. Managed Database Requirements
+
+Exigir:
+
+* red privada;
+* cifrado;
+* backups;
+* logging;
+* acceso limitado;
+* mantenimiento controlado.
+
+---
+
+# 2570. Database Authentication
+
+Preferir:
+
+* identidad federada;
+* tokens temporales;
+* certificados;
+* usuarios por servicio.
+
+---
+
+# 2571. Shared Database Credentials
+
+No deberán compartirse credenciales entre:
+
+* aplicaciones;
+* ambientes;
+* tenants críticos;
+* humanos;
+* procesos automatizados.
+
+---
+
+# 2572. ManagedDatabaseIdentity
+
+```php
+final readonly class ManagedDatabaseIdentity
+{
+    public function __construct(
+        public string $principal,
+        public string $database,
+        public array $privileges,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2573. Database Parameter Security
+
+Las configuraciones deberán revisar:
+
+* TLS obligatorio;
+* logging;
+* extensiones;
+* conexiones;
+* timeouts;
+* autenticación;
+* replicación.
+
+---
+
+# 2574. Database Backup Security
+
+Los backups deberán:
+
+* cifrarse;
+* probarse;
+* separarse;
+* retenerse;
+* auditarse;
+* protegerse contra eliminación.
+
+---
+
+# 2575. Point-in-Time Recovery
+
+Las bases críticas deberán soportar recuperación a un punto específico.
+
+---
+
+# 2576. Database Snapshot Access
+
+El acceso a snapshots deberá ser más restrictivo que el acceso normal a la base activa.
+
+---
+
+# 2577. Database Clone Security
+
+Los clones para pruebas deberán:
+
+* anonimizar datos;
+* usar cuentas separadas;
+* expirar;
+* prohibir conectividad productiva.
+
+---
+
+# 2578. Serverless Security Architecture
+
+VoltStack podrá ejecutar componentes en funciones o runtimes serverless.
+
+---
+
+# 2579. Serverless Security Characteristics
+
+Considerar:
+
+* ejecución efímera;
+* identidad por función;
+* eventos externos;
+* límites de runtime;
+* secretos dinámicos;
+* observabilidad distribuida.
+
+---
+
+# 2580. Serverless Function Isolation
+
+Cada función deberá tener:
+
+* identidad propia;
+* permisos mínimos;
+* variables limitadas;
+* red definida;
+* timeout;
+* memoria restringida.
+
+---
+
+# 2581. Serverless Event Validation
+
+Toda invocación deberá validar:
+
+* origen;
+* firma;
+* schema;
+* timestamp;
+* replay;
+* autorización.
+
+---
+
+# 2582. ServerlessInvocationContext
+
+```php
+final readonly class ServerlessInvocationContext
+{
+    public function __construct(
+        public string $functionId,
+        public string $eventSource,
+        public string $invocationId,
+        public DateTimeImmutable $invokedAt,
+        public array $claims,
+    ) {
+    }
+}
+```
+
+---
+
+# 2583. Serverless Cold Start Security
+
+La inicialización deberá:
+
+* cargar configuración validada;
+* obtener secretos temporalmente;
+* verificar integridad;
+* evitar datos residuales.
+
+---
+
+# 2584. Serverless Warm Runtime Security
+
+En reutilización de instancia deberá limpiarse:
+
+* estado de request;
+* datos de usuario;
+* contexto de tenant;
+* conexiones;
+* caches sensibles.
+
+---
+
+# 2585. Serverless Concurrency Security
+
+La concurrencia deberá evitar mezcla de:
+
+* identidades;
+* tenants;
+* transacciones;
+* respuestas;
+* datos temporales.
+
+---
+
+# 2586. Cloud Posture Management Architecture
+
+VoltStack deberá permitir evaluar continuamente la postura cloud.
+
+---
+
+# 2587. Cloud Posture Signals
+
+Evaluar:
+
+* recursos públicos;
+* cifrado;
+* IAM;
+* logging;
+* backups;
+* vulnerabilidades;
+* configuraciones;
+* exposición de red.
+
+---
+
+# 2588. CloudPostureFinding
+
+```php
+final readonly class CloudPostureFinding
+{
+    public function __construct(
+        public string $findingId,
+        public string $resourceId,
+        public string $control,
+        public string $severity,
+        public string $status,
+        public array $remediation,
+    ) {
+    }
+}
+```
+
+---
+
+# 2589. Cloud Security Posture Score
+
+El puntaje podrá considerar:
+
+```text
+Identity Security
+
++
+
+Network Security
+
++
+
+Data Protection
+
++
+
+Logging Coverage
+
++
+
+Configuration Compliance
+```
+
+---
+
+# 2590. Cloud Misconfiguration Detection
+
+Detectar:
+
+* puertos administrativos públicos;
+* snapshots compartidos;
+* buckets públicos;
+* roles excesivos;
+* cifrado desactivado;
+* logs eliminados.
+
+---
+
+# 2591. Automated Cloud Remediation
+
+Las correcciones automáticas deberán aplicar guardrails.
+
+Ejemplos:
+
+* cerrar puerto;
+* desactivar acceso público;
+* restaurar policy;
+* habilitar logging;
+* aislar recurso.
+
+---
+
+# 2592. Multi-Cloud Governance Architecture
+
+VoltStack deberá mantener controles equivalentes entre proveedores.
+
+---
+
+# 2593. Multi-Cloud Control Abstraction
+
+```text
+VoltStack Security Control
+
+↓
+
+Provider Adapter
+
+├── AWS Control
+├── Google Cloud Control
+├── Azure Control
+└── Private Cloud Control
+```
+
+---
+
+# 2594. Provider-Specific Differences
+
+La abstracción no deberá ocultar diferencias críticas como:
+
+* semántica IAM;
+* cifrado;
+* redes;
+* logging;
+* identity federation;
+* límites regionales.
+
+---
+
+# 2595. CloudCapabilityMatrix
+
+```php
+final readonly class CloudCapabilityMatrix
+{
+    public function __construct(
+        public string $provider,
+        public array $supportedControls,
+        public array $limitations,
+        public array $requiredCompensatingControls,
+    ) {
+    }
+}
+```
+
+---
+
+# 2596. Multi-Cloud Identity Governance
+
+Las identidades deberán administrarse desde una fuente de verdad central cuando sea posible.
+
+---
+
+# 2597. Multi-Cloud Logging
+
+Los eventos deberán normalizarse y enviarse a una plataforma común de observabilidad y seguridad.
+
+---
+
+# 2598. Cloud Resilience and Security Validation
+
+VoltStack deberá probar:
+
+* pérdida de región;
+* revocación de identidad;
+* caída de secret manager;
+* corrupción de configuración;
+* bloqueo de cuenta;
+* recuperación de backups.
+
+---
+
+# 2599. Cloud Security Result
+
+Esta entrega establece:
+
+```text
+Cloud Security Architecture
+
+Shared Responsibility Model
+
+Cloud Account Isolation
+
+Federated Identity
+
+Workload Identity
+
+Cloud IAM Governance
+
+Network Segmentation
+
+Secure Cloud Storage
+
+Managed Database Security
+
+Serverless Security
+
+Cloud Posture Management
+
+Multi-Cloud Governance
+```
+
+---
+
+# 2600. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2600
+
+Current Delivery:
+Sections 2501-2600
+
+Next:
+Sections 2601-2700
+```
+
+La siguiente entrega continuará con:
+
+```text
+- Data security architecture
+- Data classification
+- Data lifecycle governance
+- Field-level protection
+- Tokenization
+- Data masking
+- Privacy engineering
+- Data residency
+- Retention and deletion
+- Secure analytics
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 27 de 31
+**Cobertura:** Secciones **2601–2700**
+
+---
+
+# 2601. Data Security Architecture
+
+VoltStack deberá incorporar una arquitectura integral para proteger los datos durante todo su ciclo de vida.
+
+La protección deberá aplicarse a:
+
+* datos en tránsito;
+* datos en reposo;
+* datos en uso;
+* datos temporales;
+* datos derivados;
+* datos respaldados;
+* datos archivados.
+
+---
+
+# 2602. Data Security Objectives
+
+La arquitectura deberá garantizar:
+
+* confidencialidad;
+* integridad;
+* disponibilidad;
+* privacidad;
+* trazabilidad;
+* minimización;
+* eliminación segura.
+
+---
+
+# 2603. Data Security Model
+
+```text
+Data Classification
+
+↓
+
+Access Policy
+
+↓
+
+Protection Strategy
+
+↓
+
+Usage Monitoring
+
+↓
+
+Retention Control
+
+↓
+
+Secure Disposal
+```
+
+---
+
+# 2604. Data Security Domains
+
+VoltStack deberá organizar la seguridad de datos en:
+
+```text
+Classification
+
+Ownership
+
+Access
+
+Encryption
+
+Masking
+
+Tokenization
+
+Residency
+
+Retention
+
+Deletion
+
+Analytics
+```
+
+---
+
+# 2605. Data Governance Architecture
+
+La seguridad de datos deberá formar parte de un modelo de gobierno formal.
+
+El gobierno deberá definir:
+
+* propietarios;
+* custodios;
+* clasificación;
+* propósito;
+* ubicación;
+* retención;
+* controles.
+
+---
+
+# 2606. Data Governance Roles
+
+Definir:
+
+* Data Owner;
+* Data Steward;
+* Data Custodian;
+* Privacy Officer;
+* Security Officer;
+* Application Owner;
+* Compliance Reviewer.
+
+---
+
+# 2607. Data Ownership
+
+Cada conjunto de datos deberá tener un propietario responsable de:
+
+* aprobar usos;
+* definir clasificación;
+* establecer retención;
+* autorizar excepciones;
+* validar controles.
+
+---
+
+# 2608. Data Custodianship
+
+El custodio será responsable de implementar:
+
+* almacenamiento;
+* backups;
+* cifrado;
+* disponibilidad;
+* eliminación;
+* controles técnicos.
+
+---
+
+# 2609. DataAsset
+
+```php
+final readonly class DataAsset
+{
+    public function __construct(
+        public string $assetId,
+        public string $name,
+        public string $owner,
+        public string $classification,
+        public array $locations,
+        public array $allowedPurposes,
+    ) {
+    }
+}
+```
+
+---
+
+# 2610. Data Inventory
+
+VoltStack deberá poder mantener un inventario de:
+
+* entidades;
+* tablas;
+* archivos;
+* objetos;
+* eventos;
+* caches;
+* índices;
+* exports.
+
+---
+
+# 2611. Data Inventory Metadata
+
+Cada elemento deberá declarar:
+
+* tipo;
+* propietario;
+* sensibilidad;
+* fuente;
+* destino;
+* retención;
+* residencia;
+* controles.
+
+---
+
+# 2612. Data Discovery
+
+VoltStack podrá facilitar el descubrimiento de datos mediante:
+
+* esquemas;
+* atributos;
+* modelos;
+* migraciones;
+* DTOs;
+* serializadores;
+* registros de acceso.
+
+---
+
+# 2613. Data Classification Architecture
+
+Todo dato deberá clasificarse de acuerdo con su impacto potencial.
+
+---
+
+# 2614. DataClassification
+
+```php
+enum DataClassification: string
+{
+    case Public = 'public';
+    case Internal = 'internal';
+    case Confidential = 'confidential';
+    case Restricted = 'restricted';
+    case HighlyRestricted = 'highly_restricted';
+}
+```
+
+---
+
+# 2615. Public Data
+
+Los datos públicos podrán divulgarse sin daño significativo.
+
+Aun así deberán protegerse contra:
+
+* alteración;
+* suplantación;
+* eliminación;
+* publicación no autorizada.
+
+---
+
+# 2616. Internal Data
+
+Los datos internos deberán limitarse a:
+
+* empleados;
+* servicios autorizados;
+* integraciones confiables;
+* procesos internos.
+
+---
+
+# 2617. Confidential Data
+
+Los datos confidenciales deberán requerir:
+
+* autenticación;
+* autorización explícita;
+* cifrado;
+* logging;
+* retención definida.
+
+---
+
+# 2618. Restricted Data
+
+Los datos restringidos podrán incluir:
+
+* información financiera;
+* credenciales;
+* documentos legales;
+* información personal sensible;
+* secretos empresariales.
+
+---
+
+# 2619. Highly Restricted Data
+
+Los datos altamente restringidos deberán usar los controles más fuertes.
+
+Ejemplos:
+
+* claves criptográficas;
+* secretos raíz;
+* datos médicos sensibles;
+* credenciales privilegiadas;
+* material de autenticación.
+
+---
+
+# 2620. Data Classification Criteria
+
+La clasificación deberá considerar:
+
+```text
+Business Impact
+
++
+
+Legal Obligations
+
++
+
+Privacy Impact
+
++
+
+Security Risk
+
++
+
+Operational Criticality
+```
+
+---
+
+# 2621. DataClassificationMetadata
+
+```php
+#[Attribute(Attribute::TARGET_PROPERTY)]
+final readonly class DataClassificationMetadata
+{
+    public function __construct(
+        public DataClassification $level,
+        public bool $encrypt = false,
+        public bool $mask = false,
+        public ?string $retentionPolicy = null,
+    ) {
+    }
+}
+```
+
+---
+
+# 2622. Field Classification Example
+
+```php
+final readonly class CustomerProfile
+{
+    public function __construct(
+        #[DataClassificationMetadata(
+            DataClassification::Public
+        )]
+        public string $displayName,
+
+        #[DataClassificationMetadata(
+            DataClassification::Confidential,
+            encrypt: true,
+            mask: true
+        )]
+        public string $email,
+
+        #[DataClassificationMetadata(
+            DataClassification::Restricted,
+            encrypt: true,
+            mask: true,
+            retentionPolicy: 'financial-record'
+        )]
+        public string $taxIdentifier,
+    ) {
+    }
+}
+```
+
+---
+
+# 2623. Classification Inheritance
+
+Los contenedores podrán heredar la clasificación más alta de sus campos.
+
+```text
+Public Field
+
++
+
+Restricted Field
+
+=
+
+Restricted Record
+```
+
+---
+
+# 2624. Classification Propagation
+
+La clasificación deberá propagarse durante:
+
+* transformación;
+* serialización;
+* exportación;
+* replicación;
+* caching;
+* logging.
+
+---
+
+# 2625. Derived Data Classification
+
+Los datos derivados deberán clasificarse según:
+
+* sensibilidad de la fuente;
+* posibilidad de reidentificación;
+* propósito;
+* contexto de uso.
+
+---
+
+# 2626. Aggregated Data Classification
+
+Un agregado podrá reducir sensibilidad solo si:
+
+* no permite identificación;
+* existe suficiente tamaño de grupo;
+* no expone valores extremos;
+* ha sido validado.
+
+---
+
+# 2627. Data Labeling Architecture
+
+VoltStack deberá poder asociar etiquetas de protección a datos y recursos.
+
+Ejemplos:
+
+```text
+pii
+
+financial
+
+credential
+
+health
+
+tenant-confidential
+
+legal-hold
+```
+
+---
+
+# 2628. DataLabel
+
+```php
+final readonly class DataLabel
+{
+    public function __construct(
+        public string $name,
+        public DataClassification $classification,
+        public array $requiredControls,
+    ) {
+    }
+}
+```
+
+---
+
+# 2629. Data Lifecycle Architecture
+
+Todo dato deberá administrarse desde su creación hasta su eliminación.
+
+---
+
+# 2630. Data Lifecycle Stages
+
+```text
+Create
+
+↓
+
+Collect
+
+↓
+
+Store
+
+↓
+
+Use
+
+↓
+
+Share
+
+↓
+
+Archive
+
+↓
+
+Delete
+```
+
+---
+
+# 2631. Data Creation Security
+
+Al crear datos deberá registrarse:
+
+* origen;
+* propietario;
+* clasificación;
+* propósito;
+* timestamp;
+* tenant.
+
+---
+
+# 2632. Data Collection Security
+
+La recopilación deberá limitarse a datos:
+
+* necesarios;
+* autorizados;
+* relevantes;
+* proporcionales;
+* asociados a un propósito.
+
+---
+
+# 2633. Data Minimization Principle
+
+```text
+Collect Only
+
+What Is Necessary
+
+For The Declared Purpose
+```
+
+---
+
+# 2634. Purpose Limitation
+
+Los datos no deberán utilizarse para propósitos incompatibles sin:
+
+* nueva base autorizada;
+* evaluación;
+* aprobación;
+* transparencia cuando aplique.
+
+---
+
+# 2635. DataPurpose
+
+```php
+final readonly class DataPurpose
+{
+    public function __construct(
+        public string $purposeId,
+        public string $description,
+        public array $allowedDataCategories,
+        public DateTimeImmutable $validUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2636. Purpose-Based Access Control
+
+La autorización deberá considerar no solo quién accede, sino para qué propósito.
+
+---
+
+# 2637. PurposeAccessContext
+
+```php
+final readonly class PurposeAccessContext
+{
+    public function __construct(
+        public string $subjectId,
+        public string $purposeId,
+        public string $operation,
+        public array $dataLabels,
+    ) {
+    }
+}
+```
+
+---
+
+# 2638. Data Storage Security
+
+El almacenamiento deberá aplicar controles según:
+
+* clasificación;
+* ubicación;
+* tenant;
+* formato;
+* retención;
+* disponibilidad.
+
+---
+
+# 2639. Data at Rest Protection
+
+Los datos en reposo deberán protegerse mediante:
+
+* cifrado;
+* permisos;
+* aislamiento;
+* backups;
+* integridad;
+* monitoreo.
+
+---
+
+# 2640. Data in Transit Protection
+
+Toda transmisión sensible deberá usar:
+
+* TLS;
+* validación de certificado;
+* autenticación del destino;
+* protección contra replay;
+* integridad.
+
+---
+
+# 2641. Data in Use Protection
+
+Durante el procesamiento deberán limitarse:
+
+* copias;
+* buffers;
+* logs;
+* dumps;
+* exposición a procesos no autorizados.
+
+---
+
+# 2642. Temporary Data Security
+
+Los datos temporales deberán:
+
+* tener vida corta;
+* almacenarse en rutas controladas;
+* cifrarse si son sensibles;
+* eliminarse después del uso.
+
+---
+
+# 2643. Cache Data Security
+
+Los caches deberán respetar:
+
+* tenant;
+* clasificación;
+* expiración;
+* invalidación;
+* cifrado cuando aplique.
+
+---
+
+# 2644. CacheKeySecurity
+
+```php
+final readonly class SecureCacheKey
+{
+    public function __construct(
+        public string $tenantId,
+        public string $namespace,
+        public string $identifier,
+        public DataClassification $classification,
+    ) {
+    }
+}
+```
+
+---
+
+# 2645. Data Isolation Architecture
+
+VoltStack deberá evitar mezcla de datos entre:
+
+* tenants;
+* usuarios;
+* ambientes;
+* regiones;
+* contextos de seguridad.
+
+---
+
+# 2646. Tenant Data Isolation
+
+El aislamiento podrá aplicarse mediante:
+
+* bases separadas;
+* esquemas;
+* particiones;
+* prefijos;
+* políticas de fila;
+* claves específicas.
+
+---
+
+# 2647. Row-Level Data Security
+
+Las consultas deberán incluir restricciones derivadas del contexto de seguridad.
+
+```text
+Query
+
++
+
+Tenant Scope
+
++
+
+Ownership Scope
+
++
+
+Policy Scope
+```
+
+---
+
+# 2648. Secure Repository Pattern
+
+```php
+interface SecureRepositoryInterface
+{
+    public function find(
+        ResourceIdentifier $identifier,
+        DataAccessContext $context
+    ): object;
+
+    public function persist(
+        object $entity,
+        DataAccessContext $context
+    ): void;
+}
+```
+
+---
+
+# 2649. DataAccessContext
+
+```php
+final readonly class DataAccessContext
+{
+    public function __construct(
+        public string $subjectId,
+        public string $tenantId,
+        public string $purpose,
+        public array $permissions,
+        public array $constraints,
+    ) {
+    }
+}
+```
+
+---
+
+# 2650. Field-Level Security Architecture
+
+VoltStack deberá permitir controles a nivel de campo.
+
+---
+
+# 2651. Field-Level Access Decisions
+
+Una propiedad podrá ser:
+
+* visible;
+* enmascarada;
+* cifrada;
+* omitida;
+* reemplazada;
+* revelada bajo autorización reforzada.
+
+---
+
+# 2652. FieldAccessDecision
+
+```php
+enum FieldAccessDecision: string
+{
+    case Allow = 'allow';
+    case Mask = 'mask';
+    case Omit = 'omit';
+    case Deny = 'deny';
+    case RequireStepUp = 'require_step_up';
+}
+```
+
+---
+
+# 2653. FieldPolicyInterface
+
+```php
+interface FieldPolicyInterface
+{
+    public function decide(
+        object $resource,
+        string $field,
+        DataAccessContext $context
+    ): FieldAccessDecision;
+}
+```
+
+---
+
+# 2654. Secure Serialization
+
+Los serializadores deberán consultar políticas de campo antes de producir una salida.
+
+---
+
+# 2655. SecureSerializerInterface
+
+```php
+interface SecureSerializerInterface
+{
+    public function serialize(
+        object $value,
+        SerializationSecurityContext $context
+    ): array;
+}
+```
+
+---
+
+# 2656. Serialization Security Flow
+
+```text
+Domain Object
+
+↓
+
+Inspect Field Metadata
+
+↓
+
+Evaluate Field Policy
+
+↓
+
+Transform or Omit
+
+↓
+
+Generate Secure Output
+```
+
+---
+
+# 2657. Sensitive Field Revelation
+
+La revelación de campos sensibles podrá requerir:
+
+* permiso específico;
+* MFA;
+* dispositivo confiable;
+* justificación;
+* evento de auditoría.
+
+---
+
+# 2658. RevealSensitiveFieldCommand
+
+```php
+final readonly class RevealSensitiveFieldCommand
+{
+    public function __construct(
+        public string $resourceId,
+        public string $field,
+        public string $reason,
+        public string $subjectId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2659. Data Masking Architecture
+
+VoltStack deberá permitir enmascarar valores según contexto.
+
+---
+
+# 2660. Masking Strategies
+
+Soportar:
+
+* parcial;
+* completo;
+* basado en rol;
+* basado en propósito;
+* irreversible;
+* dinámico.
+
+---
+
+# 2661. Partial Masking Example
+
+```text
+Email:
+
+j***@example.com
+
+
+Card:
+
+**** **** **** 4242
+
+
+Phone:
+
+******7890
+```
+
+---
+
+# 2662. DataMaskerInterface
+
+```php
+interface DataMaskerInterface
+{
+    public function mask(
+        mixed $value,
+        MaskingStrategy $strategy,
+        DataAccessContext $context
+    ): mixed;
+}
+```
+
+---
+
+# 2663. MaskingStrategy
+
+```php
+enum MaskingStrategy: string
+{
+    case Full = 'full';
+    case Partial = 'partial';
+    case Hash = 'hash';
+    case Redact = 'redact';
+    case Substitute = 'substitute';
+}
+```
+
+---
+
+# 2664. Dynamic Data Masking
+
+El valor almacenado podrá permanecer intacto mientras la salida se transforma según permisos.
+
+---
+
+# 2665. Static Data Masking
+
+Las copias para desarrollo o pruebas deberán transformarse antes de abandonar producción.
+
+---
+
+# 2666. Masking Consistency
+
+Los valores sustituidos deberán mantener cuando sea necesario:
+
+* formato;
+* longitud;
+* tipo;
+* relaciones;
+* unicidad.
+
+---
+
+# 2667. Tokenization Architecture
+
+VoltStack deberá permitir reemplazar datos sensibles por tokens no significativos.
+
+---
+
+# 2668. Tokenization Use Cases
+
+Ejemplos:
+
+* tarjetas;
+* identificadores fiscales;
+* cuentas bancarias;
+* documentos;
+* números de cliente.
+
+---
+
+# 2669. Tokenization Flow
+
+```text
+Sensitive Value
+
+↓
+
+Tokenization Service
+
+↓
+
+Random Token
+
+↓
+
+Application Stores Token
+
+↓
+
+Vault Stores Mapping
+```
+
+---
+
+# 2670. TokenizationServiceInterface
+
+```php
+interface TokenizationServiceInterface
+{
+    public function tokenize(
+        SensitiveValue $value,
+        TokenizationContext $context
+    ): DataToken;
+
+    public function detokenize(
+        DataToken $token,
+        TokenizationContext $context
+    ): SensitiveValue;
+}
+```
+
+---
+
+# 2671. DataToken
+
+```php
+final readonly class DataToken
+{
+    public function __construct(
+        public string $value,
+        public string $type,
+        public string $vaultReference,
+    ) {
+    }
+}
+```
+
+---
+
+# 2672. Token Vault Security
+
+El vault deberá aplicar:
+
+* aislamiento;
+* cifrado;
+* acceso mínimo;
+* auditoría;
+* rotación;
+* alta disponibilidad.
+
+---
+
+# 2673. Detokenization Authorization
+
+La recuperación del valor original deberá requerir autorización específica.
+
+---
+
+# 2674. Format-Preserving Tokenization
+
+Cuando sistemas heredados lo requieran, el token podrá conservar:
+
+* longitud;
+* caracteres;
+* estructura;
+* validación superficial.
+
+---
+
+# 2675. Token Scope
+
+Los tokens podrán limitarse por:
+
+* tenant;
+* sistema;
+* propósito;
+* región;
+* ambiente.
+
+---
+
+# 2676. Pseudonymization Architecture
+
+VoltStack deberá soportar sustitución de identificadores directos por pseudónimos.
+
+---
+
+# 2677. Pseudonymization vs Anonymization
+
+```text
+Pseudonymized Data
+
+Can Be Re-Associated
+
+With Protected Additional Information
+
+
+Anonymized Data
+
+Cannot Reasonably Be Re-Identified
+```
+
+---
+
+# 2678. Pseudonymization Key Separation
+
+La información necesaria para reidentificar deberá almacenarse separadamente.
+
+---
+
+# 2679. Anonymization Architecture
+
+La anonimización deberá reducir razonablemente el riesgo de reidentificación.
+
+---
+
+# 2680. Anonymization Techniques
+
+Podrán utilizarse:
+
+* generalización;
+* supresión;
+* perturbación;
+* agrupamiento;
+* reducción de precisión;
+* agregación.
+
+---
+
+# 2681. Reidentification Risk
+
+La anonimización deberá evaluar:
+
+* singularidad;
+* vinculabilidad;
+* inferencia;
+* tamaño de población;
+* disponibilidad de datos externos.
+
+---
+
+# 2682. AnonymizationAssessment
+
+```php
+final readonly class AnonymizationAssessment
+{
+    public function __construct(
+        public string $datasetId,
+        public float $reidentificationRisk,
+        public array $techniques,
+        public bool $approved,
+    ) {
+    }
+}
+```
+
+---
+
+# 2683. Privacy Engineering Architecture
+
+VoltStack deberá incorporar privacidad desde el diseño.
+
+---
+
+# 2684. Privacy by Design
+
+Aplicar:
+
+* minimización;
+* transparencia;
+* control;
+* separación;
+* seguridad;
+* cumplimiento;
+* protección por defecto.
+
+---
+
+# 2685. Privacy by Default
+
+La configuración inicial deberá:
+
+* recopilar menos datos;
+* limitar visibilidad;
+* reducir retención;
+* deshabilitar tracking opcional;
+* restringir compartir.
+
+---
+
+# 2686. Privacy Impact Assessment
+
+Los cambios de alto impacto deberán evaluar:
+
+* datos tratados;
+* personas afectadas;
+* finalidad;
+* riesgos;
+* controles;
+* residual risk.
+
+---
+
+# 2687. PrivacyImpactAssessment
+
+```php
+final readonly class PrivacyImpactAssessment
+{
+    public function __construct(
+        public string $assessmentId,
+        public string $processingActivity,
+        public array $dataCategories,
+        public array $identifiedRisks,
+        public array $mitigations,
+        public string $decision,
+    ) {
+    }
+}
+```
+
+---
+
+# 2688. Consent Management
+
+Cuando el consentimiento sea necesario deberá ser:
+
+* informado;
+* específico;
+* verificable;
+* revocable;
+* registrable.
+
+---
+
+# 2689. ConsentRecord
+
+```php
+final readonly class ConsentRecord
+{
+    public function __construct(
+        public string $subjectId,
+        public string $purpose,
+        public string $version,
+        public DateTimeImmutable $grantedAt,
+        public ?DateTimeImmutable $revokedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2690. Data Residency Architecture
+
+VoltStack deberá permitir controlar dónde se almacenan y procesan los datos.
+
+---
+
+# 2691. Residency Policy
+
+Una política podrá especificar:
+
+* país;
+* región;
+* proveedor;
+* tipo de almacenamiento;
+* replicación permitida;
+* transferencia autorizada.
+
+---
+
+# 2692. DataResidencyPolicy
+
+```php
+final readonly class DataResidencyPolicy
+{
+    public function __construct(
+        public string $policyId,
+        public array $allowedRegions,
+        public array $deniedRegions,
+        public bool $crossBorderTransferAllowed,
+        public array $requiredSafeguards,
+    ) {
+    }
+}
+```
+
+---
+
+# 2693. Residency Enforcement
+
+```text
+Data Classification
+
++
+
+Tenant Residency Policy
+
++
+
+Storage Location
+
+=
+
+Placement Decision
+```
+
+---
+
+# 2694. Cross-Border Data Transfer
+
+Toda transferencia deberá evaluar:
+
+* legalidad;
+* clasificación;
+* destino;
+* proveedor;
+* cifrado;
+* contrato;
+* salvaguardas.
+
+---
+
+# 2695. Retention Architecture
+
+Cada categoría de datos deberá tener un periodo de retención definido.
+
+---
+
+# 2696. RetentionPolicy
+
+```php
+final readonly class RetentionPolicy
+{
+    public function __construct(
+        public string $policyId,
+        public DateInterval $activeRetention,
+        public DateInterval $archiveRetention,
+        public bool $legalHoldSupported,
+        public string $disposalMethod,
+    ) {
+    }
+}
+```
+
+---
+
+# 2697. Retention Enforcement
+
+El sistema deberá:
+
+* identificar datos vencidos;
+* considerar legal holds;
+* archivar cuando aplique;
+* eliminar;
+* generar evidencia.
+
+---
+
+# 2698. Secure Deletion Architecture
+
+La eliminación deberá abarcar:
+
+* registro principal;
+* réplicas;
+* caches;
+* índices;
+* archivos;
+* backups según política;
+* datos derivados.
+
+---
+
+# 2699. Data Security Result
+
+Esta entrega establece:
+
+```text
+Data Governance
+
+Data Classification
+
+Data Lifecycle Security
+
+Purpose Limitation
+
+Field-Level Security
+
+Secure Serialization
+
+Data Masking
+
+Tokenization
+
+Pseudonymization
+
+Anonymization
+
+Privacy Engineering
+
+Data Residency
+
+Retention
+
+Secure Deletion
+```
+
+---
+
+# 2700. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2700
+
+Current Delivery:
+Sections 2601-2700
+
+Planned Final Delivery:
+Section 3100
+
+Next:
+Sections 2701-2800
+```
+
+La siguiente entrega continuará con:
+
+```text
+- Cryptographic architecture
+- Key management
+- Key lifecycle
+- Envelope encryption
+- Tenant-specific keys
+- Digital signatures
+- Hashing standards
+- Password protection
+- Certificate management
+- Cryptographic agility
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 28 de 31
+**Cobertura:** Secciones **2701–2800**
+
+---
+
+# 2701. Cryptographic Security Architecture
+
+VoltStack deberá incorporar una arquitectura criptográfica centralizada, auditable y desacoplada de algoritmos específicos.
+
+La criptografía deberá proteger:
+
+* datos;
+* identidades;
+* sesiones;
+* mensajes;
+* artifacts;
+* configuraciones;
+* comunicaciones;
+* evidencias.
+
+---
+
+# 2702. Cryptographic Security Objectives
+
+La arquitectura deberá garantizar:
+
+* confidencialidad;
+* integridad;
+* autenticidad;
+* no repudio cuando aplique;
+* separación de claves;
+* rotación;
+* revocación;
+* agilidad criptográfica.
+
+---
+
+# 2703. Cryptographic Trust Model
+
+```text
+Trusted Key Source
+
+↓
+
+Validated Cryptographic Provider
+
+↓
+
+Controlled Key Usage
+
+↓
+
+Protected Data or Signature
+
+↓
+
+Auditable Result
+```
+
+---
+
+# 2704. Cryptographic Domains
+
+VoltStack deberá dividir la arquitectura en:
+
+```text
+Encryption
+
+Key Management
+
+Digital Signatures
+
+Hashing
+
+Password Protection
+
+Certificates
+
+Randomness
+
+Rotation
+
+Revocation
+
+Crypto Agility
+```
+
+---
+
+# 2705. Central Cryptographic Service
+
+Las aplicaciones no deberán instanciar primitivas criptográficas directamente.
+
+Deberán usar un servicio central.
+
+```php
+interface CryptographicServiceInterface
+{
+    public function encrypt(
+        SensitivePayload $payload,
+        EncryptionContext $context
+    ): EncryptedPayload;
+
+    public function decrypt(
+        EncryptedPayload $payload,
+        DecryptionContext $context
+    ): SensitivePayload;
+
+    public function sign(
+        SignablePayload $payload,
+        SignatureContext $context
+    ): DigitalSignature;
+
+    public function verify(
+        SignablePayload $payload,
+        DigitalSignature $signature,
+        VerificationContext $context
+    ): bool;
+}
+```
+
+---
+
+# 2706. Cryptographic Provider Abstraction
+
+VoltStack deberá poder trabajar con:
+
+* extensiones PHP;
+* OpenSSL;
+* libsodium;
+* HSM;
+* KMS cloud;
+* secret managers;
+* proveedores externos.
+
+---
+
+# 2707. CryptographicProviderInterface
+
+```php
+interface CryptographicProviderInterface
+{
+    public function supports(
+        CryptographicOperation $operation
+    ): bool;
+
+    public function execute(
+        CryptographicOperation $operation
+    ): CryptographicResult;
+}
+```
+
+---
+
+# 2708. Cryptographic Operation Model
+
+```php
+final readonly class CryptographicOperation
+{
+    public function __construct(
+        public string $type,
+        public string $algorithm,
+        public string $keyReference,
+        public array $parameters,
+        public string $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 2709. Cryptographic Algorithm Registry
+
+VoltStack deberá mantener un registro explícito de algoritmos permitidos.
+
+---
+
+# 2710. Algorithm Approval States
+
+```php
+enum CryptographicAlgorithmStatus: string
+{
+    case Approved = 'approved';
+    case Legacy = 'legacy';
+    case Deprecated = 'deprecated';
+    case Forbidden = 'forbidden';
+}
+```
+
+---
+
+# 2711. Cryptographic Algorithm Policy
+
+La política deberá definir:
+
+* algoritmo;
+* longitud mínima;
+* propósito permitido;
+* fecha de retiro;
+* compatibilidad;
+* proveedor aprobado.
+
+---
+
+# 2712. CryptographicAlgorithmPolicy
+
+```php
+final readonly class CryptographicAlgorithmPolicy
+{
+    public function __construct(
+        public string $algorithm,
+        public CryptographicAlgorithmStatus $status,
+        public array $allowedPurposes,
+        public ?DateTimeImmutable $deprecationDate,
+        public array $constraints,
+    ) {
+    }
+}
+```
+
+---
+
+# 2713. Forbidden Cryptographic Practices
+
+VoltStack deberá prohibir:
+
+* algoritmos inseguros;
+* cifrado sin autenticación;
+* nonces reutilizados;
+* claves hardcoded;
+* generación aleatoria predecible;
+* comparación insegura;
+* claves compartidas globalmente.
+
+---
+
+# 2714. Authenticated Encryption
+
+Los datos sensibles deberán cifrarse mediante mecanismos autenticados.
+
+```text
+Plaintext
+
++
+
+Nonce
+
++
+
+Associated Data
+
+↓
+
+Authenticated Encryption
+
+↓
+
+Ciphertext + Authentication Tag
+```
+
+---
+
+# 2715. EncryptionContext
+
+```php
+final readonly class EncryptionContext
+{
+    public function __construct(
+        public string $purpose,
+        public string $tenantId,
+        public DataClassification $classification,
+        public array $associatedData,
+        public ?string $keyReference = null,
+    ) {
+    }
+}
+```
+
+---
+
+# 2716. Associated Authenticated Data
+
+VoltStack deberá usar datos asociados para vincular el ciphertext con:
+
+* tenant;
+* recurso;
+* campo;
+* versión;
+* propósito;
+* contexto.
+
+---
+
+# 2717. Ciphertext Binding
+
+Ejemplo:
+
+```text
+Encrypted Customer Email
+
+Bound To:
+
+Tenant ID
+
+Customer ID
+
+Field Name
+
+Schema Version
+```
+
+Mover el ciphertext a otro contexto deberá causar fallo de autenticación.
+
+---
+
+# 2718. EncryptedPayload
+
+```php
+final readonly class EncryptedPayload
+{
+    public function __construct(
+        public string $ciphertext,
+        public string $algorithm,
+        public string $keyReference,
+        public string $nonce,
+        public string $authenticationTag,
+        public array $associatedData,
+        public int $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 2719. Encryption Versioning
+
+Todo payload cifrado deberá declarar una versión para permitir:
+
+* migraciones;
+* rotación;
+* compatibilidad;
+* re-cifrado;
+* auditoría.
+
+---
+
+# 2720. Data Encryption Scope
+
+VoltStack deberá soportar cifrado:
+
+* de campo;
+* de registro;
+* de archivo;
+* de objeto;
+* de backup;
+* de volumen;
+* de mensaje.
+
+---
+
+# 2721. Field-Level Encryption
+
+Los campos altamente sensibles deberán poder cifrarse antes de persistirse.
+
+---
+
+# 2722. Encrypted Field Example
+
+```php
+final readonly class PaymentProfile
+{
+    public function __construct(
+        public string $customerId,
+
+        #[EncryptedField(
+            purpose: 'payment-token',
+            keyScope: 'tenant'
+        )]
+        public EncryptedPayload $paymentToken,
+    ) {
+    }
+}
+```
+
+---
+
+# 2723. Transparent Encryption Boundary
+
+VoltStack podrá cifrar y descifrar en:
+
+```text
+Domain Object
+
+↓
+
+Secure Mapper
+
+↓
+
+Cryptographic Service
+
+↓
+
+Persistence Layer
+```
+
+El repositorio no deberá recibir plaintext cuando no sea necesario.
+
+---
+
+# 2724. Data Encryption at Rest
+
+El cifrado de infraestructura no reemplazará el cifrado a nivel de aplicación para datos altamente sensibles.
+
+---
+
+# 2725. Layered Encryption Model
+
+```text
+Application-Level Encryption
+
++
+
+Database Encryption
+
++
+
+Volume Encryption
+
++
+
+Backup Encryption
+```
+
+---
+
+# 2726. Key Management Architecture
+
+VoltStack deberá separar completamente:
+
+```text
+Data
+
+≠
+
+Encryption Key
+
+≠
+
+Key Management Metadata
+```
+
+---
+
+# 2727. Key Management Objectives
+
+El sistema deberá controlar:
+
+* generación;
+* almacenamiento;
+* distribución;
+* uso;
+* rotación;
+* suspensión;
+* revocación;
+* destrucción.
+
+---
+
+# 2728. CryptographicKey
+
+```php
+final readonly class CryptographicKey
+{
+    public function __construct(
+        public string $keyId,
+        public string $algorithm,
+        public string $purpose,
+        public string $scope,
+        public string $status,
+        public DateTimeImmutable $createdAt,
+        public ?DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2729. Key Material Isolation
+
+El material criptográfico no deberá formar parte de objetos de dominio ordinarios.
+
+Deberá permanecer dentro de:
+
+* KMS;
+* HSM;
+* enclave;
+* secret manager;
+* memoria protegida temporal.
+
+---
+
+# 2730. KeyReference
+
+```php
+final readonly class KeyReference
+{
+    public function __construct(
+        public string $provider,
+        public string $identifier,
+        public string $version,
+        public string $scope,
+    ) {
+    }
+}
+```
+
+---
+
+# 2731. Key Manager Interface
+
+```php
+interface KeyManagerInterface
+{
+    public function create(
+        KeyCreationRequest $request
+    ): KeyReference;
+
+    public function rotate(
+        KeyReference $key
+    ): KeyReference;
+
+    public function revoke(
+        KeyReference $key,
+        string $reason
+    ): void;
+
+    public function destroy(
+        KeyReference $key
+    ): void;
+}
+```
+
+---
+
+# 2732. Key Lifecycle
+
+```text
+Requested
+
+↓
+
+Generated
+
+↓
+
+Activated
+
+↓
+
+Used
+
+↓
+
+Rotated
+
+↓
+
+Deactivated
+
+↓
+
+Revoked
+
+↓
+
+Destroyed
+```
+
+---
+
+# 2733. Key Status Model
+
+```php
+enum CryptographicKeyStatus: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Rotating = 'rotating';
+    case Inactive = 'inactive';
+    case Revoked = 'revoked';
+    case Destroyed = 'destroyed';
+}
+```
+
+---
+
+# 2734. Key Generation Security
+
+Las claves deberán generarse mediante:
+
+* CSPRNG aprobado;
+* KMS;
+* HSM;
+* proveedor criptográfico confiable.
+
+Nunca mediante valores derivados de:
+
+* timestamps;
+* IDs;
+* nombres;
+* secuencias;
+* datos predecibles.
+
+---
+
+# 2735. Key Usage Policy
+
+Cada clave deberá limitarse por:
+
+* propósito;
+* operación;
+* servicio;
+* ambiente;
+* tenant;
+* región;
+* periodo.
+
+---
+
+# 2736. KeyUsagePolicy
+
+```php
+final readonly class KeyUsagePolicy
+{
+    public function __construct(
+        public string $keyId,
+        public array $allowedOperations,
+        public array $allowedSubjects,
+        public array $allowedPurposes,
+        public array $conditions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2737. Separation of Cryptographic Purposes
+
+Una misma clave no deberá usarse simultáneamente para:
+
+* cifrado;
+* firma;
+* autenticación;
+* hashing;
+* tokenización.
+
+---
+
+# 2738. Environment Key Separation
+
+Cada ambiente deberá utilizar claves independientes.
+
+```text
+Development Key
+
+≠
+
+Staging Key
+
+≠
+
+Production Key
+```
+
+---
+
+# 2739. Service Key Separation
+
+Cada servicio deberá tener acceso únicamente a sus claves necesarias.
+
+---
+
+# 2740. Tenant-Specific Cryptographic Keys
+
+VoltStack deberá permitir claves específicas por tenant.
+
+---
+
+# 2741. Tenant Key Benefits
+
+Las claves por tenant permiten:
+
+* aislamiento;
+* revocación selectiva;
+* crypto-shredding;
+* auditoría;
+* residencia;
+* cumplimiento.
+
+---
+
+# 2742. TenantKeyResolverInterface
+
+```php
+interface TenantKeyResolverInterface
+{
+    public function resolveEncryptionKey(
+        string $tenantId,
+        string $purpose
+    ): KeyReference;
+}
+```
+
+---
+
+# 2743. Tenant Key Hierarchy
+
+```text
+Platform Root Key
+
+↓
+
+Environment Master Key
+
+↓
+
+Tenant Key Encryption Key
+
+↓
+
+Data Encryption Key
+```
+
+---
+
+# 2744. Key Hierarchy Isolation
+
+La jerarquía deberá impedir que una clave de menor nivel pueda derivar o recuperar claves superiores.
+
+---
+
+# 2745. Envelope Encryption Architecture
+
+VoltStack deberá soportar cifrado por envoltura.
+
+---
+
+# 2746. Envelope Encryption Flow
+
+```text
+Generate Data Encryption Key
+
+↓
+
+Encrypt Data With Data Key
+
+↓
+
+Encrypt Data Key With Key Encryption Key
+
+↓
+
+Store Ciphertext + Wrapped Data Key
+```
+
+---
+
+# 2747. EnvelopeEncryptedPayload
+
+```php
+final readonly class EnvelopeEncryptedPayload
+{
+    public function __construct(
+        public string $ciphertext,
+        public string $wrappedDataKey,
+        public string $keyEncryptionKeyReference,
+        public string $algorithm,
+        public string $nonce,
+        public string $authenticationTag,
+        public array $associatedData,
+    ) {
+    }
+}
+```
+
+---
+
+# 2748. Data Encryption Key Scope
+
+Las Data Encryption Keys podrán generarse por:
+
+* objeto;
+* registro;
+* lote;
+* archivo;
+* sesión;
+* periodo.
+
+---
+
+# 2749. Plaintext Data Key Lifetime
+
+Una data key en plaintext deberá existir solamente durante la operación criptográfica.
+
+---
+
+# 2750. Data Key Memory Handling
+
+Después del uso deberá:
+
+* eliminarse la referencia;
+* sobrescribirse cuando sea viable;
+* evitarse su serialización;
+* impedirse su inclusión en logs.
+
+---
+
+# 2751. Key Rotation Architecture
+
+VoltStack deberá permitir rotación sin pérdida de disponibilidad.
+
+---
+
+# 2752. Rotation Types
+
+Soportar:
+
+* programada;
+* manual;
+* automática;
+* por incidente;
+* por cambio de política;
+* por expiración.
+
+---
+
+# 2753. Key Rotation Flow
+
+```text
+Create New Key Version
+
+↓
+
+Set as Primary
+
+↓
+
+Use for New Encryption
+
+↓
+
+Re-encrypt Existing Data Gradually
+
+↓
+
+Retire Old Version
+```
+
+---
+
+# 2754. Read-Old Write-New Strategy
+
+Durante rotación:
+
+```text
+Read:
+
+Support Current + Previous Keys
+
+
+Write:
+
+Use Current Key Only
+```
+
+---
+
+# 2755. KeyRotationPlan
+
+```php
+final readonly class KeyRotationPlan
+{
+    public function __construct(
+        public KeyReference $currentKey,
+        public KeyReference $newKey,
+        public DateTimeImmutable $startsAt,
+        public DateTimeImmutable $completesBy,
+        public string $migrationStrategy,
+    ) {
+    }
+}
+```
+
+---
+
+# 2756. Lazy Re-Encryption
+
+VoltStack podrá re-cifrar un registro cuando sea leído y aún use una versión antigua.
+
+---
+
+# 2757. Batch Re-Encryption
+
+Para grandes volúmenes deberá soportarse:
+
+* procesamiento por lotes;
+* checkpoint;
+* reintentos;
+* límites;
+* auditoría;
+* validación.
+
+---
+
+# 2758. ReEncryptionJob
+
+```php
+final readonly class ReEncryptionJob
+{
+    public function __construct(
+        public string $datasetId,
+        public string $fromKeyVersion,
+        public string $toKeyVersion,
+        public int $batchSize,
+        public string $checkpoint,
+    ) {
+    }
+}
+```
+
+---
+
+# 2759. Key Revocation Architecture
+
+Una clave deberá revocarse cuando:
+
+* se comprometa;
+* se use fuera de política;
+* expire;
+* el tenant finalice;
+* cambie la confianza.
+
+---
+
+# 2760. Revocation Effects
+
+La revocación podrá:
+
+* impedir nuevo cifrado;
+* impedir descifrado;
+* permitir descifrado de emergencia;
+* iniciar re-cifrado;
+* activar respuesta a incidentes.
+
+---
+
+# 2761. Emergency Key Revocation
+
+```text
+Compromise Detected
+
+↓
+
+Disable Key Usage
+
+↓
+
+Identify Affected Data
+
+↓
+
+Activate Replacement Key
+
+↓
+
+Re-Encrypt
+
+↓
+
+Investigate
+```
+
+---
+
+# 2762. Crypto-Shredding
+
+La eliminación criptográfica podrá lograrse destruyendo la clave que protege datos irrecuperables.
+
+---
+
+# 2763. Crypto-Shredding Conditions
+
+Solo deberá considerarse eliminación efectiva cuando:
+
+* no existan copias de la clave;
+* no haya plaintext persistido;
+* no existan claves derivadas recuperables;
+* los backups estén cubiertos.
+
+---
+
+# 2764. Key Backup Security
+
+Las copias de claves deberán:
+
+* cifrarse;
+* separarse;
+* limitarse;
+* probarse;
+* inventariarse;
+* auditarse.
+
+---
+
+# 2765. Key Recovery Governance
+
+La recuperación deberá requerir:
+
+* múltiples custodios;
+* aprobación;
+* evidencia;
+* entorno seguro;
+* auditoría.
+
+---
+
+# 2766. Split Knowledge
+
+Ninguna persona deberá tener por sí sola toda la información necesaria para reconstruir una clave crítica.
+
+---
+
+# 2767. Dual Control
+
+Operaciones críticas podrán requerir dos identidades independientes.
+
+Ejemplos:
+
+* exportar clave;
+* recuperar root key;
+* destruir master key;
+* cambiar trust root.
+
+---
+
+# 2768. Hardware Security Module Integration
+
+VoltStack deberá poder delegar operaciones a un HSM.
+
+---
+
+# 2769. HSM Benefits
+
+Un HSM podrá proporcionar:
+
+* protección física;
+* no exportabilidad;
+* auditoría;
+* límites de uso;
+* resistencia a manipulación.
+
+---
+
+# 2770. HsmProviderInterface
+
+```php
+interface HsmProviderInterface
+{
+    public function sign(
+        KeyReference $key,
+        string $payload
+    ): DigitalSignature;
+
+    public function unwrap(
+        KeyReference $key,
+        string $wrappedDataKey
+    ): SensitiveValue;
+}
+```
+
+---
+
+# 2771. KMS Integration Architecture
+
+VoltStack deberá integrar KMS administrados mediante adaptadores.
+
+---
+
+# 2772. KMS Operations
+
+Soportar:
+
+* create key;
+* encrypt;
+* decrypt;
+* wrap;
+* unwrap;
+* sign;
+* verify;
+* rotate;
+* disable.
+
+---
+
+# 2773. KMS Authorization
+
+El acceso a KMS deberá utilizar:
+
+* workload identity;
+* roles mínimos;
+* condiciones;
+* auditoría;
+* red privada cuando sea posible.
+
+---
+
+# 2774. KMS Context Binding
+
+El contexto de cifrado deberá incluir atributos que el KMS pueda validar.
+
+---
+
+# 2775. Digital Signature Architecture
+
+VoltStack deberá utilizar firmas digitales para proteger autenticidad e integridad.
+
+---
+
+# 2776. Signature Use Cases
+
+Ejemplos:
+
+* artifacts;
+* tokens;
+* webhooks;
+* manifests;
+* configuración;
+* auditoría;
+* mensajes;
+* releases.
+
+---
+
+# 2777. SignablePayload
+
+```php
+final readonly class SignablePayload
+{
+    public function __construct(
+        public string $content,
+        public string $contentType,
+        public string $purpose,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 2778. DigitalSignature
+
+```php
+final readonly class DigitalSignature
+{
+    public function __construct(
+        public string $value,
+        public string $algorithm,
+        public string $keyId,
+        public DateTimeImmutable $signedAt,
+        public array $protectedHeaders,
+    ) {
+    }
+}
+```
+
+---
+
+# 2779. Canonicalization Before Signing
+
+Los datos estructurados deberán canonicalizarse antes de firmarse.
+
+---
+
+# 2780. Canonicalization Requirements
+
+La canonicalización deberá definir:
+
+* orden de campos;
+* codificación;
+* espacios;
+* números;
+* fechas;
+* campos excluidos.
+
+---
+
+# 2781. Signature Verification Flow
+
+```text
+Receive Payload
+
+↓
+
+Canonicalize
+
+↓
+
+Resolve Trusted Key
+
+↓
+
+Verify Signature
+
+↓
+
+Validate Purpose and Timestamp
+
+↓
+
+Accept or Reject
+```
+
+---
+
+# 2782. Signature Trust Policy
+
+La verificación deberá validar:
+
+* algoritmo;
+* key ID;
+* trust root;
+* propósito;
+* expiración;
+* revocación;
+* contexto.
+
+---
+
+# 2783. Replay Protection for Signed Messages
+
+Las firmas deberán complementarse con:
+
+* timestamp;
+* nonce;
+* message ID;
+* expiration;
+* replay cache.
+
+---
+
+# 2784. Webhook Signature Security
+
+Cada webhook deberá firmarse sobre:
+
+```text
+Timestamp
+
++
+
+HTTP Method
+
++
+
+Path
+
++
+
+Body Hash
+```
+
+---
+
+# 2785. Asymmetric Key Separation
+
+Las claves privadas deberán permanecer exclusivamente en el emisor autorizado.
+
+---
+
+# 2786. Signature Key Rotation
+
+Los verificadores deberán soportar temporalmente:
+
+* clave actual;
+* clave anterior;
+* metadatos de versión;
+* lista de revocación.
+
+---
+
+# 2787. Artifact Signing
+
+Todo artifact crítico deberá firmarse después de construirse.
+
+---
+
+# 2788. SignedArtifactManifest
+
+```php
+final readonly class SignedArtifactManifest
+{
+    public function __construct(
+        public string $artifactId,
+        public string $digest,
+        public DigitalSignature $signature,
+        public string $buildId,
+        public string $sourceCommit,
+    ) {
+    }
+}
+```
+
+---
+
+# 2789. Hashing Architecture
+
+VoltStack deberá distinguir claramente entre:
+
+* hashing;
+* encryption;
+* MAC;
+* password hashing;
+* signatures.
+
+---
+
+# 2790. General Hashing Use Cases
+
+El hashing podrá usarse para:
+
+* integridad;
+* deduplicación;
+* fingerprints;
+* cache keys;
+* artifact digests;
+* evidencia.
+
+---
+
+# 2791. HashingServiceInterface
+
+```php
+interface HashingServiceInterface
+{
+    public function digest(
+        string $payload,
+        HashingContext $context
+    ): HashDigest;
+
+    public function verify(
+        string $payload,
+        HashDigest $digest
+    ): bool;
+}
+```
+
+---
+
+# 2792. HashDigest
+
+```php
+final readonly class HashDigest
+{
+    public function __construct(
+        public string $algorithm,
+        public string $value,
+        public ?string $keyId = null,
+    ) {
+    }
+}
+```
+
+---
+
+# 2793. Keyed Message Authentication
+
+Cuando se requiera autenticidad con secreto compartido deberá utilizarse un MAC aprobado.
+
+---
+
+# 2794. Constant-Time Comparison
+
+Las verificaciones de:
+
+* firmas;
+* hashes;
+* tokens;
+* MACs;
+* secretos;
+
+deberán usar comparación en tiempo constante.
+
+---
+
+# 2795. Password Protection Architecture
+
+Las contraseñas no deberán cifrarse de forma reversible.
+
+Deberán protegerse mediante algoritmos de password hashing adaptativos.
+
+---
+
+# 2796. PasswordHash
+
+```php
+final readonly class PasswordHash
+{
+    public function __construct(
+        public string $value,
+        public string $algorithm,
+        public array $parameters,
+        public int $version,
+    ) {
+    }
+}
+```
+
+---
+
+# 2797. Password Hashing Policy
+
+La política deberá definir:
+
+* algoritmo aprobado;
+* memoria;
+* iteraciones;
+* paralelismo;
+* longitud mínima;
+* rehash automático.
+
+---
+
+# 2798. Password Rehashing
+
+Después de una autenticación exitosa VoltStack deberá verificar si el hash requiere actualización.
+
+```text
+Password Verified
+
+↓
+
+Hash Parameters Outdated?
+
+↓
+
+Generate New Hash
+
+↓
+
+Persist Securely
+```
+
+---
+
+# 2799. Cryptographic Architecture Result
+
+Esta entrega establece:
+
+```text
+Central Cryptographic Service
+
+Approved Algorithm Registry
+
+Authenticated Encryption
+
+Application-Level Encryption
+
+Key Lifecycle Management
+
+Tenant-Specific Keys
+
+Envelope Encryption
+
+Key Rotation
+
+Key Revocation
+
+Crypto-Shredding
+
+HSM and KMS Integration
+
+Digital Signatures
+
+Artifact Signing
+
+Secure Hashing
+
+Password Protection
+```
+
+---
+
+# 2800. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2800
+
+Current Delivery:
+Sections 2701-2800
+
+Planned Final Delivery:
+Section 3100
+
+Next:
+Sections 2801-2900
+```
+
+La siguiente entrega continuará con:
+
+```text
+- Certificate management
+- PKI architecture
+- Mutual TLS
+- Trust stores
+- Certificate rotation
+- Secure randomness
+- Nonce management
+- Cryptographic policy enforcement
+- Post-quantum readiness
+- Cryptographic agility
+- API security architecture
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 29 de 31
+**Cobertura:** Secciones **2801–2900**
+
+---
+
+# 2801. Public Key Infrastructure Architecture
+
+VoltStack deberá incorporar una arquitectura PKI para administrar relaciones de confianza basadas en certificados.
+
+La PKI deberá soportar:
+
+* identidades de servicios;
+* identidades de dispositivos;
+* comunicación mutua;
+* firma de artifacts;
+* validación de endpoints;
+* trust roots;
+* revocación.
+
+---
+
+# 2802. PKI Security Objectives
+
+La arquitectura deberá garantizar:
+
+* autenticidad;
+* integridad;
+* validación de identidad;
+* trazabilidad;
+* rotación;
+* revocación;
+* separación de confianza.
+
+---
+
+# 2803. PKI Trust Hierarchy
+
+```text
+Root Certificate Authority
+
+↓
+
+Intermediate Certificate Authority
+
+↓
+
+Issuing Certificate Authority
+
+↓
+
+Service or User Certificate
+```
+
+---
+
+# 2804. Root Certificate Authority Security
+
+La autoridad raíz deberá:
+
+* permanecer offline cuando sea posible;
+* usar HSM;
+* aplicar control dual;
+* limitar operaciones;
+* auditar ceremonias;
+* tener backups protegidos.
+
+---
+
+# 2805. Intermediate Certificate Authority
+
+Las autoridades intermedias deberán separar:
+
+* ambientes;
+* regiones;
+* workloads;
+* propósitos;
+* niveles de confianza.
+
+---
+
+# 2806. Certificate Authority Interface
+
+```php
+interface CertificateAuthorityInterface
+{
+    public function issue(
+        CertificateSigningRequest $request,
+        CertificatePolicy $policy
+    ): IssuedCertificate;
+
+    public function revoke(
+        string $serialNumber,
+        CertificateRevocationReason $reason
+    ): void;
+}
+```
+
+---
+
+# 2807. CertificateSigningRequest
+
+```php
+final readonly class CertificateSigningRequest
+{
+    public function __construct(
+        public string $subject,
+        public string $publicKey,
+        public array $subjectAlternativeNames,
+        public string $purpose,
+        public array $requestedExtensions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2808. Certificate Policy Architecture
+
+Cada certificado deberá emitirse bajo una política explícita.
+
+---
+
+# 2809. CertificatePolicy
+
+```php
+final readonly class CertificatePolicy
+{
+    public function __construct(
+        public string $policyId,
+        public DateInterval $maximumLifetime,
+        public array $allowedPurposes,
+        public array $requiredExtensions,
+        public array $allowedIssuers,
+    ) {
+    }
+}
+```
+
+---
+
+# 2810. Certificate Purpose Separation
+
+No deberá reutilizarse el mismo certificado para propósitos incompatibles.
+
+Ejemplos:
+
+* TLS servidor;
+* TLS cliente;
+* firma de código;
+* firma de documentos;
+* autenticación administrativa.
+
+---
+
+# 2811. Certificate Identity Binding
+
+Un certificado deberá vincularse con:
+
+* servicio;
+* workload;
+* namespace;
+* ambiente;
+* tenant cuando aplique;
+* región;
+* propósito.
+
+---
+
+# 2812. Subject Alternative Name Validation
+
+VoltStack deberá validar SANs en lugar de depender únicamente del Common Name.
+
+---
+
+# 2813. Certificate Lifetime Policy
+
+Los certificados deberán tener vigencia corta cuando la automatización lo permita.
+
+```text
+Short Lifetime
+
++
+
+Automated Renewal
+
+=
+
+Reduced Exposure Window
+```
+
+---
+
+# 2814. IssuedCertificate
+
+```php
+final readonly class IssuedCertificate
+{
+    public function __construct(
+        public string $certificate,
+        public string $serialNumber,
+        public string $issuer,
+        public DateTimeImmutable $validFrom,
+        public DateTimeImmutable $validUntil,
+        public array $purposes,
+    ) {
+    }
+}
+```
+
+---
+
+# 2815. Certificate Inventory
+
+VoltStack deberá mantener inventario de:
+
+* certificado;
+* propietario;
+* emisor;
+* propósito;
+* expiración;
+* ubicación;
+* estado;
+* dependencias.
+
+---
+
+# 2816. Certificate Discovery
+
+El sistema deberá poder descubrir certificados en:
+
+* servidores;
+* proxies;
+* contenedores;
+* secrets;
+* balanceadores;
+* dispositivos;
+* pipelines.
+
+---
+
+# 2817. Certificate Rotation Architecture
+
+La renovación deberá ser automática y sin interrupciones cuando sea posible.
+
+---
+
+# 2818. Certificate Rotation Flow
+
+```text
+Issue New Certificate
+
+↓
+
+Distribute Securely
+
+↓
+
+Activate New Certificate
+
+↓
+
+Validate Connectivity
+
+↓
+
+Retire Previous Certificate
+```
+
+---
+
+# 2819. Overlapping Certificate Validity
+
+Durante la rotación podrá existir una ventana donde ambos certificados sean válidos.
+
+---
+
+# 2820. CertificateRotationPlan
+
+```php
+final readonly class CertificateRotationPlan
+{
+    public function __construct(
+        public string $currentSerial,
+        public string $replacementSerial,
+        public DateTimeImmutable $activationTime,
+        public DateTimeImmutable $retirementTime,
+        public array $affectedServices,
+    ) {
+    }
+}
+```
+
+---
+
+# 2821. Certificate Expiration Monitoring
+
+VoltStack deberá generar alertas progresivas antes de la expiración.
+
+Ejemplo:
+
+```text
+30 Days
+
+↓
+
+14 Days
+
+↓
+
+7 Days
+
+↓
+
+24 Hours
+
+↓
+
+Critical
+```
+
+---
+
+# 2822. Certificate Revocation Architecture
+
+La revocación deberá aplicarse cuando:
+
+* la clave privada se comprometa;
+* cambie la identidad;
+* termine el servicio;
+* ocurra uso indebido;
+* falle una validación.
+
+---
+
+# 2823. CertificateRevocationReason
+
+```php
+enum CertificateRevocationReason: string
+{
+    case KeyCompromise = 'key_compromise';
+    case AffiliationChanged = 'affiliation_changed';
+    case Superseded = 'superseded';
+    case CessationOfOperation = 'cessation_of_operation';
+    case PrivilegeWithdrawn = 'privilege_withdrawn';
+}
+```
+
+---
+
+# 2824. Revocation Validation
+
+Los verificadores deberán consultar:
+
+* CRL;
+* OCSP;
+* estado local;
+* revocation cache;
+* trust policy.
+
+---
+
+# 2825. Revocation Failure Policy
+
+En operaciones sensibles deberá definirse si un fallo de validación produce:
+
+* fail closed;
+* fail open temporal;
+* degradación;
+* alerta;
+* aprobación humana.
+
+---
+
+# 2826. Trust Store Architecture
+
+VoltStack deberá administrar trust stores de forma explícita.
+
+---
+
+# 2827. Trust Store Segmentation
+
+Separar:
+
+* certificados públicos;
+* CAs internas;
+* desarrollo;
+* staging;
+* producción;
+* integraciones de terceros.
+
+---
+
+# 2828. TrustStore
+
+```php
+final readonly class TrustStore
+{
+    public function __construct(
+        public string $storeId,
+        public array $trustedRoots,
+        public array $trustedIntermediates,
+        public array $revokedCertificates,
+        public string $scope,
+    ) {
+    }
+}
+```
+
+---
+
+# 2829. Trust Anchor Governance
+
+Agregar o eliminar una raíz de confianza deberá requerir:
+
+* revisión;
+* aprobación;
+* evidencia;
+* prueba;
+* rollback.
+
+---
+
+# 2830. Certificate Pinning
+
+VoltStack podrá usar pinning en integraciones altamente sensibles.
+
+Deberá evitarse cuando impida rotación operativa segura.
+
+---
+
+# 2831. Public Key Pinning Strategy
+
+El pinning deberá basarse preferentemente en:
+
+* clave pública;
+* SPKI hash;
+* conjunto rotativo de pins;
+* backup pins.
+
+---
+
+# 2832. Mutual TLS Architecture
+
+VoltStack deberá soportar autenticación mutua TLS entre servicios.
+
+---
+
+# 2833. mTLS Flow
+
+```text
+Client Presents Certificate
+
+↓
+
+Server Validates Client Identity
+
+↓
+
+Server Presents Certificate
+
+↓
+
+Client Validates Server Identity
+
+↓
+
+Encrypted Authorized Channel
+```
+
+---
+
+# 2834. mTLS Identity Context
+
+```php
+final readonly class MutualTlsIdentity
+{
+    public function __construct(
+        public string $subject,
+        public string $issuer,
+        public string $serialNumber,
+        public array $sanEntries,
+        public DateTimeImmutable $validUntil,
+    ) {
+    }
+}
+```
+
+---
+
+# 2835. mTLS Authorization
+
+La validación criptográfica no reemplaza la autorización.
+
+Después de validar el certificado deberá evaluarse:
+
+* servicio;
+* operación;
+* recurso;
+* ambiente;
+* tenant;
+* propósito.
+
+---
+
+# 2836. Service-to-Service Trust Model
+
+```text
+mTLS Authentication
+
++
+
+Workload Identity
+
++
+
+Service Policy
+
+=
+
+Authorized Service Call
+```
+
+---
+
+# 2837. Service Mesh Integration
+
+VoltStack podrá integrarse con service meshes para:
+
+* mTLS automático;
+* identidad de workloads;
+* políticas;
+* telemetría;
+* rotación de certificados.
+
+---
+
+# 2838. Sidecar Trust Boundary
+
+Cuando exista sidecar, deberá definirse claramente la frontera entre:
+
+* aplicación;
+* proxy;
+* control plane;
+* data plane;
+* trust store.
+
+---
+
+# 2839. Certificate Private Key Protection
+
+Las claves privadas deberán:
+
+* evitar persistencia innecesaria;
+* limitar permisos;
+* residir en HSM o secret manager;
+* rotarse;
+* no aparecer en logs.
+
+---
+
+# 2840. TLS Configuration Architecture
+
+VoltStack deberá aplicar una configuración TLS moderna y centralizada.
+
+---
+
+# 2841. TLS Security Requirements
+
+La configuración deberá definir:
+
+* versiones permitidas;
+* cipher suites;
+* certificados;
+* validación;
+* ALPN;
+* session resumption;
+* renegotiation policy.
+
+---
+
+# 2842. TLS Version Policy
+
+Las versiones obsoletas deberán bloquearse.
+
+---
+
+# 2843. TLS Cipher Policy
+
+Solo deberán habilitarse suites:
+
+* autenticadas;
+* modernas;
+* con forward secrecy;
+* compatibles con política.
+
+---
+
+# 2844. Perfect Forward Secrecy
+
+La arquitectura deberá favorecer intercambio efímero de claves para limitar el impacto de compromisos futuros.
+
+---
+
+# 2845. TLS Termination Boundaries
+
+La terminación TLS podrá ocurrir en:
+
+* edge;
+* load balancer;
+* reverse proxy;
+* FrankenPHP;
+* service mesh.
+
+Cada salto posterior deberá permanecer protegido.
+
+---
+
+# 2846. Re-Encryption After Termination
+
+Cuando TLS termine en un proxy, el tráfico interno sensible deberá volver a cifrarse.
+
+---
+
+# 2847. Trusted Proxy Validation
+
+VoltStack deberá aceptar headers de proxy únicamente desde fuentes confiables.
+
+---
+
+# 2848. TrustedProxyPolicy
+
+```php
+final readonly class TrustedProxyPolicy
+{
+    public function __construct(
+        public array $trustedNetworks,
+        public array $acceptedHeaders,
+        public bool $requireTlsFromProxy,
+        public bool $rejectUnknownProxyChains,
+    ) {
+    }
+}
+```
+
+---
+
+# 2849. Secure Randomness Architecture
+
+VoltStack deberá utilizar fuentes criptográficamente seguras de aleatoriedad.
+
+---
+
+# 2850. Secure Random Use Cases
+
+La aleatoriedad segura deberá emplearse para:
+
+* tokens;
+* nonces;
+* session IDs;
+* salts;
+* claves;
+* challenges;
+* IDs sensibles.
+
+---
+
+# 2851. SecureRandomGeneratorInterface
+
+```php
+interface SecureRandomGeneratorInterface
+{
+    public function bytes(int $length): string;
+
+    public function token(int $bytes): string;
+
+    public function integer(int $minimum, int $maximum): int;
+}
+```
+
+---
+
+# 2852. Forbidden Random Sources
+
+No deberán usarse para seguridad:
+
+* `rand()`;
+* `mt_rand()`;
+* timestamps;
+* hashes de datos predecibles;
+* contadores;
+* UUIDs no aleatorios para secretos.
+
+---
+
+# 2853. Randomness Health Validation
+
+Los proveedores críticos podrán ejecutar pruebas de salud para detectar:
+
+* repetición;
+* bloqueo;
+* fallo del sistema;
+* entropía insuficiente.
+
+---
+
+# 2854. Salt Management
+
+Los salts deberán:
+
+* ser únicos;
+* generarse aleatoriamente;
+* no requerir secreto;
+* almacenarse con el resultado derivado.
+
+---
+
+# 2855. Nonce Management Architecture
+
+Los nonces deberán garantizar unicidad dentro del alcance del algoritmo y la clave.
+
+---
+
+# 2856. Nonce Scope
+
+La unicidad deberá evaluarse por:
+
+```text
+Key
+
++
+
+Algorithm
+
++
+
+Message Domain
+```
+
+---
+
+# 2857. NonceGenerationStrategy
+
+```php
+enum NonceGenerationStrategy: string
+{
+    case Random = 'random';
+    case Counter = 'counter';
+    case Hybrid = 'hybrid';
+    case ProviderManaged = 'provider_managed';
+}
+```
+
+---
+
+# 2858. Nonce Reuse Prevention
+
+El sistema deberá impedir reutilización mediante:
+
+* contador persistente;
+* random seguro suficiente;
+* seguimiento por clave;
+* provider-managed nonce.
+
+---
+
+# 2859. NonceRegistryInterface
+
+```php
+interface NonceRegistryInterface
+{
+    public function reserve(
+        KeyReference $key,
+        string $nonce
+    ): void;
+
+    public function hasBeenUsed(
+        KeyReference $key,
+        string $nonce
+    ): bool;
+}
+```
+
+---
+
+# 2860. Replay Protection Architecture
+
+VoltStack deberá combinar:
+
+* nonce;
+* timestamp;
+* message ID;
+* expiration;
+* replay cache;
+* firma o MAC.
+
+---
+
+# 2861. ReplayProtectionContext
+
+```php
+final readonly class ReplayProtectionContext
+{
+    public function __construct(
+        public string $messageId,
+        public string $nonce,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public string $issuer,
+    ) {
+    }
+}
+```
+
+---
+
+# 2862. Clock Skew Handling
+
+Las validaciones temporales deberán aceptar una tolerancia limitada y configurable.
+
+---
+
+# 2863. Replay Cache
+
+El cache deberá:
+
+* ser distribuido cuando aplique;
+* expirar;
+* aislarse por emisor;
+* soportar alta disponibilidad;
+* fallar de forma segura.
+
+---
+
+# 2864. Cryptographic Policy Enforcement
+
+Toda operación criptográfica deberá pasar por un motor de políticas.
+
+---
+
+# 2865. CryptographicPolicyEngineInterface
+
+```php
+interface CryptographicPolicyEngineInterface
+{
+    public function authorize(
+        CryptographicOperation $operation,
+        CryptographicSecurityContext $context
+    ): CryptographicPolicyDecision;
+}
+```
+
+---
+
+# 2866. Cryptographic Security Context
+
+```php
+final readonly class CryptographicSecurityContext
+{
+    public function __construct(
+        public string $subjectId,
+        public string $serviceId,
+        public string $environment,
+        public string $tenantId,
+        public string $purpose,
+        public DataClassification $classification,
+    ) {
+    }
+}
+```
+
+---
+
+# 2867. Cryptographic Policy Decision
+
+```php
+final readonly class CryptographicPolicyDecision
+{
+    public function __construct(
+        public bool $allowed,
+        public array $obligations,
+        public array $reasons,
+        public ?string $requiredAlgorithm,
+        public ?string $requiredKeyScope,
+    ) {
+    }
+}
+```
+
+---
+
+# 2868. Policy Enforcement Examples
+
+```text
+Highly Restricted Data
+
+Requires:
+
+Tenant-Specific Key
+
+Authenticated Encryption
+
+HSM-Backed Master Key
+
+Audit Event
+```
+
+---
+
+# 2869. Cryptographic Observability
+
+VoltStack deberá registrar metadatos de operaciones criptográficas sin exponer:
+
+* plaintext;
+* claves;
+* nonces sensibles;
+* secretos;
+* datos completos.
+
+---
+
+# 2870. Cryptographic Audit Event
+
+```php
+final readonly class CryptographicAuditEvent
+{
+    public function __construct(
+        public string $operation,
+        public string $keyReference,
+        public string $algorithm,
+        public string $purpose,
+        public string $subjectId,
+        public string $outcome,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2871. Cryptographic Metrics
+
+Medir:
+
+* operaciones;
+* errores;
+* latencia;
+* rotaciones;
+* uso de claves antiguas;
+* fallos de validación;
+* certificados próximos a expirar.
+
+---
+
+# 2872. Cryptographic Failure Handling
+
+Los fallos deberán:
+
+* cerrar acceso;
+* evitar fallback inseguro;
+* generar alerta;
+* preservar evidencia;
+* impedir datos parciales.
+
+---
+
+# 2873. No Silent Crypto Downgrade
+
+VoltStack no deberá degradar silenciosamente a algoritmos más débiles.
+
+---
+
+# 2874. Cryptographic Agility Architecture
+
+La arquitectura deberá permitir reemplazar algoritmos, proveedores y longitudes sin rediseñar el dominio.
+
+---
+
+# 2875. Crypto Agility Dimensions
+
+Incluir:
+
+* algoritmo;
+* proveedor;
+* key size;
+* formato;
+* protocolo;
+* trust root;
+* versión de payload.
+
+---
+
+# 2876. Versioned Cryptographic Envelope
+
+```php
+final readonly class VersionedCryptographicEnvelope
+{
+    public function __construct(
+        public int $version,
+        public string $scheme,
+        public string $algorithm,
+        public string $keyReference,
+        public string $payload,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 2877. Algorithm Migration Strategy
+
+```text
+Support Old Read
+
+↓
+
+Use New Write
+
+↓
+
+Migrate Existing Data
+
+↓
+
+Disable Old Write
+
+↓
+
+Retire Old Read
+```
+
+---
+
+# 2878. Crypto Migration Registry
+
+VoltStack deberá mantener migradores entre versiones criptográficas.
+
+---
+
+# 2879. CryptographicMigrationInterface
+
+```php
+interface CryptographicMigrationInterface
+{
+    public function supports(
+        int $fromVersion,
+        int $toVersion
+    ): bool;
+
+    public function migrate(
+        VersionedCryptographicEnvelope $envelope
+    ): VersionedCryptographicEnvelope;
+}
+```
+
+---
+
+# 2880. Post-Quantum Readiness
+
+VoltStack deberá prepararse para futuras transiciones criptográficas post-cuánticas.
+
+---
+
+# 2881. Post-Quantum Objectives
+
+La preparación deberá incluir:
+
+* inventario de criptografía;
+* abstracción de algoritmos;
+* versionado;
+* tamaños variables;
+* formatos extensibles;
+* estrategia híbrida.
+
+---
+
+# 2882. Cryptographic Inventory
+
+El framework deberá poder identificar dónde se utiliza:
+
+* RSA;
+* ECC;
+* firmas;
+* intercambio de claves;
+* certificados;
+* datos con confidencialidad prolongada.
+
+---
+
+# 2883. Harvest Now, Decrypt Later Risk
+
+Los datos con vida útil larga deberán evaluarse frente a adversarios que almacenen ciphertext para descifrarlo en el futuro.
+
+---
+
+# 2884. Post-Quantum Data Priority
+
+Priorizar:
+
+* secretos de largo plazo;
+* datos regulatorios;
+* propiedad intelectual;
+* credenciales maestras;
+* archivos históricos.
+
+---
+
+# 2885. Hybrid Cryptographic Mode
+
+VoltStack podrá soportar esquemas híbridos:
+
+```text
+Classical Algorithm
+
++
+
+Post-Quantum Algorithm
+
+=
+
+Hybrid Protection
+```
+
+---
+
+# 2886. PostQuantumPolicy
+
+```php
+final readonly class PostQuantumPolicy
+{
+    public function __construct(
+        public string $dataCategory,
+        public DateInterval $requiredConfidentialityPeriod,
+        public bool $hybridModeRequired,
+        public array $approvedSchemes,
+    ) {
+    }
+}
+```
+
+---
+
+# 2887. API Security Architecture
+
+VoltStack deberá incorporar un modelo de seguridad completo para APIs.
+
+Las APIs deberán proteger:
+
+* identidad;
+* autorización;
+* entrada;
+* salida;
+* disponibilidad;
+* datos;
+* integridad;
+* trazabilidad.
+
+---
+
+# 2888. API Security Model
+
+```text
+Request
+
+↓
+
+Transport Validation
+
+↓
+
+Client Authentication
+
+↓
+
+Rate and Abuse Control
+
+↓
+
+Schema Validation
+
+↓
+
+Authorization
+
+↓
+
+Business Execution
+
+↓
+
+Response Protection
+```
+
+---
+
+# 2889. API Classification
+
+Las APIs podrán clasificarse como:
+
+* públicas;
+* partner;
+* internas;
+* administrativas;
+* machine-to-machine;
+* tenant-scoped.
+
+---
+
+# 2890. ApiSecurityProfile
+
+```php
+final readonly class ApiSecurityProfile
+{
+    public function __construct(
+        public string $apiName,
+        public string $classification,
+        public array $authenticationMethods,
+        public array $requiredPolicies,
+        public array $rateLimits,
+        public DataClassification $maximumResponseClassification,
+    ) {
+    }
+}
+```
+
+---
+
+# 2891. API Authentication Architecture
+
+VoltStack deberá soportar:
+
+* sesiones;
+* API keys;
+* OAuth 2.0;
+* OIDC;
+* JWT;
+* mTLS;
+* signed requests;
+* workload identity.
+
+---
+
+# 2892. Authentication Method Selection
+
+La selección deberá considerar:
+
+* tipo de cliente;
+* sensibilidad;
+* interactividad;
+* revocación;
+* duración;
+* ambiente.
+
+---
+
+# 2893. API Key Security
+
+Las API keys deberán:
+
+* almacenarse hasheadas;
+* tener prefijo identificable;
+* tener scopes;
+* expirar;
+* rotarse;
+* limitarse por cliente.
+
+---
+
+# 2894. ApiKeyCredential
+
+```php
+final readonly class ApiKeyCredential
+{
+    public function __construct(
+        public string $keyId,
+        public string $hashedSecret,
+        public array $scopes,
+        public DateTimeImmutable $expiresAt,
+        public string $ownerId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2895. API Key Presentation
+
+La clave completa deberá mostrarse únicamente al momento de creación.
+
+---
+
+# 2896. OAuth Scope Architecture
+
+Los scopes deberán representar capacidades concretas y no roles ambiguos.
+
+Ejemplos:
+
+```text
+invoice.read
+
+invoice.create
+
+invoice.export
+
+customer.profile.update
+```
+
+---
+
+# 2897. JWT Validation Architecture
+
+Todo JWT deberá validar:
+
+* firma;
+* issuer;
+* audience;
+* expiration;
+* not before;
+* token ID;
+* algorithm;
+* revocation.
+
+---
+
+# 2898. JwtValidationPolicy
+
+```php
+final readonly class JwtValidationPolicy
+{
+    public function __construct(
+        public array $allowedIssuers,
+        public array $allowedAudiences,
+        public array $allowedAlgorithms,
+        public DateInterval $maximumLifetime,
+        public bool $requireTokenId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2899. API Security Result
+
+Esta entrega establece:
+
+```text
+PKI Architecture
+
+Certificate Governance
+
+Certificate Rotation
+
+Trust Store Management
+
+Mutual TLS
+
+TLS Hardening
+
+Secure Randomness
+
+Nonce Management
+
+Replay Protection
+
+Cryptographic Policy Enforcement
+
+Cryptographic Observability
+
+Crypto Agility
+
+Post-Quantum Readiness
+
+API Security Architecture
+
+API Authentication Foundations
+```
+
+---
+
+# 2900. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2900
+
+Current Delivery:
+Sections 2801-2900
+
+Planned Final Delivery:
+Section 3100
+
+Next:
+Sections 2901-3000
+```
+
+La siguiente entrega continuará con:
+
+```text
+- OAuth authorization flows
+- Token lifecycle
+- API authorization
+- Object-level authorization
+- Function-level authorization
+- Request signing
+- API schema validation
+- Rate limiting
+- Abuse prevention
+- GraphQL security
+- Webhook security
+- API gateway integration
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 30 de 31
+**Cobertura:** Secciones **2901–3000**
+
+---
+
+# 2901. OAuth Security Architecture
+
+VoltStack deberá incorporar una arquitectura OAuth desacoplada del proveedor de identidad y del mecanismo de almacenamiento de tokens.
+
+La arquitectura deberá separar:
+
+* autorización;
+* autenticación;
+* emisión de tokens;
+* validación;
+* consentimiento;
+* revocación;
+* introspección.
+
+---
+
+# 2902. OAuth Security Objectives
+
+La implementación deberá garantizar:
+
+* clientes identificables;
+* grants limitados;
+* tokens de corta duración;
+* scopes mínimos;
+* redirecciones validadas;
+* revocación;
+* trazabilidad.
+
+---
+
+# 2903. OAuth Roles
+
+VoltStack deberá distinguir:
+
+```text
+Resource Owner
+
+Client
+
+Authorization Server
+
+Resource Server
+```
+
+Una misma aplicación podrá desempeñar más de un rol, pero sus responsabilidades deberán mantenerse separadas.
+
+---
+
+# 2904. OAuthFlow
+
+```php
+enum OAuthFlow: string
+{
+    case AuthorizationCode = 'authorization_code';
+    case ClientCredentials = 'client_credentials';
+    case DeviceAuthorization = 'device_authorization';
+    case RefreshToken = 'refresh_token';
+    case TokenExchange = 'token_exchange';
+}
+```
+
+---
+
+# 2905. Authorization Code Flow
+
+El flujo Authorization Code deberá usarse para aplicaciones interactivas con usuario.
+
+```text
+User
+
+↓
+
+Client Redirects to Authorization Server
+
+↓
+
+User Authenticates and Authorizes
+
+↓
+
+Authorization Code Returned
+
+↓
+
+Client Exchanges Code
+
+↓
+
+Access Token Issued
+```
+
+---
+
+# 2906. PKCE Enforcement
+
+Los clientes públicos deberán utilizar Proof Key for Code Exchange.
+
+VoltStack deberá validar:
+
+* `code_challenge`;
+* `code_challenge_method`;
+* `code_verifier`;
+* unicidad;
+* expiración;
+* asociación con el cliente.
+
+---
+
+# 2907. PkceChallenge
+
+```php
+final readonly class PkceChallenge
+{
+    public function __construct(
+        public string $challenge,
+        public string $method,
+        public DateTimeImmutable $expiresAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2908. Authorization Code Security
+
+Los authorization codes deberán:
+
+* ser de un solo uso;
+* expirar rápidamente;
+* asociarse al cliente;
+* asociarse al redirect URI;
+* vincularse al PKCE challenge;
+* invalidarse después del intercambio.
+
+---
+
+# 2909. Client Credentials Flow
+
+El flujo Client Credentials deberá reservarse para comunicación machine-to-machine.
+
+No deberá representar a un usuario humano.
+
+---
+
+# 2910. Machine Client Identity
+
+```php
+final readonly class MachineClientIdentity
+{
+    public function __construct(
+        public string $clientId,
+        public string $serviceId,
+        public array $scopes,
+        public string $environment,
+        public array $constraints,
+    ) {
+    }
+}
+```
+
+---
+
+# 2911. Device Authorization Flow
+
+VoltStack podrá soportar Device Authorization para clientes sin navegador adecuado.
+
+Deberá controlar:
+
+* user code;
+* device code;
+* polling interval;
+* expiración;
+* aprobación;
+* revocación.
+
+---
+
+# 2912. OAuth Redirect URI Security
+
+Los redirect URIs deberán:
+
+* registrarse previamente;
+* coincidir exactamente;
+* usar HTTPS salvo desarrollo local controlado;
+* evitar wildcards;
+* impedir open redirects.
+
+---
+
+# 2913. RedirectUriPolicy
+
+```php
+final readonly class RedirectUriPolicy
+{
+    public function __construct(
+        public array $allowedUris,
+        public bool $requireHttps,
+        public bool $allowLocalhost,
+        public bool $exactMatchRequired = true,
+    ) {
+    }
+}
+```
+
+---
+
+# 2914. OAuth Client Registration
+
+Todo cliente deberá declarar:
+
+* propietario;
+* tipo;
+* flows permitidos;
+* redirect URIs;
+* scopes;
+* secreto o método de autenticación;
+* ambiente;
+* fecha de expiración.
+
+---
+
+# 2915. OAuthClient
+
+```php
+final readonly class OAuthClient
+{
+    public function __construct(
+        public string $clientId,
+        public string $name,
+        public string $type,
+        public array $allowedFlows,
+        public array $redirectUris,
+        public array $allowedScopes,
+        public string $ownerId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2916. Confidential and Public Clients
+
+VoltStack deberá distinguir:
+
+```text
+Confidential Client
+
+Can Protect Credentials
+
+
+Public Client
+
+Cannot Reliably Protect Credentials
+```
+
+La política de autenticación deberá adaptarse a esta diferencia.
+
+---
+
+# 2917. Client Authentication Methods
+
+Podrán soportarse:
+
+* client secret;
+* private key JWT;
+* mTLS;
+* workload identity;
+* signed assertion.
+
+---
+
+# 2918. Client Secret Security
+
+Los secretos de cliente deberán:
+
+* generarse aleatoriamente;
+* almacenarse hasheados;
+* rotarse;
+* expirar;
+* mostrarse una sola vez;
+* limitarse por ambiente.
+
+---
+
+# 2919. Private Key JWT Authentication
+
+Los clientes de alta confianza podrán autenticarse mediante assertions firmadas.
+
+Deberán validarse:
+
+* issuer;
+* subject;
+* audience;
+* expiration;
+* token ID;
+* firma;
+* clave autorizada.
+
+---
+
+# 2920. OAuth Consent Architecture
+
+VoltStack deberá permitir consentimiento explícito cuando el contexto lo requiera.
+
+---
+
+# 2921. Consent Screen Requirements
+
+La pantalla deberá mostrar:
+
+* cliente solicitante;
+* scopes;
+* datos involucrados;
+* finalidad;
+* duración;
+* opción de cancelar.
+
+---
+
+# 2922. OAuthConsentGrant
+
+```php
+final readonly class OAuthConsentGrant
+{
+    public function __construct(
+        public string $subjectId,
+        public string $clientId,
+        public array $scopes,
+        public DateTimeImmutable $grantedAt,
+        public ?DateTimeImmutable $expiresAt,
+        public bool $revoked = false,
+    ) {
+    }
+}
+```
+
+---
+
+# 2923. Consent Reuse
+
+El consentimiento podrá reutilizarse únicamente si:
+
+* el cliente no cambió;
+* los scopes no aumentaron;
+* sigue vigente;
+* no fue revocado;
+* la política lo permite.
+
+---
+
+# 2924. Incremental Authorization
+
+VoltStack deberá permitir solicitar scopes adicionales sin volver a pedir permisos ya aprobados.
+
+---
+
+# 2925. Token Lifecycle Architecture
+
+Todo token deberá pasar por un ciclo de vida controlado.
+
+```text
+Requested
+
+↓
+
+Issued
+
+↓
+
+Activated
+
+↓
+
+Used
+
+↓
+
+Refreshed
+
+↓
+
+Revoked or Expired
+```
+
+---
+
+# 2926. Token Types
+
+VoltStack deberá distinguir:
+
+* access token;
+* refresh token;
+* ID token;
+* device code;
+* authorization code;
+* token exchange artifact.
+
+---
+
+# 2927. AccessToken
+
+```php
+final readonly class AccessToken
+{
+    public function __construct(
+        public string $tokenId,
+        public string $subjectId,
+        public string $clientId,
+        public array $scopes,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public array $claims,
+    ) {
+    }
+}
+```
+
+---
+
+# 2928. Access Token Lifetime
+
+La duración deberá depender de:
+
+* sensibilidad;
+* cliente;
+* operación;
+* ambiente;
+* autenticación;
+* riesgo;
+* capacidad de revocación.
+
+---
+
+# 2929. Short-Lived Access Tokens
+
+Los access tokens deberán ser cortos para reducir:
+
+* exposición;
+* abuso;
+* persistencia;
+* impacto de robo.
+
+---
+
+# 2930. Refresh Token Architecture
+
+Los refresh tokens deberán recibir una protección superior a los access tokens.
+
+---
+
+# 2931. RefreshToken
+
+```php
+final readonly class RefreshToken
+{
+    public function __construct(
+        public string $tokenId,
+        public string $subjectId,
+        public string $clientId,
+        public string $familyId,
+        public DateTimeImmutable $issuedAt,
+        public DateTimeImmutable $expiresAt,
+        public bool $consumed = false,
+    ) {
+    }
+}
+```
+
+---
+
+# 2932. Refresh Token Rotation
+
+Cada uso deberá emitir un nuevo refresh token e invalidar el anterior.
+
+```text
+Refresh Token A
+
+↓
+
+Used Once
+
+↓
+
+Access Token + Refresh Token B
+
+↓
+
+Refresh Token A Revoked
+```
+
+---
+
+# 2933. Refresh Token Family
+
+Los tokens rotados deberán pertenecer a una misma familia para detectar reutilización.
+
+---
+
+# 2934. Refresh Token Reuse Detection
+
+Si un token previamente consumido vuelve a usarse, VoltStack deberá:
+
+* revocar la familia;
+* invalidar sesiones;
+* registrar incidente;
+* requerir nueva autenticación;
+* alertar cuando corresponda.
+
+---
+
+# 2935. TokenFamilyCompromiseEvent
+
+```php
+final readonly class TokenFamilyCompromiseEvent
+{
+    public function __construct(
+        public string $familyId,
+        public string $subjectId,
+        public string $clientId,
+        public DateTimeImmutable $detectedAt,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 2936. Token Revocation Architecture
+
+VoltStack deberá permitir revocar por:
+
+* token;
+* familia;
+* cliente;
+* usuario;
+* sesión;
+* dispositivo;
+* tenant;
+* incidente.
+
+---
+
+# 2937. TokenRevocationServiceInterface
+
+```php
+interface TokenRevocationServiceInterface
+{
+    public function revokeToken(
+        string $tokenId,
+        string $reason
+    ): void;
+
+    public function revokeFamily(
+        string $familyId,
+        string $reason
+    ): void;
+
+    public function revokeSubject(
+        string $subjectId,
+        string $reason
+    ): void;
+}
+```
+
+---
+
+# 2938. Token Introspection
+
+Los resource servers podrán consultar el estado de tokens opacos.
+
+La respuesta deberá incluir únicamente información necesaria.
+
+---
+
+# 2939. TokenIntrospectionResult
+
+```php
+final readonly class TokenIntrospectionResult
+{
+    public function __construct(
+        public bool $active,
+        public ?string $subject,
+        public ?string $clientId,
+        public array $scopes,
+        public ?DateTimeImmutable $expiresAt,
+        public array $claims,
+    ) {
+    }
+}
+```
+
+---
+
+# 2940. Token Binding
+
+VoltStack podrá vincular tokens a:
+
+* certificado;
+* dispositivo;
+* cliente;
+* DPoP key;
+* sesión;
+* workload.
+
+---
+
+# 2941. Proof-of-Possession Tokens
+
+Los tokens de prueba de posesión deberán exigir evidencia criptográfica adicional en cada solicitud.
+
+---
+
+# 2942. DPoP Security
+
+La prueba deberá cubrir:
+
+* método HTTP;
+* URI;
+* timestamp;
+* nonce;
+* token hash;
+* clave pública.
+
+---
+
+# 2943. Token Exchange Architecture
+
+VoltStack podrá intercambiar un token por otro de menor alcance.
+
+```text
+Original Token
+
+↓
+
+Token Exchange Policy
+
+↓
+
+Restricted Downstream Token
+```
+
+---
+
+# 2944. Delegation and Impersonation
+
+VoltStack deberá diferenciar:
+
+```text
+Delegation
+
+Service Acts With Limited Authority
+On Behalf of Subject
+
+
+Impersonation
+
+Service Acts As Subject
+```
+
+La impersonación deberá recibir controles más estrictos.
+
+---
+
+# 2945. ApiAuthorizationArchitecture
+
+La autenticación de la API deberá preceder a una autorización contextual.
+
+---
+
+# 2946. API Authorization Context
+
+```php
+final readonly class ApiAuthorizationContext
+{
+    public function __construct(
+        public string $subjectId,
+        public string $clientId,
+        public string $tenantId,
+        public string $routeName,
+        public string $httpMethod,
+        public array $scopes,
+        public array $claims,
+        public array $riskSignals,
+    ) {
+    }
+}
+```
+
+---
+
+# 2947. API Authorization Layers
+
+VoltStack deberá evaluar:
+
+```text
+Route Authorization
+
++
+
+Function Authorization
+
++
+
+Object Authorization
+
++
+
+Field Authorization
+
++
+
+Business Rule Authorization
+```
+
+---
+
+# 2948. Route-Level Authorization
+
+Cada endpoint deberá declarar una política explícita.
+
+```php
+#[ApiPolicy('invoice.view')]
+final readonly class ShowInvoiceController
+{
+    public function __invoke(Invoice $invoice): InvoiceResource
+    {
+        return InvoiceResource::from($invoice);
+    }
+}
+```
+
+---
+
+# 2949. Function-Level Authorization
+
+Las operaciones sensibles deberán diferenciarse incluso cuando compartan recurso.
+
+Ejemplos:
+
+```text
+invoice.read
+
+invoice.update
+
+invoice.cancel
+
+invoice.refund
+
+invoice.export
+```
+
+---
+
+# 2950. Broken Function-Level Authorization Prevention
+
+VoltStack deberá impedir que un usuario acceda a funciones administrativas únicamente conociendo la ruta.
+
+---
+
+# 2951. Object-Level Authorization
+
+Todo recurso solicitado por identificador deberá pasar por una política de acceso.
+
+---
+
+# 2952. ObjectAuthorizationPolicyInterface
+
+```php
+interface ObjectAuthorizationPolicyInterface
+{
+    public function authorize(
+        object $subject,
+        object $resource,
+        string $operation,
+        ApiAuthorizationContext $context
+    ): AuthorizationDecision;
+}
+```
+
+---
+
+# 2953. BOLA Prevention
+
+VoltStack deberá prevenir Broken Object Level Authorization mediante:
+
+* scoping automático;
+* policy checks;
+* tenant validation;
+* ownership validation;
+* resource lookup seguro.
+
+---
+
+# 2954. Secure Resource Resolution
+
+```text
+Route Identifier
+
+↓
+
+Tenant-Scoped Query
+
+↓
+
+Resource Loaded
+
+↓
+
+Object Policy Evaluated
+
+↓
+
+Controller Invoked
+```
+
+---
+
+# 2955. Resource Identifier Security
+
+Los identificadores no deberán considerarse secretos.
+
+La autorización no podrá depender de que sean difíciles de adivinar.
+
+---
+
+# 2956. Mass Assignment Security
+
+Los DTOs de entrada deberán permitir únicamente campos explícitos.
+
+---
+
+# 2957. Secure Input DTO
+
+```php
+final readonly class UpdateCustomerInput
+{
+    public function __construct(
+        public string $displayName,
+        public ?string $phone,
+    ) {
+    }
+}
+```
+
+Campos como `role`, `tenantId` o `isAdmin` no deberán aceptarse sin una operación autorizada específica.
+
+---
+
+# 2958. Property-Level Authorization
+
+Cambiar una propiedad sensible deberá requerir una política distinta.
+
+---
+
+# 2959. PropertyMutationPolicy
+
+```php
+interface PropertyMutationPolicyInterface
+{
+    public function authorize(
+        object $subject,
+        object $resource,
+        string $property,
+        mixed $newValue,
+        ApiAuthorizationContext $context
+    ): AuthorizationDecision;
+}
+```
+
+---
+
+# 2960. API Request Signing Architecture
+
+VoltStack deberá permitir firmar solicitudes de integraciones críticas.
+
+---
+
+# 2961. Signed Request Components
+
+La firma deberá cubrir:
+
+```text
+HTTP Method
+
++
+
+Canonical Path
+
++
+
+Canonical Query
+
++
+
+Selected Headers
+
++
+
+Body Digest
+
++
+
+Timestamp
+
++
+
+Nonce
+```
+
+---
+
+# 2962. SignedApiRequest
+
+```php
+final readonly class SignedApiRequest
+{
+    public function __construct(
+        public string $clientId,
+        public string $algorithm,
+        public string $keyId,
+        public string $signature,
+        public string $timestamp,
+        public string $nonce,
+        public array $signedHeaders,
+    ) {
+    }
+}
+```
+
+---
+
+# 2963. Request Canonicalization
+
+VoltStack deberá definir una representación canónica para evitar discrepancias entre firmante y verificador.
+
+---
+
+# 2964. Canonical Request Format
+
+```text
+METHOD
+/path
+canonical=query
+content-type:application/json
+x-request-id:abc123
+
+signed-header-list
+body-digest
+timestamp
+nonce
+```
+
+---
+
+# 2965. Signed Request Verification
+
+El verificador deberá comprobar:
+
+* cliente;
+* clave;
+* firma;
+* timestamp;
+* nonce;
+* body hash;
+* headers;
+* permisos;
+* replay.
+
+---
+
+# 2966. ApiRequestSignatureVerifierInterface
+
+```php
+interface ApiRequestSignatureVerifierInterface
+{
+    public function verify(
+        ServerRequestInterface $request,
+        SignedApiRequest $signature
+    ): SignatureVerificationResult;
+}
+```
+
+---
+
+# 2967. SignatureVerificationResult
+
+```php
+final readonly class SignatureVerificationResult
+{
+    public function __construct(
+        public bool $valid,
+        public ?string $clientId,
+        public array $reasons,
+        public array $verifiedComponents,
+    ) {
+    }
+}
+```
+
+---
+
+# 2968. API Schema Validation Architecture
+
+Toda entrada deberá validarse contra un contrato conocido.
+
+---
+
+# 2969. API Input Validation Layers
+
+Aplicar:
+
+```text
+Transport Validation
+
+↓
+
+Content-Type Validation
+
+↓
+
+Syntax Validation
+
+↓
+
+Schema Validation
+
+↓
+
+Semantic Validation
+
+↓
+
+Authorization Validation
+```
+
+---
+
+# 2970. Schema Validation Requirements
+
+Validar:
+
+* tipos;
+* campos requeridos;
+* longitud;
+* formato;
+* enumeraciones;
+* rangos;
+* objetos adicionales;
+* profundidad.
+
+---
+
+# 2971. Reject Unknown Fields
+
+Los endpoints sensibles deberán rechazar propiedades desconocidas para reducir:
+
+* mass assignment;
+* errores;
+* ambigüedad;
+* payload smuggling.
+
+---
+
+# 2972. ApiSchemaValidatorInterface
+
+```php
+interface ApiSchemaValidatorInterface
+{
+    public function validate(
+        mixed $payload,
+        string $schemaId
+    ): SchemaValidationResult;
+}
+```
+
+---
+
+# 2973. SchemaValidationResult
+
+```php
+final readonly class SchemaValidationResult
+{
+    public function __construct(
+        public bool $valid,
+        public array $violations,
+        public ?object $normalizedInput,
+    ) {
+    }
+}
+```
+
+---
+
+# 2974. Payload Size Limits
+
+VoltStack deberá limitar:
+
+* body total;
+* cantidad de campos;
+* longitud de strings;
+* número de archivos;
+* tamaño por archivo;
+* profundidad JSON.
+
+---
+
+# 2975. Content-Type Enforcement
+
+Un endpoint deberá aceptar únicamente tipos declarados.
+
+Ejemplo:
+
+```text
+application/json
+
+application/problem+json
+
+multipart/form-data
+```
+
+No deberá inferirse silenciosamente el formato.
+
+---
+
+# 2976. Duplicate Parameter Security
+
+VoltStack deberá definir cómo manejar parámetros duplicados en:
+
+* query string;
+* headers;
+* form data;
+* JSON cuando el parser lo detecte.
+
+La opción segura por defecto será rechazarlos cuando generen ambigüedad.
+
+---
+
+# 2977. HTTP Parameter Pollution Prevention
+
+El framework deberá normalizar parámetros de forma consistente entre:
+
+* proxy;
+* servidor;
+* middleware;
+* router;
+* controlador.
+
+---
+
+# 2978. Deserialization Security
+
+La deserialización deberá:
+
+* evitar clases arbitrarias;
+* usar DTOs cerrados;
+* limitar profundidad;
+* validar tipos;
+* impedir ejecución implícita.
+
+---
+
+# 2979. API Response Security
+
+Las respuestas deberán:
+
+* minimizar datos;
+* aplicar field policies;
+* evitar secretos;
+* incluir content type correcto;
+* controlar caching;
+* limitar metadata interna.
+
+---
+
+# 2980. Error Response Security
+
+Los errores públicos no deberán revelar:
+
+* stack traces;
+* rutas internas;
+* SQL;
+* secretos;
+* nombres de infraestructura;
+* decisiones de policy detalladas.
+
+---
+
+# 2981. Problem Details Architecture
+
+VoltStack podrá normalizar errores mediante un formato seguro.
+
+```php
+final readonly class ApiProblemDetails
+{
+    public function __construct(
+        public string $type,
+        public string $title,
+        public int $status,
+        public string $detail,
+        public string $instance,
+        public string $correlationId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2982. API Rate Limiting Architecture
+
+VoltStack deberá limitar consumo por múltiples dimensiones.
+
+---
+
+# 2983. Rate Limit Dimensions
+
+Podrán utilizarse:
+
+* IP;
+* subject;
+* tenant;
+* client;
+* route;
+* operation;
+* token;
+* device;
+* región.
+
+---
+
+# 2984. RateLimitKey
+
+```php
+final readonly class RateLimitKey
+{
+    public function __construct(
+        public string $namespace,
+        public string $subject,
+        public string $operation,
+        public string $tenantId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2985. Rate Limit Algorithms
+
+VoltStack podrá soportar:
+
+* fixed window;
+* sliding window;
+* token bucket;
+* leaky bucket;
+* concurrency limit.
+
+---
+
+# 2986. RateLimitPolicy
+
+```php
+final readonly class RateLimitPolicy
+{
+    public function __construct(
+        public string $policyId,
+        public int $limit,
+        public DateInterval $window,
+        public int $burst,
+        public array $dimensions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2987. Distributed Rate Limiting
+
+En despliegues distribuidos, el contador deberá:
+
+* ser consistente;
+* tolerar concurrencia;
+* evitar race conditions;
+* tener expiración;
+* degradar de forma definida.
+
+---
+
+# 2988. Adaptive Rate Limiting
+
+Los límites podrán endurecerse según:
+
+* reputación;
+* errores;
+* anomalías;
+* geolocalización;
+* riesgo;
+* costo operativo.
+
+---
+
+# 2989. Cost-Based Rate Limiting
+
+No todas las operaciones deberán consumir el mismo costo.
+
+```text
+Simple Read
+
+Cost: 1
+
+
+Complex Report
+
+Cost: 20
+
+
+Large Export
+
+Cost: 100
+```
+
+---
+
+# 2990. ApiRequestCostCalculatorInterface
+
+```php
+interface ApiRequestCostCalculatorInterface
+{
+    public function calculate(
+        ServerRequestInterface $request,
+        ApiAuthorizationContext $context
+    ): int;
+}
+```
+
+---
+
+# 2991. Abuse Prevention Architecture
+
+VoltStack deberá detectar y contener patrones abusivos aunque no excedan un límite simple.
+
+---
+
+# 2992. Abuse Signals
+
+Considerar:
+
+* enumeración;
+* credential stuffing;
+* scraping;
+* bursts;
+* secuencias anómalas;
+* alta tasa de fallos;
+* cambios de identidad;
+* automatización hostil.
+
+---
+
+# 2993. AbuseDetectionResult
+
+```php
+final readonly class AbuseDetectionResult
+{
+    public function __construct(
+        public float $riskScore,
+        public array $signals,
+        public string $recommendedAction,
+        public DateTimeImmutable $evaluatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2994. Abuse Response Actions
+
+VoltStack podrá:
+
+* permitir;
+* limitar;
+* introducir delay;
+* exigir challenge;
+* requerir autenticación reforzada;
+* bloquear temporalmente;
+* alertar.
+
+---
+
+# 2995. GraphQL Security Architecture
+
+VoltStack deberá aplicar controles específicos a GraphQL.
+
+---
+
+# 2996. GraphQL Security Controls
+
+Incluir:
+
+* depth limit;
+* complexity limit;
+* field authorization;
+* query allowlists;
+* introspection policy;
+* batching limits;
+* timeout;
+* response size limits.
+
+---
+
+# 2997. GraphQlQueryPolicy
+
+```php
+final readonly class GraphQlQueryPolicy
+{
+    public function __construct(
+        public int $maximumDepth,
+        public int $maximumComplexity,
+        public int $maximumAliases,
+        public int $maximumBatchSize,
+        public bool $introspectionAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 2998. Webhook Security Architecture
+
+Los webhooks deberán protegerse mediante:
+
+* firma;
+* timestamp;
+* replay protection;
+* endpoint-specific secret;
+* retries controlados;
+* idempotency;
+* destination validation.
+
+---
+
+# 2999. API Security Architecture Result
+
+Esta entrega establece:
+
+```text
+OAuth Security Architecture
+
+Authorization Code and PKCE
+
+Machine-to-Machine Authentication
+
+Consent Governance
+
+Token Lifecycle
+
+Refresh Token Rotation
+
+Token Family Compromise Detection
+
+Token Revocation and Introspection
+
+Proof-of-Possession Tokens
+
+Delegation and Token Exchange
+
+Route-Level Authorization
+
+Function-Level Authorization
+
+Object-Level Authorization
+
+Property-Level Authorization
+
+Signed API Requests
+
+Schema Validation
+
+Secure Deserialization
+
+Safe Error Responses
+
+Rate Limiting
+
+Abuse Prevention
+
+GraphQL Security
+
+Webhook Security Foundations
+```
+
+---
+
+# 3000. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-3000
+
+Current Delivery:
+Sections 2901-3000
+
+Planned Final Delivery:
+Section 3100
+
+Remaining Deliveries:
+1
+
+Next:
+Sections 3001-3100
+```
+
+La entrega final continuará con:
+
+```text
+- Webhook delivery security
+- API gateway integration
+- Security testing architecture
+- Authorization testing
+- Policy verification
+- Threat simulation
+- Security observability integration
+- Controller security configuration
+- Framework service registration
+- Final reference architecture
+- Implementation roadmap
+- Final status
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 31 de 31
+**Cobertura:** Secciones **3001–3100**
+**Estado:** Documento completado
+
+---
+
+# 3001. Webhook Delivery Security Architecture
+
+VoltStack deberá incorporar una arquitectura específica para asegurar la entrega y recepción de webhooks.
+
+Los webhooks deberán tratarse como mensajes remotos potencialmente hostiles.
+
+---
+
+# 3002. Webhook Security Objectives
+
+La arquitectura deberá garantizar:
+
+* autenticidad;
+* integridad;
+* confidencialidad cuando aplique;
+* idempotencia;
+* protección contra replay;
+* trazabilidad;
+* entrega controlada.
+
+---
+
+# 3003. Webhook Delivery Model
+
+```text
+Domain Event
+
+↓
+
+Webhook Subscription Resolver
+
+↓
+
+Payload Builder
+
+↓
+
+Signature Generator
+
+↓
+
+Secure Delivery Queue
+
+↓
+
+Remote Endpoint
+
+↓
+
+Delivery Verification
+```
+
+---
+
+# 3004. WebhookSubscription
+
+```php
+final readonly class WebhookSubscription
+{
+    public function __construct(
+        public string $subscriptionId,
+        public string $tenantId,
+        public string $endpoint,
+        public array $events,
+        public string $signingKeyReference,
+        public bool $enabled,
+        public DateTimeImmutable $createdAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3005. Webhook Endpoint Registration
+
+Todo endpoint deberá registrarse mediante un proceso que valide:
+
+* formato;
+* protocolo;
+* ownership;
+* tenant;
+* DNS;
+* redirecciones;
+* política de destino.
+
+---
+
+# 3006. Webhook Destination Validation
+
+VoltStack deberá impedir entregas hacia:
+
+* localhost;
+* metadata endpoints;
+* redes privadas no autorizadas;
+* direcciones link-local;
+* destinos bloqueados;
+* esquemas no permitidos.
+
+---
+
+# 3007. SSRF Protection for Webhooks
+
+La entrega deberá protegerse contra Server-Side Request Forgery.
+
+```text
+Submitted URL
+
+↓
+
+Canonicalization
+
+↓
+
+DNS Resolution
+
+↓
+
+Network Classification
+
+↓
+
+Policy Validation
+
+↓
+
+Connection
+```
+
+---
+
+# 3008. WebhookDestinationPolicy
+
+```php
+final readonly class WebhookDestinationPolicy
+{
+    public function __construct(
+        public array $allowedSchemes,
+        public array $deniedNetworks,
+        public array $allowedPorts,
+        public bool $followRedirects,
+        public int $maximumRedirects,
+    ) {
+    }
+}
+```
+
+---
+
+# 3009. DNS Rebinding Protection
+
+VoltStack deberá resolver y validar el destino:
+
+* al registrar;
+* antes de conectar;
+* después de redirecciones;
+* durante reintentos sensibles.
+
+---
+
+# 3010. Webhook Payload Minimization
+
+El payload deberá contener únicamente:
+
+* identificadores necesarios;
+* evento;
+* versión;
+* timestamp;
+* datos autorizados;
+* metadata mínima.
+
+---
+
+# 3011. Webhook Payload Versioning
+
+Todo payload deberá declarar su versión.
+
+```php
+final readonly class WebhookEnvelope
+{
+    public function __construct(
+        public string $eventId,
+        public string $eventType,
+        public string $version,
+        public DateTimeImmutable $occurredAt,
+        public array $data,
+        public array $metadata,
+    ) {
+    }
+}
+```
+
+---
+
+# 3012. Webhook Signature Architecture
+
+La firma deberá proteger una representación canónica del mensaje.
+
+---
+
+# 3013. Webhook Signature Input
+
+```text
+Delivery ID
+
++
+
+Timestamp
+
++
+
+HTTP Method
+
++
+
+Canonical URI
+
++
+
+Body Digest
+```
+
+---
+
+# 3014. WebhookSignature
+
+```php
+final readonly class WebhookSignature
+{
+    public function __construct(
+        public string $algorithm,
+        public string $keyId,
+        public string $value,
+        public string $timestamp,
+        public string $deliveryId,
+    ) {
+    }
+}
+```
+
+---
+
+# 3015. Webhook Signing Key Isolation
+
+Las claves de webhook deberán separarse por:
+
+* tenant;
+* integración;
+* ambiente;
+* propósito;
+* endpoint cuando sea necesario.
+
+---
+
+# 3016. Webhook Secret Rotation
+
+La rotación deberá permitir una ventana controlada con:
+
+* clave actual;
+* clave anterior;
+* identificador de versión;
+* fecha de retiro;
+* auditoría.
+
+---
+
+# 3017. Webhook Replay Protection
+
+El receptor deberá validar:
+
+* timestamp;
+* delivery ID;
+* nonce cuando exista;
+* firma;
+* ventana temporal;
+* uso previo.
+
+---
+
+# 3018. Webhook Idempotency
+
+Cada entrega deberá incluir un identificador único reutilizable durante los reintentos.
+
+---
+
+# 3019. WebhookDelivery
+
+```php
+final readonly class WebhookDelivery
+{
+    public function __construct(
+        public string $deliveryId,
+        public string $subscriptionId,
+        public string $eventId,
+        public int $attempt,
+        public DateTimeImmutable $scheduledAt,
+        public string $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 3020. Webhook Retry Architecture
+
+Los reintentos deberán usar:
+
+* exponential backoff;
+* jitter;
+* máximo de intentos;
+* clasificación de errores;
+* dead-letter queue.
+
+---
+
+# 3021. Retry Classification
+
+```text
+2xx
+
+Delivered
+
+
+408 / 429 / Selected 5xx
+
+Retryable
+
+
+4xx Validation or Authorization Failure
+
+Non-Retryable
+```
+
+---
+
+# 3022. Webhook Dead-Letter Queue
+
+Las entregas agotadas deberán pasar a una cola controlada para:
+
+* inspección;
+* reproceso;
+* auditoría;
+* alertamiento;
+* corrección.
+
+---
+
+# 3023. Webhook Delivery Confidentiality
+
+Cuando el payload sea sensible, VoltStack podrá aplicar:
+
+* TLS reforzado;
+* mTLS;
+* cifrado de payload;
+* tokenización;
+* referencias en lugar de datos completos.
+
+---
+
+# 3024. Webhook Response Handling
+
+La respuesta remota deberá limitarse en:
+
+* tamaño;
+* tiempo;
+* redirects;
+* content type;
+* almacenamiento;
+* logging.
+
+---
+
+# 3025. Webhook Delivery Observability
+
+Registrar:
+
+* delivery ID;
+* endpoint normalizado;
+* evento;
+* intento;
+* latencia;
+* estado;
+* error seguro;
+* próximo reintento.
+
+---
+
+# 3026. Webhook Security Result
+
+La arquitectura deberá impedir que los webhooks se conviertan en:
+
+* canal de exfiltración;
+* vector SSRF;
+* mecanismo de replay;
+* fuente de duplicados;
+* dependencia no observable.
+
+---
+
+# 3027. API Gateway Integration Architecture
+
+VoltStack deberá integrarse con gateways sin delegar completamente su seguridad al perímetro.
+
+---
+
+# 3028. Gateway Security Responsibilities
+
+El gateway podrá aplicar:
+
+* TLS;
+* WAF;
+* routing;
+* rate limiting;
+* authentication preliminar;
+* transformations;
+* logging.
+
+---
+
+# 3029. Application Security Responsibilities
+
+VoltStack deberá seguir aplicando:
+
+* autorización;
+* object-level policies;
+* field security;
+* business constraints;
+* tenant isolation;
+* secure serialization.
+
+---
+
+# 3030. Gateway Trust Boundary
+
+```text
+Untrusted Client
+
+↓
+
+API Gateway
+
+↓
+
+Trusted Network Boundary
+
+↓
+
+VoltStack HTTP Kernel
+
+↓
+
+Controller Security Pipeline
+```
+
+El gateway no deberá considerarse una fuente de autorización absoluta.
+
+---
+
+# 3031. Gateway Identity Propagation
+
+La identidad propagada deberá protegerse mediante:
+
+* firma;
+* mTLS;
+* red confiable;
+* headers reservados;
+* validación de issuer.
+
+---
+
+# 3032. Trusted Gateway Headers
+
+```php
+final readonly class TrustedGatewayHeaderPolicy
+{
+    public function __construct(
+        public array $trustedGateways,
+        public array $acceptedHeaders,
+        public bool $requireSignedIdentity,
+        public bool $stripUntrustedHeaders,
+    ) {
+    }
+}
+```
+
+---
+
+# 3033. Header Spoofing Prevention
+
+VoltStack deberá eliminar headers de identidad enviados directamente por clientes no confiables.
+
+---
+
+# 3034. GatewayAuthenticationContext
+
+```php
+final readonly class GatewayAuthenticationContext
+{
+    public function __construct(
+        public string $gatewayId,
+        public string $subjectId,
+        public string $authenticationMethod,
+        public array $claims,
+        public DateTimeImmutable $authenticatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3035. Gateway Policy Consistency
+
+Las políticas del gateway y del framework deberán revisarse para evitar:
+
+* reglas contradictorias;
+* endpoints sin protección;
+* scopes inconsistentes;
+* bypasses;
+* duplicidad innecesaria.
+
+---
+
+# 3036. Gateway Failover Security
+
+El failover no deberá redirigir tráfico hacia rutas menos protegidas.
+
+---
+
+# 3037. Direct Origin Access Protection
+
+Los orígenes detrás del gateway deberán bloquear acceso directo mediante:
+
+* redes privadas;
+* firewall;
+* mTLS;
+* signed headers;
+* allowlists.
+
+---
+
+# 3038. API Gateway Result
+
+El gateway deberá funcionar como una capa adicional, no como sustituto del modelo de seguridad de VoltStack.
+
+---
+
+# 3039. Controller Security Testing Architecture
+
+VoltStack deberá incorporar pruebas específicas para autorización, políticas y acceso a recursos.
+
+---
+
+# 3040. Security Testing Objectives
+
+Las pruebas deberán verificar:
+
+* decisiones correctas;
+* aislamiento;
+* denegación segura;
+* ausencia de bypass;
+* consistencia;
+* cobertura;
+* regresión.
+
+---
+
+# 3041. Security Test Layers
+
+```text
+Unit Tests
+
+↓
+
+Policy Tests
+
+↓
+
+Controller Integration Tests
+
+↓
+
+HTTP Security Tests
+
+↓
+
+End-to-End Tests
+
+↓
+
+Adversarial Tests
+```
+
+---
+
+# 3042. Authorization Unit Testing
+
+Cada policy deberá probar:
+
+* casos permitidos;
+* casos denegados;
+* límites;
+* recursos inexistentes;
+* contexto incompleto;
+* condiciones excepcionales.
+
+---
+
+# 3043. PolicyTestCase
+
+```php
+abstract class PolicyTestCase extends TestCase
+{
+    abstract protected function policy(): object;
+
+    protected function assertAllowed(
+        AuthorizationDecision $decision
+    ): void {
+        self::assertTrue($decision->allowed);
+    }
+
+    protected function assertDenied(
+        AuthorizationDecision $decision
+    ): void {
+        self::assertFalse($decision->allowed);
+    }
+}
+```
+
+---
+
+# 3044. Authorization Decision Matrix Testing
+
+VoltStack deberá permitir definir matrices de prueba.
+
+```text
+Subject Role
+
+×
+
+Resource State
+
+×
+
+Operation
+
+×
+
+Tenant
+
+×
+
+Expected Decision
+```
+
+---
+
+# 3045. AuthorizationScenario
+
+```php
+final readonly class AuthorizationScenario
+{
+    public function __construct(
+        public string $name,
+        public object $subject,
+        public object $resource,
+        public string $operation,
+        public AuthorizationContext $context,
+        public bool $expectedAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 3046. Deny-by-Default Testing
+
+Toda nueva operación deberá probar que un sujeto sin permisos recibe denegación.
+
+---
+
+# 3047. Cross-Tenant Security Testing
+
+Las pruebas deberán intentar acceder a recursos de otro tenant mediante:
+
+* IDs válidos;
+* rutas manipuladas;
+* relaciones indirectas;
+* exports;
+* búsquedas;
+* caches.
+
+---
+
+# 3048. BOLA Security Tests
+
+Cada endpoint que reciba identificadores deberá incluir pruebas de Broken Object Level Authorization.
+
+---
+
+# 3049. Function-Level Security Tests
+
+Las rutas administrativas deberán probarse con usuarios autenticados pero no autorizados.
+
+---
+
+# 3050. Field-Level Security Tests
+
+Los serializadores deberán verificar que campos sensibles sean:
+
+* omitidos;
+* enmascarados;
+* revelados únicamente bajo permiso;
+* protegidos en errores.
+
+---
+
+# 3051. Mass Assignment Tests
+
+Las pruebas deberán enviar propiedades no permitidas y comprobar que no se persistan.
+
+---
+
+# 3052. Policy Mutation Testing
+
+VoltStack podrá aplicar mutation testing para detectar pruebas débiles.
+
+Ejemplos:
+
+* invertir `allow`;
+* eliminar restricción de tenant;
+* ignorar ownership;
+* omitir scope.
+
+---
+
+# 3053. Property-Based Authorization Testing
+
+Podrán generarse combinaciones de:
+
+* sujetos;
+* recursos;
+* estados;
+* permisos;
+* tenants;
+* operaciones.
+
+---
+
+# 3054. Authorization Invariant
+
+Ejemplo:
+
+```text
+For Every Resource
+
+A Subject From Tenant A
+
+Must Never Modify
+
+A Resource Owned By Tenant B
+```
+
+---
+
+# 3055. Policy Verification Architecture
+
+VoltStack deberá permitir análisis estructural de políticas antes del runtime.
+
+---
+
+# 3056. Policy Verification Checks
+
+Validar:
+
+* policy inexistente;
+* operación sin regla;
+* wildcard excesivo;
+* contradicción;
+* recurso no tipado;
+* dependencia circular;
+* obligación imposible.
+
+---
+
+# 3057. PolicyDefinitionValidatorInterface
+
+```php
+interface PolicyDefinitionValidatorInterface
+{
+    public function validate(
+        PolicyDefinition $policy
+    ): PolicyValidationResult;
+}
+```
+
+---
+
+# 3058. PolicyValidationResult
+
+```php
+final readonly class PolicyValidationResult
+{
+    public function __construct(
+        public bool $valid,
+        public array $errors,
+        public array $warnings,
+        public array $recommendations,
+    ) {
+    }
+}
+```
+
+---
+
+# 3059. Policy Coverage Analysis
+
+VoltStack deberá detectar controladores, métodos y operaciones sin policy asociada.
+
+---
+
+# 3060. Policy Coverage Report
+
+```php
+final readonly class PolicyCoverageReport
+{
+    public function __construct(
+        public int $totalOperations,
+        public int $protectedOperations,
+        public array $unprotectedOperations,
+        public float $coveragePercentage,
+    ) {
+    }
+}
+```
+
+---
+
+# 3061. Static Security Analysis
+
+El análisis podrá inspeccionar:
+
+* atributos;
+* rutas;
+* controladores;
+* DTOs;
+* policies;
+* repositories;
+* serializers.
+
+---
+
+# 3062. Authorization Path Analysis
+
+```text
+Route
+
+↓
+
+Controller Resolver
+
+↓
+
+Parameter Resolver
+
+↓
+
+Resource Resolver
+
+↓
+
+Policy Engine
+
+↓
+
+Controller Invoker
+```
+
+Toda ruta deberá demostrar que el policy engine no puede omitirse.
+
+---
+
+# 3063. Security Regression Testing
+
+Cada vulnerabilidad corregida deberá producir una prueba permanente.
+
+---
+
+# 3064. Threat Simulation Architecture
+
+VoltStack deberá soportar pruebas adversariales controladas.
+
+---
+
+# 3065. Threat Simulation Scenarios
+
+Incluir:
+
+* token robado;
+* tenant spoofing;
+* replay;
+* route tampering;
+* privilege escalation;
+* stale policy cache;
+* compromised service.
+
+---
+
+# 3066. ThreatSimulationScenario
+
+```php
+final readonly class ThreatSimulationScenario
+{
+    public function __construct(
+        public string $scenarioId,
+        public string $threat,
+        public array $preconditions,
+        public array $actions,
+        public array $expectedControls,
+        public string $expectedOutcome,
+    ) {
+    }
+}
+```
+
+---
+
+# 3067. Chaos Security Testing
+
+Podrán simularse fallos de:
+
+* identity provider;
+* policy store;
+* KMS;
+* audit pipeline;
+* cache;
+* network;
+* database.
+
+---
+
+# 3068. Security Failure Invariants
+
+Ante fallos críticos:
+
+```text
+Authorization Unavailable
+
+=
+
+Access Denied
+```
+
+salvo política explícita y documentada.
+
+---
+
+# 3069. Penetration Testing Support
+
+VoltStack deberá facilitar:
+
+* ambientes controlados;
+* cuentas de prueba;
+* datos sintéticos;
+* logging;
+* correlation IDs;
+* reset reproducible.
+
+---
+
+# 3070. Security Testing Result
+
+La arquitectura de testing deberá convertir la autorización en una propiedad verificable y no solamente en una expectativa de diseño.
+
+---
+
+# 3071. Security Observability Integration
+
+El modelo de controladores deberá integrarse con la observabilidad general de VoltStack.
+
+---
+
+# 3072. Authorization Observability Signals
+
+Registrar:
+
+* decisión;
+* policy;
+* sujeto;
+* operación;
+* recurso abstracto;
+* tenant;
+* obligaciones;
+* latencia;
+* motivo normalizado.
+
+---
+
+# 3073. AuthorizationDecisionEvent
+
+```php
+final readonly class AuthorizationDecisionEvent
+{
+    public function __construct(
+        public string $decisionId,
+        public string $policyId,
+        public string $subjectId,
+        public string $operation,
+        public string $resourceType,
+        public string $tenantId,
+        public bool $allowed,
+        public array $reasonCodes,
+        public DateTimeImmutable $occurredAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3074. Sensitive Audit Data Protection
+
+Los eventos no deberán incluir:
+
+* tokens completos;
+* contraseñas;
+* claves;
+* payloads sensibles;
+* PII innecesaria;
+* objetos serializados completos.
+
+---
+
+# 3075. Authorization Metrics
+
+Medir:
+
+* decisiones permitidas;
+* decisiones denegadas;
+* errores;
+* latencia;
+* cache hits;
+* step-up requests;
+* policy fallbacks.
+
+---
+
+# 3076. Security Dashboards
+
+Los dashboards podrán mostrar:
+
+```text
+Authorization Denials by Policy
+
+Cross-Tenant Access Attempts
+
+Privileged Operations
+
+Policy Evaluation Latency
+
+Unprotected Route Count
+
+Security Test Coverage
+```
+
+---
+
+# 3077. Security Alerting
+
+Generar alertas por:
+
+* incremento de denegaciones;
+* bypass attempts;
+* acceso cross-tenant;
+* fallos de policy store;
+* operaciones privilegiadas anómalas;
+* cambio inesperado de configuración.
+
+---
+
+# 3078. Security Correlation
+
+Las decisiones deberán correlacionarse con:
+
+* request ID;
+* trace ID;
+* session ID;
+* token ID;
+* deployment;
+* actor;
+* recurso.
+
+---
+
+# 3079. Security Evidence Architecture
+
+VoltStack deberá preservar evidencia suficiente para reconstruir:
+
+```text
+Who
+
+Did What
+
+To Which Resource
+
+Under Which Policy
+
+With Which Result
+
+At What Time
+```
+
+---
+
+# 3080. Observability Integration Result
+
+La observabilidad deberá permitir detectar ataques, investigar incidentes y validar que las políticas operan como fueron diseñadas.
+
+---
+
+# 3081. Controller Security Configuration Architecture
+
+VoltStack deberá centralizar la configuración de seguridad del sistema de controladores.
+
+---
+
+# 3082. Controller Security Configuration Domains
+
+```text
+Authorization
+
+Resource Resolution
+
+Policy Caching
+
+Audit
+
+Rate Limiting
+
+Step-Up Authentication
+
+Field Security
+
+Failure Handling
+```
+
+---
+
+# 3083. Security Configuration Example
+
+```php
+return [
+    'controllers' => [
+        'security' => [
+            'enabled' => true,
+            'deny_by_default' => true,
+            'require_policy' => true,
+            'fail_closed' => true,
+
+            'authorization' => [
+                'engine' => 'default',
+                'cache' => true,
+                'cache_ttl' => 30,
+            ],
+
+            'resources' => [
+                'tenant_scope_required' => true,
+                'object_policy_required' => true,
+            ],
+
+            'audit' => [
+                'enabled' => true,
+                'include_reason_codes' => true,
+                'include_sensitive_values' => false,
+            ],
+        ],
+    ],
+];
+```
+
+---
+
+# 3084. Secure Configuration Defaults
+
+Los defaults deberán:
+
+* denegar;
+* requerir policy;
+* proteger tenants;
+* registrar decisiones;
+* ocultar detalles internos;
+* limitar cache.
+
+---
+
+# 3085. Configuration Schema Validation
+
+La configuración deberá validarse durante bootstrap.
+
+---
+
+# 3086. ControllerSecurityConfiguration
+
+```php
+final readonly class ControllerSecurityConfiguration
+{
+    public function __construct(
+        public bool $enabled,
+        public bool $denyByDefault,
+        public bool $requirePolicy,
+        public bool $failClosed,
+        public bool $auditEnabled,
+        public int $policyCacheTtl,
+    ) {
+    }
+}
+```
+
+---
+
+# 3087. Environment-Specific Security Configuration
+
+Los ambientes podrán endurecer controles sin cambiar código.
+
+```text
+Development
+
+Verbose Diagnostics
+
+
+Staging
+
+Production-Like Enforcement
+
+
+Production
+
+Strict Enforcement
+```
+
+---
+
+# 3088. Security Configuration Immutability
+
+La configuración efectiva deberá volverse inmutable después del bootstrap.
+
+---
+
+# 3089. Security Configuration Fingerprint
+
+VoltStack podrá calcular un fingerprint para detectar cambios.
+
+```php
+final readonly class SecurityConfigurationFingerprint
+{
+    public function __construct(
+        public string $hash,
+        public string $environment,
+        public DateTimeImmutable $generatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 3090. Controller Security Service Registration
+
+El framework deberá registrar servicios mediante un módulo Quantum dedicado.
+
+---
+
+# 3091. Quantum Controller Security Module
+
+Estructura propuesta:
+
+```text
+src/Quantum/ControllerSecurity/
+
+├── Contracts/
+├── Authorization/
+├── Policies/
+├── Resources/
+├── Fields/
+├── Audit/
+├── Configuration/
+├── Testing/
+├── Providers/
+└── ControllerSecurityServiceProvider.php
+```
+
+---
+
+# 3092. ControllerSecurityServiceProvider
+
+```php
+final class ControllerSecurityServiceProvider
+{
+    public function register(ContainerInterface $container): void
+    {
+        $container->singleton(
+            AuthorizationEngineInterface::class,
+            DefaultAuthorizationEngine::class
+        );
+
+        $container->singleton(
+            PolicyRegistryInterface::class,
+            CompiledPolicyRegistry::class
+        );
+
+        $container->singleton(
+            SecurityAuditLoggerInterface::class,
+            StructuredSecurityAuditLogger::class
+        );
+    }
+
+    public function boot(
+        PolicyCompilerInterface $compiler,
+        SecurityConfigurationValidatorInterface $validator
+    ): void {
+        $validator->validate();
+
+        $compiler->compile();
+    }
+}
+```
+
+---
+
+# 3093. Controller Security Middleware Pipeline
+
+```text
+Request
+
+↓
+
+Authentication Middleware
+
+↓
+
+Tenant Context Middleware
+
+↓
+
+Risk Context Middleware
+
+↓
+
+Route Security Metadata Resolver
+
+↓
+
+Resource Resolution
+
+↓
+
+Authorization Middleware
+
+↓
+
+Controller Invocation
+
+↓
+
+Secure Result Transformation
+
+↓
+
+Audit Finalization
+```
+
+---
+
+# 3094. Controller Security Compiler
+
+VoltStack deberá compilar metadata de seguridad para evitar reflexión repetida.
+
+---
+
+# 3095. CompiledControllerSecurityMetadata
+
+```php
+final readonly class CompiledControllerSecurityMetadata
+{
+    public function __construct(
+        public string $controller,
+        public string $method,
+        public array $requiredPolicies,
+        public array $resourceBindings,
+        public array $fieldPolicies,
+        public array $obligations,
+    ) {
+    }
+}
+```
+
+---
+
+# 3096. Final Controller Security Reference Architecture
+
+```text
+                         ┌──────────────────────────┐
+                         │      HTTP Request        │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │ Authentication Resolver  │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │ Tenant & Security Context│
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │ Route Security Metadata  │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │ Secure Resource Resolver │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │   Authorization Engine   │
+                         ├──────────────────────────┤
+                         │ Policies                 │
+                         │ Roles                    │
+                         │ Permissions              │
+                         │ Attributes               │
+                         │ Resource Scope           │
+                         │ Risk Signals             │
+                         │ Tenant Isolation         │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │ Authorization Decision   │
+                         └───────┬───────────┬──────┘
+                                 │           │
+                              Allow         Deny
+                                 │           │
+                 ┌───────────────▼───┐   ┌──▼────────────────┐
+                 │ Controller Invoker│   │ Secure Denial      │
+                 └───────────────┬───┘   │ Response           │
+                                 │       └─────────┬──────────┘
+                 ┌───────────────▼─────────────┐   │
+                 │ Secure Result Transformation│   │
+                 └───────────────┬─────────────┘   │
+                                 │                 │
+                         ┌───────▼─────────────────▼──┐
+                         │ Audit & Security Telemetry │
+                         └────────────────────────────┘
+```
+
+---
+
+# 3097. Controller Security Implementation Roadmap
+
+La implementación deberá avanzar por fases.
+
+```text
+Phase 1
+
+Core authorization contracts
+Deny-by-default
+Policy registry
+Controller metadata
+
+
+Phase 2
+
+Resource resolution
+Tenant isolation
+Object-level authorization
+Audit events
+
+
+Phase 3
+
+Field security
+Obligations
+Step-up authentication
+Policy cache
+
+
+Phase 4
+
+Distributed policy enforcement
+Cloud identity
+API and webhook security
+Security observability
+
+
+Phase 5
+
+Formal verification
+Threat simulation
+Post-quantum readiness
+Advanced governance
+```
+
+---
+
+# 3098. Final Architectural Principles
+
+El sistema completo deberá conservar estos principios:
+
+1. Ningún controlador deberá confiar únicamente en autenticación.
+2. Toda operación deberá tener una política explícita.
+3. Todo recurso deberá resolverse dentro de un contexto autorizado.
+4. El tenant deberá formar parte de toda decisión relevante.
+5. La denegación deberá ser el comportamiento predeterminado.
+6. Los detalles sensibles no deberán filtrarse en respuestas ni logs.
+7. Las políticas deberán poder probarse, compilarse y auditarse.
+8. La seguridad deberá permanecer independiente del proveedor de infraestructura.
+9. Los controles deberán aplicarse de forma consistente en HTTP, SPA, APIs, jobs y servicios.
+10. La autorización deberá tratarse como una capacidad central del framework.
+
+---
+
+# 3099. Final Controller Security Model Result
+
+`CONTROLLER_SECURITY_MODEL_PART_06.md` establece una arquitectura integral que incluye:
+
+```text
+Controller Authorization
+
+Policy Enforcement
+
+Resource Access Security
+
+Role and Permission Models
+
+Attribute-Based Access Control
+
+Relationship-Based Access Control
+
+Tenant Isolation
+
+Resource Scoping
+
+Field-Level Authorization
+
+Secure Serialization
+
+Identity and Session Security
+
+API Security
+
+Webhook Security
+
+Cloud Security
+
+Data Security
+
+Cryptographic Architecture
+
+Audit and Observability
+
+Threat Modeling
+
+Testing and Verification
+
+Deployment Security
+
+Configuration Governance
+
+Framework Integration
+```
+
+El resultado es un modelo de seguridad diseñado para operar como parte nativa del núcleo de VoltStack y no como una capa opcional añadida posteriormente.
+
+---
+
+# 3100. Estado Final
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+COMPLETED
+
+Completed Sections:
+1-3100
+
+Completed Deliveries:
+31
+
+Current Delivery:
+Sections 3001-3100
+
+Document Result:
+Controller Authorization, Policy Enforcement
+& Resource Access Security Architecture Completed
+
+Next Recommended Document:
+CONTROLLER_TESTING_MODEL.md
+```
+
+Con esta entrega queda completado el documento:
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Total Sections:
+3100
+
+Total Deliveries:
+31
+
+Final Status:
+COMPLETED
+```
