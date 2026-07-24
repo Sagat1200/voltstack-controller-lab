@@ -27436,3 +27436,2717 @@ Sections 2301-2400
 Next:
 Sections 2401-2500
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 25 de varias
+**Cobertura:** Secciones **2401–2500**
+
+---
+
+# 2401. Environment Security Architecture
+
+VoltStack deberá definir una arquitectura de seguridad específica para cada ambiente de ejecución.
+
+Los ambientes principales serán:
+
+* local;
+* development;
+* testing;
+* staging;
+* pre-production;
+* production;
+* disaster recovery.
+
+---
+
+# 2402. Environment Isolation Principle
+
+Cada ambiente deberá permanecer aislado en:
+
+```text
+Identity
+
++
+
+Network
+
++
+
+Secrets
+
++
+
+Storage
+
++
+
+Database
+
++
+
+Observability
+```
+
+---
+
+# 2403. Environment Trust Model
+
+Regla fundamental:
+
+```text
+Development
+
+≠
+
+Production
+```
+
+Ningún ambiente inferior deberá considerarse confiable para acceder a recursos productivos.
+
+---
+
+# 2404. Environment Classification
+
+```php
+enum EnvironmentType: string
+{
+    case Local = 'local';
+    case Development = 'development';
+    case Testing = 'testing';
+    case Staging = 'staging';
+    case PreProduction = 'pre_production';
+    case Production = 'production';
+    case DisasterRecovery = 'disaster_recovery';
+}
+```
+
+---
+
+# 2405. EnvironmentSecurityProfile
+
+```php
+final readonly class EnvironmentSecurityProfile
+{
+    public function __construct(
+        public EnvironmentType $environment,
+        public array $requiredControls,
+        public array $forbiddenCapabilities,
+        public bool $productionDataAllowed,
+        public bool $debuggingAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 2406. Environment Security Baselines
+
+Cada ambiente deberá tener una línea base que defina:
+
+* controles obligatorios;
+* servicios permitidos;
+* puertos abiertos;
+* identidad de ejecución;
+* políticas de logging;
+* límites de recursos.
+
+---
+
+# 2407. Development Environment Security
+
+El ambiente de desarrollo deberá facilitar productividad sin eliminar controles esenciales.
+
+Deberá mantener:
+
+* aislamiento por desarrollador;
+* secretos no productivos;
+* datos sintéticos;
+* dependencias verificadas;
+* auditoría básica.
+
+---
+
+# 2408. Local Development Security
+
+La ejecución local deberá proteger:
+
+* archivos `.env`;
+* credenciales;
+* certificados;
+* bases de datos locales;
+* caches;
+* logs.
+
+---
+
+# 2409. Local Secret Protection
+
+Los secretos locales deberán:
+
+* mantenerse fuera del repositorio;
+* tener permisos mínimos;
+* expirar cuando sea posible;
+* evitar reutilización productiva.
+
+---
+
+# 2410. Local Environment Validation
+
+VoltStack podrá validar al iniciar:
+
+```text
+Unsafe Debug Mode?
+
+Production Secret Detected?
+
+Insecure File Permissions?
+
+Exposed Development Server?
+```
+
+---
+
+# 2411. Secure Development Server
+
+El servidor de desarrollo deberá:
+
+* escuchar en loopback por defecto;
+* requerir configuración explícita para exposición remota;
+* mostrar advertencias;
+* impedir uso accidental en producción.
+
+---
+
+# 2412. Development Data Security
+
+Los desarrolladores no deberán usar copias productivas sin:
+
+* anonimización;
+* autorización;
+* justificación;
+* controles de retención.
+
+---
+
+# 2413. Synthetic Data Strategy
+
+VoltStack deberá favorecer datos sintéticos para:
+
+* pruebas;
+* demos;
+* desarrollo;
+* benchmarking.
+
+---
+
+# 2414. Data Anonymization Controls
+
+La anonimización deberá proteger:
+
+* nombres;
+* correos;
+* teléfonos;
+* identificadores;
+* información financiera;
+* datos regulados.
+
+---
+
+# 2415. Testing Environment Security
+
+Los entornos de prueba deberán:
+
+* ser reproducibles;
+* ser efímeros;
+* usar identidades limitadas;
+* eliminar datos después de cada ciclo.
+
+---
+
+# 2416. Ephemeral Test Environments
+
+Modelo:
+
+```text
+Pull Request
+
+↓
+
+Create Isolated Environment
+
+↓
+
+Run Tests
+
+↓
+
+Collect Evidence
+
+↓
+
+Destroy Environment
+```
+
+---
+
+# 2417. Test Credential Isolation
+
+Cada suite o entorno deberá usar credenciales propias y temporales.
+
+---
+
+# 2418. Test Environment Cleanup
+
+La eliminación deberá abarcar:
+
+* bases de datos;
+* objetos;
+* colas;
+* caches;
+* secretos temporales;
+* logs sensibles.
+
+---
+
+# 2419. Staging Security Architecture
+
+Staging deberá parecerse a producción en:
+
+* arquitectura;
+* configuración;
+* runtime;
+* controles;
+* observabilidad.
+
+Pero no deberá compartir recursos productivos.
+
+---
+
+# 2420. Staging Data Policy
+
+Staging deberá utilizar:
+
+* datos sintéticos;
+* datos anonimizados;
+* conjuntos de prueba controlados.
+
+---
+
+# 2421. Staging Access Control
+
+El acceso deberá limitarse a:
+
+* equipos autorizados;
+* CI/CD;
+* pruebas de seguridad;
+* operaciones de release.
+
+---
+
+# 2422. Pre-Production Environment
+
+Pre-production podrá utilizarse para:
+
+* validación final;
+* pruebas de rendimiento;
+* comprobación de migrations;
+* smoke tests;
+* ejercicios de rollback.
+
+---
+
+# 2423. Production Security Architecture
+
+Producción deberá aplicar la configuración más restrictiva.
+
+---
+
+# 2424. Production Security Requirements
+
+Producción deberá exigir:
+
+* debug deshabilitado;
+* errores sanitizados;
+* TLS;
+* secretos externos;
+* auditoría completa;
+* mínima autoridad;
+* artifacts firmados.
+
+---
+
+# 2425. Production Runtime Principle
+
+```text
+Immutable Artifact
+
++
+
+External Configuration
+
++
+
+Controlled Identity
+
+=
+
+Production Runtime
+```
+
+---
+
+# 2426. Production Change Restrictions
+
+Quedará prohibido modificar manualmente:
+
+* código desplegado;
+* vendors;
+* assets compilados;
+* configuración administrada;
+* manifests de release.
+
+---
+
+# 2427. Production Shell Access
+
+El acceso shell deberá:
+
+* limitarse;
+* autenticarse fuertemente;
+* auditarse;
+* expirar;
+* justificarse.
+
+---
+
+# 2428. Break-Glass Production Access
+
+El acceso de emergencia deberá seguir:
+
+```text
+Emergency Request
+
+↓
+
+Strong Authentication
+
+↓
+
+Temporary Privilege
+
+↓
+
+Recorded Session
+
+↓
+
+Automatic Expiration
+
+↓
+
+Post-Access Review
+```
+
+---
+
+# 2429. Production Debugging Security
+
+Las herramientas de debugging deberán estar:
+
+* deshabilitadas por defecto;
+* protegidas por políticas;
+* disponibles solo temporalmente;
+* auditadas.
+
+---
+
+# 2430. Environment Promotion Architecture
+
+Los cambios deberán promoverse en orden controlado.
+
+```text
+Development
+
+↓
+
+Testing
+
+↓
+
+Staging
+
+↓
+
+Pre-Production
+
+↓
+
+Production
+```
+
+---
+
+# 2431. Promotion Integrity
+
+El mismo artifact deberá promocionarse entre ambientes.
+
+No deberá recompilarse de forma distinta en cada etapa.
+
+---
+
+# 2432. PromotionManifest
+
+```php
+final readonly class PromotionManifest
+{
+    public function __construct(
+        public string $artifactId,
+        public string $sourceEnvironment,
+        public string $targetEnvironment,
+        public string $checksum,
+        public array $approvals,
+        public DateTimeImmutable $promotedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2433. Environment Promotion Policy
+
+La promoción deberá validar:
+
+* artifact;
+* firma;
+* SBOM;
+* pruebas;
+* aprobaciones;
+* compatibilidad;
+* migrations.
+
+---
+
+# 2434. Separation of Duties in Deployment
+
+La persona que desarrolla un cambio no deberá necesariamente tener autoridad para desplegarlo directamente en producción.
+
+---
+
+# 2435. Promotion Approval Levels
+
+Ejemplo:
+
+```text
+Low Risk
+
+Automated Approval
+
+
+Medium Risk
+
+Release Manager Approval
+
+
+High Risk
+
+Security + Operations Approval
+```
+
+---
+
+# 2436. Configuration Security Architecture
+
+VoltStack deberá separar claramente:
+
+```text
+Code
+
+≠
+
+Configuration
+
+≠
+
+Secrets
+```
+
+---
+
+# 2437. Configuration Classification
+
+Clasificar configuración como:
+
+* pública;
+* interna;
+* sensible;
+* secreta;
+* crítica.
+
+---
+
+# 2438. ConfigurationValue
+
+```php
+final readonly class ConfigurationValue
+{
+    public function __construct(
+        public string $key,
+        public mixed $value,
+        public string $classification,
+        public string $source,
+        public bool $mutable,
+    ) {
+    }
+}
+```
+
+---
+
+# 2439. Configuration Sources
+
+VoltStack podrá resolver configuración desde:
+
+* archivos;
+* variables de entorno;
+* secret managers;
+* servicios remotos;
+* configuración compilada.
+
+---
+
+# 2440. Configuration Precedence Security
+
+La precedencia deberá ser determinista y auditable.
+
+```text
+Runtime Override
+
+↓
+
+Environment Configuration
+
+↓
+
+Application Configuration
+
+↓
+
+Framework Defaults
+```
+
+---
+
+# 2441. Configuration Validation
+
+Toda configuración deberá validarse antes de iniciar el runtime.
+
+---
+
+# 2442. ConfigurationSchema
+
+```php
+interface ConfigurationSchemaInterface
+{
+    public function validate(
+        array $configuration,
+        EnvironmentType $environment
+    ): ConfigurationValidationResult;
+}
+```
+
+---
+
+# 2443. Secure Configuration Defaults
+
+Los valores por defecto deberán favorecer:
+
+* deny by default;
+* debug off;
+* TLS required;
+* cookies seguras;
+* límites conservadores;
+* logging protegido.
+
+---
+
+# 2444. Dangerous Configuration Detection
+
+VoltStack deberá detectar:
+
+```text
+APP_DEBUG=true in production
+
+Wildcard CORS
+
+Public Storage Bucket
+
+Weak Session Cookies
+
+Disabled Authorization
+```
+
+---
+
+# 2445. Configuration Drift
+
+El sistema deberá comparar configuración activa contra la línea base aprobada.
+
+---
+
+# 2446. Configuration Drift Record
+
+```php
+final readonly class ConfigurationDrift
+{
+    public function __construct(
+        public string $key,
+        public mixed $expected,
+        public mixed $actual,
+        public string $severity,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2447. Runtime Configuration Mutability
+
+Solo configuraciones explícitamente permitidas podrán cambiar en runtime.
+
+---
+
+# 2448. Immutable Security Configuration
+
+Deberán ser inmutables durante la ejecución:
+
+* algoritmos criptográficos;
+* proveedores de identidad;
+* trust roots;
+* políticas críticas;
+* rutas administrativas.
+
+---
+
+# 2449. Configuration Reload Security
+
+La recarga deberá:
+
+* validar esquema;
+* verificar firma;
+* registrar cambio;
+* permitir rollback;
+* evitar estados parciales.
+
+---
+
+# 2450. Infrastructure as Code Security Architecture
+
+Toda infraestructura deberá definirse mediante código cuando sea posible.
+
+---
+
+# 2451. IaC Security Objectives
+
+Infrastructure as Code deberá proporcionar:
+
+* reproducibilidad;
+* revisión;
+* trazabilidad;
+* escaneo;
+* rollback;
+* detección de drift.
+
+---
+
+# 2452. IaC Security Domains
+
+Cubrir:
+
+* redes;
+* firewalls;
+* IAM;
+* almacenamiento;
+* compute;
+* bases de datos;
+* secretos;
+* observabilidad.
+
+---
+
+# 2453. IaC Repository Security
+
+Los repositorios de infraestructura deberán aplicar:
+
+* branch protection;
+* revisores obligatorios;
+* firmas;
+* análisis estático;
+* ownership.
+
+---
+
+# 2454. IaC Static Analysis
+
+Detectar:
+
+* recursos públicos;
+* cifrado deshabilitado;
+* permisos excesivos;
+* redes abiertas;
+* logging ausente;
+* versiones inseguras.
+
+---
+
+# 2455. InfrastructurePolicy
+
+```php
+final readonly class InfrastructurePolicy
+{
+    public function __construct(
+        public string $policyId,
+        public string $resourceType,
+        public array $constraints,
+        public string $severity,
+    ) {
+    }
+}
+```
+
+---
+
+# 2456. Policy as Code
+
+Las políticas de infraestructura deberán poder ejecutarse automáticamente durante:
+
+* pull requests;
+* planificación;
+* despliegue;
+* auditoría continua.
+
+---
+
+# 2457. IaC Plan Review
+
+Antes de aplicar cambios deberá revisarse:
+
+```text
+Resources Created
+
+Resources Modified
+
+Resources Destroyed
+
+Permission Changes
+
+Network Changes
+```
+
+---
+
+# 2458. Destructive Infrastructure Changes
+
+Cambios destructivos deberán requerir:
+
+* aprobación adicional;
+* backup;
+* ventana controlada;
+* plan de recuperación.
+
+---
+
+# 2459. Infrastructure Drift Detection
+
+VoltStack deberá detectar recursos modificados fuera del flujo aprobado.
+
+---
+
+# 2460. Drift Response
+
+Ante drift:
+
+```text
+Detect
+
+↓
+
+Classify
+
+↓
+
+Alert
+
+↓
+
+Reconcile or Approve
+
+↓
+
+Preserve Evidence
+```
+
+---
+
+# 2461. Container Security Architecture
+
+Los despliegues en contenedores deberán aplicar una postura endurecida.
+
+---
+
+# 2462. Container Image Principles
+
+Las imágenes deberán ser:
+
+* mínimas;
+* versionadas;
+* escaneadas;
+* firmadas;
+* reproducibles;
+* inmutables.
+
+---
+
+# 2463. Base Image Security
+
+Las imágenes base deberán:
+
+* provenir de fuentes confiables;
+* usar versiones fijas;
+* recibir actualizaciones;
+* reducir paquetes innecesarios.
+
+---
+
+# 2464. ContainerImageMetadata
+
+```php
+final readonly class ContainerImageMetadata
+{
+    public function __construct(
+        public string $image,
+        public string $digest,
+        public string $baseImage,
+        public string $signature,
+        public array $vulnerabilities,
+        public string $sbomReference,
+    ) {
+    }
+}
+```
+
+---
+
+# 2465. Image Digest Enforcement
+
+Producción deberá desplegar imágenes mediante digest y no únicamente mediante etiquetas mutables.
+
+---
+
+# 2466. Container Image Scanning
+
+Analizar:
+
+* sistema operativo;
+* librerías;
+* PHP;
+* extensiones;
+* Composer packages;
+* binarios;
+* secretos.
+
+---
+
+# 2467. Container Signing
+
+Las imágenes deberán firmarse antes de entrar al registro de producción.
+
+---
+
+# 2468. Container Registry Security
+
+El registro deberá aplicar:
+
+* autenticación;
+* autorización;
+* retención;
+* escaneo;
+* auditoría;
+* inmutabilidad.
+
+---
+
+# 2469. Runtime Container Identity
+
+Los contenedores no deberán ejecutarse como root salvo necesidad excepcional documentada.
+
+---
+
+# 2470. Read-Only Filesystem
+
+Cuando sea posible, el filesystem raíz deberá ser de solo lectura.
+
+---
+
+# 2471. Writable Paths
+
+Las rutas escribibles deberán limitarse a:
+
+* cache;
+* logs temporales;
+* uploads controlados;
+* sockets;
+* directorios runtime.
+
+---
+
+# 2472. Linux Capability Reduction
+
+Eliminar capabilities innecesarias.
+
+```text
+Default Capabilities
+
+↓
+
+Drop All
+
+↓
+
+Add Only Required
+```
+
+---
+
+# 2473. Container Privilege Restrictions
+
+Evitar:
+
+* privileged mode;
+* host networking;
+* host PID;
+* mounts sensibles;
+* Docker socket.
+
+---
+
+# 2474. Container Resource Limits
+
+Definir:
+
+* CPU;
+* memoria;
+* procesos;
+* almacenamiento efímero;
+* conexiones.
+
+---
+
+# 2475. Container Secret Injection
+
+Los secretos deberán inyectarse:
+
+* en runtime;
+* temporalmente;
+* fuera de la imagen;
+* con permisos mínimos.
+
+---
+
+# 2476. Container Health Security
+
+Health checks no deberán exponer:
+
+* configuración;
+* versiones sensibles;
+* stack traces;
+* credenciales;
+* estado interno detallado.
+
+---
+
+# 2477. Kubernetes Security Architecture
+
+VoltStack deberá soportar despliegues endurecidos en Kubernetes.
+
+---
+
+# 2478. Kubernetes Namespace Isolation
+
+Separar por:
+
+* ambiente;
+* tenant crítico;
+* dominio funcional;
+* nivel de confianza.
+
+---
+
+# 2479. Kubernetes Service Accounts
+
+Cada workload deberá usar una service account específica.
+
+---
+
+# 2480. Kubernetes RBAC
+
+RBAC deberá aplicar mínimo privilegio para:
+
+* lectura;
+* deployments;
+* secrets;
+* config maps;
+* jobs;
+* pods.
+
+---
+
+# 2481. Kubernetes Network Policies
+
+Definir comunicación explícita:
+
+```text
+Frontend Pod
+
+CAN CALL
+
+Application Pod
+
+
+Application Pod
+
+CAN CALL
+
+Database Proxy
+
+
+Unknown Pod
+
+DENIED
+```
+
+---
+
+# 2482. Kubernetes Admission Control
+
+Los admission controllers deberán bloquear:
+
+* imágenes no firmadas;
+* contenedores privilegiados;
+* root;
+* tags mutables;
+* secretos embebidos;
+* recursos sin límites.
+
+---
+
+# 2483. Kubernetes Pod Security
+
+Aplicar estándares equivalentes a:
+
+* restricted;
+* non-root;
+* seccomp;
+* read-only root filesystem;
+* dropped capabilities.
+
+---
+
+# 2484. Kubernetes Secret Security
+
+Los secrets deberán:
+
+* cifrarse en reposo;
+* limitarse por namespace;
+* evitar exposición en logs;
+* rotarse;
+* auditarse.
+
+---
+
+# 2485. Kubernetes Workload Identity
+
+Deberá preferirse identidad del workload sobre credenciales cloud estáticas.
+
+---
+
+# 2486. Kubernetes Audit Integration
+
+Registrar:
+
+* creación;
+* modificación;
+* acceso a secrets;
+* exec;
+* cambios RBAC;
+* escalado.
+
+---
+
+# 2487. FrankenPHP Deployment Security
+
+VoltStack deberá endurecer despliegues basados en FrankenPHP.
+
+---
+
+# 2488. FrankenPHP Runtime Identity
+
+El proceso FrankenPHP deberá ejecutarse con:
+
+* usuario dedicado;
+* grupo dedicado;
+* permisos mínimos;
+* filesystem restringido.
+
+---
+
+# 2489. FrankenPHP Worker Mode Security
+
+Los workers persistentes deberán aplicar después de cada request:
+
+```text
+Clear Request Context
+
+↓
+
+Reset Scoped Services
+
+↓
+
+Release Connections
+
+↓
+
+Clear Sensitive Data
+
+↓
+
+Verify Runtime Health
+```
+
+---
+
+# 2490. FrankenPHP Configuration Security
+
+La configuración deberá proteger:
+
+* Caddyfile;
+* certificados;
+* admin API;
+* trusted proxies;
+* rutas estáticas;
+* worker scripts.
+
+---
+
+# 2491. FrankenPHP Admin Endpoint Security
+
+Cualquier endpoint administrativo deberá:
+
+* estar deshabilitado públicamente;
+* limitarse a red interna;
+* requerir autenticación;
+* auditar accesos.
+
+---
+
+# 2492. FrankenPHP TLS Security
+
+VoltStack deberá favorecer:
+
+* TLS automático;
+* protocolos modernos;
+* certificados rotables;
+* HSTS;
+* redirección segura.
+
+---
+
+# 2493. FrankenPHP Static File Security
+
+Los archivos estáticos deberán servirse mediante:
+
+* allowlists;
+* rutas conocidas;
+* bloqueo de archivos ocultos;
+* prevención de traversal;
+* headers seguros.
+
+---
+
+# 2494. Deployment Rollback Architecture
+
+Todo despliegue deberá tener una estrategia de rollback previamente validada.
+
+---
+
+# 2495. Rollback Integrity
+
+El rollback deberá utilizar artifacts previamente:
+
+* firmados;
+* probados;
+* almacenados;
+* asociados a un release.
+
+---
+
+# 2496. Database Rollback Security
+
+Las migrations deberán clasificarse como:
+
+* reversibles;
+* parcialmente reversibles;
+* irreversibles.
+
+Las irreversibles requerirán backup y plan de recuperación.
+
+---
+
+# 2497. RollbackAuthorization
+
+```php
+final readonly class RollbackAuthorization
+{
+    public function __construct(
+        public string $releaseId,
+        public string $targetVersion,
+        public string $reason,
+        public array $approvers,
+        public DateTimeImmutable $authorizedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2498. Post-Deployment Security Validation
+
+Después del despliegue deberán ejecutarse:
+
+* smoke tests;
+* autorización básica;
+* validación de configuración;
+* verificación de logs;
+* comprobación de integridad;
+* monitoreo reforzado.
+
+---
+
+# 2499. Environment and Deployment Security Result
+
+Esta entrega establece:
+
+```text
+Environment Isolation
+
+Secure Configuration
+
+Production Hardening
+
+Infrastructure as Code Security
+
+Container Hardening
+
+Kubernetes Security
+
+FrankenPHP Protection
+
+Controlled Promotion
+
+Secure Rollback
+
+Post-Deployment Validation
+```
+
+---
+
+# 2500. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2500
+
+Current Delivery:
+Sections 2401-2500
+
+Next:
+Sections 2501-2600
+```
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 25 de varias
+**Cobertura:** Secciones **2401–2500**
+
+---
+
+# 2401. Environment Security Architecture
+
+VoltStack deberá definir una arquitectura de seguridad específica para cada ambiente de ejecución.
+
+Los ambientes principales serán:
+
+* local;
+* development;
+* testing;
+* staging;
+* pre-production;
+* production;
+* disaster recovery.
+
+---
+
+# 2402. Environment Isolation Principle
+
+Cada ambiente deberá permanecer aislado en:
+
+```text
+Identity
+
++
+
+Network
+
++
+
+Secrets
+
++
+
+Storage
+
++
+
+Database
+
++
+
+Observability
+```
+
+---
+
+# 2403. Environment Trust Model
+
+Regla fundamental:
+
+```text
+Development
+
+≠
+
+Production
+```
+
+Ningún ambiente inferior deberá considerarse confiable para acceder a recursos productivos.
+
+---
+
+# 2404. Environment Classification
+
+```php
+enum EnvironmentType: string
+{
+    case Local = 'local';
+    case Development = 'development';
+    case Testing = 'testing';
+    case Staging = 'staging';
+    case PreProduction = 'pre_production';
+    case Production = 'production';
+    case DisasterRecovery = 'disaster_recovery';
+}
+```
+
+---
+
+# 2405. EnvironmentSecurityProfile
+
+```php
+final readonly class EnvironmentSecurityProfile
+{
+    public function __construct(
+        public EnvironmentType $environment,
+        public array $requiredControls,
+        public array $forbiddenCapabilities,
+        public bool $productionDataAllowed,
+        public bool $debuggingAllowed,
+    ) {
+    }
+}
+```
+
+---
+
+# 2406. Environment Security Baselines
+
+Cada ambiente deberá tener una línea base que defina:
+
+* controles obligatorios;
+* servicios permitidos;
+* puertos abiertos;
+* identidad de ejecución;
+* políticas de logging;
+* límites de recursos.
+
+---
+
+# 2407. Development Environment Security
+
+El ambiente de desarrollo deberá facilitar productividad sin eliminar controles esenciales.
+
+Deberá mantener:
+
+* aislamiento por desarrollador;
+* secretos no productivos;
+* datos sintéticos;
+* dependencias verificadas;
+* auditoría básica.
+
+---
+
+# 2408. Local Development Security
+
+La ejecución local deberá proteger:
+
+* archivos `.env`;
+* credenciales;
+* certificados;
+* bases de datos locales;
+* caches;
+* logs.
+
+---
+
+# 2409. Local Secret Protection
+
+Los secretos locales deberán:
+
+* mantenerse fuera del repositorio;
+* tener permisos mínimos;
+* expirar cuando sea posible;
+* evitar reutilización productiva.
+
+---
+
+# 2410. Local Environment Validation
+
+VoltStack podrá validar al iniciar:
+
+```text
+Unsafe Debug Mode?
+
+Production Secret Detected?
+
+Insecure File Permissions?
+
+Exposed Development Server?
+```
+
+---
+
+# 2411. Secure Development Server
+
+El servidor de desarrollo deberá:
+
+* escuchar en loopback por defecto;
+* requerir configuración explícita para exposición remota;
+* mostrar advertencias;
+* impedir uso accidental en producción.
+
+---
+
+# 2412. Development Data Security
+
+Los desarrolladores no deberán usar copias productivas sin:
+
+* anonimización;
+* autorización;
+* justificación;
+* controles de retención.
+
+---
+
+# 2413. Synthetic Data Strategy
+
+VoltStack deberá favorecer datos sintéticos para:
+
+* pruebas;
+* demos;
+* desarrollo;
+* benchmarking.
+
+---
+
+# 2414. Data Anonymization Controls
+
+La anonimización deberá proteger:
+
+* nombres;
+* correos;
+* teléfonos;
+* identificadores;
+* información financiera;
+* datos regulados.
+
+---
+
+# 2415. Testing Environment Security
+
+Los entornos de prueba deberán:
+
+* ser reproducibles;
+* ser efímeros;
+* usar identidades limitadas;
+* eliminar datos después de cada ciclo.
+
+---
+
+# 2416. Ephemeral Test Environments
+
+Modelo:
+
+```text
+Pull Request
+
+↓
+
+Create Isolated Environment
+
+↓
+
+Run Tests
+
+↓
+
+Collect Evidence
+
+↓
+
+Destroy Environment
+```
+
+---
+
+# 2417. Test Credential Isolation
+
+Cada suite o entorno deberá usar credenciales propias y temporales.
+
+---
+
+# 2418. Test Environment Cleanup
+
+La eliminación deberá abarcar:
+
+* bases de datos;
+* objetos;
+* colas;
+* caches;
+* secretos temporales;
+* logs sensibles.
+
+---
+
+# 2419. Staging Security Architecture
+
+Staging deberá parecerse a producción en:
+
+* arquitectura;
+* configuración;
+* runtime;
+* controles;
+* observabilidad.
+
+Pero no deberá compartir recursos productivos.
+
+---
+
+# 2420. Staging Data Policy
+
+Staging deberá utilizar:
+
+* datos sintéticos;
+* datos anonimizados;
+* conjuntos de prueba controlados.
+
+---
+
+# 2421. Staging Access Control
+
+El acceso deberá limitarse a:
+
+* equipos autorizados;
+* CI/CD;
+* pruebas de seguridad;
+* operaciones de release.
+
+---
+
+# 2422. Pre-Production Environment
+
+Pre-production podrá utilizarse para:
+
+* validación final;
+* pruebas de rendimiento;
+* comprobación de migrations;
+* smoke tests;
+* ejercicios de rollback.
+
+---
+
+# 2423. Production Security Architecture
+
+Producción deberá aplicar la configuración más restrictiva.
+
+---
+
+# 2424. Production Security Requirements
+
+Producción deberá exigir:
+
+* debug deshabilitado;
+* errores sanitizados;
+* TLS;
+* secretos externos;
+* auditoría completa;
+* mínima autoridad;
+* artifacts firmados.
+
+---
+
+# 2425. Production Runtime Principle
+
+```text
+Immutable Artifact
+
++
+
+External Configuration
+
++
+
+Controlled Identity
+
+=
+
+Production Runtime
+```
+
+---
+
+# 2426. Production Change Restrictions
+
+Quedará prohibido modificar manualmente:
+
+* código desplegado;
+* vendors;
+* assets compilados;
+* configuración administrada;
+* manifests de release.
+
+---
+
+# 2427. Production Shell Access
+
+El acceso shell deberá:
+
+* limitarse;
+* autenticarse fuertemente;
+* auditarse;
+* expirar;
+* justificarse.
+
+---
+
+# 2428. Break-Glass Production Access
+
+El acceso de emergencia deberá seguir:
+
+```text
+Emergency Request
+
+↓
+
+Strong Authentication
+
+↓
+
+Temporary Privilege
+
+↓
+
+Recorded Session
+
+↓
+
+Automatic Expiration
+
+↓
+
+Post-Access Review
+```
+
+---
+
+# 2429. Production Debugging Security
+
+Las herramientas de debugging deberán estar:
+
+* deshabilitadas por defecto;
+* protegidas por políticas;
+* disponibles solo temporalmente;
+* auditadas.
+
+---
+
+# 2430. Environment Promotion Architecture
+
+Los cambios deberán promoverse en orden controlado.
+
+```text
+Development
+
+↓
+
+Testing
+
+↓
+
+Staging
+
+↓
+
+Pre-Production
+
+↓
+
+Production
+```
+
+---
+
+# 2431. Promotion Integrity
+
+El mismo artifact deberá promocionarse entre ambientes.
+
+No deberá recompilarse de forma distinta en cada etapa.
+
+---
+
+# 2432. PromotionManifest
+
+```php
+final readonly class PromotionManifest
+{
+    public function __construct(
+        public string $artifactId,
+        public string $sourceEnvironment,
+        public string $targetEnvironment,
+        public string $checksum,
+        public array $approvals,
+        public DateTimeImmutable $promotedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2433. Environment Promotion Policy
+
+La promoción deberá validar:
+
+* artifact;
+* firma;
+* SBOM;
+* pruebas;
+* aprobaciones;
+* compatibilidad;
+* migrations.
+
+---
+
+# 2434. Separation of Duties in Deployment
+
+La persona que desarrolla un cambio no deberá necesariamente tener autoridad para desplegarlo directamente en producción.
+
+---
+
+# 2435. Promotion Approval Levels
+
+Ejemplo:
+
+```text
+Low Risk
+
+Automated Approval
+
+
+Medium Risk
+
+Release Manager Approval
+
+
+High Risk
+
+Security + Operations Approval
+```
+
+---
+
+# 2436. Configuration Security Architecture
+
+VoltStack deberá separar claramente:
+
+```text
+Code
+
+≠
+
+Configuration
+
+≠
+
+Secrets
+```
+
+---
+
+# 2437. Configuration Classification
+
+Clasificar configuración como:
+
+* pública;
+* interna;
+* sensible;
+* secreta;
+* crítica.
+
+---
+
+# 2438. ConfigurationValue
+
+```php
+final readonly class ConfigurationValue
+{
+    public function __construct(
+        public string $key,
+        public mixed $value,
+        public string $classification,
+        public string $source,
+        public bool $mutable,
+    ) {
+    }
+}
+```
+
+---
+
+# 2439. Configuration Sources
+
+VoltStack podrá resolver configuración desde:
+
+* archivos;
+* variables de entorno;
+* secret managers;
+* servicios remotos;
+* configuración compilada.
+
+---
+
+# 2440. Configuration Precedence Security
+
+La precedencia deberá ser determinista y auditable.
+
+```text
+Runtime Override
+
+↓
+
+Environment Configuration
+
+↓
+
+Application Configuration
+
+↓
+
+Framework Defaults
+```
+
+---
+
+# 2441. Configuration Validation
+
+Toda configuración deberá validarse antes de iniciar el runtime.
+
+---
+
+# 2442. ConfigurationSchema
+
+```php
+interface ConfigurationSchemaInterface
+{
+    public function validate(
+        array $configuration,
+        EnvironmentType $environment
+    ): ConfigurationValidationResult;
+}
+```
+
+---
+
+# 2443. Secure Configuration Defaults
+
+Los valores por defecto deberán favorecer:
+
+* deny by default;
+* debug off;
+* TLS required;
+* cookies seguras;
+* límites conservadores;
+* logging protegido.
+
+---
+
+# 2444. Dangerous Configuration Detection
+
+VoltStack deberá detectar:
+
+```text
+APP_DEBUG=true in production
+
+Wildcard CORS
+
+Public Storage Bucket
+
+Weak Session Cookies
+
+Disabled Authorization
+```
+
+---
+
+# 2445. Configuration Drift
+
+El sistema deberá comparar configuración activa contra la línea base aprobada.
+
+---
+
+# 2446. Configuration Drift Record
+
+```php
+final readonly class ConfigurationDrift
+{
+    public function __construct(
+        public string $key,
+        public mixed $expected,
+        public mixed $actual,
+        public string $severity,
+        public DateTimeImmutable $detectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2447. Runtime Configuration Mutability
+
+Solo configuraciones explícitamente permitidas podrán cambiar en runtime.
+
+---
+
+# 2448. Immutable Security Configuration
+
+Deberán ser inmutables durante la ejecución:
+
+* algoritmos criptográficos;
+* proveedores de identidad;
+* trust roots;
+* políticas críticas;
+* rutas administrativas.
+
+---
+
+# 2449. Configuration Reload Security
+
+La recarga deberá:
+
+* validar esquema;
+* verificar firma;
+* registrar cambio;
+* permitir rollback;
+* evitar estados parciales.
+
+---
+
+# 2450. Infrastructure as Code Security Architecture
+
+Toda infraestructura deberá definirse mediante código cuando sea posible.
+
+---
+
+# 2451. IaC Security Objectives
+
+Infrastructure as Code deberá proporcionar:
+
+* reproducibilidad;
+* revisión;
+* trazabilidad;
+* escaneo;
+* rollback;
+* detección de drift.
+
+---
+
+# 2452. IaC Security Domains
+
+Cubrir:
+
+* redes;
+* firewalls;
+* IAM;
+* almacenamiento;
+* compute;
+* bases de datos;
+* secretos;
+* observabilidad.
+
+---
+
+# 2453. IaC Repository Security
+
+Los repositorios de infraestructura deberán aplicar:
+
+* branch protection;
+* revisores obligatorios;
+* firmas;
+* análisis estático;
+* ownership.
+
+---
+
+# 2454. IaC Static Analysis
+
+Detectar:
+
+* recursos públicos;
+* cifrado deshabilitado;
+* permisos excesivos;
+* redes abiertas;
+* logging ausente;
+* versiones inseguras.
+
+---
+
+# 2455. InfrastructurePolicy
+
+```php
+final readonly class InfrastructurePolicy
+{
+    public function __construct(
+        public string $policyId,
+        public string $resourceType,
+        public array $constraints,
+        public string $severity,
+    ) {
+    }
+}
+```
+
+---
+
+# 2456. Policy as Code
+
+Las políticas de infraestructura deberán poder ejecutarse automáticamente durante:
+
+* pull requests;
+* planificación;
+* despliegue;
+* auditoría continua.
+
+---
+
+# 2457. IaC Plan Review
+
+Antes de aplicar cambios deberá revisarse:
+
+```text
+Resources Created
+
+Resources Modified
+
+Resources Destroyed
+
+Permission Changes
+
+Network Changes
+```
+
+---
+
+# 2458. Destructive Infrastructure Changes
+
+Cambios destructivos deberán requerir:
+
+* aprobación adicional;
+* backup;
+* ventana controlada;
+* plan de recuperación.
+
+---
+
+# 2459. Infrastructure Drift Detection
+
+VoltStack deberá detectar recursos modificados fuera del flujo aprobado.
+
+---
+
+# 2460. Drift Response
+
+Ante drift:
+
+```text
+Detect
+
+↓
+
+Classify
+
+↓
+
+Alert
+
+↓
+
+Reconcile or Approve
+
+↓
+
+Preserve Evidence
+```
+
+---
+
+# 2461. Container Security Architecture
+
+Los despliegues en contenedores deberán aplicar una postura endurecida.
+
+---
+
+# 2462. Container Image Principles
+
+Las imágenes deberán ser:
+
+* mínimas;
+* versionadas;
+* escaneadas;
+* firmadas;
+* reproducibles;
+* inmutables.
+
+---
+
+# 2463. Base Image Security
+
+Las imágenes base deberán:
+
+* provenir de fuentes confiables;
+* usar versiones fijas;
+* recibir actualizaciones;
+* reducir paquetes innecesarios.
+
+---
+
+# 2464. ContainerImageMetadata
+
+```php
+final readonly class ContainerImageMetadata
+{
+    public function __construct(
+        public string $image,
+        public string $digest,
+        public string $baseImage,
+        public string $signature,
+        public array $vulnerabilities,
+        public string $sbomReference,
+    ) {
+    }
+}
+```
+
+---
+
+# 2465. Image Digest Enforcement
+
+Producción deberá desplegar imágenes mediante digest y no únicamente mediante etiquetas mutables.
+
+---
+
+# 2466. Container Image Scanning
+
+Analizar:
+
+* sistema operativo;
+* librerías;
+* PHP;
+* extensiones;
+* Composer packages;
+* binarios;
+* secretos.
+
+---
+
+# 2467. Container Signing
+
+Las imágenes deberán firmarse antes de entrar al registro de producción.
+
+---
+
+# 2468. Container Registry Security
+
+El registro deberá aplicar:
+
+* autenticación;
+* autorización;
+* retención;
+* escaneo;
+* auditoría;
+* inmutabilidad.
+
+---
+
+# 2469. Runtime Container Identity
+
+Los contenedores no deberán ejecutarse como root salvo necesidad excepcional documentada.
+
+---
+
+# 2470. Read-Only Filesystem
+
+Cuando sea posible, el filesystem raíz deberá ser de solo lectura.
+
+---
+
+# 2471. Writable Paths
+
+Las rutas escribibles deberán limitarse a:
+
+* cache;
+* logs temporales;
+* uploads controlados;
+* sockets;
+* directorios runtime.
+
+---
+
+# 2472. Linux Capability Reduction
+
+Eliminar capabilities innecesarias.
+
+```text
+Default Capabilities
+
+↓
+
+Drop All
+
+↓
+
+Add Only Required
+```
+
+---
+
+# 2473. Container Privilege Restrictions
+
+Evitar:
+
+* privileged mode;
+* host networking;
+* host PID;
+* mounts sensibles;
+* Docker socket.
+
+---
+
+# 2474. Container Resource Limits
+
+Definir:
+
+* CPU;
+* memoria;
+* procesos;
+* almacenamiento efímero;
+* conexiones.
+
+---
+
+# 2475. Container Secret Injection
+
+Los secretos deberán inyectarse:
+
+* en runtime;
+* temporalmente;
+* fuera de la imagen;
+* con permisos mínimos.
+
+---
+
+# 2476. Container Health Security
+
+Health checks no deberán exponer:
+
+* configuración;
+* versiones sensibles;
+* stack traces;
+* credenciales;
+* estado interno detallado.
+
+---
+
+# 2477. Kubernetes Security Architecture
+
+VoltStack deberá soportar despliegues endurecidos en Kubernetes.
+
+---
+
+# 2478. Kubernetes Namespace Isolation
+
+Separar por:
+
+* ambiente;
+* tenant crítico;
+* dominio funcional;
+* nivel de confianza.
+
+---
+
+# 2479. Kubernetes Service Accounts
+
+Cada workload deberá usar una service account específica.
+
+---
+
+# 2480. Kubernetes RBAC
+
+RBAC deberá aplicar mínimo privilegio para:
+
+* lectura;
+* deployments;
+* secrets;
+* config maps;
+* jobs;
+* pods.
+
+---
+
+# 2481. Kubernetes Network Policies
+
+Definir comunicación explícita:
+
+```text
+Frontend Pod
+
+CAN CALL
+
+Application Pod
+
+
+Application Pod
+
+CAN CALL
+
+Database Proxy
+
+
+Unknown Pod
+
+DENIED
+```
+
+---
+
+# 2482. Kubernetes Admission Control
+
+Los admission controllers deberán bloquear:
+
+* imágenes no firmadas;
+* contenedores privilegiados;
+* root;
+* tags mutables;
+* secretos embebidos;
+* recursos sin límites.
+
+---
+
+# 2483. Kubernetes Pod Security
+
+Aplicar estándares equivalentes a:
+
+* restricted;
+* non-root;
+* seccomp;
+* read-only root filesystem;
+* dropped capabilities.
+
+---
+
+# 2484. Kubernetes Secret Security
+
+Los secrets deberán:
+
+* cifrarse en reposo;
+* limitarse por namespace;
+* evitar exposición en logs;
+* rotarse;
+* auditarse.
+
+---
+
+# 2485. Kubernetes Workload Identity
+
+Deberá preferirse identidad del workload sobre credenciales cloud estáticas.
+
+---
+
+# 2486. Kubernetes Audit Integration
+
+Registrar:
+
+* creación;
+* modificación;
+* acceso a secrets;
+* exec;
+* cambios RBAC;
+* escalado.
+
+---
+
+# 2487. FrankenPHP Deployment Security
+
+VoltStack deberá endurecer despliegues basados en FrankenPHP.
+
+---
+
+# 2488. FrankenPHP Runtime Identity
+
+El proceso FrankenPHP deberá ejecutarse con:
+
+* usuario dedicado;
+* grupo dedicado;
+* permisos mínimos;
+* filesystem restringido.
+
+---
+
+# 2489. FrankenPHP Worker Mode Security
+
+Los workers persistentes deberán aplicar después de cada request:
+
+```text
+Clear Request Context
+
+↓
+
+Reset Scoped Services
+
+↓
+
+Release Connections
+
+↓
+
+Clear Sensitive Data
+
+↓
+
+Verify Runtime Health
+```
+
+---
+
+# 2490. FrankenPHP Configuration Security
+
+La configuración deberá proteger:
+
+* Caddyfile;
+* certificados;
+* admin API;
+* trusted proxies;
+* rutas estáticas;
+* worker scripts.
+
+---
+
+# 2491. FrankenPHP Admin Endpoint Security
+
+Cualquier endpoint administrativo deberá:
+
+* estar deshabilitado públicamente;
+* limitarse a red interna;
+* requerir autenticación;
+* auditar accesos.
+
+---
+
+# 2492. FrankenPHP TLS Security
+
+VoltStack deberá favorecer:
+
+* TLS automático;
+* protocolos modernos;
+* certificados rotables;
+* HSTS;
+* redirección segura.
+
+---
+
+# 2493. FrankenPHP Static File Security
+
+Los archivos estáticos deberán servirse mediante:
+
+* allowlists;
+* rutas conocidas;
+* bloqueo de archivos ocultos;
+* prevención de traversal;
+* headers seguros.
+
+---
+
+# 2494. Deployment Rollback Architecture
+
+Todo despliegue deberá tener una estrategia de rollback previamente validada.
+
+---
+
+# 2495. Rollback Integrity
+
+El rollback deberá utilizar artifacts previamente:
+
+* firmados;
+* probados;
+* almacenados;
+* asociados a un release.
+
+---
+
+# 2496. Database Rollback Security
+
+Las migrations deberán clasificarse como:
+
+* reversibles;
+* parcialmente reversibles;
+* irreversibles.
+
+Las irreversibles requerirán backup y plan de recuperación.
+
+---
+
+# 2497. RollbackAuthorization
+
+```php
+final readonly class RollbackAuthorization
+{
+    public function __construct(
+        public string $releaseId,
+        public string $targetVersion,
+        public string $reason,
+        public array $approvers,
+        public DateTimeImmutable $authorizedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2498. Post-Deployment Security Validation
+
+Después del despliegue deberán ejecutarse:
+
+* smoke tests;
+* autorización básica;
+* validación de configuración;
+* verificación de logs;
+* comprobación de integridad;
+* monitoreo reforzado.
+
+---
+
+# 2499. Environment and Deployment Security Result
+
+Esta entrega establece:
+
+```text
+Environment Isolation
+
+Secure Configuration
+
+Production Hardening
+
+Infrastructure as Code Security
+
+Container Hardening
+
+Kubernetes Security
+
+FrankenPHP Protection
+
+Controlled Promotion
+
+Secure Rollback
+
+Post-Deployment Validation
+```
+
+---
+
+# 2500. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2500
+
+Current Delivery:
+Sections 2401-2500
+
+Next:
+Sections 2501-2600
+```
+
+La siguiente entrega continuará con:
+
+```text
+- Cloud security architecture
+- Shared responsibility model
+- AWS, Google Cloud and Azure security
+- IAM federation
+- Cloud workload identity
+- Network segmentation
+- Cloud posture management
+- Serverless security
+- Managed database security
+- Multi-cloud governance
+```
