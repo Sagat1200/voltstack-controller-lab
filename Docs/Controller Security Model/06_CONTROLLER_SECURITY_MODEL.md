@@ -22120,3 +22120,5319 @@ Continuará con:
 - Security posture
 - Continuous compliance
 ```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 21 de varias
+**Cobertura:** Secciones **2001–2100**
+
+---
+
+# 2001. Enterprise Security Governance Architecture
+
+VoltStack deberá incorporar un modelo de gobierno de seguridad de nivel empresarial.
+
+La seguridad deberá administrarse como un proceso continuo y no únicamente como una colección de controles técnicos.
+
+---
+
+# 2002. Governance Objectives
+
+El modelo de gobierno deberá garantizar:
+
+* consistencia;
+* cumplimiento;
+* trazabilidad;
+* mejora continua;
+* gestión del riesgo;
+* responsabilidad organizacional.
+
+---
+
+# 2003. Governance Domains
+
+El gobierno abarcará:
+
+```text
+Security Policies
+
+Risk Management
+
+Compliance
+
+Auditing
+
+Identity Governance
+
+Incident Management
+
+Security Metrics
+
+Continuous Improvement
+```
+
+---
+
+# 2004. Governance Layers
+
+```text
+Corporate Governance
+
+↓
+
+Security Governance
+
+↓
+
+Application Governance
+
+↓
+
+Controller Governance
+
+↓
+
+Operational Governance
+```
+
+---
+
+# 2005. Security Governance Model
+
+```php
+final readonly class SecurityGovernance
+{
+    public function __construct(
+        public string $frameworkVersion,
+        public array $policies,
+        public array $controls,
+        public array $owners,
+        public array $metrics,
+    ) {
+    }
+}
+```
+
+---
+
+# 2006. Governance Roles
+
+Definir responsabilidades para:
+
+* Security Administrator;
+* Application Owner;
+* Tenant Administrator;
+* Compliance Officer;
+* Auditor;
+* Operations Team.
+
+---
+
+# 2007. Security Ownership
+
+Cada componente crítico deberá tener un responsable claramente identificado.
+
+Ejemplos:
+
+* Policy Owner;
+* Key Owner;
+* Identity Owner;
+* Storage Owner;
+* Runtime Owner.
+
+---
+
+# 2008. Responsibility Matrix
+
+Modelo RACI sugerido:
+
+```text
+Responsible
+
+Accountable
+
+Consulted
+
+Informed
+```
+
+---
+
+# 2009. Security Policy Lifecycle
+
+Toda política deberá seguir un ciclo de vida controlado.
+
+---
+
+# 2010. Policy Lifecycle
+
+```text
+Draft
+
+↓
+
+Review
+
+↓
+
+Approval
+
+↓
+
+Deployment
+
+↓
+
+Monitoring
+
+↓
+
+Revision
+
+↓
+
+Retirement
+```
+
+---
+
+# 2011. Policy Versioning
+
+Cada política deberá almacenar:
+
+* identificador;
+* versión;
+* autor;
+* fecha;
+* cambios;
+* estado.
+
+---
+
+# 2012. Policy Metadata
+
+```php
+final readonly class SecurityPolicyMetadata
+{
+    public function __construct(
+        public string $policyId,
+        public string $version,
+        public string $owner,
+        public DateTimeImmutable $approvedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2013. Policy Review
+
+Las políticas críticas deberán revisarse:
+
+* periódicamente;
+* tras incidentes;
+* tras cambios regulatorios;
+* antes de nuevas versiones mayores.
+
+---
+
+# 2014. Policy Approval Workflow
+
+```text
+Security Team
+
+↓
+
+Architecture Review
+
+↓
+
+Compliance Review
+
+↓
+
+Executive Approval
+
+↓
+
+Production
+```
+
+---
+
+# 2015. Continuous Compliance Architecture
+
+VoltStack deberá facilitar el cumplimiento continuo.
+
+---
+
+# 2016. Compliance Principles
+
+El cumplimiento deberá ser:
+
+* automático;
+* verificable;
+* repetible;
+* auditable.
+
+---
+
+# 2017. Compliance Domains
+
+Compatibilidad conceptual con:
+
+* ISO 27001;
+* SOC 2;
+* GDPR;
+* PCI DSS;
+* HIPAA;
+* NIST CSF.
+
+---
+
+# 2018. Compliance Control Mapping
+
+Cada control deberá asociarse a:
+
+```text
+Requirement
+
+↓
+
+Implementation
+
+↓
+
+Evidence
+
+↓
+
+Verification
+```
+
+---
+
+# 2019. ComplianceControl
+
+```php
+final readonly class ComplianceControl
+{
+    public function __construct(
+        public string $controlId,
+        public string $framework,
+        public string $description,
+        public array $evidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 2020. Compliance Evidence
+
+La evidencia podrá provenir de:
+
+* auditorías;
+* logs;
+* eventos;
+* métricas;
+* configuraciones;
+* pruebas automatizadas.
+
+---
+
+# 2021. Continuous Compliance Checks
+
+VoltStack podrá ejecutar verificaciones automáticas de:
+
+* configuraciones;
+* políticas;
+* permisos;
+* cifrado;
+* autenticación.
+
+---
+
+# 2022. Compliance Engine
+
+```php
+interface ComplianceEngineInterface
+{
+    public function evaluate(
+        ComplianceControl $control
+    ): ComplianceResult;
+}
+```
+
+---
+
+# 2023. Compliance Result
+
+```php
+final readonly class ComplianceResult
+{
+    public function __construct(
+        public bool $passed,
+        public array $findings,
+        public array $recommendations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2024. Security Posture Architecture
+
+La postura de seguridad representa el estado global del sistema.
+
+---
+
+# 2025. Security Posture Dimensions
+
+Evaluar:
+
+```text
+Identity
+
+Authorization
+
+Infrastructure
+
+Secrets
+
+Storage
+
+Monitoring
+
+Compliance
+```
+
+---
+
+# 2026. Security Posture Levels
+
+```php
+enum SecurityPosture: string
+{
+    case Critical = 'critical';
+    case Weak = 'weak';
+    case Moderate = 'moderate';
+    case Strong = 'strong';
+    case Hardened = 'hardened';
+}
+```
+
+---
+
+# 2027. Security Score
+
+El framework podrá calcular un puntaje basado en:
+
+* cobertura de controles;
+* cumplimiento;
+* incidentes;
+* configuración;
+* exposición.
+
+---
+
+# 2028. Security Metrics
+
+Ejemplos:
+
+* autenticaciones fallidas;
+* políticas incumplidas;
+* sesiones activas;
+* permisos huérfanos;
+* incidentes abiertos.
+
+---
+
+# 2029. Governance Dashboard
+
+Debe mostrar:
+
+* postura de seguridad;
+* riesgos;
+* cumplimiento;
+* auditorías;
+* eventos críticos.
+
+---
+
+# 2030. Risk Management Architecture
+
+VoltStack deberá incorporar un modelo formal de gestión del riesgo.
+
+---
+
+# 2031. Risk Lifecycle
+
+```text
+Identify
+
+↓
+
+Analyze
+
+↓
+
+Evaluate
+
+↓
+
+Treat
+
+↓
+
+Monitor
+
+↓
+
+Review
+```
+
+---
+
+# 2032. Risk Categories
+
+Clasificar:
+
+* técnico;
+* operacional;
+* regulatorio;
+* organizacional;
+* terceros.
+
+---
+
+# 2033. SecurityRisk
+
+```php
+final readonly class SecurityRisk
+{
+    public function __construct(
+        public string $riskId,
+        public string $category,
+        public string $impact,
+        public string $likelihood,
+        public string $owner,
+    ) {
+    }
+}
+```
+
+---
+
+# 2034. Risk Scoring
+
+La puntuación podrá considerar:
+
+```text
+Impact
+
+×
+
+Likelihood
+
+×
+
+Exposure
+```
+
+---
+
+# 2035. Risk Treatment
+
+Opciones:
+
+* aceptar;
+* mitigar;
+* transferir;
+* evitar.
+
+---
+
+# 2036. Residual Risk
+
+Después de aplicar controles deberá calcularse el riesgo residual.
+
+---
+
+# 2037. Security Control Effectiveness
+
+Cada control deberá medir:
+
+* cobertura;
+* eficacia;
+* costo;
+* mantenimiento.
+
+---
+
+# 2038. Governance Automation
+
+Automatizar:
+
+* revisiones;
+* recordatorios;
+* vencimientos;
+* aprobaciones.
+
+---
+
+# 2039. Exception Management
+
+Las excepciones deberán:
+
+* documentarse;
+* aprobarse;
+* expirar;
+* revisarse.
+
+---
+
+# 2040. Security Exception
+
+```php
+final readonly class SecurityExceptionApproval
+{
+    public function __construct(
+        public string $exceptionId,
+        public string $reason,
+        public DateTimeImmutable $expiresAt,
+        public string $approvedBy,
+    ) {
+    }
+}
+```
+
+---
+
+# 2041. Governance Audit
+
+Todo cambio deberá registrar:
+
+* autor;
+* fecha;
+* motivo;
+* impacto.
+
+---
+
+# 2042. Governance Events
+
+Eventos:
+
+```text
+PolicyApproved
+
+PolicyRejected
+
+RiskCreated
+
+RiskAccepted
+
+CompliancePassed
+
+ComplianceFailed
+
+SecurityExceptionGranted
+```
+
+---
+
+# 2043. Governance Reporting
+
+Generar:
+
+* reportes ejecutivos;
+* reportes técnicos;
+* métricas históricas;
+* tendencias.
+
+---
+
+# 2044. Trend Analysis
+
+Analizar:
+
+* incidentes;
+* cumplimiento;
+* vulnerabilidades;
+* madurez.
+
+---
+
+# 2045. Security Maturity Model
+
+```text
+Initial
+
+↓
+
+Managed
+
+↓
+
+Defined
+
+↓
+
+Measured
+
+↓
+
+Optimized
+```
+
+---
+
+# 2046. Continuous Improvement
+
+Después de cada incidente deberá revisarse:
+
+* políticas;
+* controles;
+* procesos;
+* documentación.
+
+---
+
+# 2047. Governance Reviews
+
+Realizar revisiones:
+
+* mensuales;
+* trimestrales;
+* anuales;
+* posteriores a incidentes.
+
+---
+
+# 2048. Third-Party Governance
+
+Evaluar:
+
+* proveedores;
+* dependencias;
+* SDKs;
+* servicios cloud.
+
+---
+
+# 2049. Supply Chain Security
+
+Verificar:
+
+* integridad;
+* procedencia;
+* firmas;
+* versiones.
+
+---
+
+# 2050. Software Bill of Materials (SBOM)
+
+VoltStack podrá generar un inventario de:
+
+* librerías;
+* versiones;
+* licencias;
+* dependencias críticas.
+
+---
+
+# 2051. Security Baselines
+
+Definir configuraciones mínimas para:
+
+* producción;
+* staging;
+* desarrollo.
+
+---
+
+# 2052. Baseline Drift Detection
+
+Detectar desviaciones respecto a la configuración aprobada.
+
+---
+
+# 2053. Policy Drift Detection
+
+Identificar:
+
+* políticas modificadas;
+* reglas eliminadas;
+* permisos agregados.
+
+---
+
+# 2054. Governance Alerts
+
+Alertar cuando:
+
+* un control falle;
+* una política expire;
+* aumente el riesgo;
+* cambie la postura.
+
+---
+
+# 2055. Executive Security Reports
+
+Los reportes deberán resumir:
+
+* riesgos principales;
+* cumplimiento;
+* incidentes;
+* evolución.
+
+---
+
+# 2056. Technical Security Reports
+
+Los reportes técnicos incluirán:
+
+* métricas;
+* configuraciones;
+* hallazgos;
+* recomendaciones.
+
+---
+
+# 2057. Governance APIs
+
+Exponer APIs para consultar:
+
+* políticas;
+* controles;
+* métricas;
+* cumplimiento.
+
+---
+
+# 2058. Governance Access Control
+
+El acceso a funciones de gobierno deberá restringirse mediante RBAC y políticas.
+
+---
+
+# 2059. Governance Security Events
+
+Eventos adicionales:
+
+```text
+SecurityBaselineChanged
+
+PolicyDriftDetected
+
+ConfigurationDriftDetected
+
+GovernanceReviewCompleted
+
+SBOMGenerated
+```
+
+---
+
+# 2060. Governance Security Result
+
+Esta entrega establece:
+
+```text
+Enterprise Security Governance
+
+Continuous Compliance
+
+Risk Management
+
+Security Posture
+
+Policy Lifecycle
+
+Compliance Engine
+
+Governance Automation
+
+Security Baselines
+
+Supply Chain Governance
+```
+
+---
+
+# 2061. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 22`
+
+Continuará con:
+
+```text
+- Zero Trust Architecture
+- Continuous Verification
+- Adaptive Authorization
+- Device Trust
+- Context-Aware Security
+- Continuous Access Evaluation
+- Security Mesh
+- Future Security Roadmap
+```
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 22 de varias
+**Cobertura:** Secciones **2101–2200**
+
+---
+
+# 2101. Zero Trust Security Architecture
+
+VoltStack deberá adoptar un modelo Zero Trust basado en el principio:
+
+```text
+Never Trust
+
+Always Verify
+
+Assume Breach
+```
+
+Ningún usuario, servicio, dispositivo o proceso deberá considerarse confiable únicamente por encontrarse dentro de una red, tenant o infraestructura interna.
+
+---
+
+# 2102. Zero Trust Objectives
+
+La arquitectura deberá garantizar:
+
+* verificación explícita;
+* privilegio mínimo;
+* segmentación;
+* evaluación continua;
+* reducción del movimiento lateral;
+* respuesta adaptativa.
+
+---
+
+# 2103. Zero Trust Trust Model
+
+El modelo tradicional:
+
+```text
+Inside Network
+
+=
+
+Trusted
+```
+
+deberá sustituirse por:
+
+```text
+Identity
+
++
+
+Device
+
++
+
+Context
+
++
+
+Risk
+
++
+
+Policy
+
+=
+
+Access Decision
+```
+
+---
+
+# 2104. Zero Trust Domains
+
+VoltStack deberá aplicar Zero Trust sobre:
+
+* usuarios;
+* controladores;
+* servicios;
+* workers;
+* dispositivos;
+* bases de datos;
+* almacenamiento;
+* eventos;
+* infraestructura.
+
+---
+
+# 2105. Zero Trust Control Plane
+
+La arquitectura deberá contar con un plano de control central.
+
+```text
+Identity Providers
+
+↓
+
+Security Context
+
+↓
+
+Policy Decision Point
+
+↓
+
+Policy Enforcement Points
+
+↓
+
+Protected Resources
+```
+
+---
+
+# 2106. Zero Trust Data Plane
+
+El plano de datos comprenderá las operaciones reales:
+
+* solicitudes HTTP;
+* ejecución de controladores;
+* consultas;
+* descargas;
+* eventos;
+* jobs;
+* llamadas entre servicios.
+
+---
+
+# 2107. Zero Trust Component Model
+
+```php
+final readonly class ZeroTrustContext
+{
+    public function __construct(
+        public Identity $identity,
+        public DeviceContext $device,
+        public NetworkContext $network,
+        public RiskContext $risk,
+        public SecurityPurpose $purpose,
+    ) {
+    }
+}
+```
+
+---
+
+# 2108. Explicit Verification
+
+Cada acceso deberá verificar explícitamente:
+
+* identidad;
+* autenticidad;
+* permisos;
+* estado de sesión;
+* contexto;
+* riesgo.
+
+---
+
+# 2109. Continuous Verification
+
+La autenticación inicial no deberá ser suficiente para toda la duración de la sesión.
+
+VoltStack deberá reevaluar el acceso durante:
+
+* cambios de recurso;
+* operaciones sensibles;
+* cambios de contexto;
+* aumento de riesgo;
+* sesiones prolongadas.
+
+---
+
+# 2110. Continuous Verification Flow
+
+```text
+Authenticated Session
+
+↓
+
+Access Request
+
+↓
+
+Context Refresh
+
+↓
+
+Risk Evaluation
+
+↓
+
+Policy Decision
+
+↓
+
+Allow / Challenge / Deny
+```
+
+---
+
+# 2111. Continuous Verification Triggers
+
+La reevaluación podrá activarse por:
+
+* cambio de IP;
+* cambio de dispositivo;
+* cambio de ubicación;
+* actividad anormal;
+* cambio de permisos;
+* vencimiento de credenciales.
+
+---
+
+# 2112. Verification Frequency
+
+La frecuencia deberá adaptarse al riesgo.
+
+```text
+Low Risk
+
+↓
+
+Longer Verification Window
+
+
+High Risk
+
+↓
+
+Immediate Reverification
+```
+
+---
+
+# 2113. VerificationPolicy
+
+```php
+interface VerificationPolicyInterface
+{
+    public function shouldReverify(
+        ZeroTrustContext $context,
+        ProtectedOperation $operation
+    ): bool;
+}
+```
+
+---
+
+# 2114. Adaptive Authorization Architecture
+
+VoltStack deberá soportar autorización adaptativa.
+
+La decisión no dependerá únicamente de roles y permisos estáticos.
+
+---
+
+# 2115. Adaptive Authorization Inputs
+
+La decisión podrá considerar:
+
+* identidad;
+* rol;
+* dispositivo;
+* ubicación;
+* horario;
+* historial;
+* sensibilidad;
+* amenaza activa.
+
+---
+
+# 2116. Adaptive Decision Model
+
+```text
+Base Permissions
+
++
+
+Runtime Context
+
++
+
+Risk Score
+
++
+
+Resource Sensitivity
+
+=
+
+Adaptive Decision
+```
+
+---
+
+# 2117. AdaptiveAuthorizationDecision
+
+```php
+enum AdaptiveAuthorizationDecision: string
+{
+    case Allow = 'allow';
+    case AllowWithRestrictions = 'allow_with_restrictions';
+    case RequireStepUp = 'require_step_up';
+    case Deny = 'deny';
+    case TerminateSession = 'terminate_session';
+}
+```
+
+---
+
+# 2118. Restricted Access Decisions
+
+Una autorización limitada podrá:
+
+* ocultar campos;
+* impedir exportaciones;
+* reducir volumen;
+* bloquear descargas;
+* exigir supervisión.
+
+---
+
+# 2119. Context-Aware Authorization
+
+Ejemplo:
+
+```text
+User has invoice.read
+
+BUT
+
+Device is unmanaged
+
+THEREFORE
+
+Read allowed
+
+Download denied
+```
+
+---
+
+# 2120. Context Attribute Sources
+
+Los atributos contextuales podrán provenir de:
+
+* sesión;
+* request;
+* dispositivo;
+* red;
+* tenant;
+* SIEM;
+* proveedor de identidad.
+
+---
+
+# 2121. Context Integrity
+
+Los atributos contextuales deberán:
+
+* validarse;
+* firmarse cuando corresponda;
+* tener procedencia conocida;
+* tener fecha de actualización.
+
+---
+
+# 2122. ContextAttribute
+
+```php
+final readonly class ContextAttribute
+{
+    public function __construct(
+        public string $name,
+        public mixed $value,
+        public string $source,
+        public DateTimeImmutable $observedAt,
+        public int $confidence,
+    ) {
+    }
+}
+```
+
+---
+
+# 2123. Context Confidence
+
+VoltStack podrá asignar nivel de confianza:
+
+```php
+enum ContextConfidence: int
+{
+    case Untrusted = 0;
+    case Low = 25;
+    case Medium = 50;
+    case High = 75;
+    case Verified = 100;
+}
+```
+
+---
+
+# 2124. Device Trust Architecture
+
+Los dispositivos deberán formar parte del contexto de seguridad.
+
+---
+
+# 2125. Device Trust Signals
+
+Evaluar:
+
+* dispositivo registrado;
+* sistema actualizado;
+* cifrado local;
+* antivirus;
+* certificado;
+* integridad;
+* administración corporativa.
+
+---
+
+# 2126. DeviceIdentity
+
+```php
+final readonly class DeviceIdentity
+{
+    public function __construct(
+        public string $deviceId,
+        public string $fingerprint,
+        public bool $managed,
+        public bool $compliant,
+        public DateTimeImmutable $lastVerifiedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2127. Device Trust Levels
+
+```php
+enum DeviceTrustLevel: string
+{
+    case Unknown = 'unknown';
+    case Untrusted = 'untrusted';
+    case Registered = 'registered';
+    case Managed = 'managed';
+    case Verified = 'verified';
+}
+```
+
+---
+
+# 2128. Device Registration Security
+
+El registro deberá requerir:
+
+* autenticación fuerte;
+* consentimiento;
+* asociación con identidad;
+* token único;
+* verificación posterior.
+
+---
+
+# 2129. Device Revocation
+
+VoltStack deberá permitir:
+
+```text
+Revoke Device
+
+↓
+
+Terminate Sessions
+
+↓
+
+Invalidate Tokens
+
+↓
+
+Block Future Access
+```
+
+---
+
+# 2130. Device Compliance Evaluation
+
+La conformidad podrá evaluarse antes de:
+
+* acceso administrativo;
+* lectura de datos sensibles;
+* exportación;
+* modificación de seguridad.
+
+---
+
+# 2131. DeviceTrustEvaluator
+
+```php
+interface DeviceTrustEvaluatorInterface
+{
+    public function evaluate(
+        DeviceIdentity $device,
+        SecurityContext $context
+    ): DeviceTrustResult;
+}
+```
+
+---
+
+# 2132. Unmanaged Device Restrictions
+
+Un dispositivo no administrado podrá tener:
+
+* acceso de solo lectura;
+* sesiones más cortas;
+* MFA frecuente;
+* descargas deshabilitadas;
+* datos enmascarados.
+
+---
+
+# 2133. Network Trust Architecture
+
+La red será una señal de contexto, pero nunca una garantía absoluta.
+
+---
+
+# 2134. Network Context Signals
+
+Considerar:
+
+* dirección IP;
+* ASN;
+* proxy;
+* VPN;
+* TOR;
+* reputación;
+* geolocalización aproximada.
+
+---
+
+# 2135. NetworkContext
+
+```php
+final readonly class NetworkContext
+{
+    public function __construct(
+        public string $ipAddress,
+        public ?string $asn,
+        public bool $vpnDetected,
+        public bool $proxyDetected,
+        public int $reputationScore,
+    ) {
+    }
+}
+```
+
+---
+
+# 2136. Network Risk Evaluation
+
+Ejemplo:
+
+```text
+Known Corporate Network
+
++
+
+Verified Device
+
+=
+
+Lower Risk
+
+
+Anonymous Proxy
+
++
+
+Unknown Device
+
+=
+
+Higher Risk
+```
+
+---
+
+# 2137. Location-Aware Security
+
+La ubicación podrá utilizarse para:
+
+* detectar viajes imposibles;
+* restringir regiones;
+* aplicar cumplimiento;
+* aumentar autenticación.
+
+---
+
+# 2138. Impossible Travel Detection
+
+```text
+Login Mexico
+
+↓
+
+10 Minutes
+
+↓
+
+Login Europe
+
+=
+
+Risk Alert
+```
+
+---
+
+# 2139. Temporal Context Security
+
+El horario podrá influir en el acceso.
+
+Ejemplo:
+
+```text
+Payroll Administration
+
+Allowed:
+
+Business Hours
+
+Denied or Challenged:
+
+Outside Business Hours
+```
+
+---
+
+# 2140. Behavioral Trust Architecture
+
+VoltStack podrá analizar patrones de comportamiento.
+
+---
+
+# 2141. Behavioral Signals
+
+Ejemplos:
+
+* frecuencia de acceso;
+* recursos habituales;
+* volumen de consultas;
+* horario;
+* secuencia de acciones;
+* velocidad de navegación.
+
+---
+
+# 2142. BehavioralProfile
+
+```php
+final readonly class BehavioralProfile
+{
+    public function __construct(
+        public string $identityId,
+        public array $normalPatterns,
+        public int $confidence,
+        public DateTimeImmutable $updatedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2143. Behavior Anomaly Detection
+
+Detectar:
+
+```text
+Normal:
+
+20 invoices/day
+
+
+Current:
+
+50,000 invoices/hour
+```
+
+---
+
+# 2144. Behavioral Privacy
+
+El análisis de comportamiento deberá:
+
+* minimizar datos;
+* documentar propósito;
+* respetar retención;
+* evitar decisiones opacas injustificadas.
+
+---
+
+# 2145. Risk-Based Access Control
+
+El acceso deberá ajustarse al riesgo calculado.
+
+---
+
+# 2146. Risk Score Model
+
+```php
+final readonly class AccessRiskScore
+{
+    public function __construct(
+        public int $score,
+        public array $signals,
+        public string $severity,
+    ) {
+        if ($score < 0 || $score > 100) {
+            throw new InvalidArgumentException(
+                'Risk score must be between 0 and 100.'
+            );
+        }
+    }
+}
+```
+
+---
+
+# 2147. Risk Thresholds
+
+Ejemplo:
+
+```text
+0–25
+
+Allow
+
+
+26–50
+
+Allow with Monitoring
+
+
+51–75
+
+Require Step-Up
+
+
+76–100
+
+Deny and Investigate
+```
+
+---
+
+# 2148. Risk Calculation Principles
+
+El cálculo deberá ser:
+
+* explicable;
+* configurable;
+* auditable;
+* reproducible;
+* resistente a manipulación.
+
+---
+
+# 2149. Risk Signal Weighting
+
+```php
+final readonly class RiskSignalWeight
+{
+    public function __construct(
+        public string $signal,
+        public float $weight,
+        public bool $mandatory,
+    ) {
+    }
+}
+```
+
+---
+
+# 2150. Risk Evaluation Engine
+
+```php
+interface AccessRiskEngineInterface
+{
+    public function evaluate(
+        ZeroTrustContext $context,
+        ProtectedOperation $operation
+    ): AccessRiskScore;
+}
+```
+
+---
+
+# 2151. Resource Sensitivity Model
+
+Cada recurso podrá declarar su sensibilidad.
+
+```php
+enum ResourceSensitivity: string
+{
+    case Public = 'public';
+    case Internal = 'internal';
+    case Confidential = 'confidential';
+    case Sensitive = 'sensitive';
+    case Restricted = 'restricted';
+}
+```
+
+---
+
+# 2152. Sensitivity-Aware Enforcement
+
+Cuanto mayor sea la sensibilidad:
+
+* mayor autenticación;
+* menor duración de sesión;
+* más auditoría;
+* controles adicionales;
+* menor tolerancia al riesgo.
+
+---
+
+# 2153. ProtectedOperation
+
+```php
+final readonly class ProtectedOperation
+{
+    public function __construct(
+        public string $name,
+        public ResourceSensitivity $sensitivity,
+        public array $requiredCapabilities,
+        public bool $supportsRestrictedAccess,
+    ) {
+    }
+}
+```
+
+---
+
+# 2154. Continuous Access Evaluation
+
+VoltStack deberá soportar evaluación continua de acceso durante la sesión.
+
+---
+
+# 2155. Continuous Access Evaluation Events
+
+Reevaluar cuando ocurra:
+
+* revocación de permisos;
+* suspensión de usuario;
+* compromiso de dispositivo;
+* cambio de riesgo;
+* incidente activo;
+* cierre de tenant.
+
+---
+
+# 2156. CAE Flow
+
+```text
+Security Event
+
+↓
+
+Access Evaluation Service
+
+↓
+
+Affected Sessions
+
+↓
+
+Recalculate Decision
+
+↓
+
+Continue / Restrict / Terminate
+```
+
+---
+
+# 2157. Access Evaluation Event Bus
+
+Los cambios críticos deberán propagarse mediante eventos internos seguros.
+
+---
+
+# 2158. AccessRevocationEvent
+
+```php
+final readonly class AccessRevocationEvent
+{
+    public function __construct(
+        public string $subjectId,
+        public string $reason,
+        public DateTimeImmutable $effectiveAt,
+        public bool $terminateImmediately,
+    ) {
+    }
+}
+```
+
+---
+
+# 2159. Session Reassessment
+
+Una sesión activa deberá poder:
+
+* conservarse;
+* reducir privilegios;
+* requerir MFA;
+* bloquearse;
+* terminarse.
+
+---
+
+# 2160. Token Reassessment
+
+Los tokens de larga duración no deberán conservar privilegios revocados.
+
+---
+
+# 2161. Token Introspection
+
+VoltStack podrá validar en tiempo real:
+
+* vigencia;
+* scopes;
+* revocación;
+* riesgo;
+* estado del sujeto.
+
+---
+
+# 2162. Short-Lived Token Strategy
+
+Los tokens sensibles deberán tener:
+
+* vida corta;
+* refresh controlado;
+* rotación;
+* detección de reutilización.
+
+---
+
+# 2163. Proof-of-Possession Tokens
+
+Para operaciones críticas podrá requerirse prueba de posesión asociada a:
+
+* certificado;
+* dispositivo;
+* clave;
+* sesión.
+
+---
+
+# 2164. Step-Up Authentication Architecture
+
+Cuando el riesgo aumente, VoltStack podrá solicitar autenticación adicional.
+
+---
+
+# 2165. Step-Up Factors
+
+Soportar:
+
+* contraseña reciente;
+* TOTP;
+* WebAuthn;
+* llave de seguridad;
+* biometría delegada;
+* aprobación administrativa.
+
+---
+
+# 2166. StepUpRequirement
+
+```php
+final readonly class StepUpRequirement
+{
+    public function __construct(
+        public array $acceptableMethods,
+        public int $requiredAssuranceLevel,
+        public DateInterval $validity,
+        public string $reason,
+    ) {
+    }
+}
+```
+
+---
+
+# 2167. Authentication Assurance Levels
+
+```php
+enum AuthenticationAssuranceLevel: int
+{
+    case Basic = 1;
+    case Enhanced = 2;
+    case Strong = 3;
+    case HardwareBacked = 4;
+}
+```
+
+---
+
+# 2168. Step-Up Scope
+
+La elevación deberá limitarse a:
+
+* una operación;
+* un recurso;
+* una sesión breve;
+* un propósito determinado.
+
+---
+
+# 2169. Step-Up Replay Protection
+
+Una validación elevada no deberá reutilizarse fuera de su alcance autorizado.
+
+---
+
+# 2170. Policy Enforcement Point Architecture
+
+Los puntos de aplicación de políticas deberán existir en:
+
+* routing;
+* middleware;
+* controller invoker;
+* ORM;
+* storage;
+* queue;
+* event bus;
+* serializer.
+
+---
+
+# 2171. Policy Decision Point Architecture
+
+El Policy Decision Point deberá:
+
+* recibir contexto;
+* evaluar políticas;
+* emitir decisión;
+* registrar explicación;
+* generar obligaciones.
+
+---
+
+# 2172. Policy Information Point
+
+El Policy Information Point deberá proporcionar:
+
+* identidad;
+* permisos;
+* riesgo;
+* dispositivo;
+* clasificación;
+* datos del recurso.
+
+---
+
+# 2173. Policy Administration Point
+
+El Policy Administration Point deberá administrar:
+
+* creación;
+* edición;
+* aprobación;
+* publicación;
+* retiro de políticas.
+
+---
+
+# 2174. Zero Trust Policy Flow
+
+```text
+PEP
+
+↓
+
+PDP
+
+↓
+
+PIP
+
+↓
+
+Policy Evaluation
+
+↓
+
+Decision + Obligations
+
+↓
+
+PEP Enforcement
+```
+
+---
+
+# 2175. Authorization Obligations
+
+Una decisión podrá incluir obligaciones.
+
+Ejemplos:
+
+* registrar auditoría reforzada;
+* ocultar campos;
+* aplicar watermark;
+* limitar resultados;
+* solicitar MFA.
+
+---
+
+# 2176. AuthorizationObligation
+
+```php
+final readonly class AuthorizationObligation
+{
+    public function __construct(
+        public string $type,
+        public array $parameters,
+        public bool $mandatory,
+    ) {
+    }
+}
+```
+
+---
+
+# 2177. Obligation Enforcement
+
+Si una obligación obligatoria no puede aplicarse:
+
+```text
+Fail Closed
+```
+
+La operación deberá rechazarse.
+
+---
+
+# 2178. Authorization Advice
+
+Las políticas también podrán emitir recomendaciones no obligatorias.
+
+Ejemplo:
+
+```text
+Allow Access
+
+Advice:
+
+Increase Monitoring
+```
+
+---
+
+# 2179. Security Mesh Architecture
+
+VoltStack podrá implementar un Security Mesh distribuido.
+
+---
+
+# 2180. Security Mesh Principles
+
+El modelo deberá:
+
+* descentralizar enforcement;
+* centralizar gobierno;
+* compartir contexto;
+* mantener políticas consistentes;
+* reducir acoplamiento.
+
+---
+
+# 2181. Security Mesh Components
+
+```text
+Identity Service
+
+Policy Service
+
+Risk Service
+
+Audit Service
+
+Secret Service
+
+Enforcement Adapters
+```
+
+---
+
+# 2182. Security Mesh Integration
+
+Cada módulo Quantum podrá integrar un adaptador de seguridad.
+
+Ejemplo:
+
+```text
+Quantum\Http
+
+Quantum\Routing
+
+Quantum\Database
+
+Quantum\Storage
+
+Quantum\Queue
+```
+
+---
+
+# 2183. SecurityMeshAdapter
+
+```php
+interface SecurityMeshAdapterInterface
+{
+    public function authorize(
+        SecurityRequest $request
+    ): SecurityDecision;
+
+    public function report(
+        SecurityObservation $observation
+    ): void;
+}
+```
+
+---
+
+# 2184. Distributed Policy Consistency
+
+Las políticas distribuidas deberán controlar:
+
+* versión;
+* sincronización;
+* caché;
+* invalidez;
+* rollback.
+
+---
+
+# 2185. Policy Propagation
+
+```text
+Policy Published
+
+↓
+
+Signed Policy Bundle
+
+↓
+
+Mesh Distribution
+
+↓
+
+Local Validation
+
+↓
+
+Activation
+```
+
+---
+
+# 2186. Signed Policy Bundles
+
+Cada paquete deberá incluir:
+
+* versión;
+* firma;
+* hash;
+* fecha;
+* emisor;
+* compatibilidad.
+
+---
+
+# 2187. PolicyBundle
+
+```php
+final readonly class PolicyBundle
+{
+    public function __construct(
+        public string $bundleId,
+        public string $version,
+        public array $policies,
+        public string $checksum,
+        public string $signature,
+    ) {
+    }
+}
+```
+
+---
+
+# 2188. Offline Enforcement
+
+Los servicios deberán poder aplicar políticas temporalmente cuando el PDP no esté disponible.
+
+---
+
+# 2189. Offline Decision Rules
+
+En modo degradado:
+
+* usar caché válida;
+* limitar operaciones;
+* rechazar acciones críticas;
+* generar alerta;
+* auditar la decisión.
+
+---
+
+# 2190. Zero Trust Availability Strategy
+
+La seguridad no deberá introducir un punto único de falla.
+
+Soportar:
+
+* réplicas;
+* caché firmada;
+* circuit breakers;
+* degradación segura;
+* recuperación automática.
+
+---
+
+# 2191. Fail-Open vs Fail-Closed
+
+VoltStack deberá clasificar operaciones.
+
+```text
+Critical Operation
+
+↓
+
+Fail Closed
+
+
+Low-Risk Read Operation
+
+↓
+
+Configurable Degraded Mode
+```
+
+---
+
+# 2192. Zero Trust Observability
+
+Registrar:
+
+* decisiones;
+* riesgo;
+* contexto;
+* obligaciones;
+* cambios de confianza;
+* revocaciones.
+
+---
+
+# 2193. Decision Explainability
+
+Cada decisión deberá poder explicar:
+
+```text
+Decision:
+
+Denied
+
+Reasons:
+
+Unknown Device
+
+High-Risk Network
+
+Restricted Resource
+```
+
+---
+
+# 2194. Zero Trust Audit Event
+
+```php
+final readonly class ZeroTrustAuditEvent
+{
+    public function __construct(
+        public string $decisionId,
+        public string $subjectId,
+        public string $resource,
+        public AdaptiveAuthorizationDecision $decision,
+        public array $reasons,
+        public int $riskScore,
+    ) {
+    }
+}
+```
+
+---
+
+# 2195. Zero Trust Metrics
+
+Medir:
+
+* solicitudes evaluadas;
+* accesos denegados;
+* step-up solicitado;
+* sesiones revocadas;
+* anomalías detectadas;
+* decisiones degradadas.
+
+---
+
+# 2196. Zero Trust Testing Strategy
+
+Las pruebas deberán cubrir:
+
+* cambio de dispositivo;
+* revocación inmediata;
+* riesgo elevado;
+* políticas desactualizadas;
+* caída del PDP;
+* bypass de obligaciones.
+
+---
+
+# 2197. Zero Trust Simulation
+
+VoltStack deberá permitir simulaciones:
+
+```text
+What if:
+
+Device becomes compromised?
+
+Role is revoked?
+
+Risk increases to critical?
+
+Policy bundle is unavailable?
+```
+
+---
+
+# 2198. Zero Trust Security Result
+
+Esta entrega establece:
+
+```text
+Zero Trust Architecture
+
+Continuous Verification
+
+Adaptive Authorization
+
+Device Trust
+
+Network Context
+
+Behavioral Risk
+
+Continuous Access Evaluation
+
+Step-Up Authentication
+
+Security Mesh
+
+Distributed Policy Enforcement
+```
+
+---
+
+# 2199. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 23`
+
+Continuará con:
+
+```text
+- Security operations architecture
+- SOC integration
+- SIEM integration
+- Threat detection pipelines
+- Incident orchestration
+- Automated response
+- Security playbooks
+- Detection engineering
+- Runtime containment
+- Security operations center
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 23 de varias
+**Cobertura:** Secciones **2201–2300**
+
+---
+
+# 2201. Security Operations Architecture
+
+VoltStack deberá incorporar una arquitectura de operaciones de seguridad capaz de observar, detectar, investigar, contener y responder ante amenazas.
+
+La seguridad operacional deberá cubrir:
+
+* aplicaciones;
+* controladores;
+* sesiones;
+* identidades;
+* servicios;
+* workers;
+* almacenamiento;
+* eventos;
+* infraestructura.
+
+---
+
+# 2202. Security Operations Objectives
+
+El sistema deberá permitir:
+
+* detección temprana;
+* correlación de señales;
+* priorización de alertas;
+* respuesta automatizada;
+* investigación forense;
+* aprendizaje posterior al incidente.
+
+---
+
+# 2203. Security Operations Model
+
+```text
+Telemetry Sources
+
+↓
+
+Collection Pipeline
+
+↓
+
+Normalization
+
+↓
+
+Detection Engine
+
+↓
+
+Alert Triage
+
+↓
+
+Incident Response
+
+↓
+
+Containment and Recovery
+```
+
+---
+
+# 2204. Security Operations Domains
+
+VoltStack deberá organizar las operaciones en:
+
+```text
+Monitoring
+
+Detection
+
+Triage
+
+Investigation
+
+Containment
+
+Eradication
+
+Recovery
+
+Lessons Learned
+```
+
+---
+
+# 2205. Security Operations Center Integration
+
+VoltStack deberá integrarse con un Security Operations Center interno o externo.
+
+---
+
+# 2206. SOC Responsibilities
+
+El SOC podrá encargarse de:
+
+* supervisión continua;
+* clasificación de alertas;
+* investigación;
+* coordinación de respuesta;
+* comunicación de incidentes;
+* mejora de detecciones.
+
+---
+
+# 2207. Security Operations Roles
+
+Definir:
+
+* SOC Analyst;
+* Incident Commander;
+* Threat Hunter;
+* Detection Engineer;
+* Forensic Analyst;
+* Platform Security Engineer;
+* Application Owner.
+
+---
+
+# 2208. Security Operations Responsibility Model
+
+```text
+Detection Engineer
+
+Creates Rules
+
+
+SOC Analyst
+
+Investigates Alerts
+
+
+Incident Commander
+
+Coordinates Response
+
+
+Platform Team
+
+Applies Containment
+```
+
+---
+
+# 2209. Security Telemetry Architecture
+
+VoltStack deberá producir telemetría estructurada desde todos los puntos críticos.
+
+---
+
+# 2210. Security Telemetry Sources
+
+Fuentes:
+
+* HTTP requests;
+* controller invocations;
+* authorization decisions;
+* authentication events;
+* database access;
+* file operations;
+* queue jobs;
+* service calls;
+* runtime events.
+
+---
+
+# 2211. SecurityTelemetryRecord
+
+```php
+final readonly class SecurityTelemetryRecord
+{
+    public function __construct(
+        public string $eventId,
+        public string $eventType,
+        public DateTimeImmutable $occurredAt,
+        public array $attributes,
+        public string $source,
+        public string $traceId,
+    ) {
+    }
+}
+```
+
+---
+
+# 2212. Telemetry Collection Pipeline
+
+```text
+Security Event
+
+↓
+
+Local Collector
+
+↓
+
+Buffer
+
+↓
+
+Normalizer
+
+↓
+
+Secure Transport
+
+↓
+
+Detection Platform
+```
+
+---
+
+# 2213. Telemetry Reliability
+
+La canalización deberá soportar:
+
+* buffering;
+* reintentos;
+* persistencia temporal;
+* detección de pérdida;
+* backpressure.
+
+---
+
+# 2214. Telemetry Integrity
+
+Cada registro podrá incluir:
+
+* checksum;
+* firma;
+* secuencia;
+* origen autenticado.
+
+---
+
+# 2215. Telemetry Confidentiality
+
+La telemetría deberá evitar exposición de:
+
+* contraseñas;
+* tokens;
+* claves;
+* datos completos de tarjetas;
+* información médica;
+* secretos empresariales.
+
+---
+
+# 2216. Telemetry Minimization
+
+Registrar únicamente lo necesario para:
+
+* seguridad;
+* auditoría;
+* diagnóstico;
+* cumplimiento.
+
+---
+
+# 2217. Security Event Normalization
+
+Los eventos deberán transformarse a un esquema uniforme.
+
+---
+
+# 2218. Normalized Security Event
+
+```php
+final readonly class NormalizedSecurityEvent
+{
+    public function __construct(
+        public string $category,
+        public string $action,
+        public string $outcome,
+        public ?string $actorId,
+        public ?string $resourceId,
+        public array $context,
+    ) {
+    }
+}
+```
+
+---
+
+# 2219. Event Taxonomy
+
+Categorías sugeridas:
+
+```text
+Authentication
+
+Authorization
+
+Data Access
+
+Configuration
+
+Execution
+
+Network
+
+Storage
+
+Runtime
+
+Threat
+```
+
+---
+
+# 2220. Event Severity
+
+```php
+enum SecurityEventSeverity: string
+{
+    case Informational = 'informational';
+    case Low = 'low';
+    case Medium = 'medium';
+    case High = 'high';
+    case Critical = 'critical';
+}
+```
+
+---
+
+# 2221. SIEM Integration Architecture
+
+VoltStack deberá permitir integración con plataformas SIEM.
+
+---
+
+# 2222. SIEM Export Formats
+
+Soportar:
+
+* JSON;
+* NDJSON;
+* syslog;
+* OpenTelemetry;
+* CloudEvents;
+* formatos específicos mediante adaptadores.
+
+---
+
+# 2223. SiemExporterInterface
+
+```php
+interface SiemExporterInterface
+{
+    public function export(
+        NormalizedSecurityEvent $event
+    ): void;
+}
+```
+
+---
+
+# 2224. SIEM Delivery Modes
+
+VoltStack podrá soportar:
+
+* push;
+* pull;
+* streaming;
+* batch;
+* event-driven export.
+
+---
+
+# 2225. SIEM Transport Security
+
+El transporte deberá usar:
+
+* TLS;
+* autenticación mutua cuando aplique;
+* tokens rotables;
+* validación de destino;
+* control de reintentos.
+
+---
+
+# 2226. SIEM Backpressure Protection
+
+Cuando el SIEM no responda:
+
+```text
+Buffer Locally
+
+↓
+
+Limit Memory Usage
+
+↓
+
+Persist Critical Events
+
+↓
+
+Discard Only Low-Priority Events
+
+↓
+
+Raise Operational Alert
+```
+
+---
+
+# 2227. Detection Engineering Architecture
+
+VoltStack deberá soportar reglas de detección mantenibles, versionadas y verificables.
+
+---
+
+# 2228. Detection Rule Lifecycle
+
+```text
+Draft
+
+↓
+
+Test
+
+↓
+
+Review
+
+↓
+
+Deploy
+
+↓
+
+Monitor
+
+↓
+
+Tune
+
+↓
+
+Retire
+```
+
+---
+
+# 2229. DetectionRule
+
+```php
+final readonly class DetectionRule
+{
+    public function __construct(
+        public string $ruleId,
+        public string $name,
+        public string $version,
+        public SecurityEventSeverity $severity,
+        public array $conditions,
+        public array $actions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2230. Detection Rule Sources
+
+Las reglas podrán basarse en:
+
+* patrones;
+* umbrales;
+* secuencias;
+* comportamiento;
+* inteligencia de amenazas;
+* correlación temporal.
+
+---
+
+# 2231. Threshold Detection
+
+Ejemplo:
+
+```text
+More Than 20 Failed Logins
+
+Within 5 Minutes
+
+For Same Identity
+
+=
+
+Credential Attack Alert
+```
+
+---
+
+# 2232. Sequence Detection
+
+Ejemplo:
+
+```text
+Permission Denied
+
+↓
+
+Privilege Updated
+
+↓
+
+Sensitive Export
+
+=
+
+Potential Privilege Escalation
+```
+
+---
+
+# 2233. Behavioral Detection
+
+El motor podrá comparar la actividad actual con patrones históricos.
+
+---
+
+# 2234. Detection Context
+
+Una regla deberá considerar:
+
+* usuario;
+* tenant;
+* servicio;
+* dispositivo;
+* IP;
+* horario;
+* sensibilidad del recurso.
+
+---
+
+# 2235. Detection Correlation Engine
+
+```php
+interface SecurityCorrelationEngineInterface
+{
+    public function correlate(
+        array $events,
+        CorrelationWindow $window
+    ): array;
+}
+```
+
+---
+
+# 2236. Correlation Window
+
+```php
+final readonly class CorrelationWindow
+{
+    public function __construct(
+        public DateInterval $duration,
+        public array $groupBy,
+    ) {
+    }
+}
+```
+
+---
+
+# 2237. Cross-Domain Correlation
+
+Ejemplo:
+
+```text
+New Device Login
+
++
+
+Multiple Authorization Denials
+
++
+
+Large File Download
+
+=
+
+High-Risk Incident
+```
+
+---
+
+# 2238. Detection Confidence
+
+Cada detección deberá incluir:
+
+* confianza;
+* evidencia;
+* señales;
+* reglas activadas.
+
+---
+
+# 2239. DetectionResult
+
+```php
+final readonly class DetectionResult
+{
+    public function __construct(
+        public string $detectionId,
+        public SecurityEventSeverity $severity,
+        public int $confidence,
+        public array $evidence,
+        public array $recommendedActions,
+    ) {
+    }
+}
+```
+
+---
+
+# 2240. False Positive Management
+
+El sistema deberá permitir:
+
+* marcar falsos positivos;
+* documentar causa;
+* ajustar umbrales;
+* crear excepciones temporales;
+* medir precisión.
+
+---
+
+# 2241. False Negative Review
+
+Después de un incidente no detectado deberá revisarse:
+
+* cobertura;
+* reglas;
+* telemetría;
+* ventanas de correlación;
+* puntos ciegos.
+
+---
+
+# 2242. Detection Rule Testing
+
+Cada regla deberá probarse con:
+
+* eventos positivos;
+* eventos negativos;
+* datos límite;
+* secuencias incompletas;
+* volúmenes altos.
+
+---
+
+# 2243. Detection Simulation
+
+VoltStack deberá permitir inyectar eventos simulados sin afectar producción.
+
+---
+
+# 2244. Detection as Code
+
+Las reglas deberán poder almacenarse como código versionado.
+
+Beneficios:
+
+* revisión por pares;
+* historial;
+* despliegue automatizado;
+* rollback;
+* pruebas.
+
+---
+
+# 2245. Threat Intelligence Integration
+
+VoltStack podrá consumir inteligencia de amenazas.
+
+---
+
+# 2246. Threat Intelligence Sources
+
+Ejemplos:
+
+* IPs maliciosas;
+* dominios;
+* hashes;
+* indicadores de compromiso;
+* campañas;
+* firmas.
+
+---
+
+# 2247. ThreatIndicator
+
+```php
+final readonly class ThreatIndicator
+{
+    public function __construct(
+        public string $type,
+        public string $value,
+        public int $confidence,
+        public DateTimeImmutable $validUntil,
+        public string $source,
+    ) {
+    }
+}
+```
+
+---
+
+# 2248. Threat Intelligence Validation
+
+No deberá confiarse ciegamente en un feed externo.
+
+Validar:
+
+* reputación de la fuente;
+* fecha;
+* confianza;
+* contexto;
+* caducidad.
+
+---
+
+# 2249. Threat Intelligence Matching
+
+```text
+Incoming Request IP
+
+↓
+
+Threat Feed Match
+
+↓
+
+Risk Score Increase
+
+↓
+
+Challenge or Deny
+```
+
+---
+
+# 2250. Threat Intelligence Privacy
+
+El intercambio de inteligencia deberá evitar exposición indebida de datos internos.
+
+---
+
+# 2251. Threat Hunting Architecture
+
+VoltStack deberá facilitar búsquedas proactivas de amenazas.
+
+---
+
+# 2252. Threat Hunting Hypothesis
+
+Ejemplo:
+
+```text
+A Compromised Account
+
+May Be Exporting Data
+
+Outside Normal Hours
+```
+
+---
+
+# 2253. Threat Hunting Data Sources
+
+Usar:
+
+* eventos de identidad;
+* decisiones de autorización;
+* consultas;
+* descargas;
+* comandos;
+* actividad de workers.
+
+---
+
+# 2254. HuntingQuery
+
+```php
+final readonly class HuntingQuery
+{
+    public function __construct(
+        public string $hypothesis,
+        public array $dataSources,
+        public DateTimeImmutable $from,
+        public DateTimeImmutable $to,
+        public array $filters,
+    ) {
+    }
+}
+```
+
+---
+
+# 2255. Alert Management Architecture
+
+Una detección deberá convertirse en alerta cuando requiera revisión.
+
+---
+
+# 2256. SecurityAlert
+
+```php
+final readonly class SecurityAlert
+{
+    public function __construct(
+        public string $alertId,
+        public string $title,
+        public SecurityEventSeverity $severity,
+        public int $confidence,
+        public array $evidence,
+        public string $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 2257. Alert States
+
+```text
+New
+
+↓
+
+Acknowledged
+
+↓
+
+Investigating
+
+↓
+
+Contained
+
+↓
+
+Resolved
+
+↓
+
+Closed
+```
+
+---
+
+# 2258. Alert Deduplication
+
+El sistema deberá agrupar alertas equivalentes para evitar fatiga operacional.
+
+---
+
+# 2259. Alert Suppression
+
+La supresión deberá:
+
+* tener motivo;
+* tener propietario;
+* tener expiración;
+* quedar auditada.
+
+---
+
+# 2260. Alert Prioritization
+
+La prioridad deberá considerar:
+
+```text
+Severity
+
++
+
+Confidence
+
++
+
+Asset Criticality
+
++
+
+Business Impact
+
++
+
+Current Threat Context
+```
+
+---
+
+# 2261. Alert Enrichment
+
+Antes de mostrar una alerta, VoltStack podrá agregar:
+
+* identidad;
+* tenant;
+* dispositivo;
+* historial;
+* geolocalización aproximada;
+* criticidad del recurso.
+
+---
+
+# 2262. Alert Routing
+
+Las alertas podrán dirigirse según:
+
+* severidad;
+* módulo;
+* tenant;
+* ambiente;
+* equipo responsable.
+
+---
+
+# 2263. Alert Escalation
+
+Ejemplo:
+
+```text
+Medium Alert
+
+Unacknowledged for 30 Minutes
+
+↓
+
+Escalate to High
+
+↓
+
+Notify Incident Commander
+```
+
+---
+
+# 2264. Incident Management Architecture
+
+Una alerta confirmada podrá convertirse en incidente.
+
+---
+
+# 2265. SecurityIncident
+
+```php
+final readonly class SecurityIncident
+{
+    public function __construct(
+        public string $incidentId,
+        public string $title,
+        public SecurityEventSeverity $severity,
+        public array $affectedAssets,
+        public array $evidence,
+        public string $commander,
+        public string $status,
+    ) {
+    }
+}
+```
+
+---
+
+# 2266. Incident Lifecycle
+
+```text
+Declared
+
+↓
+
+Triage
+
+↓
+
+Containment
+
+↓
+
+Eradication
+
+↓
+
+Recovery
+
+↓
+
+Post-Incident Review
+```
+
+---
+
+# 2267. Incident Classification
+
+Clasificar por:
+
+* identidad comprometida;
+* acceso no autorizado;
+* fuga de datos;
+* malware;
+* abuso interno;
+* disponibilidad;
+* configuración insegura.
+
+---
+
+# 2268. Incident Severity Model
+
+La severidad deberá considerar:
+
+* alcance;
+* impacto;
+* sensibilidad;
+* duración;
+* propagación;
+* obligación regulatoria.
+
+---
+
+# 2269. Incident Command Structure
+
+```text
+Incident Commander
+
+├── Security Operations
+├── Platform Engineering
+├── Application Team
+├── Compliance
+└── Communications
+```
+
+---
+
+# 2270. Incident Timeline
+
+VoltStack deberá construir una cronología ordenada de:
+
+* señales;
+* accesos;
+* decisiones;
+* cambios;
+* acciones de respuesta.
+
+---
+
+# 2271. IncidentTimelineEntry
+
+```php
+final readonly class IncidentTimelineEntry
+{
+    public function __construct(
+        public DateTimeImmutable $occurredAt,
+        public string $eventType,
+        public string $description,
+        public array $evidenceReferences,
+    ) {
+    }
+}
+```
+
+---
+
+# 2272. Evidence Preservation
+
+Durante un incidente deberán preservarse:
+
+* logs;
+* eventos;
+* snapshots;
+* configuraciones;
+* tokens relevantes;
+* metadatos.
+
+---
+
+# 2273. Chain of Custody
+
+La evidencia deberá registrar:
+
+```text
+Collected By
+
+Collected At
+
+Source
+
+Checksum
+
+Transfers
+
+Current Custodian
+```
+
+---
+
+# 2274. EvidenceIntegrityRecord
+
+```php
+final readonly class EvidenceIntegrityRecord
+{
+    public function __construct(
+        public string $evidenceId,
+        public string $checksum,
+        public string $algorithm,
+        public string $collectedBy,
+        public DateTimeImmutable $collectedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2275. Incident Response Playbooks
+
+VoltStack deberá soportar playbooks estructurados y versionados.
+
+---
+
+# 2276. Playbook Structure
+
+Un playbook deberá contener:
+
+* disparadores;
+* precondiciones;
+* acciones;
+* responsables;
+* validaciones;
+* rollback;
+* evidencias.
+
+---
+
+# 2277. SecurityPlaybook
+
+```php
+final readonly class SecurityPlaybook
+{
+    public function __construct(
+        public string $playbookId,
+        public string $name,
+        public string $version,
+        public array $triggers,
+        public array $steps,
+    ) {
+    }
+}
+```
+
+---
+
+# 2278. Playbook Example: Compromised Account
+
+```text
+Disable Session
+
+↓
+
+Revoke Tokens
+
+↓
+
+Require Password Reset
+
+↓
+
+Revoke Devices
+
+↓
+
+Review Recent Activity
+
+↓
+
+Notify Security Team
+```
+
+---
+
+# 2279. Playbook Example: Malicious Upload
+
+```text
+Quarantine File
+
+↓
+
+Block Hash
+
+↓
+
+Identify Downloader
+
+↓
+
+Scan Related Files
+
+↓
+
+Preserve Evidence
+```
+
+---
+
+# 2280. Playbook Approval
+
+Los playbooks críticos deberán aprobarse antes de producción.
+
+---
+
+# 2281. Automated Response Architecture
+
+VoltStack podrá ejecutar acciones automáticas ante amenazas de alta confianza.
+
+---
+
+# 2282. Automated Response Principles
+
+Toda automatización deberá ser:
+
+* proporcional;
+* reversible cuando sea posible;
+* auditable;
+* limitada por alcance;
+* validada por política.
+
+---
+
+# 2283. Automated Response Actions
+
+Ejemplos:
+
+* revocar sesión;
+* bloquear token;
+* pausar worker;
+* deshabilitar cuenta;
+* aislar archivo;
+* bloquear IP;
+* limitar endpoint.
+
+---
+
+# 2284. ResponseAction
+
+```php
+final readonly class ResponseAction
+{
+    public function __construct(
+        public string $type,
+        public array $parameters,
+        public bool $requiresApproval,
+        public bool $reversible,
+    ) {
+    }
+}
+```
+
+---
+
+# 2285. Response Authorization
+
+El motor de respuesta también deberá estar autorizado.
+
+No deberá poder ejecutar acciones fuera de sus capacidades declaradas.
+
+---
+
+# 2286. Response Policy
+
+Ejemplo:
+
+```text
+Critical Credential Theft
+
++
+
+Confidence Above 90
+
+=
+
+Immediate Session Revocation
+```
+
+---
+
+# 2287. Human-in-the-Loop Response
+
+Acciones destructivas deberán poder requerir aprobación humana.
+
+Ejemplos:
+
+* eliminar datos;
+* suspender tenant;
+* bloquear servicio crítico;
+* rotar claves maestras.
+
+---
+
+# 2288. Automated Response Guardrails
+
+Aplicar:
+
+* límites de volumen;
+* ventanas de tiempo;
+* scopes;
+* doble aprobación;
+* rollback.
+
+---
+
+# 2289. Response Circuit Breaker
+
+Si una automatización produce efectos anómalos:
+
+```text
+Stop Automation
+
+↓
+
+Preserve State
+
+↓
+
+Notify Operator
+
+↓
+
+Require Manual Review
+```
+
+---
+
+# 2290. Runtime Containment Architecture
+
+VoltStack deberá permitir contener procesos comprometidos.
+
+---
+
+# 2291. Runtime Containment Actions
+
+Soportar:
+
+* detener request;
+* cancelar job;
+* aislar worker;
+* bloquear servicio;
+* cerrar conexión;
+* revocar contexto.
+
+---
+
+# 2292. Controller Containment
+
+Un controlador comprometido podrá:
+
+* ser deshabilitado;
+* pasar a modo solo lectura;
+* requerir autorización reforzada;
+* limitar métodos.
+
+---
+
+# 2293. Worker Containment
+
+```text
+Suspicious Worker
+
+↓
+
+Stop Accepting Jobs
+
+↓
+
+Finish or Abort Current Job
+
+↓
+
+Clear Runtime State
+
+↓
+
+Quarantine Node
+
+↓
+
+Investigate
+```
+
+---
+
+# 2294. Tenant Containment
+
+VoltStack deberá permitir contener un tenant sin afectar a los demás.
+
+Acciones:
+
+* bloquear sesiones;
+* pausar jobs;
+* deshabilitar integraciones;
+* impedir exportaciones;
+* preservar evidencia.
+
+---
+
+# 2295. Service Containment
+
+Un servicio comprometido deberá perder:
+
+* tokens;
+* certificados;
+* acceso al broker;
+* acceso a secretos;
+* capacidades de red.
+
+---
+
+# 2296. Recovery Architecture
+
+Después de contener y erradicar la amenaza deberá restaurarse el servicio de forma controlada.
+
+---
+
+# 2297. Recovery Validation
+
+Antes de reactivar:
+
+* confirmar eliminación de amenaza;
+* rotar credenciales;
+* validar integridad;
+* verificar configuración;
+* monitorear actividad.
+
+---
+
+# 2298. Security Operations Result
+
+Esta entrega establece:
+
+```text
+Security Operations Architecture
+
+SOC Integration
+
+SIEM Integration
+
+Security Telemetry
+
+Detection Engineering
+
+Threat Intelligence
+
+Threat Hunting
+
+Alert Management
+
+Incident Orchestration
+
+Automated Response
+
+Runtime Containment
+
+Secure Recovery
+```
+
+---
+
+# 2299. Próxima entrega
+
+`CONTROLLER_SECURITY_MODEL_PART_06 Entrega 24`
+
+Continuará con:
+
+```text
+- Secure software development lifecycle
+- Security architecture reviews
+- Threat modeling workflows
+- Secure coding standards
+- Static and dynamic analysis
+- Dependency security
+- CI/CD security gates
+- Release security
+- Environment promotion controls
+- Production deployment security
+```
+
+# CONTROLLER_SECURITY_MODEL_PART_06.md
+
+## Controller Authorization, Policy Enforcement & Resource Access Security
+
+**Documento:** Parte 06
+**Entrega:** 24 de varias
+**Cobertura:** Secciones **2301–2400**
+
+---
+
+# 2301. Secure Software Development Lifecycle Architecture
+
+VoltStack deberá incorporar seguridad durante todo el ciclo de vida del software.
+
+La seguridad no deberá agregarse únicamente antes del despliegue.
+
+Deberá formar parte de:
+
+* diseño;
+* implementación;
+* revisión;
+* pruebas;
+* integración;
+* despliegue;
+* operación;
+* mantenimiento.
+
+---
+
+# 2302. SSDLC Objectives
+
+El Secure Software Development Lifecycle deberá:
+
+* detectar riesgos temprano;
+* reducir vulnerabilidades;
+* automatizar controles;
+* generar evidencia;
+* proteger releases;
+* mantener trazabilidad.
+
+---
+
+# 2303. SSDLC Security Model
+
+```text
+Requirements
+
+↓
+
+Security Design
+
+↓
+
+Threat Modeling
+
+↓
+
+Secure Implementation
+
+↓
+
+Security Testing
+
+↓
+
+Release Validation
+
+↓
+
+Secure Deployment
+
+↓
+
+Runtime Monitoring
+```
+
+---
+
+# 2304. Shift-Left Security
+
+VoltStack deberá aplicar seguridad desde las primeras fases.
+
+```text
+Earlier Detection
+
+=
+
+Lower Remediation Cost
+
++
+
+Lower Production Risk
+```
+
+---
+
+# 2305. Shift-Right Security
+
+La seguridad deberá continuar después del despliegue mediante:
+
+* observabilidad;
+* pruebas en runtime;
+* detección;
+* validación de configuración;
+* respuesta a incidentes.
+
+---
+
+# 2306. Security Development Roles
+
+Definir:
+
+* Developer;
+* Security Champion;
+* Application Security Engineer;
+* Reviewer;
+* Release Manager;
+* Platform Engineer;
+* Product Owner.
+
+---
+
+# 2307. Security Champion Model
+
+Cada equipo podrá designar un Security Champion responsable de:
+
+* promover prácticas seguras;
+* revisar cambios sensibles;
+* facilitar threat modeling;
+* coordinar hallazgos;
+* elevar riesgos.
+
+---
+
+# 2308. Security Responsibility Principle
+
+La seguridad será responsabilidad compartida.
+
+```text
+Security Team
+
++
+
+Framework Maintainers
+
++
+
+Module Owners
+
++
+
+Application Developers
+```
+
+---
+
+# 2309. Security Requirements Architecture
+
+Cada funcionalidad deberá identificar sus requisitos de seguridad.
+
+---
+
+# 2310. Security Requirement Categories
+
+Clasificar:
+
+* autenticación;
+* autorización;
+* confidencialidad;
+* integridad;
+* disponibilidad;
+* auditoría;
+* privacidad;
+* cumplimiento.
+
+---
+
+# 2311. SecurityRequirement
+
+```php
+final readonly class SecurityRequirement
+{
+    public function __construct(
+        public string $requirementId,
+        public string $description,
+        public string $category,
+        public string $priority,
+        public array $acceptanceCriteria,
+    ) {
+    }
+}
+```
+
+---
+
+# 2312. Security Acceptance Criteria
+
+Ejemplo:
+
+```text
+Feature:
+
+Invoice Export
+
+
+Security Criteria:
+
+- Requires invoice.export permission
+- Requires verified device
+- Applies tenant filtering
+- Generates audit event
+- Limits maximum records
+```
+
+---
+
+# 2313. Security Requirements Traceability
+
+Cada requisito deberá relacionarse con:
+
+```text
+Requirement
+
+↓
+
+Design Decision
+
+↓
+
+Implementation
+
+↓
+
+Security Test
+
+↓
+
+Evidence
+```
+
+---
+
+# 2314. Security Architecture Review
+
+Los cambios de alto impacto deberán pasar por revisión de arquitectura de seguridad.
+
+---
+
+# 2315. Architecture Review Triggers
+
+Requerir revisión cuando se agregue:
+
+* autenticación;
+* autorización;
+* cifrado;
+* almacenamiento;
+* ejecución remota;
+* integración externa;
+* datos sensibles;
+* multi-tenancy.
+
+---
+
+# 2316. Security Architecture Review Process
+
+```text
+Architecture Proposal
+
+↓
+
+Threat Review
+
+↓
+
+Control Evaluation
+
+↓
+
+Risk Decision
+
+↓
+
+Approval or Rework
+```
+
+---
+
+# 2317. ArchitectureSecurityReview
+
+```php
+final readonly class ArchitectureSecurityReview
+{
+    public function __construct(
+        public string $reviewId,
+        public string $component,
+        public array $identifiedRisks,
+        public array $requiredControls,
+        public string $decision,
+        public string $reviewer,
+    ) {
+    }
+}
+```
+
+---
+
+# 2318. Security Design Principles
+
+VoltStack deberá promover:
+
+* secure by default;
+* deny by default;
+* least privilege;
+* defense in depth;
+* explicit trust boundaries;
+* secure failure.
+
+---
+
+# 2319. Threat Modeling Architecture
+
+El threat modeling deberá integrarse al diseño de módulos y funcionalidades.
+
+---
+
+# 2320. Threat Modeling Objectives
+
+Identificar:
+
+* activos;
+* actores;
+* límites de confianza;
+* amenazas;
+* controles;
+* riesgo residual.
+
+---
+
+# 2321. Threat Modeling Workflow
+
+```text
+Define Scope
+
+↓
+
+Identify Assets
+
+↓
+
+Map Data Flows
+
+↓
+
+Identify Trust Boundaries
+
+↓
+
+Analyze Threats
+
+↓
+
+Design Mitigations
+
+↓
+
+Validate Residual Risk
+```
+
+---
+
+# 2322. Threat Model Scope
+
+Un modelo podrá cubrir:
+
+* controlador;
+* módulo Quantum;
+* protocolo;
+* servicio;
+* integración;
+* flujo empresarial.
+
+---
+
+# 2323. ThreatModel
+
+```php
+final readonly class ThreatModel
+{
+    public function __construct(
+        public string $modelId,
+        public string $scope,
+        public array $assets,
+        public array $trustBoundaries,
+        public array $threats,
+        public array $mitigations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2324. Asset Identification
+
+Activos típicos:
+
+* identidades;
+* sesiones;
+* tokens;
+* datos;
+* archivos;
+* claves;
+* configuraciones;
+* capacidad de ejecución.
+
+---
+
+# 2325. Data Flow Diagram Security
+
+Ejemplo:
+
+```text
+Browser
+
+↓
+
+Edge Gateway
+
+↓
+
+Routing
+
+↓
+
+Controller
+
+↓
+
+Policy Engine
+
+↓
+
+Repository
+
+↓
+
+Database
+```
+
+Cada transición deberá declarar su límite de confianza.
+
+---
+
+# 2326. Trust Boundary Identification
+
+Límites comunes:
+
+* cliente-servidor;
+* aplicación-base de datos;
+* servicio-servicio;
+* tenant-tenant;
+* runtime-sistema operativo;
+* framework-paquete externo.
+
+---
+
+# 2327. Threat Catalog
+
+VoltStack podrá mantener un catálogo reutilizable de amenazas.
+
+---
+
+# 2328. Threat Categories
+
+Incluir:
+
+* spoofing;
+* tampering;
+* repudiation;
+* information disclosure;
+* denial of service;
+* elevation of privilege;
+* supply chain compromise.
+
+---
+
+# 2329. ThreatRecord
+
+```php
+final readonly class ThreatRecord
+{
+    public function __construct(
+        public string $threatId,
+        public string $category,
+        public string $description,
+        public string $affectedAsset,
+        public string $severity,
+        public array $mitigations,
+    ) {
+    }
+}
+```
+
+---
+
+# 2330. Threat Modeling Automation
+
+VoltStack podrá generar modelos iniciales desde:
+
+* rutas;
+* controladores;
+* atributos;
+* permisos;
+* dependencias;
+* manifiestos;
+* flujos de datos.
+
+---
+
+# 2331. Controller Threat Metadata
+
+Ejemplo:
+
+```php
+#[ThreatSurface(
+    exposes: ['customer-data'],
+    accepts: ['http-input'],
+    performs: ['database-write']
+)]
+final class CustomerController
+{
+}
+```
+
+---
+
+# 2332. Threat Model Review Frequency
+
+Revisar cuando:
+
+* cambie arquitectura;
+* aparezca nueva amenaza;
+* ocurra incidente;
+* cambien dependencias;
+* se amplíe el alcance.
+
+---
+
+# 2333. Secure Coding Standards Architecture
+
+VoltStack deberá publicar estándares de codificación segura.
+
+---
+
+# 2334. Secure Coding Domains
+
+Cubrir:
+
+* validación;
+* serialización;
+* consultas;
+* filesystem;
+* procesos;
+* criptografía;
+* errores;
+* concurrencia;
+* autorización.
+
+---
+
+# 2335. Secure Input Handling
+
+Toda entrada deberá tratarse como no confiable.
+
+---
+
+# 2336. Input Validation Principle
+
+Validar:
+
+* tipo;
+* formato;
+* longitud;
+* rango;
+* estructura;
+* propósito.
+
+---
+
+# 2337. Validation at Boundaries
+
+```text
+External Input
+
+↓
+
+Validate Immediately
+
+↓
+
+Convert to Trusted Domain Type
+```
+
+---
+
+# 2338. Domain Value Objects
+
+Ejemplo:
+
+```php
+final readonly class EmailAddress
+{
+    public function __construct(
+        public string $value
+    ) {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException(
+                'Invalid email address.'
+            );
+        }
+    }
+}
+```
+
+---
+
+# 2339. Output Encoding Standard
+
+La salida deberá codificarse según el contexto:
+
+* HTML;
+* URL;
+* JavaScript;
+* JSON;
+* SQL;
+* shell.
+
+---
+
+# 2340. Query Safety Standard
+
+Usar:
+
+* parámetros;
+* query builders;
+* APIs tipadas;
+* allowlists.
+
+Nunca concatenar entrada no confiable en SQL.
+
+---
+
+# 2341. Command Execution Safety
+
+Las llamadas al sistema deberán:
+
+* evitar shell cuando sea posible;
+* usar argumentos estructurados;
+* validar binarios;
+* limitar entorno;
+* capturar resultado.
+
+---
+
+# 2342. Safe Process Interface
+
+```php
+interface SecureProcessRunnerInterface
+{
+    public function run(
+        Executable $executable,
+        array $arguments,
+        ProcessSecurityContext $context
+    ): ProcessResult;
+}
+```
+
+---
+
+# 2343. Filesystem Coding Standard
+
+Toda operación deberá:
+
+* resolver ruta segura;
+* impedir traversal;
+* aplicar permisos;
+* validar propietario;
+* auditar cambios críticos.
+
+---
+
+# 2344. Serialization Safety Standard
+
+No permitir deserialización arbitraria de clases desde entrada externa.
+
+---
+
+# 2345. Error Handling Standard
+
+Los errores deberán:
+
+* ocultar detalles internos;
+* generar correlación;
+* registrar contexto seguro;
+* preservar causa técnica internamente.
+
+---
+
+# 2346. Secret Handling Standard
+
+Los secretos no deberán:
+
+* imprimirse;
+* serializarse;
+* almacenarse en repositorios;
+* aparecer en excepciones;
+* enviarse al frontend.
+
+---
+
+# 2347. SensitiveValue
+
+```php
+final readonly class SensitiveValue
+{
+    public function __construct(
+        private string $value
+    ) {
+    }
+
+    public function reveal(
+        SecretAccessContext $context
+    ): string {
+        return $this->value;
+    }
+
+    public function __toString(): string
+    {
+        return '[REDACTED]';
+    }
+}
+```
+
+---
+
+# 2348. Secure Logging Standard
+
+Los logs deberán usar:
+
+* campos estructurados;
+* redacción;
+* trace ID;
+* clasificación;
+* nivel correcto.
+
+---
+
+# 2349. Authorization Coding Standard
+
+Los desarrolladores no deberán depender únicamente de validaciones visuales o frontend.
+
+---
+
+# 2350. Authorization Placement
+
+Aplicar autorización en:
+
+```text
+Route
+
++
+
+Controller
+
++
+
+Domain Operation
+
++
+
+Data Access
+```
+
+según sensibilidad y profundidad requerida.
+
+---
+
+# 2351. Insecure Direct Object Reference Prevention
+
+La resolución de recursos deberá verificar:
+
+* identidad;
+* tenant;
+* ownership;
+* política;
+* estado del recurso.
+
+---
+
+# 2352. Mass Assignment Protection
+
+Los modelos deberán declarar campos permitidos explícitamente.
+
+---
+
+# 2353. Safe Data Mapping
+
+```php
+final readonly class UpdateUserData
+{
+    public function __construct(
+        public string $displayName,
+        public string $timezone,
+    ) {
+    }
+}
+```
+
+La entrada no deberá asignarse directamente a entidades persistentes.
+
+---
+
+# 2354. Concurrency Coding Standard
+
+Las operaciones críticas deberán considerar:
+
+* idempotencia;
+* locking;
+* versionado;
+* transacciones;
+* reintentos seguros.
+
+---
+
+# 2355. Secure Code Review Architecture
+
+Los cambios deberán revisarse según su riesgo.
+
+---
+
+# 2356. Security Review Checklist
+
+Revisar:
+
+* trust boundaries;
+* entrada;
+* autorización;
+* datos sensibles;
+* errores;
+* dependencias;
+* concurrencia;
+* auditoría.
+
+---
+
+# 2357. Risk-Based Code Review
+
+Cambios críticos podrán requerir:
+
+* dos revisores;
+* Security Champion;
+* AppSec;
+* pruebas adicionales;
+* aprobación de propietario.
+
+---
+
+# 2358. Protected Code Ownership
+
+Archivos críticos deberán usar reglas de ownership.
+
+Ejemplos:
+
+```text
+Security Kernel
+
+Policy Engine
+
+Crypto Module
+
+Authentication
+
+Deployment Configuration
+```
+
+---
+
+# 2359. ReviewEvidence
+
+```php
+final readonly class ReviewEvidence
+{
+    public function __construct(
+        public string $changeId,
+        public array $reviewers,
+        public array $checks,
+        public DateTimeImmutable $approvedAt,
+    ) {
+    }
+}
+```
+
+---
+
+# 2360. Static Application Security Testing
+
+VoltStack deberá integrar análisis estático en el pipeline.
+
+---
+
+# 2361. SAST Objectives
+
+Detectar:
+
+* inyecciones;
+* uso inseguro de APIs;
+* exposición de secretos;
+* errores de autorización;
+* configuraciones inseguras;
+* flujo de datos sensible.
+
+---
+
+# 2362. SAST Execution Modes
+
+Ejecutar:
+
+* localmente;
+* en pull requests;
+* en integración continua;
+* periódicamente sobre la rama principal.
+
+---
+
+# 2363. SAST Quality Gate
+
+Un release podrá bloquearse ante:
+
+* vulnerabilidad crítica;
+* vulnerabilidad alta sin excepción;
+* secreto confirmado;
+* regla obligatoria incumplida.
+
+---
+
+# 2364. StaticAnalysisFinding
+
+```php
+final readonly class StaticAnalysisFinding
+{
+    public function __construct(
+        public string $findingId,
+        public string $rule,
+        public string $severity,
+        public string $file,
+        public int $line,
+        public string $message,
+    ) {
+    }
+}
+```
+
+---
+
+# 2365. SAST Baseline Management
+
+VoltStack deberá distinguir:
+
+* deuda existente;
+* vulnerabilidades nuevas;
+* hallazgos corregidos;
+* regresiones.
+
+---
+
+# 2366. No New Critical Findings Policy
+
+Regla recomendada:
+
+```text
+Existing Technical Debt
+
+May Be Tracked
+
+
+New Critical Vulnerability
+
+Must Block Merge
+```
+
+---
+
+# 2367. Dynamic Application Security Testing
+
+VoltStack deberá soportar análisis dinámico contra entornos controlados.
+
+---
+
+# 2368. DAST Coverage
+
+Probar:
+
+* rutas;
+* autenticación;
+* sesiones;
+* headers;
+* errores;
+* inyecciones;
+* controles de acceso;
+* uploads.
+
+---
+
+# 2369. DAST Environment Isolation
+
+Las pruebas dinámicas deberán ejecutarse en entornos:
+
+* aislados;
+* con datos sintéticos;
+* reiniciables;
+* sin secretos productivos.
+
+---
+
+# 2370. DynamicScanResult
+
+```php
+final readonly class DynamicScanResult
+{
+    public function __construct(
+        public string $scanId,
+        public string $target,
+        public array $findings,
+        public DateTimeImmutable $completedAt,
+        public bool $passed,
+    ) {
+    }
+}
+```
+
+---
+
+# 2371. Interactive Application Security Testing
+
+VoltStack podrá integrar instrumentación durante pruebas funcionales.
+
+---
+
+# 2372. IAST Benefits
+
+Permitirá observar:
+
+* ejecución real;
+* flujos de datos;
+* sinks vulnerables;
+* rutas afectadas;
+* contexto de aplicación.
+
+---
+
+# 2373. Runtime Application Self-Protection Testing
+
+Los controles runtime deberán probarse contra:
+
+* payloads maliciosos;
+* abuso de sesión;
+* acceso indebido;
+* anomalías;
+* evasión.
+
+---
+
+# 2374. Fuzz Testing Architecture
+
+VoltStack deberá permitir fuzzing de:
+
+* parsers;
+* protocolo Volt;
+* serializadores;
+* rutas;
+* validadores;
+* archivos.
+
+---
+
+# 2375. FuzzTarget
+
+```php
+interface FuzzTargetInterface
+{
+    public function execute(
+        string $input
+    ): FuzzResult;
+}
+```
+
+---
+
+# 2376. Property-Based Security Testing
+
+Ejemplos de propiedades:
+
+```text
+Unauthorized Identity
+
+Never Accesses Restricted Resource
+
+
+Invalid Signature
+
+Never Produces Valid Session
+
+
+Tenant A Context
+
+Never Resolves Tenant B Record
+```
+
+---
+
+# 2377. Penetration Testing
+
+Los releases mayores deberán poder someterse a pruebas de penetración.
+
+---
+
+# 2378. Penetration Test Scope
+
+Cubrir:
+
+* aplicación;
+* APIs;
+* SPA Runtime;
+* infraestructura;
+* cloud;
+* multi-tenancy;
+* procesos administrativos.
+
+---
+
+# 2379. Security Regression Testing
+
+Cada vulnerabilidad corregida deberá generar una prueba de regresión.
+
+---
+
+# 2380. Dependency Security Architecture
+
+VoltStack deberá controlar la seguridad de dependencias PHP, JavaScript y herramientas de build.
+
+---
+
+# 2381. Dependency Inventory
+
+Mantener:
+
+* nombre;
+* versión;
+* origen;
+* licencia;
+* checksum;
+* criticidad;
+* dependencias transitivas.
+
+---
+
+# 2382. DependencyPolicy
+
+```php
+final readonly class DependencyPolicy
+{
+    public function __construct(
+        public array $allowedSources,
+        public array $deniedPackages,
+        public array $licenseRules,
+        public string $maximumAllowedSeverity,
+    ) {
+    }
+}
+```
+
+---
+
+# 2383. Dependency Vulnerability Scanning
+
+Analizar:
+
+* Composer;
+* npm;
+* Bun;
+* imágenes de contenedor;
+* paquetes del sistema;
+* herramientas CI.
+
+---
+
+# 2384. Lockfile Integrity
+
+Los lockfiles deberán:
+
+* versionarse;
+* revisarse;
+* protegerse;
+* compararse durante build.
+
+---
+
+# 2385. Package Provenance
+
+VoltStack deberá verificar cuando sea posible:
+
+* repositorio;
+* autor;
+* firma;
+* checksum;
+* canal de distribución.
+
+---
+
+# 2386. Typosquatting Protection
+
+Los nuevos paquetes deberán revisarse contra:
+
+* nombres similares;
+* baja reputación;
+* publicación reciente;
+* mantenedores desconocidos;
+* scripts sospechosos.
+
+---
+
+# 2387. Dependency Update Policy
+
+Clasificar actualizaciones:
+
+* emergencia;
+* seguridad crítica;
+* seguridad normal;
+* mantenimiento;
+* major release.
+
+---
+
+# 2388. Vulnerability Exception Process
+
+Una vulnerabilidad no corregida deberá requerir:
+
+* justificación;
+* mitigación compensatoria;
+* propietario;
+* fecha límite;
+* aprobación.
+
+---
+
+# 2389. Software Bill of Materials Generation
+
+Cada release deberá poder producir un SBOM firmado.
+
+---
+
+# 2390. CI/CD Security Architecture
+
+El pipeline deberá considerarse infraestructura privilegiada.
+
+---
+
+# 2391. Pipeline Security Principles
+
+Aplicar:
+
+* mínima autoridad;
+* aislamiento;
+* reproducibilidad;
+* integridad;
+* trazabilidad;
+* secretos temporales.
+
+---
+
+# 2392. CI Identity Model
+
+Cada pipeline deberá ejecutar bajo identidad propia.
+
+```php
+final readonly class PipelineIdentity
+{
+    public function __construct(
+        public string $pipelineId,
+        public string $repository,
+        public string $commit,
+        public array $capabilities,
+    ) {
+    }
+}
+```
+
+---
+
+# 2393. CI Secret Security
+
+Los secretos deberán:
+
+* inyectarse temporalmente;
+* limitarse por ambiente;
+* rotarse;
+* enmascararse;
+* no persistir en artifacts.
+
+---
+
+# 2394. CI Security Gates
+
+Gates sugeridos:
+
+```text
+Unit Tests
+
+↓
+
+Static Analysis
+
+↓
+
+Secret Scan
+
+↓
+
+Dependency Scan
+
+↓
+
+Security Tests
+
+↓
+
+Artifact Signing
+
+↓
+
+Release Approval
+```
+
+---
+
+# 2395. Build Integrity
+
+El build deberá relacionarse con:
+
+* commit;
+* pipeline;
+* dependencias;
+* entorno;
+* resultado;
+* firma.
+
+---
+
+# 2396. Reproducible Builds
+
+VoltStack deberá favorecer builds reproducibles para detectar alteraciones y reducir incertidumbre.
+
+---
+
+# 2397. Artifact Security
+
+Los artifacts deberán incluir:
+
+* checksum;
+* firma;
+* versión;
+* procedencia;
+* SBOM;
+* metadatos del build.
+
+---
+
+# 2398. Release and Deployment Security
+
+Todo release deberá pasar por:
+
+* validación;
+* firma;
+* aprobación;
+* promoción controlada;
+* verificación posterior.
+
+---
+
+# 2399. Production Deployment Security
+
+El despliegue a producción deberá aplicar:
+
+```text
+Approved Artifact
+
++
+
+Verified Provenance
+
++
+
+Environment Authorization
+
++
+
+Controlled Rollout
+
++
+
+Post-Deployment Validation
+```
+
+Deberá evitarse construir directamente en producción o desplegar artifacts no verificados.
+
+---
+
+# 2400. Estado
+
+```text
+CONTROLLER_SECURITY_MODEL_PART_06.md
+
+Status:
+IN PROGRESS
+
+Completed:
+Sections 1-2400
+
+Current Delivery:
+Sections 2301-2400
+
+Next:
+Sections 2401-2500
+```
