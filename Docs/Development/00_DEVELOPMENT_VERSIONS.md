@@ -61,6 +61,8 @@ Regla:
 | 0.0.0 | `[x]` | Baseline | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal) | `vendor/voltstack/framework/tests` |
 | 0.1.0 | `[x]` | MVP-1 | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe) | `phpunit` (suite `framework`) |
 | 0.1.1 | `[x]` | MVP-1.1 | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*` | `phpunit` (suite `framework`) |
+| 0.2.0 | `[x]` | MVP-2 | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors` | `phpunit` (suite `framework`) |
+| 0.2.1 | `[x]` | MVP-2.1 | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching) | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -99,9 +101,18 @@ Errores estandar (Controllers Engine):
 | `controller.method_not_public` | `ControllerMethodNotPublicException` | metodo existe pero no es publico |
 | `controller.parameter_resolution_failed` | `ControllerParameterResolutionException` | falla al resolver argumentos (excluye binding missing) |
 
+### Bloque Activo 3. Interceptors (MVP-2)
+
+- `[x]` introducir `ControllerExecution` como contexto de ejecucion
+- `[x]` registry de interceptores (descriptor + alias + freeze)
+- `[x]` resolver de interceptores por `routeMetadata` key `controller.interceptors`
+- `[x]` plan builder determinista (prioridad + estabilidad por orden original)
+- `[x]` pipeline around con short-circuit (sin invocar controller si un interceptor no llama `proceed`)
+- `[x]` pruebas contractuales minimas (orden, short-circuit, mutacion args, captura excepcion)
+- `[x]` InterceptorDefinition en metadata con `priority`, `arguments` y `conditions`
+
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
-- `[ ]` interceptor system (Docs 07)
 - `[ ]` metadata engine (Docs 06)
 - `[ ]` compilation framework (Docs 13)
 - `[ ]` observabilidad unificada (Docs 11)
@@ -138,6 +149,15 @@ Errores estandar (Controllers Engine):
 - `[ ]` normalizar `mixed` a `Response` con el mismo contrato actual de `ResponseNormalizer`
 - `[ ]` mantener compatibilidad con `View`, `Component`, `array`, `string|numeric`, `null`
 
+### F. Interceptors (MVP-2)
+
+- `[x]` `ControllerExecution` (definition/context/controller/arguments/executionContext/attributes)
+- `[x]` `ControllerInterceptorInterface` + `ControllerInterceptorChainInterface`
+- `[x]` `ControllerInterceptorRegistryInterface` + registry default singleton
+- `[x]` `ControllerInterceptorResolver` (`controller.interceptors` desde route metadata)
+- `[x]` `ControllerInterceptorPlanBuilder` (prioridad + orden estable)
+- `[x]` `ControllerInterceptorPipeline` + chain + terminal de invocacion
+
 ## Checklist De Pruebas (MVP-1)
 
 ### 1. Resolucion de Target
@@ -156,6 +176,13 @@ Errores estandar (Controllers Engine):
 - `[ ]` retorna `Response` si el controller retorna `Response`
 - `[ ]` retorna `JsonResponse` si el controller retorna `array`
 - `[ ]` retorna `Response` si el controller retorna `View` o `Component`
+
+### 4. Interceptors (MVP-2)
+
+- `[x]` orden determinista por prioridad
+- `[x]` short-circuit (sin invocar controller)
+- `[x]` mutacion de argumentos antes de invocar
+- `[x]` captura de excepcion y recovery result
 
 ## Regla Operativa Del Documento
 

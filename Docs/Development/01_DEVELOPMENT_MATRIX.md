@@ -52,11 +52,33 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/ParameterResolutionEngine.php` | Capa formal de resolucion de parametros (backend: RouteArgumentResolver) | `[x]` | Centraliza `parameter_aliases` y mantiene `RouteBindableInterface`/`MissingRouteBindingException` |
 | `src/Quantum/Controllers/Exceptions/*` | Taxonomia de errores estandar del engine | `[x]` | Codigos `controller.*` |
 
+## Matriz (Interceptors - MVP-2)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Contexto mutable de ejecucion para interceptores | `[x]` | Contiene definition/context/controller/arguments/executionContext/attributes |
+| `src/Quantum/Controllers/Interceptors/Contracts/ControllerInterceptorInterface.php` | Contrato principal de interceptor | `[x]` | Semantica around |
+| `src/Quantum/Controllers/Interceptors/Contracts/ControllerInterceptorChainInterface.php` | Contrato de cadena | `[x]` | `proceed(execution): mixed` |
+| `src/Quantum/Controllers/Interceptors/Contracts/ControllerInterceptorRegistryInterface.php` | Contrato de registry | `[x]` | Binding singleton en Application |
+| `src/Quantum/Controllers/Interceptors/ControllerInterceptorRegistry.php` | Implementacion registry (descriptors + aliases + freeze) | `[x]` | Determinista, sin metadata engine |
+| `src/Quantum/Controllers/Interceptors/InterceptorDescriptor.php` | Descriptor registrado (id/clase/scope/prioridad/fase) | `[x]` | Prioridad default para orden |
+| `src/Quantum/Controllers/Interceptors/ControllerInterceptorPlanBuilder.php` | Ordena/normaliza plan | `[x]` | Prioridad desc + orden estable |
+| `src/Quantum/Controllers/Interceptors/ControllerInterceptorResolver.php` | Resuelve interceptores desde `controller.interceptors` | `[x]` | Soporta ids/aliases registry y class-string directo |
+| `src/Quantum/Controllers/Interceptors/ControllerInterceptorPipeline.php` | Ejecuta pipeline around y terminal de invocacion | `[x]` | Short-circuit si un interceptor no llama `proceed` |
+| `src/Quantum/Controllers/Interceptors/ControllerInterceptorChain.php` | Chain mutable (index) | `[x]` | Instancia interceptores con container |
+| `src/Quantum/Controllers/Interceptors/InterceptorDefinition.php` | Definicion declarativa (metadata) | `[x]` | Soporta `priority`, `arguments`, `conditions` |
+| `src/Quantum/Controllers/Interceptors/ResolvedInterceptorDefinition.php` | Definicion resuelta para ejecucion | `[x]` | Contiene conditions ya resueltas + `matches()` |
+| `src/Quantum/Controllers/Interceptors/Conditions/InterceptorConditionRegistry.php` | Registry de conditions (type -> class) | `[x]` | Se registra en Application con defaults |
+| `src/Quantum/Controllers/Interceptors/Conditions/*InterceptorCondition.php` | Condiciones iniciales | `[x]` | environment/http_method/route_name |
+| `src/Quantum/Controllers/Exceptions/UnknownInterceptorConditionException.php` | Error condition desconocida | `[x]` | `controller.interceptor_condition_unknown` |
+| `src/Quantum/Controllers/Exceptions/InvalidInterceptorConditionException.php` | Error condition invalida | `[x]` | `controller.interceptor_condition_invalid` |
+
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
 | `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubrir invocable, class@method, array callable, release, normalizacion |
+| `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion |
 
 ## Riesgos (Corte MVP-1)
 
