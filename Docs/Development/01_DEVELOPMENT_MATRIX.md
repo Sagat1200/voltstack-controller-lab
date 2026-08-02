@@ -34,6 +34,7 @@ Alcance de esta matriz:
 | [ResponseNormalizer.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/Routing/Dispatching/ResponseNormalizer.php) | Normaliza `mixed` a `Response` | `[x]` | En MVP se reusa para normalizacion de controllers |
 | [HttpKernel.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/HttpKernel/HttpKernel.php) | Orquestacion HTTP + middleware + normalizacion global | `[x]` | Debe seguir siendo compatible si ControllerDispatcher empieza a devolver `Response` |
 | [DispatcherResolver.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/Routing/Dispatching/DispatcherResolver.php) | Seleccion de dispatcher por tipo de action | `[x]` | No cambia para MVP |
+| [ExceptionHandler.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Exceptions/ExceptionHandler.php) | Mapea exceptions a status/codes y headers | `[x]` | Incluye `controller.*` via `ControllerException` |
 
 ## Matriz (Controllers Engine - MVP-1)
 
@@ -49,6 +50,7 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/ControllerContextInjector.php` | Inyecta/libera contexto en controllers aware | `[x]` | Implementa el contrato de base class opcional |
 | `src/Quantum/Controllers/Contracts/ControllerExecutionContextAwareInterface.php` | Contrato para controllers que reciben contexto | `[x]` | `set...` y `release...` |
 | `src/Quantum/Controllers/ParameterResolutionEngine.php` | Capa formal de resolucion de parametros (backend: RouteArgumentResolver) | `[x]` | Centraliza `parameter_aliases` y mantiene `RouteBindableInterface`/`MissingRouteBindingException` |
+| `src/Quantum/Controllers/Exceptions/*` | Taxonomia de errores estandar del engine | `[x]` | Codigos `controller.*` |
 
 ## Matriz (Tests)
 

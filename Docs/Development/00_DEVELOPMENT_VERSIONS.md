@@ -60,6 +60,7 @@ Regla:
 |---|---|---|---|---|---|
 | 0.0.0 | `[x]` | Baseline | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal) | `vendor/voltstack/framework/tests` |
 | 0.1.0 | `[x]` | MVP-1 | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe) | `phpunit` (suite `framework`) |
+| 0.1.1 | `[x]` | MVP-1.1 | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*` | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -85,7 +86,18 @@ Impacta directamente:
 - `[x]` formalizar `ParameterResolutionEngine` sin cambiar reglas actuales
 - `[x]` mantener soporte de `RouteBindableInterface` y `Request` injection
 - `[x]` mantener `MissingRouteBindingException` + metadata `missing` route handler
-- `[ ]` definir errores estandar del engine (sin Security Model)
+- `[x]` definir errores estandar del engine (sin Security Model)
+
+Errores estandar (Controllers Engine):
+
+| Codigo | Tipo | Cuando ocurre |
+|---|---|---|
+| `controller.unsupported_action` | `UnsupportedControllerActionException` | action de ruta no soportada por el engine |
+| `controller.method_invalid` | `InvalidControllerMethodException` | nombre de metodo vacio o invalido |
+| `controller.method_not_allowed` | `ControllerMethodNotAllowedException` | intento de invocar magic method distinto de `__invoke` |
+| `controller.method_not_found` | `ControllerMethodNotFoundException` | metodo no existe en la instancia |
+| `controller.method_not_public` | `ControllerMethodNotPublicException` | metodo existe pero no es publico |
+| `controller.parameter_resolution_failed` | `ControllerParameterResolutionException` | falla al resolver argumentos (excluye binding missing) |
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
