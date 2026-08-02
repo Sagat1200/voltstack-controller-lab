@@ -63,6 +63,7 @@ Regla:
 | 0.1.1 | `[x]` | MVP-1.1 | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*` | `phpunit` (suite `framework`) |
 | 0.2.0 | `[x]` | MVP-2 | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors` | `phpunit` (suite `framework`) |
 | 0.2.1 | `[x]` | MVP-2.1 | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching) | `phpunit` (suite `framework`) |
+| 0.2.2 | `[x]` | MVP-2.2 | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority` | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -110,6 +111,7 @@ Errores estandar (Controllers Engine):
 - `[x]` pipeline around con short-circuit (sin invocar controller si un interceptor no llama `proceed`)
 - `[x]` pruebas contractuales minimas (orden, short-circuit, mutacion args, captura excepcion)
 - `[x]` InterceptorDefinition en metadata con `priority`, `arguments` y `conditions`
+- `[x]` conditions: alias + string `type:value` + array asociativo; dedupe por `id` con prioridad (no-repeatable)
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
