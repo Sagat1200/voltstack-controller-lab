@@ -48,6 +48,7 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/ControllerInvoker.php` | Invoca controller y garantiza release en `finally` | `[x]` | No transforma resultado a Response (eso es normalizer) |
 | `src/Quantum/Controllers/ControllerContextInjector.php` | Inyecta/libera contexto en controllers aware | `[x]` | Implementa el contrato de base class opcional |
 | `src/Quantum/Controllers/Contracts/ControllerExecutionContextAwareInterface.php` | Contrato para controllers que reciben contexto | `[x]` | `set...` y `release...` |
+| `src/Quantum/Controllers/ParameterResolutionEngine.php` | Capa formal de resolucion de parametros (backend: RouteArgumentResolver) | `[x]` | Centraliza `parameter_aliases` y mantiene `RouteBindableInterface`/`MissingRouteBindingException` |
 
 ## Matriz (Tests)
 

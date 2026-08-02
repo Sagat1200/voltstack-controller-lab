@@ -82,9 +82,9 @@ Impacta directamente:
 
 ### Bloque Activo 2. Parametros (Equivalencia + Guardrails)
 
-- `[ ]` formalizar `ParameterResolutionEngine` sin cambiar reglas actuales
-- `[ ]` mantener soporte de `RouteBindableInterface` y `Request` injection
-- `[ ]` mantener `MissingRouteBindingException` + metadata `missing` route handler
+- `[x]` formalizar `ParameterResolutionEngine` sin cambiar reglas actuales
+- `[x]` mantener soporte de `RouteBindableInterface` y `Request` injection
+- `[x]` mantener `MissingRouteBindingException` + metadata `missing` route handler
 - `[ ]` definir errores estandar del engine (sin Security Model)
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
@@ -111,9 +111,9 @@ Impacta directamente:
 
 ### C. Parameter Engine (Compatibilidad)
 
-- `[ ]` integrar `RouteArgumentResolver` como backend (sin reescritura de reglas)
-- `[ ]` soportar `parameter_aliases` desde `routeMetadata`
-- `[ ]` soportar `RouteBindableInterface` y `MissingRouteBindingException`
+- `[x]` integrar `RouteArgumentResolver` como backend (sin reescritura de reglas)
+- `[x]` soportar `parameter_aliases` desde `routeMetadata`
+- `[x]` soportar `RouteBindableInterface` y `MissingRouteBindingException`
 
 ### D. Invoker (Ejecucion)
 
