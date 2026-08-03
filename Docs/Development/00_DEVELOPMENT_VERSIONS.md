@@ -69,6 +69,7 @@ Regla:
 | 0.3.2 | `[x]` | Metadata Engine (V1.2) | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar) | `phpunit` (suite `framework`) |
 | 0.3.3 | `[x]` | Metadata Engine (V1.3) | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route) | `phpunit` (suite `framework`) |
 | 0.3.4 | `[x]` | Controllers Runtime (V1) | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution` | `phpunit` (suite `framework`) |
+| 0.4.0 | `[x]` | Controller Lifecycle (V1) | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution` | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -127,6 +128,13 @@ Errores estandar (Controllers Engine):
 - `[x]` schemas base: `controller.interceptors` (append) + `parameter_aliases` (replace)
 - `[x]` integrar Controllers: `ControllerInterceptorResolver` consume `ControllerMetadataResolver`
 - `[x]` pruebas unitarias base del engine
+
+### Bloque Activo 5. Lifecycle + Execution State (Docs 10)
+
+- `[x]` exponer `ControllerExecutionState` (enum) y almacenarlo en `ControllerExecution`
+- `[x]` transiciones mínimas en el engine: `created` → `running` → `succeeded|failed`
+- `[x]` capturar excepción en `ControllerExecution` cuando falle la ejecución
+- `[x]` pruebas: estado final en success y en excepción
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 

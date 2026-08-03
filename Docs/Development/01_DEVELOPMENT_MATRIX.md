@@ -101,7 +101,9 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Runtime/ControllerRuntimeOptions.php` | DTO de runtime options | `[x]` | `lifecycleMode`, `compilationEnabled`, `compilationArtifactsFormat` |
 | `src/Quantum/Controllers/Runtime/ControllerRuntimeResolver.php` | Resolver runtime desde metadata | `[x]` | Lee `controller.lifecycle.*` y `controller.compilation.*` |
 | `src/Quantum/Controllers/Runtime/ControllerRuntimeResolverInterface.php` | Contrato de resolver runtime | `[x]` | Inyectado en `ControllerEngine` |
+| `src/Quantum/Controllers/Runtime/ControllerExecutionState.php` | Estado de ejecución (mínimo) | `[x]` | `created/running/succeeded/failed` |
 | `src/Quantum/Controllers/ControllerEngine.php` | Hook runtime options | `[x]` | Adjunta `controller.runtime` como attribute en `ControllerExecution` |
+| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Helpers: `runtimeOptions()`, `state()`, `setState()` |
 
 ## Matriz (Tests)
 
