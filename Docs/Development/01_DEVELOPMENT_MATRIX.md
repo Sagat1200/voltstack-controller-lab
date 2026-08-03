@@ -83,6 +83,13 @@ Alcance de esta matriz:
 | `src/Quantum/Metadata/MetadataProviderPipeline.php` | Pipeline para recolectar fragments | `[x]` | Filtra por `supports()` |
 | `src/Quantum/Metadata/Schema/MetadataSchemaRegistry.php` | Registry de schemas | `[x]` | Define tipo + merge strategy + defaults |
 | `src/Quantum/Metadata/Providers/RouteMetadataProvider.php` | Provider: route metadata → fragments | `[x]` | Integra con `RouteMatchSubject` |
+| `src/Quantum/Metadata/Providers/AttributeMetadataProvider.php` | Provider: atributos PHP -> fragments | `[x]` | Soporta `#[Meta(...)]` y atributos friendly de Controllers |
+| `src/Quantum/Controllers/Attributes/Interceptors.php` | Attribute friendly: interceptors | `[x]` | Mapea a `controller.interceptors` |
+| `src/Quantum/Controllers/Attributes/ParameterAliases.php` | Attribute friendly: parameter aliases | `[x]` | Mapea a `parameter_aliases` |
+| `src/Quantum/Metadata/Providers/ReflectionMetadataProvider.php` | Provider: reflection base -> fragments | `[x]` | Expone `controller.reflection.*` |
+| `src/Quantum/Metadata/Attributes/Meta.php` | Attribute base para metadata | `[x]` | `key/value/priority/final` |
+| `src/Quantum/Metadata/Subjects/ControllerClassSubject.php` | Subject: controller class | `[x]` | Padre: route subject |
+| `src/Quantum/Metadata/Subjects/ControllerMethodSubject.php` | Subject: controller method | `[x]` | Padre: controller class subject |
 | `src/Quantum/Controllers/Metadata/ControllerMetadataResolver.php` | Adapter Controllers -> Metadata Engine | `[x]` | `ControllerInterceptorResolver` consume este resolver |
 
 ## Matriz (Tests)

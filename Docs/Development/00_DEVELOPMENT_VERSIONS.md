@@ -65,6 +65,8 @@ Regla:
 | 0.2.1 | `[x]` | MVP-2.1 | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching) | `phpunit` (suite `framework`) |
 | 0.2.2 | `[x]` | MVP-2.2 | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority` | `phpunit` (suite `framework`) |
 | 0.3.0 | `[x]` | Metadata Engine (V1) | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors) | `phpunit` (suite `framework`) |
+| 0.3.1 | `[x]` | Metadata Engine (V1.1) | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata | `phpunit` (suite `framework`) |
+| 0.3.2 | `[x]` | Metadata Engine (V1.2) | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar) | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -118,6 +120,7 @@ Errores estandar (Controllers Engine):
 
 - `[x]` introducir `Quantum\Metadata` (engine + provider pipeline + schema registry)
 - `[x]` provider base: `RouteMetadataProvider` (route metadata -> fragments)
+- `[x]` providers: `AttributeMetadataProvider` + `ReflectionMetadataProvider` (controller class/method)
 - `[x]` schemas base: `controller.interceptors` (append) + `parameter_aliases` (replace)
 - `[x]` integrar Controllers: `ControllerInterceptorResolver` consume `ControllerMetadataResolver`
 - `[x]` pruebas unitarias base del engine
