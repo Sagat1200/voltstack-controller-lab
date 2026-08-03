@@ -70,6 +70,9 @@ Regla:
 | 0.3.3 | `[x]` | Metadata Engine (V1.3) | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route) | `phpunit` (suite `framework`) |
 | 0.3.4 | `[x]` | Controllers Runtime (V1) | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution` | `phpunit` (suite `framework`) |
 | 0.4.0 | `[x]` | Controller Lifecycle (V1) | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution` | `phpunit` (suite `framework`) |
+| 0.4.1 | `[x]` | Controller Lifecycle (V1.1) | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`) | `phpunit` (suite `framework`) |
+| 0.4.2 | `[x]` | Controller Lifecycle (V1.2) | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
+| 0.4.3 | `[x]` | Controller Lifecycle (V1.3) | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -134,6 +137,10 @@ Errores estandar (Controllers Engine):
 - `[x]` exponer `ControllerExecutionState` (enum) y almacenarlo en `ControllerExecution`
 - `[x]` transiciones mínimas en el engine: `created` → `running` → `succeeded|failed`
 - `[x]` capturar excepción en `ControllerExecution` cuando falle la ejecución
+- `[x]` registrar `invoked` vs `short_circuited` de forma determinista
+- `[x]` registrar `short_circuit_origin` y `short_circuit_result` para short-circuits por interceptores
+- `[x]` registrar `short_circuit_reason` y `short_circuit_metadata` (diagnóstico/depuración)
+- `[x]` prohibir doble invocación desde `InterceptorChain` (guard mínimo)
 - `[x]` pruebas: estado final en success y en excepción
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
