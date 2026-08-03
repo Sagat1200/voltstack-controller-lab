@@ -64,6 +64,7 @@ Regla:
 | 0.2.0 | `[x]` | MVP-2 | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors` | `phpunit` (suite `framework`) |
 | 0.2.1 | `[x]` | MVP-2.1 | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching) | `phpunit` (suite `framework`) |
 | 0.2.2 | `[x]` | MVP-2.2 | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority` | `phpunit` (suite `framework`) |
+| 0.3.0 | `[x]` | Metadata Engine (V1) | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors) | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -113,9 +114,16 @@ Errores estandar (Controllers Engine):
 - `[x]` InterceptorDefinition en metadata con `priority`, `arguments` y `conditions`
 - `[x]` conditions: alias + string `type:value` + array asociativo; dedupe por `id` con prioridad (no-repeatable)
 
+### Bloque Activo 4. Metadata Engine (Docs 06)
+
+- `[x]` introducir `Quantum\Metadata` (engine + provider pipeline + schema registry)
+- `[x]` provider base: `RouteMetadataProvider` (route metadata -> fragments)
+- `[x]` schemas base: `controller.interceptors` (append) + `parameter_aliases` (replace)
+- `[x]` integrar Controllers: `ControllerInterceptorResolver` consume `ControllerMetadataResolver`
+- `[x]` pruebas unitarias base del engine
+
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
-- `[ ]` metadata engine (Docs 06)
 - `[ ]` compilation framework (Docs 13)
 - `[ ]` observabilidad unificada (Docs 11)
 - `[ ]` Controller Security Model (carpeta excluida)
@@ -124,15 +132,15 @@ Errores estandar (Controllers Engine):
 
 ### A. Definicion, Contexto y Resolucion
 
-- `[ ]` `ControllerDefinition` y parser de referencias (`invokable`, `Class@method`, `[class, method]`)
-- `[ ]` `ControllerContext` / `ControllerExecutionContext` (request-scoped)
-- `[ ]` `ControllerResolver` (validaciones minimas: callable soportado, metodo publico, metodo no vacio)
+- `[x]` `ControllerDefinition` y parser de referencias (`invokable`, `Class@method`, `[class, method]`)
+- `[x]` `ControllerContext` / `ControllerExecutionContext` (request-scoped)
+- `[x]` `ControllerResolver` (validaciones minimas: callable soportado, metodo publico, metodo no vacio)
 
 ### B. Inyeccion y Release De Contexto
 
-- `[ ]` `ControllerExecutionContextAwareInterface` (`set...` / `release...`)
-- `[ ]` `ControllerContextInjectorInterface` (inyectar y liberar sin fugas)
-- `[ ]` asegurar ejecucion de `release()` en `finally` incluso en excepcion
+- `[x]` `ControllerExecutionContextAwareInterface` (`set...` / `release...`)
+- `[x]` `ControllerContextInjectorInterface` (inyectar y liberar sin fugas)
+- `[x]` asegurar ejecucion de `release()` en `finally` incluso en excepcion
 
 ### C. Parameter Engine (Compatibilidad)
 
@@ -142,14 +150,14 @@ Errores estandar (Controllers Engine):
 
 ### D. Invoker (Ejecucion)
 
-- `[ ]` `ControllerInvokerInterface` (invoca y retorna `mixed` del controller)
-- `[ ]` prohibir doble invocacion accidental (guard basico a nivel execution)
-- `[ ]` no coercion de tipos en invoker (si hay mismatch: falla)
+- `[x]` `ControllerInvokerInterface` (invoca y retorna `mixed` del controller)
+- `[x]` prohibir doble invocacion accidental (guard basico a nivel execution)
+- `[x]` no coercion de tipos en invoker (si hay mismatch: falla)
 
 ### E. Result Normalization (Respuesta Final)
 
-- `[ ]` normalizar `mixed` a `Response` con el mismo contrato actual de `ResponseNormalizer`
-- `[ ]` mantener compatibilidad con `View`, `Component`, `array`, `string|numeric`, `null`
+- `[x]` normalizar `mixed` a `Response` con el mismo contrato actual de `ResponseNormalizer`
+- `[x]` mantener compatibilidad con `View`, `Component`, `array`, `string|numeric`, `null`
 
 ### F. Interceptors (MVP-2)
 
@@ -164,20 +172,20 @@ Errores estandar (Controllers Engine):
 
 ### 1. Resolucion de Target
 
-- `[ ]` invocable: `Route::get(..., HomeController::class)`
-- `[ ]` class@method: `Route::get(..., UserController::class . '@show')`
-- `[ ]` array callable: `Route::get(..., [UserController::class, 'show'])`
+- `[x]` invocable: `Route::get(..., HomeController::class)`
+- `[x]` class@method: `Route::get(..., UserController::class . '@show')`
+- `[x]` array callable: `Route::get(..., [UserController::class, 'show'])`
 
 ### 2. Release En Exito y Error
 
-- `[ ]` `release()` ocurre en success
-- `[ ]` `release()` ocurre en excepcion del controller
+- `[x]` `release()` ocurre en success
+- `[x]` `release()` ocurre en excepcion del controller
 
 ### 3. Normalizacion (Compatibilidad)
 
-- `[ ]` retorna `Response` si el controller retorna `Response`
-- `[ ]` retorna `JsonResponse` si el controller retorna `array`
-- `[ ]` retorna `Response` si el controller retorna `View` o `Component`
+- `[x]` retorna `Response` si el controller retorna `Response`
+- `[x]` retorna `JsonResponse` si el controller retorna `array`
+- `[x]` retorna `Response` si el controller retorna `View` o `Component`
 
 ### 4. Interceptors (MVP-2)
 

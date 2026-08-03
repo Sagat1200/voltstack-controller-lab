@@ -73,11 +73,23 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Exceptions/UnknownInterceptorConditionException.php` | Error condition desconocida | `[x]` | `controller.interceptor_condition_unknown` |
 | `src/Quantum/Controllers/Exceptions/InvalidInterceptorConditionException.php` | Error condition invalida | `[x]` | `controller.interceptor_condition_invalid` |
 
+## Matriz (Metadata Engine - Docs 06)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Metadata/Contracts/MetadataEngineInterface.php` | Contrato principal de resolución | `[x]` | `resolve(MetadataRequest): MetadataBag` |
+| `src/Quantum/Metadata/MetadataEngine.php` | Engine: collect → normalize → merge → bag | `[x]` | Cache in-memory determinista (request-level) |
+| `src/Quantum/Metadata/MetadataProviderRegistry.php` | Registry de providers (orden estable) | `[x]` | Orden: priority desc + index asc |
+| `src/Quantum/Metadata/MetadataProviderPipeline.php` | Pipeline para recolectar fragments | `[x]` | Filtra por `supports()` |
+| `src/Quantum/Metadata/Schema/MetadataSchemaRegistry.php` | Registry de schemas | `[x]` | Define tipo + merge strategy + defaults |
+| `src/Quantum/Metadata/Providers/RouteMetadataProvider.php` | Provider: route metadata → fragments | `[x]` | Integra con `RouteMatchSubject` |
+| `src/Quantum/Controllers/Metadata/ControllerMetadataResolver.php` | Adapter Controllers -> Metadata Engine | `[x]` | `ControllerInterceptorResolver` consume este resolver |
+
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
-| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubrir invocable, class@method, array callable, release, normalizacion |
+| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null) |
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
 
 ## Riesgos (Corte MVP-1)
