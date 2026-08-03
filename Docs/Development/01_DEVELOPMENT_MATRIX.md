@@ -104,7 +104,7 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Runtime/ControllerExecutionState.php` | Estado de ejecución (mínimo) | `[x]` | `created/running/succeeded/failed` |
 | `src/Quantum/Controllers/Runtime/ControllerShortCircuitOrigin.php` | Origen del short-circuit | `[x]` | V1: `interceptor` |
 | `src/Quantum/Controllers/ControllerEngine.php` | Hook runtime options | `[x]` | Adjunta `controller.runtime` como attribute en `ControllerExecution` |
-| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Invoked/short-circuit flags + `shortCircuitReason()` + `shortCircuitMetadata()` |
+| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Invoked/short-circuit flags + reason/metadata + timeline + helpers de duración (`durationBetween`, `totalDuration`) |
 | `src/Quantum/Controllers/Exceptions/ControllerAlreadyInvokedException.php` | Guard: doble invocación | `[x]` | `controller.already_invoked` |
 
 ## Matriz (Tests)

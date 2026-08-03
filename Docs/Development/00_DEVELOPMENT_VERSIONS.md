@@ -73,6 +73,8 @@ Regla:
 | 0.4.1 | `[x]` | Controller Lifecycle (V1.1) | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`) | `phpunit` (suite `framework`) |
 | 0.4.2 | `[x]` | Controller Lifecycle (V1.2) | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
 | 0.4.3 | `[x]` | Controller Lifecycle (V1.3) | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
+| 0.4.4 | `[x]` | Controller Lifecycle (V1.4) | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed) | `phpunit` (suite `framework`) |
+| 0.4.5 | `[x]` | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`) | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -140,6 +142,7 @@ Errores estandar (Controllers Engine):
 - `[x]` registrar `invoked` vs `short_circuited` de forma determinista
 - `[x]` registrar `short_circuit_origin` y `short_circuit_result` para short-circuits por interceptores
 - `[x]` registrar `short_circuit_reason` y `short_circuit_metadata` (diagnóstico/depuración)
+- `[x]` exponer timeline mínimo de ejecución (timestamps por eventos)
 - `[x]` prohibir doble invocación desde `InterceptorChain` (guard mínimo)
 - `[x]` pruebas: estado final en success y en excepción
 
