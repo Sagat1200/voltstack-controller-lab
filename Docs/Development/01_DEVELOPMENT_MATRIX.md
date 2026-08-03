@@ -94,6 +94,15 @@ Alcance de esta matriz:
 | `src/Quantum/Metadata/Subjects/ControllerMethodSubject.php` | Subject: controller method | `[x]` | Padre: controller class subject |
 | `src/Quantum/Controllers/Metadata/ControllerMetadataResolver.php` | Adapter Controllers -> Metadata Engine | `[x]` | `ControllerInterceptorResolver` consume este resolver |
 
+## Matriz (Controllers Runtime)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Controllers/Runtime/ControllerRuntimeOptions.php` | DTO de runtime options | `[x]` | `lifecycleMode`, `compilationEnabled`, `compilationArtifactsFormat` |
+| `src/Quantum/Controllers/Runtime/ControllerRuntimeResolver.php` | Resolver runtime desde metadata | `[x]` | Lee `controller.lifecycle.*` y `controller.compilation.*` |
+| `src/Quantum/Controllers/Runtime/ControllerRuntimeResolverInterface.php` | Contrato de resolver runtime | `[x]` | Inyectado en `ControllerEngine` |
+| `src/Quantum/Controllers/ControllerEngine.php` | Hook runtime options | `[x]` | Adjunta `controller.runtime` como attribute en `ControllerExecution` |
+
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |

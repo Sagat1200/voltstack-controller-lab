@@ -68,6 +68,7 @@ Regla:
 | 0.3.1 | `[x]` | Metadata Engine (V1.1) | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata | `phpunit` (suite `framework`) |
 | 0.3.2 | `[x]` | Metadata Engine (V1.2) | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar) | `phpunit` (suite `framework`) |
 | 0.3.3 | `[x]` | Metadata Engine (V1.3) | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route) | `phpunit` (suite `framework`) |
+| 0.3.4 | `[x]` | Controllers Runtime (V1) | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution` | `phpunit` (suite `framework`) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
