@@ -34,7 +34,7 @@ Alcance de esta matriz:
 | [ResponseNormalizer.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/Routing/Dispatching/ResponseNormalizer.php) | Normaliza `mixed` a `Response` | `[x]` | En MVP se reusa para normalizacion de controllers |
 | [HttpKernel.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/HttpKernel/HttpKernel.php) | Orquestacion HTTP + middleware + normalizacion global | `[x]` | Debe seguir siendo compatible si ControllerDispatcher empieza a devolver `Response` |
 | [DispatcherResolver.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Quantum/Routing/Dispatching/DispatcherResolver.php) | Seleccion de dispatcher por tipo de action | `[x]` | No cambia para MVP |
-| [ExceptionHandler.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Exceptions/ExceptionHandler.php) | Mapea exceptions a status/codes y headers | `[x]` | Incluye `controller.*` via `ControllerException` |
+| [ExceptionHandler.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Exceptions/ExceptionHandler.php) | Adaptador `Framework\Contracts\ExceptionHandler` → `Quantum\Exceptions` | `[x]` | Preserva `X-Volt-Error-Code` (incluye `controller.*`) |
 
 ## Matriz (Controllers Engine - MVP-1)
 
@@ -135,6 +135,18 @@ Alcance de esta matriz:
 | `src/Quantum/Transport/Testing/InMemoryTransportEmitter.php` | Emitter in-memory para contract tests | `[x]` | Captura `PreparedTransportResponseInterface` |
 | `src/Quantum/Transport/Bridges/Http/HttpResponseTransformer.php` | Bridge: `Quantum\\Http\\Response` → `Quantum\\Transport\\ResponseInterface` | `[x]` | Permite integración incremental sin reescribir `HttpKernel` |
 | `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Emite vía `ResponseTransportManagerInterface` (ya no llama `Response::send()`) |
+
+## Matriz (Exception & Error Handling System - exception-lab)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Exceptions/Contracts/ExceptionHandlerInterface.php` | Contrato principal del handler transversal | `[x]` | Entrada `handle(Throwable, ExceptionHandlingContext)` |
+| `src/Quantum/Exceptions/ExceptionHandler.php` | Handler V0: mapea status/headers y renderiza HTML/JSON/Volt | `[x]` | Compatible con tests actuales del Kernel |
+| `src/Quantum/Exceptions/ExceptionHandlingContext.php` | Contexto de manejo de excepción | `[x]` | Incluye `Request`, `ControllerExecution` y futuro `TransportExecution` |
+| `src/Quantum/Exceptions/ExceptionHandlingResult.php` | Resultado del handler | `[x]` | Incluye `WorkerDisposition` y `emissionStarted` |
+| `src/Quantum/Exceptions/Enums/*` | Enums del sistema (origen/estado/disposición) | `[x]` | Base para expandir pipeline (classify/report) |
+| `src/Quantum/Exceptions/Runtime/*` | Runtime context/state del handler | `[x]` | Tracking de status/attempts |
+| [Application.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Application.php) | Bindings base del handler Quantum | `[x]` | `Quantum\\Exceptions\\Contracts\\ExceptionHandlerInterface` → `Quantum\\Exceptions\\ExceptionHandler` |
 
 ## Matriz (Tests)
 

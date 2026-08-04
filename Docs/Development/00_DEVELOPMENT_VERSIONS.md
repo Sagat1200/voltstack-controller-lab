@@ -82,6 +82,7 @@ Regla:
 | 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                            | `phpunit` (suite `framework`)      |
 | 0.6.0   | `[x]`  | Response Transport (V0)       | 2026-08-04 | `Quantum\\Transport`: contratos + `ResponseTransportManager` + `HttpTransportAdapter` + emitters (null/in-memory) + bindings base + tests        | `phpunit` (suite `framework`)      |
 | 0.6.1   | `[x]`  | Response Transport (V0.1)   | 2026-08-04 | Integración host: `public/index.php` emite vía `ResponseTransportManager` (transformer `Quantum\\Http\\Response` → `Quantum\\Transport\\Response`) | `phpunit` (suite `framework`)      |
+| 0.7.0   | `[x]`  | Exception Handling (V0)       | 2026-08-04 | `Quantum\\Exceptions`: handler V0 + context/result/enums + bridge `VoltStack\\Framework\\Exceptions\\ExceptionHandler` → Quantum handler + binding | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -179,12 +180,12 @@ Errores estandar (Controllers Engine):
 
 ### Bloque Activo 8. Exception & Error Handling System (exception-lab)
 
-- `[ ]` introducir `Quantum\Exceptions` (contratos + modelos) como sistema transversal (no solo Controllers/HTTP)
-- `[ ]` `ExceptionHandlingContext` (incluye `ControllerExecution` y futuro `TransportExecution`)
-- `[ ]` pipeline mínimo: resolve → classify → map → render (sin reporting/recovery al inicio)
-- `[ ]` integración con `HttpKernel`: unificar captura de `Throwable` y producir representación segura
+- `[x]` introducir `Quantum\Exceptions` (contratos + modelos) como sistema transversal (no solo Controllers/HTTP)
+- `[x]` `ExceptionHandlingContext` (incluye `ControllerExecution` y futuro `TransportExecution`)
+- `[x]` pipeline mínimo: resolve → classify → map → render (sin reporting/recovery al inicio)
+- `[x]` integración con `HttpKernel`: unificar captura de `Throwable` y producir representación segura
 - `[ ]` reglas de “post-emisión”: si el transporte ya inició, no intentar segunda respuesta (solo abort/mark incomplete)
-- `[ ]` preservar headers `X-Volt-Error-Code` para errores `controller.*` (consistencia contractual)
+- `[x]` preservar headers `X-Volt-Error-Code` para errores `controller.*` (consistencia contractual)
 - `[ ]` worker-safety: definir `WorkerDisposition` mínimo y reset request-scoped tras excepción
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
