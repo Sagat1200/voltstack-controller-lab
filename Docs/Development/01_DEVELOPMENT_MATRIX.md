@@ -126,12 +126,15 @@ Alcance de esta matriz:
 |---|---|---:|---|
 | `src/Quantum/Transport/Contracts/ResponseInterface.php` | Contrato de respuesta abstracta (destino del framework) | `[x]` | Implementación actual: `TransportResponse` (inmutable) |
 | `src/Quantum/Transport/Contracts/ResponseTransportManagerInterface.php` | Contrato del manager de transporte | `[x]` | Punto de entrada del sistema |
-| `src/Quantum/Transport/ResponseTransportManager.php` | Manager V0: prepare→emit con estado | `[x]` | No integra aún con `HttpKernel`/`index.php` |
+| `src/Quantum/Transport/ResponseTransportManager.php` | Manager V0: prepare→emit con estado | `[x]` | Integración incremental: `public/index.php` emite; `HttpKernel` se mantiene retornando `Quantum\\Http\\Response` |
 | `src/Quantum/Transport/Contracts/TransportAdapterInterface.php` | Contrato de adapter (prepare sin E/S) | `[x]` | Separa preparación vs emisión |
 | `src/Quantum/Transport/Contracts/TransportEmitterInterface.php` | Contrato de emitter (E/S) | `[x]` | Default no-op |
 | `src/Quantum/Transport/Adapters/HttpTransportAdapter.php` | Adapter HTTP V0 (payload string + headers/status) | `[x]` | `TextResponseBody`/`EmptyResponseBody` |
-| `src/Quantum/Transport/Emitters/NullTransportEmitter.php` | Emitter no-op default | `[x]` | Sin funciones globales |
+| `src/Quantum/Transport/Emitters/HttpSapiEmitter.php` | Emitter HTTP (SAPI) V0.1 | `[x]` | Emite status/headers/body |
+| `src/Quantum/Transport/Emitters/NullTransportEmitter.php` | Emitter no-op | `[x]` | Útil para pruebas/unit |
 | `src/Quantum/Transport/Testing/InMemoryTransportEmitter.php` | Emitter in-memory para contract tests | `[x]` | Captura `PreparedTransportResponseInterface` |
+| `src/Quantum/Transport/Bridges/Http/HttpResponseTransformer.php` | Bridge: `Quantum\\Http\\Response` → `Quantum\\Transport\\ResponseInterface` | `[x]` | Permite integración incremental sin reescribir `HttpKernel` |
+| `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Emite vía `ResponseTransportManagerInterface` (ya no llama `Response::send()`) |
 
 ## Matriz (Tests)
 
@@ -140,6 +143,7 @@ Alcance de esta matriz:
 | `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null), lifecycle (state/timeline/short-circuit/production mode/timeouts soft), observability (eventos mínimos) y transport V0 |
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
 | `vendor/voltstack/framework/tests/Unit/ResponseTransportManagerTest.php` | Contract tests de transport manager | `[x]` | Prepara + emite con `InMemoryTransportEmitter`; manejo de excepción en adapter |
+| `vendor/voltstack/framework/tests/Unit/HttpResponseTransformerTest.php` | Test del bridge HTTP→Transport | `[x]` | Mapea status/headers/body |
 
 ## Riesgos (Corte MVP-1)
 

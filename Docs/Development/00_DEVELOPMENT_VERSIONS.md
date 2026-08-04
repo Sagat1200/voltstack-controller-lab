@@ -81,6 +81,7 @@ Regla:
 | 0.4.9   | `[x]`  | Controller Lifecycle (V1.9)   | 2026-08-04 | Metadata: `MetadataValueType::Float` + schema tipado para normalizar `controller.lifecycle.timeouts.default`                                     | `phpunit` (suite `framework`)      |
 | 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                            | `phpunit` (suite `framework`)      |
 | 0.6.0   | `[x]`  | Response Transport (V0)       | 2026-08-04 | `Quantum\\Transport`: contratos + `ResponseTransportManager` + `HttpTransportAdapter` + emitters (null/in-memory) + bindings base + tests        | `phpunit` (suite `framework`)      |
+| 0.6.1   | `[x]`  | Response Transport (V0.1)   | 2026-08-04 | Integración host: `public/index.php` emite vía `ResponseTransportManager` (transformer `Quantum\\Http\\Response` → `Quantum\\Transport\\Response`) | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -174,7 +175,7 @@ Errores estandar (Controllers Engine):
 - `[x]` introducir `TransportAdapterInterface` vs `TransportEmitterInterface` (separación preparación vs emisión)
 - `[x]` implementar `Testing/InMemoryTransportEmitter` para contract tests (sin funciones globales)
 - `[x]` definir política “exactly once”: prevenir doble emisión y registrar estado de emisión
-- `[ ]` definir puntos de integración con `HttpKernel` (sin emitir aún dentro del kernel; solo preparar frontera y pruebas)
+- `[x]` integrar host de emisión (`public/index.php`) vía Transport Manager (sin cambiar el contrato actual de `HttpKernel`)
 
 ### Bloque Activo 8. Exception & Error Handling System (exception-lab)
 
