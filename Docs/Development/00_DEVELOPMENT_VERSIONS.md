@@ -161,6 +161,29 @@ Errores estandar (Controllers Engine):
 - `[x]` implementación no-op default (no overhead cuando no hay integración)
 - `[x]` hooks de eventos en `ControllerEngine` (created/started/invocation/completed/short-circuit)
 - `[x]` pruebas unitarias: captura de eventos, `executionId` consistente y `sequence` creciente
+- `[ ]` implementar `ControllerEventDispatcherInterface` in-memory (útil para debugging local y harnesses)
+- `[ ]` implementar `ControllerEventDispatcherInterface` como logger estructurado (JSON line) con payload mínimo y sanitizado
+- `[ ]` definir estrategia de configuración/binding por entorno (ej. `local` vs `production`) para seleccionar dispatcher sin tocar el pipeline funcional
+
+### Bloque Activo 7. Response Transport System (http-lab)
+
+- `[ ]` introducir `Quantum\Transport` (contratos + tipos base) sin romper el pipeline actual
+- `[ ]` definir frontera: `ResultTransformationEngine` produce `ResponseInterface` (abstracta) y el Transport la entrega
+- `[ ]` introducir `ResponseTransportManagerInterface` + pipeline mínimo con `TransportExecution` (created → prepared → emitted|failed)
+- `[ ]` introducir `TransportAdapterInterface` vs `TransportEmitterInterface` (separación preparación vs emisión)
+- `[ ]` implementar `Testing/InMemoryTransportEmitter` para contract tests (sin funciones globales)
+- `[ ]` definir política “exactly once”: prevenir doble emisión y registrar estado de emisión
+- `[ ]` definir puntos de integración con `HttpKernel` (sin emitir aún dentro del kernel; solo preparar frontera y pruebas)
+
+### Bloque Activo 8. Exception & Error Handling System (exception-lab)
+
+- `[ ]` introducir `Quantum\Exceptions` (contratos + modelos) como sistema transversal (no solo Controllers/HTTP)
+- `[ ]` `ExceptionHandlingContext` (incluye `ControllerExecution` y futuro `TransportExecution`)
+- `[ ]` pipeline mínimo: resolve → classify → map → render (sin reporting/recovery al inicio)
+- `[ ]` integración con `HttpKernel`: unificar captura de `Throwable` y producir representación segura
+- `[ ]` reglas de “post-emisión”: si el transporte ya inició, no intentar segunda respuesta (solo abort/mark incomplete)
+- `[ ]` preservar headers `X-Volt-Error-Code` para errores `controller.*` (consistencia contractual)
+- `[ ]` worker-safety: definir `WorkerDisposition` mínimo y reset request-scoped tras excepción
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
