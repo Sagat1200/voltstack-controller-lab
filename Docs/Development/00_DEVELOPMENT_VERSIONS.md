@@ -56,25 +56,26 @@ Regla:
 
 ### Historial
 
-| Version | Estado | Corte | Fecha | Resumen | Pruebas |
-|---|---|---|---|---|---|
-| 0.0.0 | `[x]` | Baseline | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal) | `vendor/voltstack/framework/tests` |
-| 0.1.0 | `[x]` | MVP-1 | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe) | `phpunit` (suite `framework`) |
-| 0.1.1 | `[x]` | MVP-1.1 | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*` | `phpunit` (suite `framework`) |
-| 0.2.0 | `[x]` | MVP-2 | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors` | `phpunit` (suite `framework`) |
-| 0.2.1 | `[x]` | MVP-2.1 | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching) | `phpunit` (suite `framework`) |
-| 0.2.2 | `[x]` | MVP-2.2 | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority` | `phpunit` (suite `framework`) |
-| 0.3.0 | `[x]` | Metadata Engine (V1) | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors) | `phpunit` (suite `framework`) |
-| 0.3.1 | `[x]` | Metadata Engine (V1.1) | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata | `phpunit` (suite `framework`) |
-| 0.3.2 | `[x]` | Metadata Engine (V1.2) | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar) | `phpunit` (suite `framework`) |
-| 0.3.3 | `[x]` | Metadata Engine (V1.3) | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route) | `phpunit` (suite `framework`) |
-| 0.3.4 | `[x]` | Controllers Runtime (V1) | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution` | `phpunit` (suite `framework`) |
-| 0.4.0 | `[x]` | Controller Lifecycle (V1) | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution` | `phpunit` (suite `framework`) |
-| 0.4.1 | `[x]` | Controller Lifecycle (V1.1) | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`) | `phpunit` (suite `framework`) |
-| 0.4.2 | `[x]` | Controller Lifecycle (V1.2) | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
-| 0.4.3 | `[x]` | Controller Lifecycle (V1.3) | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution` | `phpunit` (suite `framework`) |
-| 0.4.4 | `[x]` | Controller Lifecycle (V1.4) | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed) | `phpunit` (suite `framework`) |
-| 0.4.5 | `[x]` | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`) | `phpunit` (suite `framework`) |
+| Version | Estado | Corte                       | Fecha      | Resumen                                                                                                                                          | Pruebas                            |
+| ------- | ------ | --------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| 0.0.0   | `[x]`  | Baseline                    | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal)                                                                                 | `vendor/voltstack/framework/tests` |
+| 0.1.0   | `[x]`  | MVP-1                       | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe)                                                  | `phpunit` (suite `framework`)      |
+| 0.1.1   | `[x]`  | MVP-1.1                     | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*`                                                                               | `phpunit` (suite `framework`)      |
+| 0.2.0   | `[x]`  | MVP-2                       | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors`                                                         | `phpunit` (suite `framework`)      |
+| 0.2.1   | `[x]`  | MVP-2.1                     | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching)                                   | `phpunit` (suite `framework`)      |
+| 0.2.2   | `[x]`  | MVP-2.2                     | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority`                                    | `phpunit` (suite `framework`)      |
+| 0.3.0   | `[x]`  | Metadata Engine (V1)        | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors)                                           | `phpunit` (suite `framework`)      |
+| 0.3.1   | `[x]`  | Metadata Engine (V1.1)      | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata                                                         | `phpunit` (suite `framework`)      |
+| 0.3.2   | `[x]`  | Metadata Engine (V1.2)      | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar)                                               | `phpunit` (suite `framework`)      |
+| 0.3.3   | `[x]`  | Metadata Engine (V1.3)      | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route)                                                          | `phpunit` (suite `framework`)      |
+| 0.3.4   | `[x]`  | Controllers Runtime (V1)    | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution`                         | `phpunit` (suite `framework`)      |
+| 0.4.0   | `[x]`  | Controller Lifecycle (V1)   | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution`                                      | `phpunit` (suite `framework`)      |
+| 0.4.1   | `[x]`  | Controller Lifecycle (V1.1) | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`)                                                      | `phpunit` (suite `framework`)      |
+| 0.4.2   | `[x]`  | Controller Lifecycle (V1.2) | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution`                                                                 | `phpunit` (suite `framework`)      |
+| 0.4.3   | `[x]`  | Controller Lifecycle (V1.3) | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution`                                                                             | `phpunit` (suite `framework`)      |
+| 0.4.4   | `[x]`  | Controller Lifecycle (V1.4) | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed)                                               | `phpunit` (suite `framework`)      |
+| 0.4.5   | `[x]`  | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`)                                                    | `phpunit` (suite `framework`)      |
+| 0.4.6   | `[x]`  | Controller Lifecycle (V1.6) | 2026-08-03 | Comportamiento según `controller.lifecycle.mode`: en `production` no se guarda timeline ni payloads sensibles (exception/result/reason/metadata) | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -104,13 +105,13 @@ Impacta directamente:
 
 Errores estandar (Controllers Engine):
 
-| Codigo | Tipo | Cuando ocurre |
-|---|---|---|
-| `controller.unsupported_action` | `UnsupportedControllerActionException` | action de ruta no soportada por el engine |
-| `controller.method_invalid` | `InvalidControllerMethodException` | nombre de metodo vacio o invalido |
-| `controller.method_not_allowed` | `ControllerMethodNotAllowedException` | intento de invocar magic method distinto de `__invoke` |
-| `controller.method_not_found` | `ControllerMethodNotFoundException` | metodo no existe en la instancia |
-| `controller.method_not_public` | `ControllerMethodNotPublicException` | metodo existe pero no es publico |
+| Codigo                                   | Tipo                                     | Cuando ocurre                                          |
+| ---------------------------------------- | ---------------------------------------- | ------------------------------------------------------ |
+| `controller.unsupported_action`          | `UnsupportedControllerActionException`   | action de ruta no soportada por el engine              |
+| `controller.method_invalid`              | `InvalidControllerMethodException`       | nombre de metodo vacio o invalido                      |
+| `controller.method_not_allowed`          | `ControllerMethodNotAllowedException`    | intento de invocar magic method distinto de `__invoke` |
+| `controller.method_not_found`            | `ControllerMethodNotFoundException`      | metodo no existe en la instancia                       |
+| `controller.method_not_public`           | `ControllerMethodNotPublicException`     | metodo existe pero no es publico                       |
 | `controller.parameter_resolution_failed` | `ControllerParameterResolutionException` | falla al resolver argumentos (excluye binding missing) |
 
 ### Bloque Activo 3. Interceptors (MVP-2)
@@ -143,6 +144,7 @@ Errores estandar (Controllers Engine):
 - `[x]` registrar `short_circuit_origin` y `short_circuit_result` para short-circuits por interceptores
 - `[x]` registrar `short_circuit_reason` y `short_circuit_metadata` (diagnóstico/depuración)
 - `[x]` exponer timeline mínimo de ejecución (timestamps por eventos)
+- `[x]` respetar `controller.lifecycle.mode` para controlar diagnóstico (en `production` no guardar payloads)
 - `[x]` prohibir doble invocación desde `InterceptorChain` (guard mínimo)
 - `[x]` pruebas: estado final en success y en excepción
 
