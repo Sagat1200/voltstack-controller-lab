@@ -98,20 +98,20 @@ Alcance de esta matriz:
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
-| `src/Quantum/Controllers/Runtime/ControllerRuntimeOptions.php` | DTO de runtime options | `[x]` | `lifecycleMode`, `compilationEnabled`, `compilationArtifactsFormat` |
-| `src/Quantum/Controllers/Runtime/ControllerRuntimeResolver.php` | Resolver runtime desde metadata | `[x]` | Lee `controller.lifecycle.*` y `controller.compilation.*` |
+| `src/Quantum/Controllers/Runtime/ControllerRuntimeOptions.php` | DTO de runtime options | `[x]` | `lifecycleMode`, `compilationEnabled`, `compilationArtifactsFormat`, `timeoutsEnabled`, `timeoutDefaultSeconds` |
+| `src/Quantum/Controllers/Runtime/ControllerRuntimeResolver.php` | Resolver runtime desde metadata | `[x]` | Lee `controller.lifecycle.*`, `controller.lifecycle.timeouts.*` y `controller.compilation.*` |
 | `src/Quantum/Controllers/Runtime/ControllerRuntimeResolverInterface.php` | Contrato de resolver runtime | `[x]` | Inyectado en `ControllerEngine` |
 | `src/Quantum/Controllers/Runtime/ControllerExecutionState.php` | Estado de ejecución (mínimo) | `[x]` | `created/running/succeeded/failed` |
 | `src/Quantum/Controllers/Runtime/ControllerShortCircuitOrigin.php` | Origen del short-circuit | `[x]` | V1: `interceptor` |
-| `src/Quantum/Controllers/ControllerEngine.php` | Hook runtime options | `[x]` | Adjunta `controller.runtime` como attribute en `ControllerExecution` |
-| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Diagnóstico condicionado por `lifecycleMode` (production minimiza payloads); timeline + helpers de duración |
+| `src/Quantum/Controllers/ControllerEngine.php` | Hook runtime options | `[x]` | Adjunta `controller.runtime` como attribute en `ControllerExecution` + marca `controller.lifecycle.started_at` y evalúa timeouts (soft) para setear `duration_seconds`/`timeout_seconds`/`timeout_exceeded` |
+| `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Diagnóstico condicionado por `lifecycleMode` (production minimiza payloads); timeline + helpers de duración; helpers de timeout (`durationSeconds`, `timeoutSeconds`, `timeoutExceeded`) |
 | `src/Quantum/Controllers/Exceptions/ControllerAlreadyInvokedException.php` | Guard: doble invocación | `[x]` | `controller.already_invoked` |
 
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
-| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null) |
+| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null) y lifecycle (state/timeline/short-circuit/production mode/timeouts soft) |
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
 
 ## Riesgos (Corte MVP-1)

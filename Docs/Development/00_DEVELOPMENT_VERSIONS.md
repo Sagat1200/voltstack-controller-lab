@@ -76,6 +76,7 @@ Regla:
 | 0.4.4   | `[x]`  | Controller Lifecycle (V1.4) | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed)                                               | `phpunit` (suite `framework`)      |
 | 0.4.5   | `[x]`  | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`)                                                    | `phpunit` (suite `framework`)      |
 | 0.4.6   | `[x]`  | Controller Lifecycle (V1.6) | 2026-08-03 | Comportamiento según `controller.lifecycle.mode`: en `production` no se guarda timeline ni payloads sensibles (exception/result/reason/metadata) | `phpunit` (suite `framework`)      |
+| 0.4.7   | `[x]`  | Controller Lifecycle (V1.7) | 2026-08-03 | Timeouts (soft): usa `controller.lifecycle.timeouts.*` para marcar `timeout_exceeded` + `duration_seconds`                                       | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -145,6 +146,7 @@ Errores estandar (Controllers Engine):
 - `[x]` registrar `short_circuit_reason` y `short_circuit_metadata` (diagnóstico/depuración)
 - `[x]` exponer timeline mínimo de ejecución (timestamps por eventos)
 - `[x]` respetar `controller.lifecycle.mode` para controlar diagnóstico (en `production` no guardar payloads)
+- `[x]` timeouts (soft) desde `controller.lifecycle.timeouts.*` (`timeout_exceeded`, `timeout_seconds`, `duration_seconds`)
 - `[x]` prohibir doble invocación desde `InterceptorChain` (guard mínimo)
 - `[x]` pruebas: estado final en success y en excepción
 
