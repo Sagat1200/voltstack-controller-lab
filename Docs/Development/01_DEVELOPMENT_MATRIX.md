@@ -148,6 +148,9 @@ Alcance de esta matriz:
 | `src/Quantum/Exceptions/Enums/*` | Enums del sistema (origen/estado/disposición) | `[x]` | Base para expandir pipeline (classify/report) |
 | `src/Quantum/Exceptions/Runtime/*` | Runtime context/state del handler | `[x]` | Tracking de status/attempts |
 | [Application.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Application.php) | Bindings base del handler Quantum | `[x]` | `Quantum\\Exceptions\\Contracts\\ExceptionHandlerInterface` → `Quantum\\Exceptions\\ExceptionHandler` |
+| `src/Runtime/Context/WorkerLifecycle.php` | Estado mínimo de disposición del worker | `[x]` | Singleton; no se limpia con `flushScope()` |
+| [ExceptionHandler.php](file:///c:/W4/Packages/VoltStack/app-skeleton/vendor/voltstack/framework/src/Platform/Exceptions/ExceptionHandler.php) | Registra `WorkerDisposition` devuelto por `Quantum\\Exceptions` | `[x]` | Marca terminate/reset para que el host decida |
+| `public/index.php` | Aplica política mínima de worker-safety al final del request | `[x]` | Si `shouldTerminate()`: finaliza request y termina el proceso |
 
 ## Matriz (Tests)
 
