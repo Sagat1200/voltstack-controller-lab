@@ -56,30 +56,31 @@ Regla:
 
 ### Historial
 
-| Version | Estado | Corte                       | Fecha      | Resumen                                                                                                                                          | Pruebas                            |
-| ------- | ------ | --------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
-| 0.0.0   | `[x]`  | Baseline                    | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal)                                                                                 | `vendor/voltstack/framework/tests` |
-| 0.1.0   | `[x]`  | MVP-1                       | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe)                                                  | `phpunit` (suite `framework`)      |
-| 0.1.1   | `[x]`  | MVP-1.1                     | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*`                                                                               | `phpunit` (suite `framework`)      |
-| 0.2.0   | `[x]`  | MVP-2                       | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors`                                                         | `phpunit` (suite `framework`)      |
-| 0.2.1   | `[x]`  | MVP-2.1                     | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching)                                   | `phpunit` (suite `framework`)      |
-| 0.2.2   | `[x]`  | MVP-2.2                     | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority`                                    | `phpunit` (suite `framework`)      |
-| 0.3.0   | `[x]`  | Metadata Engine (V1)        | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors)                                           | `phpunit` (suite `framework`)      |
-| 0.3.1   | `[x]`  | Metadata Engine (V1.1)      | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata                                                         | `phpunit` (suite `framework`)      |
-| 0.3.2   | `[x]`  | Metadata Engine (V1.2)      | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar)                                               | `phpunit` (suite `framework`)      |
-| 0.3.3   | `[x]`  | Metadata Engine (V1.3)      | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route)                                                          | `phpunit` (suite `framework`)      |
-| 0.3.4   | `[x]`  | Controllers Runtime (V1)    | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution`                         | `phpunit` (suite `framework`)      |
-| 0.4.0   | `[x]`  | Controller Lifecycle (V1)   | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution`                                      | `phpunit` (suite `framework`)      |
-| 0.4.1   | `[x]`  | Controller Lifecycle (V1.1) | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`)                                                      | `phpunit` (suite `framework`)      |
-| 0.4.2   | `[x]`  | Controller Lifecycle (V1.2) | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution`                                                                 | `phpunit` (suite `framework`)      |
-| 0.4.3   | `[x]`  | Controller Lifecycle (V1.3) | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution`                                                                             | `phpunit` (suite `framework`)      |
-| 0.4.4   | `[x]`  | Controller Lifecycle (V1.4) | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed)                                               | `phpunit` (suite `framework`)      |
-| 0.4.5   | `[x]`  | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`)                                                    | `phpunit` (suite `framework`)      |
-| 0.4.6   | `[x]`  | Controller Lifecycle (V1.6) | 2026-08-03 | Comportamiento según `controller.lifecycle.mode`: en `production` no se guarda timeline ni payloads sensibles (exception/result/reason/metadata) | `phpunit` (suite `framework`)      |
-| 0.4.7   | `[x]`  | Controller Lifecycle (V1.7) | 2026-08-03 | Timeouts (soft): usa `controller.lifecycle.timeouts.*` para marcar `timeout_exceeded` + `duration_seconds`                                       | `phpunit` (suite `framework`)      |
-| 0.4.8   | `[x]`  | Controller Lifecycle (V1.8) | 2026-08-03 | Metadata schemas para `controller.lifecycle.timeouts.enabled` y `controller.lifecycle.timeouts.default` con defaults deterministas                | `phpunit` (suite `framework`)      |
-| 0.4.9   | `[x]`  | Controller Lifecycle (V1.9) | 2026-08-04 | Metadata: `MetadataValueType::Float` + schema tipado para normalizar `controller.lifecycle.timeouts.default`                                      | `phpunit` (suite `framework`)      |
-| 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                             | `phpunit` (suite `framework`)      |
+| Version | Estado | Corte                         | Fecha      | Resumen                                                                                                                                          | Pruebas                            |
+| ------- | ------ | ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| 0.0.0   | `[x]`  | Baseline                      | 2026-08-02 | Dispatcher/argumentos/normalizacion actuales (sin engine formal)                                                                                 | `vendor/voltstack/framework/tests` |
+| 0.1.0   | `[x]`  | MVP-1                         | 2026-08-02 | Controllers Engine minimo (dispatcher+invoker+normalize) + context inject/release (worker-safe)                                                  | `phpunit` (suite `framework`)      |
+| 0.1.1   | `[x]`  | MVP-1.1                       | 2026-08-02 | ParameterResolutionEngine formal + errores estandar `controller.*`                                                                               | `phpunit` (suite `framework`)      |
+| 0.2.0   | `[x]`  | MVP-2                         | 2026-08-02 | Interceptor system MVP (registry+resolver+pipeline around) via `controller.interceptors`                                                         | `phpunit` (suite `framework`)      |
+| 0.2.1   | `[x]`  | MVP-2.1                       | 2026-08-02 | InterceptorDefinition: soporte de `priority`, `arguments` y `conditions` (condition registry + chain matching)                                   | `phpunit` (suite `framework`)      |
+| 0.2.2   | `[x]`  | MVP-2.2                       | 2026-08-02 | Conditions: alias + formatos alternos (`type:value`, asociativo) + dedupe por `id` eligiendo mayor `priority`                                    | `phpunit` (suite `framework`)      |
+| 0.3.0   | `[x]`  | Metadata Engine (V1)          | 2026-08-03 | Metadata Engine: sujeto Route + provider route + schemas base + integración Controllers (interceptors)                                           | `phpunit` (suite `framework`)      |
+| 0.3.1   | `[x]`  | Metadata Engine (V1.1)        | 2026-08-03 | Providers: attributes/reflection para Controller class/method + merge con route metadata                                                         | `phpunit` (suite `framework`)      |
+| 0.3.2   | `[x]`  | Metadata Engine (V1.2)        | 2026-08-03 | Atributos friendly Controllers: `#[Interceptors]` y `#[ParameterAliases]` (mapean a keys estándar)                                               | `phpunit` (suite `framework`)      |
+| 0.3.3   | `[x]`  | Metadata Engine (V1.3)        | 2026-08-03 | Providers: config + convention (defaults por config y convenciones por namespace/route)                                                          | `phpunit` (suite `framework`)      |
+| 0.3.4   | `[x]`  | Controllers Runtime (V1)      | 2026-08-03 | Runtime options desde metadata: `controller.lifecycle.*` + `controller.compilation.*` adjuntados a `ControllerExecution`                         | `phpunit` (suite `framework`)      |
+| 0.4.0   | `[x]`  | Controller Lifecycle (V1)     | 2026-08-03 | Execution state mínimo (`created/running/succeeded/failed`) + captura de excepción en `ControllerExecution`                                      | `phpunit` (suite `framework`)      |
+| 0.4.1   | `[x]`  | Controller Lifecycle (V1.1)   | 2026-08-03 | Short-circuit vs invoked (flags) + guard de doble invocación (`controller.already_invoked`)                                                      | `phpunit` (suite `framework`)      |
+| 0.4.2   | `[x]`  | Controller Lifecycle (V1.2)   | 2026-08-03 | Short-circuit origin + short-circuit result almacenados en `ControllerExecution`                                                                 | `phpunit` (suite `framework`)      |
+| 0.4.3   | `[x]`  | Controller Lifecycle (V1.3)   | 2026-08-03 | Short-circuit reason + metadata almacenados en `ControllerExecution`                                                                             | `phpunit` (suite `framework`)      |
+| 0.4.4   | `[x]`  | Controller Lifecycle (V1.4)   | 2026-08-03 | Execution timeline mínimo (timestamps de created/running/invoked/short_circuited/succeeded/failed)                                               | `phpunit` (suite `framework`)      |
+| 0.4.5   | `[x]`  | Controller Lifecycle (V1.5)   | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`)                                                    | `phpunit` (suite `framework`)      |
+| 0.4.6   | `[x]`  | Controller Lifecycle (V1.6)   | 2026-08-03 | Comportamiento según `controller.lifecycle.mode`: en `production` no se guarda timeline ni payloads sensibles (exception/result/reason/metadata) | `phpunit` (suite `framework`)      |
+| 0.4.7   | `[x]`  | Controller Lifecycle (V1.7)   | 2026-08-03 | Timeouts (soft): usa `controller.lifecycle.timeouts.*` para marcar `timeout_exceeded` + `duration_seconds`                                       | `phpunit` (suite `framework`)      |
+| 0.4.8   | `[x]`  | Controller Lifecycle (V1.8)   | 2026-08-03 | Metadata schemas para `controller.lifecycle.timeouts.enabled` y `controller.lifecycle.timeouts.default` con defaults deterministas               | `phpunit` (suite `framework`)      |
+| 0.4.9   | `[x]`  | Controller Lifecycle (V1.9)   | 2026-08-04 | Metadata: `MetadataValueType::Float` + schema tipado para normalizar `controller.lifecycle.timeouts.default`                                     | `phpunit` (suite `framework`)      |
+| 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                            | `phpunit` (suite `framework`)      |
+| 0.6.0   | `[x]`  | Response Transport (V0)       | 2026-08-04 | `Quantum\\Transport`: contratos + `ResponseTransportManager` + `HttpTransportAdapter` + emitters (null/in-memory) + bindings base + tests        | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -167,12 +168,12 @@ Errores estandar (Controllers Engine):
 
 ### Bloque Activo 7. Response Transport System (http-lab)
 
-- `[ ]` introducir `Quantum\Transport` (contratos + tipos base) sin romper el pipeline actual
+- `[x]` introducir `Quantum\Transport` (contratos + tipos base) sin romper el pipeline actual
 - `[ ]` definir frontera: `ResultTransformationEngine` produce `ResponseInterface` (abstracta) y el Transport la entrega
-- `[ ]` introducir `ResponseTransportManagerInterface` + pipeline mínimo con `TransportExecution` (created → prepared → emitted|failed)
-- `[ ]` introducir `TransportAdapterInterface` vs `TransportEmitterInterface` (separación preparación vs emisión)
-- `[ ]` implementar `Testing/InMemoryTransportEmitter` para contract tests (sin funciones globales)
-- `[ ]` definir política “exactly once”: prevenir doble emisión y registrar estado de emisión
+- `[x]` introducir `ResponseTransportManagerInterface` + pipeline mínimo con `TransportExecution` (created → prepared → emitted|failed)
+- `[x]` introducir `TransportAdapterInterface` vs `TransportEmitterInterface` (separación preparación vs emisión)
+- `[x]` implementar `Testing/InMemoryTransportEmitter` para contract tests (sin funciones globales)
+- `[x]` definir política “exactly once”: prevenir doble emisión y registrar estado de emisión
 - `[ ]` definir puntos de integración con `HttpKernel` (sin emitir aún dentro del kernel; solo preparar frontera y pruebas)
 
 ### Bloque Activo 8. Exception & Error Handling System (exception-lab)

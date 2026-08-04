@@ -120,12 +120,26 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Observability/Engine/NullControllerEventDispatcher.php` | Dispatcher no-op default | `[x]` | Evita overhead cuando no hay integración |
 | `src/Quantum/Controllers/ControllerEngine.php` | Hooks de eventos (created/started/invocation/completed/short-circuit) | `[x]` | Genera `controller.execution.id` |
 
+## Matriz (Response Transport System - http-lab)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Transport/Contracts/ResponseInterface.php` | Contrato de respuesta abstracta (destino del framework) | `[x]` | Implementación actual: `TransportResponse` (inmutable) |
+| `src/Quantum/Transport/Contracts/ResponseTransportManagerInterface.php` | Contrato del manager de transporte | `[x]` | Punto de entrada del sistema |
+| `src/Quantum/Transport/ResponseTransportManager.php` | Manager V0: prepare→emit con estado | `[x]` | No integra aún con `HttpKernel`/`index.php` |
+| `src/Quantum/Transport/Contracts/TransportAdapterInterface.php` | Contrato de adapter (prepare sin E/S) | `[x]` | Separa preparación vs emisión |
+| `src/Quantum/Transport/Contracts/TransportEmitterInterface.php` | Contrato de emitter (E/S) | `[x]` | Default no-op |
+| `src/Quantum/Transport/Adapters/HttpTransportAdapter.php` | Adapter HTTP V0 (payload string + headers/status) | `[x]` | `TextResponseBody`/`EmptyResponseBody` |
+| `src/Quantum/Transport/Emitters/NullTransportEmitter.php` | Emitter no-op default | `[x]` | Sin funciones globales |
+| `src/Quantum/Transport/Testing/InMemoryTransportEmitter.php` | Emitter in-memory para contract tests | `[x]` | Captura `PreparedTransportResponseInterface` |
+
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
-| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null), lifecycle (state/timeline/short-circuit/production mode/timeouts soft) y observability (eventos mínimos) |
+| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null), lifecycle (state/timeline/short-circuit/production mode/timeouts soft), observability (eventos mínimos) y transport V0 |
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
+| `vendor/voltstack/framework/tests/Unit/ResponseTransportManagerTest.php` | Contract tests de transport manager | `[x]` | Prepara + emite con `InMemoryTransportEmitter`; manejo de excepción en adapter |
 
 ## Riesgos (Corte MVP-1)
 
