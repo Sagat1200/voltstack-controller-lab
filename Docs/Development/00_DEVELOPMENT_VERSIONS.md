@@ -83,6 +83,7 @@ Regla:
 | 0.6.0   | `[x]`  | Response Transport (V0)       | 2026-08-04 | `Quantum\\Transport`: contratos + `ResponseTransportManager` + `HttpTransportAdapter` + emitters (null/in-memory) + bindings base + tests        | `phpunit` (suite `framework`)      |
 | 0.6.1   | `[x]`  | Response Transport (V0.1)   | 2026-08-04 | Integración host: `public/index.php` emite vía `ResponseTransportManager` (transformer `Quantum\\Http\\Response` → `Quantum\\Transport\\Response`) | `phpunit` (suite `framework`)      |
 | 0.7.0   | `[x]`  | Exception Handling (V0)       | 2026-08-04 | `Quantum\\Exceptions`: handler V0 + context/result/enums + bridge `VoltStack\\Framework\\Exceptions\\ExceptionHandler` → Quantum handler + binding | `phpunit` (suite `framework`)      |
+| 0.7.1   | `[x]`  | Exception Handling (V0.1)     | 2026-08-04 | Post-emisión: `TransportResult` propaga `TransportExecution` + `public/index.php` fallback seguro si falla antes de emitir + aborta si ya emitió | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -184,7 +185,7 @@ Errores estandar (Controllers Engine):
 - `[x]` `ExceptionHandlingContext` (incluye `ControllerExecution` y futuro `TransportExecution`)
 - `[x]` pipeline mínimo: resolve → classify → map → render (sin reporting/recovery al inicio)
 - `[x]` integración con `HttpKernel`: unificar captura de `Throwable` y producir representación segura
-- `[ ]` reglas de “post-emisión”: si el transporte ya inició, no intentar segunda respuesta (solo abort/mark incomplete)
+- `[x]` reglas de “post-emisión”: si el transporte ya inició, no intentar segunda respuesta (solo abort/mark incomplete)
 - `[x]` preservar headers `X-Volt-Error-Code` para errores `controller.*` (consistencia contractual)
 - `[ ]` worker-safety: definir `WorkerDisposition` mínimo y reset request-scoped tras excepción
 

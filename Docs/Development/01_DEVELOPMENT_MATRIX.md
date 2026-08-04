@@ -134,7 +134,8 @@ Alcance de esta matriz:
 | `src/Quantum/Transport/Emitters/NullTransportEmitter.php` | Emitter no-op | `[x]` | Útil para pruebas/unit |
 | `src/Quantum/Transport/Testing/InMemoryTransportEmitter.php` | Emitter in-memory para contract tests | `[x]` | Captura `PreparedTransportResponseInterface` |
 | `src/Quantum/Transport/Bridges/Http/HttpResponseTransformer.php` | Bridge: `Quantum\\Http\\Response` → `Quantum\\Transport\\ResponseInterface` | `[x]` | Permite integración incremental sin reescribir `HttpKernel` |
-| `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Emite vía `ResponseTransportManagerInterface` (ya no llama `Response::send()`) |
+| `src/Quantum/Transport/Runtime/TransportResult.php` | Resultado del transport (status/bytes/exception) | `[x]` | Propaga `TransportExecution` para awareness post-emisión (`emissionStarted`) |
+| `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Emite vía `ResponseTransportManagerInterface` + fallback a `Quantum\\Exceptions` si falla antes de emitir |
 
 ## Matriz (Exception & Error Handling System - exception-lab)
 
