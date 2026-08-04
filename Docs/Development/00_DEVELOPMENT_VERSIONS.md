@@ -77,6 +77,9 @@ Regla:
 | 0.4.5   | `[x]`  | Controller Lifecycle (V1.5) | 2026-08-03 | Helpers de duración derivados del timeline (`timelineAt`, `durationBetween`, `totalDuration`)                                                    | `phpunit` (suite `framework`)      |
 | 0.4.6   | `[x]`  | Controller Lifecycle (V1.6) | 2026-08-03 | Comportamiento según `controller.lifecycle.mode`: en `production` no se guarda timeline ni payloads sensibles (exception/result/reason/metadata) | `phpunit` (suite `framework`)      |
 | 0.4.7   | `[x]`  | Controller Lifecycle (V1.7) | 2026-08-03 | Timeouts (soft): usa `controller.lifecycle.timeouts.*` para marcar `timeout_exceeded` + `duration_seconds`                                       | `phpunit` (suite `framework`)      |
+| 0.4.8   | `[x]`  | Controller Lifecycle (V1.8) | 2026-08-03 | Metadata schemas para `controller.lifecycle.timeouts.enabled` y `controller.lifecycle.timeouts.default` con defaults deterministas                | `phpunit` (suite `framework`)      |
+| 0.4.9   | `[x]`  | Controller Lifecycle (V1.9) | 2026-08-04 | Metadata: `MetadataValueType::Float` + schema tipado para normalizar `controller.lifecycle.timeouts.default`                                      | `phpunit` (suite `framework`)      |
+| 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                             | `phpunit` (suite `framework`)      |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -147,13 +150,21 @@ Errores estandar (Controllers Engine):
 - `[x]` exponer timeline mínimo de ejecución (timestamps por eventos)
 - `[x]` respetar `controller.lifecycle.mode` para controlar diagnóstico (en `production` no guardar payloads)
 - `[x]` timeouts (soft) desde `controller.lifecycle.timeouts.*` (`timeout_exceeded`, `timeout_seconds`, `duration_seconds`)
+- `[x]` formalizar schemas de metadata para `controller.lifecycle.timeouts.enabled` y `controller.lifecycle.timeouts.default`
+- `[x]` tipar y normalizar `controller.lifecycle.timeouts.default` como float en el Metadata Engine
 - `[x]` prohibir doble invocación desde `InterceptorChain` (guard mínimo)
 - `[x]` pruebas: estado final en success y en excepción
+
+### Bloque Activo 6. Observability (Docs 11)
+
+- `[x]` contratos mínimos: eventos, dispatcher y manager
+- `[x]` implementación no-op default (no overhead cuando no hay integración)
+- `[x]` hooks de eventos en `ControllerEngine` (created/started/invocation/completed/short-circuit)
+- `[x]` pruebas unitarias: captura de eventos, `executionId` consistente y `sequence` creciente
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
 - `[ ]` compilation framework (Docs 13)
-- `[ ]` observabilidad unificada (Docs 11)
 - `[ ]` Controller Security Model (carpeta excluida)
 
 ## Checklist De Desarrollo (MVP-1)

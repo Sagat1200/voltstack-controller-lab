@@ -78,10 +78,10 @@ Alcance de esta matriz:
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
 | `src/Quantum/Metadata/Contracts/MetadataEngineInterface.php` | Contrato principal de resolución | `[x]` | `resolve(MetadataRequest): MetadataBag` |
-| `src/Quantum/Metadata/MetadataEngine.php` | Engine: collect → normalize → merge → bag | `[x]` | Cache in-memory determinista (request-level) |
+| `src/Quantum/Metadata/MetadataEngine.php` | Engine: collect → normalize → merge → bag | `[x]` | Cache in-memory determinista (request-level). Materializa `defaultValue` de schemas aun cuando `keys=[]` (no filtrado) |
 | `src/Quantum/Metadata/MetadataProviderRegistry.php` | Registry de providers (orden estable) | `[x]` | Orden: priority desc + index asc |
 | `src/Quantum/Metadata/MetadataProviderPipeline.php` | Pipeline para recolectar fragments | `[x]` | Filtra por `supports()` |
-| `src/Quantum/Metadata/Schema/MetadataSchemaRegistry.php` | Registry de schemas | `[x]` | Define tipo + merge strategy + defaults |
+| `src/Quantum/Metadata/Schema/MetadataSchemaRegistry.php` | Registry de schemas | `[x]` | Define tipo + merge strategy + defaults (incluye `controller.lifecycle.*`, `controller.lifecycle.timeouts.*`, `controller.compilation.*`) |
 | `src/Quantum/Metadata/Providers/RouteMetadataProvider.php` | Provider: route metadata → fragments | `[x]` | Integra con `RouteMatchSubject` |
 | `src/Quantum/Metadata/Providers/ConfigMetadataProvider.php` | Provider: config -> fragments | `[x]` | Mapea `controller_lifecycle` y `controller_compilation` a keys `controller.*` |
 | `src/Quantum/Metadata/Providers/AttributeMetadataProvider.php` | Provider: atributos PHP -> fragments | `[x]` | Soporta `#[Meta(...)]` y atributos friendly de Controllers |
@@ -107,11 +107,24 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Execution/ControllerExecution.php` | Execution API | `[x]` | Diagnóstico condicionado por `lifecycleMode` (production minimiza payloads); timeline + helpers de duración; helpers de timeout (`durationSeconds`, `timeoutSeconds`, `timeoutExceeded`) |
 | `src/Quantum/Controllers/Exceptions/ControllerAlreadyInvokedException.php` | Guard: doble invocación | `[x]` | `controller.already_invoked` |
 
+## Matriz (Observability - Docs 11)
+
+| Archivo | Rol | Estado | Notas / Dependencias |
+|---|---|---:|---|
+| `src/Quantum/Controllers/Observability/Contracts/ControllerEventInterface.php` | Contrato de evento V1 (name/version/executionId/sequence/payload) | `[x]` | Payload mínimo, sin serializar request/response |
+| `src/Quantum/Controllers/Observability/Contracts/ControllerEventDispatcherInterface.php` | Contrato dispatcher de eventos | `[x]` | Se implementa no-op por defecto |
+| `src/Quantum/Controllers/Observability/Contracts/ControllerObservabilityManagerInterface.php` | Contrato manager mínimo (emit) | `[x]` | Punto único para no propagar try/catch por todo el pipeline |
+| `src/Quantum/Controllers/Observability/Events/ControllerEvent.php` | Implementación inmutable de evento | `[x]` | Incluye `sequence` |
+| `src/Quantum/Controllers/Observability/Events/EventSequence.php` | Secuenciador por ejecución | `[x]` | Request-scoped via `ControllerExecution` attributes |
+| `src/Quantum/Controllers/Observability/Engine/ControllerObservabilityManager.php` | Manager V0: emite eventos sin bloquear ejecución | `[x]` | Si falla, marca `controller.observability.failed` |
+| `src/Quantum/Controllers/Observability/Engine/NullControllerEventDispatcher.php` | Dispatcher no-op default | `[x]` | Evita overhead cuando no hay integración |
+| `src/Quantum/Controllers/ControllerEngine.php` | Hooks de eventos (created/started/invocation/completed/short-circuit) | `[x]` | Genera `controller.execution.id` |
+
 ## Matriz (Tests)
 
 | Archivo | Rol | Estado | Notas / Dependencias |
 |---|---|---:|---|
-| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null) y lifecycle (state/timeline/short-circuit/production mode/timeouts soft) |
+| `vendor/voltstack/framework/tests/Unit/*` | Unit tests del engine y compatibilidad de dispatch | `[x]` | Cubre invocable, class@method, array callable, release (success/error), parameter_aliases, missing binding, normalizacion (Response/JsonResponse/View/string/null), lifecycle (state/timeline/short-circuit/production mode/timeouts soft) y observability (eventos mínimos) |
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
 
 ## Riesgos (Corte MVP-1)
