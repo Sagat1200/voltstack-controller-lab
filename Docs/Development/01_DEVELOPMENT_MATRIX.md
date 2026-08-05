@@ -118,7 +118,10 @@ Alcance de esta matriz:
 | `src/Quantum/Controllers/Observability/Events/EventSequence.php` | Secuenciador por ejecución | `[x]` | Request-scoped via `ControllerExecution` attributes |
 | `src/Quantum/Controllers/Observability/Engine/ControllerObservabilityManager.php` | Manager V0: emite eventos sin bloquear ejecución | `[x]` | Si falla, marca `controller.observability.failed` |
 | `src/Quantum/Controllers/Observability/Engine/NullControllerEventDispatcher.php` | Dispatcher no-op default | `[x]` | Evita overhead cuando no hay integración |
+| `src/Quantum/Controllers/Observability/Engine/InMemoryControllerEventDispatcher.php` | Dispatcher in-memory (ring buffer) | `[x]` | Útil para debugging local/harness; evita crecimiento sin límite |
+| `src/Quantum/Controllers/Observability/Engine/JsonLineControllerEventDispatcher.php` | Dispatcher logger JSON line | `[x]` | Sanitiza payload y escribe en `storage/framework/logs/controller-events.jsonl` por default |
 | `src/Quantum/Controllers/ControllerEngine.php` | Hooks de eventos (created/started/invocation/completed/short-circuit) | `[x]` | Genera `controller.execution.id` |
+| `config/controller_observability.php` | Config de selección de dispatcher | `[x]` | `dispatcher=auto|null|in_memory|jsonl`, `jsonl_path` opcional |
 
 ## Matriz (Response Transport System - http-lab)
 
@@ -134,8 +137,13 @@ Alcance de esta matriz:
 | `src/Quantum/Transport/Emitters/NullTransportEmitter.php` | Emitter no-op | `[x]` | Útil para pruebas/unit |
 | `src/Quantum/Transport/Testing/InMemoryTransportEmitter.php` | Emitter in-memory para contract tests | `[x]` | Captura `PreparedTransportResponseInterface` |
 | `src/Quantum/Transport/Bridges/Http/HttpResponseTransformer.php` | Bridge: `Quantum\\Http\\Response` → `Quantum\\Transport\\ResponseInterface` | `[x]` | Permite integración incremental sin reescribir `HttpKernel` |
+| `src/Quantum/Transport/Contracts/TransportKernelInterface.php` | Contrato frontera: Request → `ResponseInterface` | `[x]` | Salida abstracta nativa (puerta para Transport destino) |
+| `src/Quantum/Transport/Bridges/Http/HttpKernelTransportKernel.php` | Implementación mínima: delega en `Kernel` + `HttpResponseTransformer` | `[x]` | Compatibilidad mientras no exista un `ResultTransformationEngine` nativo |
+| `app/Controllers/RuntimeLabController.php` | Lab de integración runtime: summary / JSON / probe | `[x]` | Resuelve bindings, config observability y smoke de `ResponseTransportManager::send` con probe autocontenido |
+| `resources/views/runtime-lab-harness.volt.php` | Vista UI del lab | `[x]` | Expone markers `data-runtime-check` y navegación Resumen/JSON |
+| `routes/web.php` | Ruta `/runtime-lab-harness` | `[x]` | `Route::get(...)->name('runtimeLabHarness')` |
 | `src/Quantum/Transport/Runtime/TransportResult.php` | Resultado del transport (status/bytes/exception) | `[x]` | Propaga `TransportExecution` para awareness post-emisión (`emissionStarted`) |
-| `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Emite vía `ResponseTransportManagerInterface` + fallback a `Quantum\\Exceptions` si falla antes de emitir |
+| `public/index.php` | Host HTTP: emisión final de la respuesta | `[x]` | Usa frontera `TransportKernelInterface` + emite vía `ResponseTransportManagerInterface` + fallback a `Quantum\\Exceptions` si falla antes de emitir |
 
 ## Matriz (Exception & Error Handling System - exception-lab)
 
@@ -160,6 +168,11 @@ Alcance de esta matriz:
 | `vendor/voltstack/framework/tests/Unit/ControllerInterceptorSystemTest.php` | Contract tests de interceptores | `[x]` | Orden, short-circuit, mutacion de args, recovery por excepcion; conditions por alias, `type:value` y asociativo; dedupe por `id` con mayor `priority` |
 | `vendor/voltstack/framework/tests/Unit/ResponseTransportManagerTest.php` | Contract tests de transport manager | `[x]` | Prepara + emite con `InMemoryTransportEmitter`; manejo de excepción en adapter |
 | `vendor/voltstack/framework/tests/Unit/HttpResponseTransformerTest.php` | Test del bridge HTTP→Transport | `[x]` | Mapea status/headers/body |
+| `vendor/voltstack/framework/tests/Unit/HttpKernelTransportKernelTest.php` | Test de frontera TransportKernel | `[x]` | Valida retorno `ResponseInterface` con status/headers/body de `Kernel` |
+| `vendor/voltstack/framework/tests/Feature/RuntimeStackHarnessLabTest.php` | Harness lab QA (SkeletonSpaRoadmapTest-style) | `[x]` | Procesos separados; smoke summary page, JSON endpoint y probe request (200 + binding/ok) |
+| `vendor/voltstack/framework/tests/Unit/ObservabilityDispatcherBindingTest.php` | Binding/estrategia auto de observability | `[x]` | `auto` selecciona in-memory en local + jsonl si `APP_ENV=production` y `jsonl_path` |
+| `vendor/voltstack/framework/tests/Unit/InMemoryControllerEventDispatcherTest.php` | Dispatcher in-memory | `[x]` | Ring buffer, `events()` y `clear()` |
+| `vendor/voltstack/framework/tests/Unit/JsonLineControllerEventDispatcherTest.php` | Dispatcher JSONL | `[x]` | Payload sanitizado, headers/cookies/tokens filtrados |
 
 ## Riesgos (Corte MVP-1)
 

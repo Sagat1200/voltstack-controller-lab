@@ -80,11 +80,14 @@ Regla:
 | 0.4.8   | `[x]`  | Controller Lifecycle (V1.8)   | 2026-08-03 | Metadata schemas para `controller.lifecycle.timeouts.enabled` y `controller.lifecycle.timeouts.default` con defaults deterministas               | `phpunit` (suite `framework`)      |
 | 0.4.9   | `[x]`  | Controller Lifecycle (V1.9)   | 2026-08-04 | Metadata: `MetadataValueType::Float` + schema tipado para normalizar `controller.lifecycle.timeouts.default`                                     | `phpunit` (suite `framework`)      |
 | 0.5.0   | `[x]`  | Controller Observability (V0) | 2026-08-04 | Observability mínima (Docs 11): contratos + dispatcher no-op + hooks de eventos en `ControllerEngine`                                            | `phpunit` (suite `framework`)      |
+| 0.5.1   | `[x]`  | Controller Observability (V0.1) | 2026-08-04 | Dispatchers: in-memory (ring buffer) + JSON line sanitizado + estrategia auto por entorno/config (`controller_observability.*`)                  | `phpunit` (suite `framework`)      |
 | 0.6.0   | `[x]`  | Response Transport (V0)       | 2026-08-04 | `Quantum\\Transport`: contratos + `ResponseTransportManager` + `HttpTransportAdapter` + emitters (null/in-memory) + bindings base + tests        | `phpunit` (suite `framework`)      |
 | 0.6.1   | `[x]`  | Response Transport (V0.1)   | 2026-08-04 | Integración host: `public/index.php` emite vía `ResponseTransportManager` (transformer `Quantum\\Http\\Response` → `Quantum\\Transport\\Response`) | `phpunit` (suite `framework`)      |
+| 0.6.2   | `[x]`  | Response Transport (V0.2)   | 2026-08-05 | Frontera Transport: `TransportKernelInterface` + `HttpKernelTransportKernel` + `public/index.php` usa la frontera como entrada de `ResponseInterface` + tests | `phpunit` (suite `framework`)      |
 | 0.7.0   | `[x]`  | Exception Handling (V0)       | 2026-08-04 | `Quantum\\Exceptions`: handler V0 + context/result/enums + bridge `VoltStack\\Framework\\Exceptions\\ExceptionHandler` → Quantum handler + binding | `phpunit` (suite `framework`)      |
 | 0.7.1   | `[x]`  | Exception Handling (V0.1)     | 2026-08-04 | Post-emisión: `TransportResult` propaga `TransportExecution` + `public/index.php` fallback seguro si falla antes de emitir + aborta si ya emitió | `phpunit` (suite `framework`)      |
 | 0.7.2   | `[x]`  | Exception Handling (V0.2)     | 2026-08-04 | Worker-safety: `WorkerLifecycle` + política mínima de disposición (terminate/reset) integrada en handler Platform y host                         | `phpunit` (suite `framework`)      |
+| 0.8.0   | `[x]`  | Runtime Stack Harness (QA)    | 2026-08-05 | Harness/lab de integración: `RuntimeLabController` + vista `runtime-lab-harness.volt.php` + ruta + `RuntimeStackHarnessLabTest` (summary/json/probe) para validar bindings de TransportKernel + Manager y smoke de send, sin loops recursivos | `phpunit` (suite `framework`, 3 tests verdes) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -166,19 +169,21 @@ Errores estandar (Controllers Engine):
 - `[x]` implementación no-op default (no overhead cuando no hay integración)
 - `[x]` hooks de eventos en `ControllerEngine` (created/started/invocation/completed/short-circuit)
 - `[x]` pruebas unitarias: captura de eventos, `executionId` consistente y `sequence` creciente
-- `[ ]` implementar `ControllerEventDispatcherInterface` in-memory (útil para debugging local y harnesses)
-- `[ ]` implementar `ControllerEventDispatcherInterface` como logger estructurado (JSON line) con payload mínimo y sanitizado
-- `[ ]` definir estrategia de configuración/binding por entorno (ej. `local` vs `production`) para seleccionar dispatcher sin tocar el pipeline funcional
+- `[x]` implementar `ControllerEventDispatcherInterface` in-memory (útil para debugging local y harnesses)
+- `[x]` implementar `ControllerEventDispatcherInterface` como logger estructurado (JSON line) con payload mínimo y sanitizado
+- `[x]` definir estrategia de configuración/binding por entorno (ej. `local` vs `production`) para seleccionar dispatcher sin tocar el pipeline funcional
+- `[x]` harness de integración QA (lab) para validar bindings de observability/transport via runtime probe autocontenido
 
 ### Bloque Activo 7. Response Transport System (http-lab)
 
 - `[x]` introducir `Quantum\Transport` (contratos + tipos base) sin romper el pipeline actual
-- `[ ]` definir frontera: `ResultTransformationEngine` produce `ResponseInterface` (abstracta) y el Transport la entrega
+- `[x]` definir frontera: `TransportKernelInterface` produce `ResponseInterface` (abstracta) y el Transport la entrega (frontera mínima sobre `ResultTransformationEngine` vía bridge HttpKernel)
 - `[x]` introducir `ResponseTransportManagerInterface` + pipeline mínimo con `TransportExecution` (created → prepared → emitted|failed)
 - `[x]` introducir `TransportAdapterInterface` vs `TransportEmitterInterface` (separación preparación vs emisión)
 - `[x]` implementar `Testing/InMemoryTransportEmitter` para contract tests (sin funciones globales)
 - `[x]` definir política “exactly once”: prevenir doble emisión y registrar estado de emisión
 - `[x]` integrar host de emisión (`public/index.php`) vía Transport Manager (sin cambiar el contrato actual de `HttpKernel`)
+- `[x]` harness de integración QA (lab) `RuntimeStackHarnessLabTest`: summary page, JSON endpoint y probe request alineados a `SkeletonSpaRoadmapTest`
 
 ### Bloque Activo 8. Exception & Error Handling System (exception-lab)
 
@@ -189,6 +194,7 @@ Errores estandar (Controllers Engine):
 - `[x]` reglas de “post-emisión”: si el transporte ya inició, no intentar segunda respuesta (solo abort/mark incomplete)
 - `[x]` preservar headers `X-Volt-Error-Code` para errores `controller.*` (consistencia contractual)
 - `[x]` worker-safety: definir `WorkerDisposition` mínimo y reset request-scoped tras excepción
+- `[x]` integración smoke en harness lab: validar `last_error === null` y `TransportStatus::Completed` por `ResponseTransportManager::send` (no-loop probe autocontenido)
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
