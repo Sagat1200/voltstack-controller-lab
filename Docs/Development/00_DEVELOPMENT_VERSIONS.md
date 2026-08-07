@@ -90,6 +90,8 @@ Regla:
 | 0.8.0   | `[x]`  | Runtime Stack Harness (QA)    | 2026-08-05 | Harness/lab de integración: `RuntimeLabController` + vista `runtime-lab-harness.volt.php` + ruta + `RuntimeStackHarnessLabTest` (summary/json/probe) para validar bindings de TransportKernel + Manager y smoke de send, sin loops recursivos | `phpunit` (suite `framework`, 3 tests verdes) |
 | 0.9.0   | `[x]`  | Compilation Framework (V0)    | 2026-08-06 | AOT compilation pipeline: Contracts `CompilerInterface`/`ArtifactStoreInterface`/`BuildManifestInterface`/`CompiledControllerFactoryInterface` + DTOs Build/ControllerArtifact/CompilationResult/CompiledInvocationPlan + exceptions (Compilation/ArtifactNotFound/ArtifactCorrupt/BuildActivation) + 4 config schemas (controller_compilation.enabled, fallback, warmup, security) | `phpunit` (suite `framework`) |
 | 0.9.1   | `[x]`  | Compilation Framework (V0.1)  | 2026-08-06 | Implementación runtime: Compiler, ArtifactStore, BuildManifest (atomics), CompiledControllerFactory (ring LRU worker-cache ≥16) + integración ControllerEngine compiled-first path con fallback configurable + CLI commands `compile`/`compile:clear`/`compile:warmup` + PSR-11 bindings singleton + eventos observabilidad `controllers.compilation.{hit,miss,materialize_failed}` post-created | `phpunit` 509 tests / 2792 assertions (suite `framework` OK) |
+| 0.10.0  | `[x]`  | Controller Security Model (V0) | 2026-08-07 | Arquitectura transversal security V0: 7 Contracts (Manager/ContextFactory/DecisionEngine/PolicyRegistry/Policy/Principal/DecisionCache), 4 Enums (PrincipalType/AuthenticationStrength/SecurityDecisionEffect/ControllerTargetType), DTOs (Principal/TenantIdentity/SecurityAttributes/ControllerSecurityContext/ControllerTarget/SecurityDecision/SecurityDecisionKey/SecurityEvaluationRequest/ControllerSecurityBudget), 6 Exceptions (SecurityException, AuthRequired/AuthDenied/TenantViolation/ExposureViolation/InfrastructureFailure), Decision Engine (any-deny-wins + fail-closed + deny-by-default + budget guard + short-circuit Challenge), Hook transversal en ControllerEngine::handle() (post-created, pre-Running) con eventos observabilidad `controllers.security.{context.created,authorization.evaluating,authorization.allowed,authorization.denied,authentication.failed}`, Container PSR-11 bindings (4 singletons), config schema `controller_security.php` + integración PolicyRegistry desde `controller_security.policies[]` | `phpunit` 531 tests / 2870 assertions (suite `framework` OK) |
+| 0.10.1  | `[x]`  | Controller Security Model (V0.1) | 2026-08-07 | Integración end-to-end: ControllerExecutionContext storage inmutable para SecurityContext, Cache LRU decisions per-execution, PolicyRegistry freezable post-boot, Metadata extractor para `security.*` / `attributes[*].security.*` desde RouteMatch, `assertAuthorized()` transforma SecurityDecision → Exceptions tipadas (Challenge→AuthRequiredException, Deny→AuthDeniedException con safeContext/reasonCode/policy_id), `finalize()` limpia cache, default `controller_security.enabled=false` (backward compat), policy skeleton open-development (`skeleton.open.development`) para roadmap tests. | `phpunit` (suite `framework`, 531 tests OK)
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -201,7 +203,30 @@ Errores estandar (Controllers Engine):
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
 - `[x]` compilation framework (Docs 13)
-- `[ ]` Controller Security Model (carpeta excluida)
+- `[x]` Controller Security Model (carpeta excluida)
+
+### Bloque 10. Controller Security Model (V0) - Completado
+
+- `[x]` Contracts e interfaces mínimas: `ControllerSecurityManagerInterface`, `ControllerSecurityContextFactoryInterface`, `ControllerSecurityDecisionEngineInterface`, `ControllerSecurityPolicyRegistryInterface`, `ControllerSecurityPolicyInterface`, `PrincipalInterface`, `SecurityDecisionCacheInterface`
+- `[x]` Enums base: `PrincipalType` (6 tipos), `AuthenticationStrength` (5 niveles), `SecurityDecisionEffect` (Allow/Deny/Abstain/Challenge), `ControllerTargetType` (8 tipos)
+- `[x]` DTOs de Contexto: `Principal` (factory anonymous), `TenantIdentity` (verified), `SecurityAttributes` (attribute bag), `ControllerSecurityContext` (readonly immutable, v1, Budget+DecisionCache+version+executionId)
+- `[x]` DTOs de Decisión: `SecurityDecision` (named ctors allow/deny/challenge/abstain + isAllow/isDeny), `SecurityDecisionKey` (hash cache), `SecurityEvaluationRequest` (context+target+action+resource+metadata), `ControllerTarget` (signature/type/exposed/source), `ControllerSecurityBudget` (64/16/8/256)
+- `[x]` Jerarquía de Exceptions seguras: `SecurityException` base → `AuthenticationRequiredException` (challenge), `AuthorizationDeniedException` (reasonCode+safeContext), `TenantViolationException`, `ControllerExposureViolationException`, `SecurityInfrastructureFailureException`
+- `[x]` Implementación `ControllerSecurityContextFactory`: Principal anonymous default + DecisionCache LRU + Budget configurable desde `controller_security.authorization.max_policy_evaluations`
+- `[x]` Implementación `SecurityDecisionCache`: ring-shift LRU maxItems configurable, `get/put/clear/count`
+- `[x]` Implementación `ControllerSecurityPolicy` abstract base: helpers `allow()/deny()/abstain()/challenge()` heredables
+- `[x]` Implementación `ControllerSecurityPolicyRegistry`: freezable, throw en register post-freeze, throw si policy missing (Infrastructure), carga policies desde config `controller_security.policies[]` (strings via app->make() o instances)
+- `[x]` Implementación `ControllerSecurityDecisionEngine`: any-deny short-circuit, authentication_required → Challenge, tenant_required → Deny, deny-by-default (0 policies → Deny), fail-closed exceptions → Deny, budget exceed → Deny, abstain_as_deny configurable, cache por SecurityDecisionKey
+- `[x]` Implementación `ControllerSecurityManager`: `initialize()` delega factory, `decide()` delega engine, `assertAuthorized()` transforma Decision → Exceptions tipadas, `finalize()` limpia cache
+- `[x]` Hook transversal en ControllerEngine::handle(): entre `execution.state=Created` (post compilación events) y `Running` (antes de interceptors+invoker). Finally: `securityManager->finalize()`. Inmutabilidad `setSecurityContext()` single-assignment throw en 2do set.
+- `[x]` Integración metadata: `extractSecurityMetadata(RouteMatch)` busca policies/permissions/authentication_required/tenant_required en root route metadata, `security.*`, `attributes[*].security.*`
+- `[x]` Eventos observabilidad agregados: `controllers.security.context.created`, `controllers.security.authorization.evaluating`, `controllers.security.authorization.allowed`, `controllers.security.authorization.denied`, `controllers.security.authentication.failed`
+- `[x]` Container PSR-11 bindings: 4 singletons (PolicyRegistry, ContextFactory, DecisionEngine, Manager) + PolicyRegistry carga desde config policies[]
+- `[x]` Config schema user-space: `config/controller_security.php` con defaults deny_by_default=true, fail_closed=true, 9 keys de config, policy `skeleton.open.development` por defecto para skeleton dev
+- `[x]` Backward compat: ControllerEngine `security.enabled` default = `false` si no hay config existente (apps antiguas sin controller_security.php no rompen). App skeleton con config explícita enabled=true.
+- `[x]` Tests: 22 tests unitarios Security (contracts, registry freeze, decision engine deny-by-default + fail-open + short-circuit deny + auth challenge + tenant, assertAuthorized→exceptions, finalize clear cache, container hooks 3 scenarios: disabled→pass, enabled+deny_by_default→AuthDenied, enabled+policy→pass)
+- `[x]` Fix regresión CompilationCommandsTest: uso de nombres antiguos CompileCommand → ControllerCompile*Command (6 tests OK)
+- `[x]` Suite completa PHPUnit 531/531 OK, 2870 assertions
 
 ## Checklist De Desarrollo (MVP-1)
 
