@@ -88,6 +88,8 @@ Regla:
 | 0.7.1   | `[x]`  | Exception Handling (V0.1)     | 2026-08-04 | Post-emisión: `TransportResult` propaga `TransportExecution` + `public/index.php` fallback seguro si falla antes de emitir + aborta si ya emitió | `phpunit` (suite `framework`)      |
 | 0.7.2   | `[x]`  | Exception Handling (V0.2)     | 2026-08-04 | Worker-safety: `WorkerLifecycle` + política mínima de disposición (terminate/reset) integrada en handler Platform y host                         | `phpunit` (suite `framework`)      |
 | 0.8.0   | `[x]`  | Runtime Stack Harness (QA)    | 2026-08-05 | Harness/lab de integración: `RuntimeLabController` + vista `runtime-lab-harness.volt.php` + ruta + `RuntimeStackHarnessLabTest` (summary/json/probe) para validar bindings de TransportKernel + Manager y smoke de send, sin loops recursivos | `phpunit` (suite `framework`, 3 tests verdes) |
+| 0.9.0   | `[x]`  | Compilation Framework (V0)    | 2026-08-06 | AOT compilation pipeline: Contracts `CompilerInterface`/`ArtifactStoreInterface`/`BuildManifestInterface`/`CompiledControllerFactoryInterface` + DTOs Build/ControllerArtifact/CompilationResult/CompiledInvocationPlan + exceptions (Compilation/ArtifactNotFound/ArtifactCorrupt/BuildActivation) + 4 config schemas (controller_compilation.enabled, fallback, warmup, security) | `phpunit` (suite `framework`) |
+| 0.9.1   | `[x]`  | Compilation Framework (V0.1)  | 2026-08-06 | Implementación runtime: Compiler, ArtifactStore, BuildManifest (atomics), CompiledControllerFactory (ring LRU worker-cache ≥16) + integración ControllerEngine compiled-first path con fallback configurable + CLI commands `compile`/`compile:clear`/`compile:warmup` + PSR-11 bindings singleton + eventos observabilidad `controllers.compilation.{hit,miss,materialize_failed}` post-created | `phpunit` 509 tests / 2792 assertions (suite `framework` OK) |
 
 ## Plan Ejecutivo Recomendado (Corte Actual)
 
@@ -198,7 +200,7 @@ Errores estandar (Controllers Engine):
 
 ### Bloques Postergados Explicitamente (No Iniciar Aun)
 
-- `[ ]` compilation framework (Docs 13)
+- `[x]` compilation framework (Docs 13)
 - `[ ]` Controller Security Model (carpeta excluida)
 
 ## Checklist De Desarrollo (MVP-1)
